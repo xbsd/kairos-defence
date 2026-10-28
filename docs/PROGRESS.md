@@ -26,6 +26,24 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Next: …
 -->
 
+### 2026-10-28 · Phase 0 (documentation backfill, autopilot)
+- Built: no code. `docs/phases/phase-00/PLAN.md` (as built, from `f9258de`), `REPORT.md` and
+  `EXIT_CHECK.md`, plus READMEs for `src/kairos_defense/`, `config/`, `store/`, `eval/` and `web/`,
+  and a Status section in the root README (D-061).
+- Exit check rerun at `911aba1` on the dev laptop:
+  `uv sync && npm --prefix web install && make check && uv run kairos-defense --help && npm --prefix web run build`
+  → exit 0 in 18.7 s. Ruff clean; 367 passed, 7 slow deselected; web lint, typecheck and Vitest 5/5;
+  14 commands in help; JS 222.56 kB and CSS 10.45 kB, identical to phase 0's build.
+  `make test-all`: 374 passed in 51 s. The built placeholder in Playwright at 1920×1080 loads the
+  B612 fonts, makes only same-origin requests and does not overflow.
+- Open issues:
+  - **D-062 (phase 4 must start here, with D-058):** dtaidistance's C library does not load on this
+    laptop because `libomp` is missing. `dtw_ndim.distance(use_c=True)` silently runs pure Python, and
+    D-020's fail-loudly rule would stop the matcher. Options are in D-062.
+  - `npm --prefix web install` outside `make` runs under Node 26 and prints EBADENGINE (harmless,
+    D-002). The built app logs a favicon 404 (phase 7).
+- Next: backfills for phases 1 to 3, then phase 4.
+
 ### 2026-10-28 · Phase 3
 - Built: this branch fast-forwarded onto phase 2's commit (it started at the kit). `features/`:
   `resample.py` (§9.1), `channels.py` (§9.2-§9.3, target choice D-046), `signatures.py` (§9.4,

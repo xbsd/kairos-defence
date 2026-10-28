@@ -756,3 +756,44 @@ Where this file and the SPEC ever disagree, this file wins.
 - Why: the user's instructions; a gate that fails on timing noise sends fix sessions after nothing.
 - Consequences: §19's latency row is a known, logged gap until a human revisits it. PROGRESS.md has a
   phase 10 row.
+
+## D-061 · Phase 0 documentation backfill · 2026-10-28
+- Context: the autopilot (D-059) expects every phase to leave `PLAN.md`, `REPORT.md` and
+  `EXIT_CHECK.md` in `docs/phases/phase-NN/`, and every package to have a README. Phases 0 to 3 were
+  built by hand before that convention existed. `phase-auto backfill 0` reconstructs phase 0's
+  documents without changing code.
+- Decision: `PLAN.md` is marked "as built" and is reconstructed from `f9258de`, PROGRESS.md and
+  D-015 to D-022. The exit check was rerun at HEAD (`911aba1`) and today's output recorded beside the
+  original numbers. READMEs are written for what phase 0 created: `src/kairos_defense/` (cli, ports,
+  rng, geo), `config/`, `store/`, `eval/` and `web/`. Each describes the code as it is now, with a
+  per-phase changelog, so it stays current. The `sim/`, `features/` and `match/` READMEs are left to
+  the backfills of phases 1 to 3, which created those packages.
+- Why: each backfill documents its own phase, and a README that described only phase 0's
+  `store/guard.py` would already be wrong.
+- Consequences: the autopilot's docs check (all subpackage READMEs) passes only after the phase 1 and
+  3 backfills, or phase 4's build, add the remaining three.
+
+## D-062 · Open: dtaidistance's C library does not load on the dev laptop · 2026-10-28
+- Context: during the phase 0 backfill, the D-020 toolchain check was rerun on the dev laptop (macOS
+  arm64, Python 3.12.12, dtaidistance 2.5.1 wheel). D-020 had verified the C path on the cloud Linux
+  machine only. Here:
+  - `dtw.try_import_c()` is False. `dtw_cc_omp` and `dtw_cc_numpy` cannot `dlopen`
+    `/usr/local/lib/libomp.dylib`, the path baked into the wheel, and Homebrew `libomp` is not
+    installed.
+  - `dtaidistance.dtw.dtw_cc` is None, so `dtw.distance_fast` raises `CythonException`.
+  - `dtw_ndim.distance(..., use_c=True)` logs "C-library not available, using the Python version" and
+    silently runs pure Python. The values are the same; it is slower.
+- Decision: none yet. The backfill changes no code and no machine state. Phase 4 must choose before it
+  relies on the C path. Options, none tested here:
+  - (a) Install `libomp` (`brew install libomp`) and make it loadable at the wheel's path, or through
+    `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/opt/libomp/lib`. This changes the machine, so a human
+    must do it.
+  - (b) Build dtaidistance from source in this project (uv `no-binary-package = ["dtaidistance"]`),
+    with or without OpenMP.
+  - (c) Accept the pure-Python fallback on this laptop. Latency does not block (D-060), but D-020's
+    "fail loudly when `try_import_c()` is false" would stop the matcher. That rule would have to become
+    a loud warning, recorded in a new decision.
+- Why: the phase 4 DTW re-rank and its latency (§10.4, §10.9) depend on the C path, and the autopilot
+  runs phase 4 on this laptop.
+- Consequences: phase 4's plan must cite D-062 and choose an option. Until then, any DTW latency
+  measured on the laptop is pure-Python latency.
