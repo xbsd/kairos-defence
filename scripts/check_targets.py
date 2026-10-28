@@ -6,7 +6,7 @@ Targets come from SPEC §19.3, §10.9 and the phase exit checks in §20. Checks 
 must also meet every target of the earlier phases, so later work cannot quietly lose an earlier win.
 
 Exit codes: 0 all met; 1 only target shortfalls ("GAP" lines, soft: the autopilot gives them a few fix
-attempts, then records them in GAPS.md and continues, per the user on 2026-10-28, D-061); 2 something is
+attempts, then records them in GAPS.md and continues, per the user on 2026-10-28, D-063); 2 something is
 broken (no fresh eval report, DTW not running, a metric not produced): hard, the gate fails as usual.
 Gaps already accepted in an earlier phase (docs/phases/accepted_gaps.json, written by the autopilot) are
 printed as WARN and not retried.

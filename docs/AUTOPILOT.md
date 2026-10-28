@@ -94,8 +94,11 @@ still fails after the fix attempts. It writes `docs/phases/phase-NN/BLOCKED.md` 
 phase `blocked` in PROGRESS.md. It commits the logs and rings the terminal bell. Fix the cause or make the
 decision, commit, then rerun `run`. It picks up at the gate if the phase was already built.
 
-Expected stopping points worth a human look: phase 4's DTW lift target (SPEC §19) and phase 8's
-frame-rate target.
+Target shortfalls do not stop the run (D-063). When the only failures are `GAP` lines from
+`scripts/check_targets.py`, the phase gets `--target-attempts` (3) fix sessions; anything still short is
+written to `docs/phases/phase-NN/GAPS.md`, the phase is marked "done with gaps", and the run continues.
+Later phases show accepted gaps as WARN. Latency targets are report-only (D-060). Read every GAPS.md
+when the run ends. Hard failures (tests, crashes, a metric not produced, e2e, docs) still stop it.
 
 ## Safety
 

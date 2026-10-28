@@ -59,3 +59,9 @@ ignore = ["RUF001", "RUF002", "RUF003"]  # ×, §, – in docs and messages
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
 markers = ["slow: slow tests, run by make test-all"]
+
+[tool.uv]
+# The dtaidistance macOS wheel links /usr/local/lib/libomp.dylib, which does not exist on Apple
+# Silicon, so none of its C modules load (D-062). Building from source links whatever OpenMP the
+# machine has (Homebrew libomp on the laptop, libgomp on Linux). D-064.
+no-binary-package = ["dtaidistance"]

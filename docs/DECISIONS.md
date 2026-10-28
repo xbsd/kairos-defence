@@ -797,3 +797,36 @@ Where this file and the SPEC ever disagree, this file wins.
   runs phase 4 on this laptop.
 - Consequences: phase 4's plan must cite D-062 and choose an option. Until then, any DTW latency
   measured on the laptop is pure-Python latency.
+
+## D-063 · Target shortfalls are recorded gaps, not stops · 2026-10-28
+- Context: the user asked that a missed accuracy target (phase 3's Recall@5 is 0.43 against 0.80) get a
+  few honest attempts and then not stop the run, "unless something is seriously wrong", because many
+  phases remain.
+- Decision: `scripts/check_targets.py` exits 1 for target shortfalls (`GAP` lines: §19.3 metrics and
+  demo assertions) and 2 when something is broken (no fresh eval report, DTW not running, a metric or
+  demo row not produced). In `docs/phases/gates.json` the checker is a `soft:` command: when it is the
+  only failure, the autopilot runs up to `--target-attempts` (3) fix sessions, then writes
+  `docs/phases/phase-NN/GAPS.md`, marks the phase "done with gaps" and continues. Accepted gap keys go
+  to `docs/phases/accepted_gaps.json` (written only by the script) and show as WARN in later phases
+  instead of being retried. `make eval`'s own exit code no longer blocks; a crash is caught because the
+  checker requires a report newer than the gate's start. Tests, crashes, missing metrics, e2e and
+  documentation still block.
+- Why: the user's instruction; fix sessions should not loop on a hard research target while the rest
+  of the product waits.
+- Consequences: §19 targets that end short are listed in GAPS.md files and in PROGRESS.md as "done with
+  gaps"; phase 9's "gaps approved in DECISIONS.md" is satisfied by this entry plus those files.
+
+## D-064 · dtaidistance built from source (resolves D-062) · 2026-10-28
+- Context: D-062. The macOS wheel's C modules all link `/usr/local/lib/libomp.dylib`, which is absent on
+  Apple Silicon, so dtaidistance silently ran pure Python on the laptop. Making that path exist needs
+  `sudo`.
+- Decision: installed Homebrew `libomp` on the laptop (`brew install libomp`, undo with
+  `brew uninstall libomp`) and set `[tool.uv] no-binary-package = ["dtaidistance"]`, so uv builds it
+  from source against the OpenMP the machine has. Verified in the project venv: `dtw.try_import_c()` is
+  True, `dtw_cc_omp` imports, and C and Python `dtw_ndim.distance` agree.
+- Why: keeps D-013's "use the C implementations and fail loudly without them" true on the dev laptop,
+  without root and without patching installed files. Rejected: a symlink in `/usr/local/lib` (needs
+  sudo); `DYLD_*` variables (macOS strips them through `/bin/bash` and `make`); accepting pure Python.
+- Consequences: a fresh machine needs a C compiler (Xcode command-line tools or gcc) for `uv sync`; on
+  macOS also `brew install libomp`, or dtaidistance builds without OpenMP. README prerequisites should
+  say so (phase 10).

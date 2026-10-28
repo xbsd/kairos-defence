@@ -408,7 +408,7 @@ def run_gate(
     """Run the gate. Returns (passed, hard failure reason, log, target gaps).
 
     A command prefixed `soft:` that exits 1 reports target shortfalls (its `GAP ...` lines) instead of
-    failing the gate outright; any other non-zero exit is a hard failure (D-061)."""
+    failing the gate outright; any other non-zero exit is a hard failure (D-063)."""
     cmds = list(gates.get("always", [])) + list(gates.get("phases", {}).get(str(n), []))
     logf = pdir(n) / f"gate-{attempt}.log"
     reason = ""
@@ -507,7 +507,7 @@ def write_accepted(opts) -> None:
 
 
 def accept_gaps(n: int, m: dict, gaps: list[str], logf: Path, opts) -> None:
-    """Record target shortfalls that survived the fix attempts and let the run continue (D-061)."""
+    """Record target shortfalls that survived the fix attempts and let the run continue (D-063)."""
     keys = sorted({gap_key(g) for g in gaps})
     opts.accepted |= set(keys)
     write_accepted(opts)
@@ -516,7 +516,7 @@ def accept_gaps(n: int, m: dict, gaps: list[str], logf: Path, opts) -> None:
         f.write(
             f"# Phase {n}: targets not met, accepted by the autopilot\n\n"
             f"After {opts.target_attempts} fix attempts these targets were still short. Per the user's "
-            "instruction of 2026-10-28 (D-061) the run recorded them and continued; later phases report "
+            "instruction of 2026-10-28 (D-063) the run recorded them and continued; later phases report "
             "them as WARN and do not retry them. Every other check in the gate passed.\n\n"
             + "\n".join(f"- {g}" for g in gaps)
             + f"\n\nLast gate log: `{logf.relative_to(ROOT)}`. Accepted keys: {', '.join(keys)}.\n"

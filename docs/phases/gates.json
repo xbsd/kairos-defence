@@ -1,5 +1,5 @@
 {
-  "_comment": "Commands the autopilot runs after each phase. Every command must exit 0 and must not block (no servers left running). A 'soft:' command that exits 1 reports target gaps: they get --target-attempts fix attempts, then are recorded in GAPS.md and the run continues (D-061); exit 2 or anything else is a hard failure. Edited by humans only.",
+  "_comment": "Commands the autopilot runs after each phase. Every command must exit 0 and must not block (no servers left running). A 'soft:' command that exits 1 reports target gaps: they get --target-attempts fix attempts, then are recorded in GAPS.md and the run continues (D-063); exit 2 or anything else is a hard failure. Edited by humans only.",
   "always": [
     "make check"
   ],
