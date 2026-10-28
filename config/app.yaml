@@ -1,0 +1,22 @@
+paths:
+  duckdb: data/kairos_defense.duckdb
+  truth: data/truth.duckdb          # eval only (CLAUDE.md rule 2)
+  memory: data/memory.duckdb
+  lancedb: data/lancedb
+  models: models
+  reports: reports
+  exports: exports
+embeddings:
+  provider: hashing                 # hashing | fastembed
+  dim: 384
+  fastembed_model: BAAI/bge-small-en-v1.5
+reports_llm_paraphrase: false       # if true, cache outputs under data/cache/llm/
+llm:
+  provider: none                    # none | anthropic | openai | ollama
+  model: ""
+  base_url: ""                      # for ollama or other OpenAI-compatible servers
+signing:
+  enabled: true
+  key_path: data/keys/ed25519.pem   # generated on first use
+replay:
+  default_speed: 1.0                # 1.0, 2.0 or 5.0

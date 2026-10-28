@@ -164,3 +164,78 @@ Where this file and the SPEC ever disagree, this file wins.
 - Consequences: supersedes D-001's "phase 0's commit is the first". On the cloud machine
   `/opt/homebrew/opt/node@22/bin` does not exist, so the Makefile falls back to the `node` on PATH;
   phase 0 must check it is Node 22 there (add an environment setup step if not).
+
+## D-016 · `kairos_defense.config` is a package · 2026-10-28
+- Context: one pydantic model per YAML file in a single `config.py` came to about 600 lines, over the
+  ~400-line module limit in CLAUDE.md.
+- Decision: `config/` package with `app.py`, `world.py`, `actors.py`, `scenario.py`, `scoring.py`, a
+  shared `_types.py` and `_yaml.py`; `__init__.py` holds the root `Config` model, cross-file checks and
+  `load_config()`. The import path is unchanged: `from kairos_defense.config import load_config`.
+- Why: one module per file mirrors the "one model per YAML file" rule.
+- Consequences: §5's `config.py` is `config/__init__.py`.
+
+## D-017 · YAML 1.2 booleans in the config loader · 2026-10-28
+- Context: PyYAML follows YAML 1.1, so `rid: off` loads as `False` and the clue key `true:` as the
+  boolean `True`. `Road.construct` would also shadow pydantic's `BaseModel.construct`.
+- Decision: the loader resolves only `true`/`false` as booleans and turns boolean mapping keys into the
+  strings `"true"`/`"false"`. The clue field is `is_true` (alias `true`) and the road field is `build`
+  (alias `construct`). The YAML stays exactly as in §6.
+- Why: keeps the spec's YAML verbatim and the values what they mean (`rid` is `"off"`, not `False`).
+- Consequences: always load config through `kairos_defense.config.load_yaml`, never `yaml.safe_load`.
+
+## D-018 · Config validation rules · 2026-10-28
+- Context: §6 gives the values but not how strictly to check them.
+- Decision: every model forbids unknown keys and is frozen. Ranges `[lo, hi]` must be ordered; times
+  are `HH:MM` and may wrap past midnight; bearings are in [0, 360). Cross-file checks: actor bases
+  exist, targets are template assets or `fence`, `snap_to_road` names a road, the road's actor is a
+  prober, P1 flights use P1's bases, swarm events use a known team on one of its bases, and expectations
+  name real incidents. `app.paths.*` and `signing.key_path` are resolved against the project root (the
+  config folder's parent), so commands work from any directory.
+- Why: CLAUDE.md asks for config errors to fail loudly; the cross-file checks catch typos that would
+  otherwise surface phases later.
+- Consequences: `Config.root` is the project root; paths in `cfg.app.paths` are absolute.
+
+## D-019 · Web toolchain pins · 2026-10-28
+- Context: the newest TypeScript is 7.0, but typescript-eslint 8.72 supports TypeScript only below 6.1.
+  jsdom 30 needs Node ≥ 22.22.2, and the cloud machine has 22.22.0. @react-three/fiber 9 needs React
+  below 19.4.
+- Decision: TypeScript `~6.0.3`, jsdom `^29.1.1`, React and React DOM exactly `19.3.1`, `@types/react`
+  `~19.3.0`. Phase 0 installs only what the placeholder needs: Vite 8.3, @vitejs/plugin-react 6.1,
+  Tailwind 4.3, ESLint 10 with typescript-eslint, Prettier 3.9, Vitest 5.0, Testing Library and
+  @fontsource B612. three, R3F, drei, postprocessing, Motion, D3, Zustand and Playwright arrive in
+  phase 7. `package-lock.json` is committed.
+- Why: a clean install with no peer or engine warnings on both the laptop and the cloud machine.
+- Consequences: move to TypeScript 7 once typescript-eslint supports it, and log that change.
+
+## D-020 · Python library versions verified; dtaidistance C path · 2026-10-28
+- Context: CLAUDE.md asked phase 0 to check the pinned versions against what installs. D-013 asked
+  about `dtw_ndim`.
+- Decision: the pins are lower bounds from §3. The lockfile resolves duckdb 2.0.0, lancedb 0.40.0 and
+  dtaidistance 2.5.1, the verified versions. On 2.5.1, `dtw.try_import_c()` succeeds (OpenMP found) and
+  `dtw_ndim.distance` defaults to `use_c=False`; with `use_c=True` it returns the same value as pure Python.
+- Why: D-013 asked us to confirm before phase 4.
+- Consequences: phase 4 calls `dtw_ndim.distance(..., use_c=True)` and, as D-013 requires, fails loudly
+  when `dtw.try_import_c()` is false.
+
+## D-021 · Tokens are the only styling vocabulary · 2026-10-28
+- Context: §17.1 and §21 allow only token colors, type, radii and durations. Tailwind ships its own
+  palette, shadows and easings. The spec's `:root` block names no radius, type-size or blur variables.
+- Decision: `tokens.css` keeps the spec's `:root` block verbatim. A Tailwind `@theme` block resets the
+  default colors, shadows, easings, text sizes, radii and blurs, then defines the §17.1 type scale
+  (`text-12` to `text-32`), radii (`rounded-panel` 6, `rounded-button` 4, `rounded-chip`) and
+  `backdrop-blur-glass` (14 px). `@theme inline` maps the colors (`bg-scope`, `text-ink-mid`, …) and the
+  fonts (`font-sans` is B612, `font-mono` is B612 Mono with tabular figures). Durations and easings are
+  used as `duration-(--dur-panel)` and `ease-(--ease-out)`. ESLint rejects hex color literals in TS/TSX.
+- Why: an off-token class or hex value fails the build or the lint, instead of slipping past review.
+- Consequences: a new token needs an edit to `tokens.css`. The built CSS contains only the 11 token colors.
+
+## D-022 · CLI stubs and Makefile-only targets · 2026-10-28
+- Context: the phase block lists 14 CLI commands. §5 also names `test-all`, `clean`, `api`, `web` and
+  `dev` as Makefile targets.
+- Decision: the 14 commands are Typer stubs. Each accepts and ignores any options, prints which phase
+  implements it, and exits 0, so `make data` (`gen --seed 42`) already runs end to end. `test-all`,
+  `clean`, `web` and `dev` exist only as Makefile targets; `make e2e` says Playwright comes in phase 7
+  until `web/package.json` has an `e2e` script. Ruff excludes `*.md`, because ruff 0.17 also reformats
+  Python code blocks inside Markdown and would rewrite the spec.
+- Why: the simplest option that satisfies the exit check without inventing behavior.
+- Consequences: each later phase replaces its stubs with real commands and keeps `test_cli.py` green.

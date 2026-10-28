@@ -1,0 +1,35 @@
+features:
+  resample_hz: 1
+  max_interp_gap_s: 10
+  channels: [speed_ms, turn_rate_dps, dist_target_m, alt_m, vspeed_ms]
+  channel_weights: [1.0, 1.0, 1.2, 0.6, 0.4]
+windows:
+  sizes_s: [60, 120, 300]
+  stride_s: 10
+  paa_segments: 16                  # vector dim = 5 channels × 16 = 80
+prefilter:
+  k_windows: 200
+  candidate_tracks: 50
+dtw:
+  band_fraction: 0.25               # Sakoe-Chiba window = 25% of the longer series
+  anchor_before: 0.5                # anchor segment = [start − 0.5W, start + 1.5W]
+  anchor_after: 1.5
+  tau: auto                         # calibrated in phase 4, saved to models/dtw_calibration.json
+fusion:
+  model: logistic
+  features: [shape_sim, rf_match, bearing_sim, tod_sim, launch_sim, radius_sim, alt_sim]
+live:
+  min_track_s: 45
+  rerun_every_s: 5
+recall:
+  hours_window: 3
+  radius_m: 5000
+  k: 5
+forecast:
+  top_k: 3
+  min_radius_m: 150
+  radius_factor: 1.5
+swarm:
+  min_drones: 3
+  max_spacing_m: 300
+  min_duration_s: 60

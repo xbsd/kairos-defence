@@ -1,0 +1,142 @@
+hobbyists:
+  rate_per_night_per_base: 0.27     # ≈1,780 flights over 18 months and 12 bases
+  duration_s: [180, 720]
+  altitude_m: [30, 120]
+  speed_ms: [4, 12]
+  rid_on_prob: 0.9
+  rf_families: [FAM-01, FAM-02, FAM-03, FAM-04, FAM-05]
+  launch_from: [parks, public_events]
+  cross_fence_prob: 0.3
+  pattern: random_walk
+
+probers:
+  - id: P1
+    nickname: County Rd operator
+    bases: [ALPHA, BRAVO, CHARLIE, DELTA]
+    flights: planted_only           # every P1 flight comes from scenario_demo.yaml
+    target: fuel_farm
+    pattern: {type: orbit, radius_m: 180, direction: ccw, laps: [2, 3], angular_speed_dps: 3}   # 9.4 m/s, slower than cruise (D-004)
+    approach_bearing_deg: 315       # bearing from the target toward where the drone comes from
+    launch: {bearing_deg: 315, distance_m: 2100, jitter_m: 150, snap_to_road: "County Rd 12"}   # snap only within 500 m (D-006)
+    altitude_m: [90, 120]
+    cruise_speed_ms: 15             # D-003
+    rf_family: FAM-07
+    rid: off
+    clues: {vehicle: white pickup, road: "County Rd 12"}
+    time_local: ["21:00", "22:30"]
+  - id: P2
+    nickname: Flight-line surveyor
+    bases: [CHARLIE, DELTA]
+    flights: 12
+    target: flight_line
+    pattern: {type: lawnmower, leg_m: 600, spacing_m: 80, legs: [4, 6]}
+    approach_bearing_deg: 200
+    launch: {bearing_deg: 200, distance_m: 1600, jitter_m: 200}
+    altitude_m: [60, 80]
+    cruise_speed_ms: 9
+    rf_family: FAM-11
+    rid: spoofed
+    clues: {vehicle: dark SUV}
+    time_local: ["23:00", "01:00"]
+  - id: P3
+    nickname: Munitions figure-eight
+    bases: [ECHO, FOXTROT, HOTEL]
+    flights: 16
+    target: munitions
+    pattern: {type: figure8, lobe_radius_m: 120, loops: [2, 3]}
+    approach_bearing_deg: 90
+    launch: {bearing_deg: 90, distance_m: 2500, jitter_m: 200}
+    altitude_m: [110, 140]
+    cruise_speed_ms: 14
+    rf_family: FAM-07               # same family as P1 on purpose: RF alone must not decide a match
+    rid: off
+    clues: {vehicle: silver sedan}
+    time_local: ["20:00", "21:30"]
+  - id: P4
+    nickname: Fence runner
+    bases: [GOLF, JULIET]
+    flights: 10
+    target: fence
+    pattern: {type: perimeter, offset_m: 200, fraction: [0.4, 0.7]}
+    approach_bearing_deg: 0
+    launch: {bearing_deg: 0, distance_m: 1200, jitter_m: 150}
+    altitude_m: [40, 60]
+    cruise_speed_ms: 15
+    rf_family: FAM-03               # a common hobby family: harder case
+    rid: off
+    clues: {vehicle: motorcycle}
+    time_local: ["22:00", "23:30"]
+  - id: P5
+    nickname: Hover-and-stare
+    bases: [KILO, LIMA, INDIA]
+    flights: 12
+    target: hq
+    pattern: {type: hover, dwell_s: [240, 360], jitter_m: 6}
+    approach_bearing_deg: 135
+    launch: {bearing_deg: 135, distance_m: 1800, jitter_m: 150}   # lands inside the fence: pushed out (§8.3, D-005)
+    altitude_m: [140, 160]
+    cruise_speed_ms: 10
+    rf_family: FAM-15
+    rid: off
+    clues: {vehicle: red hatchback}
+    time_local: ["19:30", "20:30"]
+  - id: P6
+    nickname: High transit with dips
+    bases: [BRAVO, CHARLIE, GOLF]   # spans two regions
+    flights: 10
+    target: housing
+    pattern: {type: transit_dips, transit_alt_m: 300, dip_alt_m: 80, dips: 3}
+    approach_bearing_deg: 250
+    launch: {bearing_deg: 250, distance_m: 3000, jitter_m: 300}
+    altitude_m: [80, 300]
+    cruise_speed_ms: 18
+    rf_family: FAM-21
+    rid: off
+    clues: {}
+    time_local: ["01:00", "03:00"]
+
+copycats:
+  - id: C1
+    mimics: P1                      # same loiter shape, different RF and launch area
+    bases: [BRAVO, DELTA]
+    flights: 15
+    pattern_overrides: {radius_m: [170, 190]}
+    launch: {bearing_deg: 120, distance_m: 900, jitter_m: 200, from: parks}   # `from` only labels the site in reports (D-005)
+    rf_family: FAM-02
+    rid_on_prob: 0.5
+    time_local: ["19:00", "20:30"]
+  - id: C2
+    mimics: P3
+    bases: [ECHO, INDIA]
+    flights: 15
+    launch: {bearing_deg: 270, distance_m: 700, jitter_m: 200, from: parks}   # inside the fence: pushed out (D-005)
+    rf_family: FAM-04
+    rid_on_prob: 0.6
+    time_local: ["19:30", "21:00"]
+
+swarms:
+  - id: S1
+    drones: 5
+    bases: [GOLF, ECHO, HOTEL]
+    random_events: 2                # after 2026-06-14 (D-009), plus the planted events in scenario_demo.yaml
+    rf_family: FAM-30
+    altitude_m: [80, 100]
+    target: flight_line
+    choreography:                   # executed in order
+      - {formation: line_abreast, spacing_m: 40, duration_s: 60}
+      - {action: rotate, degrees: 90, direction: cw, duration_s: 30}
+      - {action: split, groups: [2, 3], separation_m: 250, duration_s: 45}
+      - {formation: v, spacing_m: 35, duration_s: 40}
+      - {action: orbit_target, radius_m: 220, duration_s: 90}
+  - id: S2
+    drones: 3
+    bases: [JULIET, KILO]
+    random_events: 5
+    rf_family: FAM-31
+    altitude_m: [60, 80]
+    target: munitions
+    choreography:
+      - {formation: triangle, spacing_m: 50, duration_s: 50}
+      - {action: expand, factor: 2.0, duration_s: 30}
+      - {action: rotate, degrees: 180, direction: ccw, duration_s: 40}
+      - {formation: trail, spacing_m: 30, duration_s: 60}

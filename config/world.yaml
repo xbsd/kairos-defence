@@ -1,0 +1,72 @@
+seed: 42
+calendar:
+  start_local: "2025-03-01"
+  end_local: "2026-08-31"
+  night_window_local: ["19:00", "03:00"]
+regions:
+  - id: COASTAL
+    utc_offset_hours: -5            # fixed offset, no daylight saving in the synthetic world
+    installations:
+      - {id: ALPHA,   origin_m: [0, 0],         rotation_deg: 0}
+      - {id: BRAVO,   origin_m: [22000, -6000], rotation_deg: 12,
+         terrain_mask: {bearing_deg: [285, 20], beyond_fence_m: 50, below_alt_m: 200}}   # wooded ridge, northwest (D-003)
+      - {id: CHARLIE, origin_m: [41000, 4000],  rotation_deg: -8}
+      - {id: DELTA,   origin_m: [9000, -24000], rotation_deg: 20}
+    parks:
+      - {id: COASTAL-PARK-1, center_m: [5200, 6100], radius_m: 600}
+      - {id: COASTAL-PARK-2, center_m: [25800, -1200], radius_m: 500}
+      - {id: COASTAL-PARK-3, center_m: [12500, -19500], radius_m: 450}
+      - {id: COASTAL-PARK-4, center_m: [2200, 0], radius_m: 300}         # ALPHA launch park (D-005)
+      - {id: COASTAL-PARK-5, center_m: [22000, -8200], radius_m: 300}    # BRAVO
+      - {id: COASTAL-PARK-6, center_m: [43200, 4000], radius_m: 300}     # CHARLIE
+      - {id: COASTAL-PARK-7, center_m: [10905, -22900], radius_m: 300}   # DELTA
+    roads:
+      - {name: "County Rd 12", construct: through_launch_points, actor: P1, extend_m: 4000}
+      - {name: "State Hwy 7", points_m: [[-6000, -3000], [46000, -1500]]}
+  - id: PLAINS
+    utc_offset_hours: -6
+    installations:
+      - {id: ECHO,    origin_m: [0, 0],          rotation_deg: 0}
+      - {id: FOXTROT, origin_m: [30000, 8000],   rotation_deg: 15}
+      - {id: HOTEL,   origin_m: [12000, -20000], rotation_deg: -10}
+      - {id: INDIA,   origin_m: [-18000, -9000], rotation_deg: 5}
+    parks:
+      - {id: PLAINS-PARK-1, center_m: [4000, 5000], radius_m: 700}
+      - {id: PLAINS-PARK-2, center_m: [26000, 12000], radius_m: 500}
+      - {id: PLAINS-PARK-3, center_m: [0, -2200], radius_m: 300}         # ECHO launch park (D-005)
+      - {id: PLAINS-PARK-4, center_m: [28586, 6315], radius_m: 300}      # FOXTROT
+      - {id: PLAINS-PARK-5, center_m: [10095, -18900], radius_m: 300}    # HOTEL
+      - {id: PLAINS-PARK-6, center_m: [-16900, -7095], radius_m: 300}    # INDIA
+    roads:
+      - {name: "Farm Rd 300", points_m: [[-25000, 3000], [40000, 6000]]}
+  - id: DESERT
+    utc_offset_hours: -7
+    installations:
+      - {id: GOLF,   origin_m: [0, 0],          rotation_deg: 0}
+      - {id: JULIET, origin_m: [35000, -5000],  rotation_deg: 25}
+      - {id: KILO,   origin_m: [15000, 22000],  rotation_deg: -15}
+      - {id: LIMA,   origin_m: [-20000, 10000], rotation_deg: 8}
+    parks:
+      - {id: DESERT-PARK-1, center_m: [6000, -4000], radius_m: 800}
+      - {id: DESERT-PARK-2, center_m: [1414, -1685], radius_m: 300}      # GOLF launch park (D-005)
+      - {id: DESERT-PARK-3, center_m: [34248, -7067], radius_m: 300}     # JULIET
+      - {id: DESERT-PARK-4, center_m: [12800, 22000], radius_m: 300}     # KILO
+      - {id: DESERT-PARK-5, center_m: [-21905, 11100], radius_m: 300}    # LIMA
+    roads:
+      - {name: "Route 66B", points_m: [[-30000, 0], [45000, -2000]]}
+
+installation_template:              # installation-local meters before rotation
+  fence: [[-1300, -1000], [1300, -1000], [1300, 1000], [-1300, 1000]]
+  assets:
+    fuel_farm:   {center: [600, 300],   size: [120, 80]}
+    flight_line: {center: [100, -160],  size: [1000, 90]}
+    munitions:   {center: [900, -700],  size: [150, 150]}
+    hq:          {center: [-300, 400],  size: [80, 60]}
+    housing:     {center: [-700, -500], size: [300, 200]}
+  jitter_m: 60                      # seeded per-base offset of each asset center
+
+sensors_template:                   # installation-local positions
+  - {kind: radar, at: [0, 0],     range_m: 3500, rate_hz: 1.0, pos_sigma_m: 8,
+     alt_sigma_m: 5, p_detect_near: 0.98, p_detect_far: 0.70, min_alt_m: 15}
+  - {kind: rf,    at: [200, 150], range_m: 4000, rate_hz: 0.5, bearing_sigma_deg: 4}
+  - {kind: rid,   at: [0, 0],     range_m: 3000, rate_hz: 1.0}

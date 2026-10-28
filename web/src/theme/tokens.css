@@ -1,0 +1,110 @@
+/*
+ * Design tokens (SPEC §17.1): the only source of colors, type, radii and durations.
+ * The :root block is the spec's, verbatim. The @theme blocks expose it to Tailwind 4 and remove
+ * Tailwind's default palette, shadows and easings so nothing ad hoc can creep in.
+ */
+
+:root {
+  --scope: #050b12; /* background: scope glass */
+  --glass: rgb(11 21 32 / 0.74); /* docked panels, with a 14px backdrop blur */
+  --hairline: rgb(155 176 196 / 0.16);
+  --ink-hi: #e6eef7;
+  --ink-mid: #9bb0c4;
+  --ink-low: #61758a; /* 18px+ or non-essential text only */
+  --flash: #9fe3ff; /* live: tonight */
+  --afterglow: #ffb347; /* memory: past flights and matches */
+  --bone: #e8e2d4; /* forecasts, always dotted */
+  --alert: #ff5a5f;
+  --verified: #6ee7a8;
+  --font-ui: "B612", system-ui, sans-serif;
+  --font-data: "B612 Mono", ui-monospace, monospace;
+  --dur-micro: 120ms;
+  --dur-panel: 240ms;
+  --dur-reveal: 600ms;
+  --dur-cinema: 1200ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@theme {
+  --color-*: initial;
+  --shadow-*: initial;
+  --drop-shadow-*: initial;
+  --inset-shadow-*: initial;
+  --ease-*: initial;
+  --text-*: initial;
+  --radius-*: initial;
+  --blur-*: initial;
+
+  /* Type scale (§17.1): 12, 13, 15, 18, 24, 32 px */
+  --text-12: 12px;
+  --text-13: 13px;
+  --text-15: 15px;
+  --text-18: 18px;
+  --text-24: 24px;
+  --text-32: 32px;
+
+  /* Radii by hierarchy (§17.1): theater 0, panels 6, buttons 4, chips fully rounded */
+  --radius-panel: 6px;
+  --radius-button: 4px;
+  --radius-chip: 9999px;
+
+  --blur-glass: 14px;
+}
+
+@theme inline {
+  --color-scope: var(--scope);
+  --color-glass: var(--glass);
+  --color-hairline: var(--hairline);
+  --color-ink-hi: var(--ink-hi);
+  --color-ink-mid: var(--ink-mid);
+  --color-ink-low: var(--ink-low);
+  --color-flash: var(--flash);
+  --color-afterglow: var(--afterglow);
+  --color-bone: var(--bone);
+  --color-alert: var(--alert);
+  --color-verified: var(--verified);
+  --color-transparent: transparent;
+
+  --font-sans: var(--font-ui);
+  --font-mono: var(--font-data);
+
+  --default-transition-duration: var(--dur-micro);
+  --default-transition-timing-function: var(--ease-out);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--scope);
+    color: var(--ink-hi);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* B612 Mono for telemetry numbers and hashes, with tabular figures */
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--flash);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0ms !important;
+      animation-duration: 0ms !important;
+    }
+  }
+}

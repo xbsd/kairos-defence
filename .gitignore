@@ -1,1 +1,21 @@
 .DS_Store
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Generated data and outputs (make data / index / export)
+data/
+exports/
+
+# Web
+web/node_modules/
+web/dist/
+web/test-results/
+web/playwright-report/
