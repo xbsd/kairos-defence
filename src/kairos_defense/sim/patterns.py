@@ -68,6 +68,7 @@ def pattern_size(pattern: dict, site: Site, target: Asset, approach_deg: float) 
 
     Orbit: radius. Figure-eight: 2 × lobe radius (its long half-axis, D-024). Lawnmower: half the
     footprint diagonal. Hover: 0. Perimeter: to the buffered fence. Transit with dips: to the fence.
+    Swarm choreography: its first orbit radius, else 0.
     """
     kind = pattern["type"]
     if kind == "orbit":
@@ -84,6 +85,8 @@ def pattern_size(pattern: dict, site: Site, target: Asset, approach_deg: float) 
         return ray_exit_distance(ring, target.centroid, approach_deg)
     if kind == "transit_dips":
         return ray_exit_distance(site.fence, target.centroid, approach_deg)
+    if kind == "choreography":  # swarm: the first orbit_target radius, else 0 (§8.7)
+        return float(pattern.get("radius_m", 0.0))
     raise ValueError(f"no size for pattern {kind!r}")
 
 

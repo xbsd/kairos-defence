@@ -93,7 +93,7 @@ def night_of(local: datetime) -> date:
     return (local - timedelta(days=1)).date() if local.hour < 12 else local.date()
 
 
-def _disc(rng: np.random.Generator, radius: float) -> np.ndarray:
+def disc_offset(rng: np.random.Generator, radius: float) -> np.ndarray:
     """Uniform offset in a disc; ``(2,)``. Always draws two numbers."""
     r, b = radius * math.sqrt(rng.random()), rng.uniform(0.0, 360.0)
     return geo.destination((0.0, 0.0), b, r)
@@ -124,12 +124,12 @@ def make_flight(
     target = site.target(target_kind)
     # fixed draw order: warp, launch, approach, radius, altitude, pattern ints, recovery, rid
     w_draw = rng.uniform(*TIME_WARP_RANGE)
-    launch_off = _disc(rng, spec.launch.jitter_m)
+    launch_off = disc_offset(rng, spec.launch.jitter_m)
     approach_off = rng.uniform(-APPROACH_JITTER_DEG, APPROACH_JITTER_DEG)
     radius_u = rng.random()
     alt = float(rng.uniform(*spec.altitude_m))
     pattern = _resolve_pattern(spec, rng, radius_u, jitter)
-    recovery_off = _disc(rng, spec.recovery_m)
+    recovery_off = disc_offset(rng, spec.recovery_m)
     rid_u = rng.random()
 
     nominal = nominal_launch(site, target_kind, spec.launch.bearing_deg, spec.launch.distance_m)
@@ -273,11 +273,11 @@ def _hobbyist(cfg, site, park, night, night_start, j, key, events, window, rng) 
         rng.random() < PUBLIC_LAUNCH_P and len(events) > 0 and "public_events" in h.launch_from
     )
     ev_idx = int(rng.integers(max(len(events), 1)))
-    launch = park.center + _disc(rng, park.radius_m)
+    launch = park.center + disc_offset(rng, park.radius_m)
     if use_event:
-        launch = np.asarray(events[ev_idx]) + _disc(rng, 50.0)
+        launch = np.asarray(events[ev_idx]) + disc_offset(rng, 50.0)
     launch = push_out(site.fence, site.origin, launch)
-    recovery = launch + _disc(rng, RECOVERY_OTHER_M)
+    recovery = launch + disc_offset(rng, RECOVERY_OTHER_M)
     launch_local = night_start + timedelta(seconds=start_s)
     return FlightPlan(
         key=key,

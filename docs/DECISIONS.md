@@ -370,6 +370,13 @@ Where this file and the SPEC ever disagree, this file wins.
   final approach, so the top-3 beat would match on transit only. Options: (a) keep it and let phase 4
   test T+90; (b) leave the P1 target assets at BRAVO un-jittered; (c) cap asset jitter at 1σ. Needs a
   decision from the product owner.
+- **Resolved in phase 2 (product owner chose (b)):** the live P1 flight's target at its base
+  (BRAVO's fuel farm) keeps its template position; its jitter is still drawn, so no other stream
+  moves (`world.unjittered_assets`, derived from the scenario like D-031). Measured before choosing:
+  (a) first contact 21:39:51, 47 m out, orbit T+94, 251 m from the farm at T+90; (b) 21:40:06, 71 m
+  out, orbit T+79, on the orbit at T+90; (c) 21:40:00, 46 m out, orbit T+85. With (b), County Rd 12
+  and the live launch point follow the farm, so first contact moves 15 s later and 24 m further out,
+  still inside both §1.2 windows. Test: `test_live_target_is_not_jittered`.
 
 ## D-034 · Data card and figures are committed · 2026-10-28
 - Context: phase 1's exit evidence is the data card and the sample figures.
@@ -378,3 +385,153 @@ Where this file and the SPEC ever disagree, this file wins.
   light surface.
 - Why: reviewers can see the evidence without running the generator.
 - Consequences: rerunning `make data` rewrites them; commit them again when they change.
+
+## D-035 · Swarm choreography, schedule and geometry · 2026-10-28
+- Context: §8.7 names the formations and actions but not the swarm frame, how the center moves
+  during the choreography, the orbit direction, how formations change, or where and when swarms fly.
+- Decision: the swarm frame is fixed to the travel heading at the start of the choreography (entry
+  point toward the target); formations are laid out in it (line abreast across the heading, trail
+  along it, V at 45° half-angle with drone 0 at the apex, triangle on an equilateral lattice) and
+  actions transform the current offsets (`rotate` cw adds to the bearing; `expand` scales; `split`
+  moves the first group and the rest apart by `separation_m` across the heading, centroid fixed;
+  `orbit_target` leaves them alone). Every change follows a smoothstep; a formation change blends
+  over max(10 s, farthest drone ÷ 5 m/s), capped at 60% of its step, then holds. The center creeps
+  from the entry point (target + first orbit radius + 300 m) to the orbit circle (or the target)
+  during the steps before the first `orbit_target`, orbits clockwise at cruise (10 m/s) during it
+  and holds after it. Drone = flown center + offset + a smooth wander (OU, σ 2 m, τ 10 s), faded in
+  over the first 10 m of altitude. Each event draws a time warp in [0.7, 1.4] (planted events too),
+  an approach bearing uniform in [0, 360), an altitude in the band and a ±10% factor per step; launch
+  2 km from the target (pushed out per D-005), recovery within 300 m, launch time uniform in
+  20:00-01:00. A team with a live planted event flies its random events only on later nights
+  (D-009). Swarms broadcast no Remote ID.
+- Why: the simplest reading that keeps formations meaningful relative to the approach, gives the
+  §14 descriptors (spread, pairwise quartiles, rotation rate, center speed) a distinctive shape, and
+  keeps drone speeds plausible (fastest drone 17 m/s at w = 0.79). The wander keeps "N(0, 2 m)" as
+  a stationary spread without 3 m/s jitter between seconds.
+- Consequences: spacing during holds stays within ±20% of spec (tested on every event); during
+  S1's split the group gap reaches about 300 m, at §14's `max_spacing_m`, but every event has other
+  windows of 60 s or more below it. Figures: `reports/figures/swarm_S1.png`, `swarm_S2.png`.
+
+## D-036 · RF model details · 2026-10-28
+- Context: §8.6 gives RF's range, rate, band table and bearing noise but no detection probability,
+  SNR law or scan timing.
+- Decision: one detection per scan (0.5 Hz, aligned to launch) while airborne (> 0.5 m), within
+  4 km slant range of the RF sensor and outside the terrain mask; no detection probability. SNR =
+  40 dB at 100 m minus 20 dB per decade, plus N(0, 2 dB), 0.1 dB steps; bearing to 0.1°. Planted
+  `sensor_outage_s` windows stay radar-only (§8.6 lists them under radar). Families map to bands by
+  their first digit; an unknown family is an error.
+- Why: "emit detections at rate_hz" reads as deterministic; free-space falloff is the simplest SNR
+  law that "falls with range" and stays positive at 4 km.
+- Consequences: RF hears takeoff, which the radar cannot see below 15 m, so RF usually starts an
+  incident (D-039). Volume in D-044.
+
+## D-037 · Remote ID details · 2026-10-28
+- Context: §8.6 says `on` broadcasts a stable per-drone serial, but not its form, whether it is
+  stable across flights, or how the broadcast drone position relates to the truth.
+- Decision: serials are `SN-` plus 16 upper-case hex digits. `on`: the drone's serial comes from
+  `rng_for(seed, "rid-serial", actor, drone)`, so the same drone keeps it on every flight (copycats
+  with Remote ID on share one serial per actor; each hobbyist flight is its own drone, D-026);
+  operator fixed within 10 m of launch. `spoofed`: a new random serial per flight, operator 1-3 km
+  from launch at a random bearing. Broadcasts at 1 Hz while airborne within 3 km slant range and
+  outside the mask; drone position = truth + N(0, 2 m), 0.1 m steps.
+- Why: stable across flights is what a real serial is; the `SN-` form cannot look like a plate.
+- Consequences: phase 3's `rid_serial` links a copycat's Remote ID flights to each other, which is
+  true (same drone). About 0.69 M broadcasts.
+
+## D-038 · Incidents need a radar track; sensors log everything · 2026-10-28
+- Context: D-028 moves incident boundaries to "any sensor", but tracks are radar tracks and §8.11
+  says a flight no sensor detects makes no incident. A flight heard only by RF would be an incident
+  with no track.
+- Decision: an incident needs at least one radar point; its start and end are the first and last
+  detection of any of its drones by radar, RF or Remote ID. `rf_detections` and `remote_id` log
+  every flown drone, incident or not. Swarm drones share one incident; tracks are numbered `T1…Tn`
+  in drone order over the drones the radar saw. The data card counts flights heard but never
+  tracked (0 at seed 42).
+- Why: keeps every incident matchable (it has a track) without dropping sensor data.
+- Consequences: generated ids are the minute of the first detection by any sensor, usually the RF
+  hearing takeoff (D-028 expected this).
+
+## D-039 · Live T+0 stays first radar contact · 2026-10-28
+- Context: §16.1 sets a replay's T+0 to `incidents.start_ts` (any sensor) while §1.2 sets it to
+  first radar contact; RF could hear the live drone before the radar sees it.
+- Decision: keep both definitions and measure the gap: `LiveTiming.radar_lag_s` (first radar contact
+  minus first detection by any sensor). BRAVO's terrain mask hides the drone from RF too, so at seed
+  42 the gap is 0 s and both definitions give 21:40:06. A test asserts it.
+- Why: no change needed; the test guards the demo if sensors or the mask change.
+- Consequences: phase 7 can use `incidents.start_ts` as T+0.
+
+## D-040 · Report details and actor clue profiles · 2026-10-28
+- Context: §8.8 and Appendix A leave open the source mix, the event time and place, the templates
+  for the four bases Appendix A does not style, how blotters write directions, and where the truth
+  of lights, sound, launch site and departure comes from.
+- Decision: sources are drawn without repeats with weights BDOC 0.4, security forces 0.35, local
+  PD 0.15, FAA 0.1; delays uniform in the source range after the incident end, whole minutes; grades
+  uniform in the source list. `event_ts` is the incident start; the report position is the mean
+  radar position (10 m steps); "near the …" names the target asset, or the side of the fence for
+  fence targets. A hobbyist whose registered serial was received gets the hobbyist template
+  (security forces 60%, local PD 40%). CHARLIE, HOTEL, INDIA and JULIET get a new terse
+  security-forces line (`HH:MM SF: patrol observed sUAS near …`). Blotters are upper case with
+  directions in full. Clue model: vehicle and road as §8.8 (true road: P1's `clues.road`, else the
+  region road nearest the launch point; the true probability for roads is 0.8, like vehicles;
+  wrong roads come from the region's other roads plus three minor roads outside the gazetteer);
+  lights and departure in every security-forces report, sound in 30% of narrative ones, a local-PD
+  witness clause half the time (launch site or sound); each is true with p = 0.8. Each actor has a
+  stable lights, sound and launch-site profile from `rng_for(seed, "profile", actor)`; hobbyists'
+  launch site is their park. Departure truth = compass direction from the mean radar position to
+  the true recovery point. Swarm reports say how many drones flew in formation. The planted DELTA
+  report adds the true lights and departure that the narrative template needs, so its text matches
+  Appendix A's example. Every clue in a text has a `clue_truth` row, checked by reading the text
+  back with `lexicon.find_clues`.
+- Why: the simplest model that fills every template slot and keeps the clue truth complete.
+- Consequences: 956 reports. Phase 5's clue extraction must be case-insensitive (blotters).
+  Report counts per actor type, the delay histogram and clue rates are on the data card.
+
+## D-041 · Live incidents get no reports or assessments · 2026-10-28
+- Context: §8.8 gives every incident reports and an assessment, but the two live incidents are
+  happening during the replay; paperwork recorded after them would leak the future into the demo
+  and into the seeded memory (§15.5).
+- Decision: no reports or assessments for `status = 'live'`; `assessment_truth` still has their
+  correct labels.
+- Why: nobody has written anything about tonight yet.
+- Consequences: 1,876 assessments for 1,878 incidents.
+
+## D-042 · Assessment rules and correct labels · 2026-10-28
+- Context: §8.8 says "Remote ID with a stable serial" means hobbyist, but a spoofed serial is also
+  consistent within a flight; it does not give copycats a correct label.
+- Decision: "stable serial" means mode `on` (a registered serial) and at least one broadcast
+  received; spoofed serials are "not registered" and stay `unknown`. The 20% mislabel applies to
+  prober incidents only. Correct labels: hobbyist → hobbyist, prober and copycat → probing (a
+  copycat flies the same probing pattern), swarm → swarm. Author `<BASE> BDOC`, recorded 2-36 h after
+  the incident end; rationales are fixed sentences.
+- Why: matches the planted author and keeps "unknown" the honest default.
+- Consequences: no history incident is labeled `probing`; prober incidents labeled hobbyist: 18%
+  at seed 42 (including the planted DELTA label).
+
+## D-043 · LLM paraphrase waits for phase 9 · 2026-10-28
+- Context: `reports_llm_paraphrase: true` needs an LLM client, which phase 9 builds (`llm.py`).
+- Decision: the flag stays `false`; when it is `true`, `gen` stops with an error naming phase 9.
+- Why: offline by default (CLAUDE.md rule 5); no half-built LLM path.
+- Consequences: phase 9 adds the paraphrase, keyed and cached by `report_id`.
+
+## D-044 · RF volume below §8.11 · 2026-10-28
+- Context: §8.11 expects ≈0.5 M RF detections; the generator produces 415 k (83%).
+- Decision: keep the specified rate, range and flight durations and report the real number, as
+  for track points (D-030).
+- Why: hobbyists are ≈95% of flights and fly 180-720 s; at 0.5 Hz that is ≈225 detections per
+  flight. Reaching 0.5 M would mean longer flights or invented detections. The phase 2 exit check
+  does not gate on volumes; incidents, tracks, reports and assessments are within ±15%.
+- Consequences: the slow test asserts more than 380 k. Raise RF `rate_hz` to stress-test.
+
+## D-045 · Guardrail scan for generated text · 2026-10-28
+- Context: phase 2 asks for a forbidden-content scan of reports (no plates, no person names) using
+  regex and lexicon checks, but blotter capitals ("EST 350 FT", "FARM RD 300") and NATO
+  installation names (Charlie, Juliet) look like plates and names to naive rules.
+- Decision: `lexicon.forbidden` removes world vocabulary (road, park and installation names) and
+  Remote ID serials, then flags plate-like tokens without spaces, plate and registration words,
+  street addresses, phone numbers, e-mail, a title before a capitalized name, words describing a
+  person, and a lexicon of about 300 common given names and surnames. The lexicon leaves out English
+  words used in the world (colors such as White and Gray, Park, Hill) and the NATO installation
+  names; a test checks it shares no word with the clue lexicons or installation ids.
+- Why: catches the realistic mistakes without false alarms on the synthetic world's own words.
+- Consequences: every report text, rationale and author passes; the scanner is also tested on
+  made-up offenders.

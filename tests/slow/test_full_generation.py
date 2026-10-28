@@ -26,9 +26,22 @@ def full(cfg):
 
 def test_volumes_within_15_percent(full) -> None:
     v = volumes(full)
-    for k in ("incidents", "tracks"):
+    for k in ("incidents", "tracks", "reports", "assessments"):
         assert 0.85 * EXPECTED[k] <= v[k] <= 1.15 * EXPECTED[k], (k, v[k])
     assert v["track_points"] > 400_000  # below §8.11's ≈1 M by design (D-030)
+    assert v["rf_detections"] > 380_000  # below §8.11's ≈0.5 M for the same reason (D-044)
+
+
+def test_full_swarms_and_paperwork(cfg, full) -> None:
+    inc = full.tables["incidents"]
+    teams = {s.id: s for s in cfg.actors.swarms}
+    expected = sum(t.random_events for t in teams.values()) + len(cfg.scenario.swarm_events)
+    assert int(inc.is_swarm.sum()) == expected
+    history = inc[inc.status == "history"]
+    assert set(full.tables["assessments"].incident_id) == set(history.incident_id)
+    assert set(full.truth["assessment_truth"].incident_id) == set(inc.incident_id)
+    rep = full.tables["reports"]
+    assert (rep.incident_id == "P1-DELTA-260419").sum() == 1
 
 
 def test_every_planted_flight_detected_and_live_on_time(cfg, full) -> None:

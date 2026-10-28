@@ -65,7 +65,7 @@ def gen(
     config: str = typer.Option("config", help="Folder with the five YAML files."),
     figures: bool = typer.Option(True, "--figures/--no-figures", help="Write sample figures."),
 ) -> None:
-    """Generate the synthetic world, flights, radar and truth from scratch (seeded)."""
+    """Generate the synthetic world, flights, swarms, sensors, paperwork and truth (seeded)."""
     from kairos_defense.config import ConfigError, load_config
     from kairos_defense.sim.datacard import EXPECTED, volumes, write_data_card
     from kairos_defense.sim.generate import generate
@@ -89,8 +89,11 @@ def gen(
     for k, v in volumes(g).items():
         table.add_row(k, f"{v:,}", f"≈{EXPECTED[k]:,}")
     missed = sum(not r.detected for r in g.results)
-    table.add_row("flights flown", f"{len(g.results):,}", "")
-    table.add_row("flights not detected", f"{missed:,}", "")
+    swarms = sum(i.is_swarm for i in g.incidents)
+    table.add_row("remote_id", f"{len(g.tables['remote_id']):,}", "")
+    table.add_row("swarm incidents", f"{swarms:,}", "")
+    table.add_row("drones flown", f"{len(g.results):,}", "")
+    table.add_row("drones not tracked", f"{missed:,}", "")
     if g.live is not None:
         lt = g.live
         est = "never" if lt.orbit_established_s is None else f"T+{lt.orbit_established_s:.0f} s"

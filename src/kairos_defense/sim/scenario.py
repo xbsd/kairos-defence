@@ -3,7 +3,8 @@
 Each P1 flight uses its stated base, launch time and time warp. ``jitter: none`` turns off the
 launch, approach and radius jitter (and the random pauses, D-025); ``target_override`` changes the
 target; ``sensor_outage_s`` is measured from launch (D-027); ``status: live`` marks the demo
-incident. Phase 2 adds the planted DELTA report, the wrong assessment and the swarm events.
+incident. The planted swarm events are in ``swarm``; the planted DELTA report and wrong
+assessment in ``reports`` and ``assessments``.
 """
 
 from __future__ import annotations
@@ -72,13 +73,17 @@ class LiveTiming:
     first_contact_after_launch_s: float
     first_contact_fence_m: float  # measured position's distance outside the fence
     orbit_established_s: float | None  # after first contact
+    radar_lag_s: float = 0.0  # first radar contact minus first detection by any sensor (D-039)
 
     def as_dict(self) -> dict:
         return self.__dict__.copy()
 
 
-def live_timing(plan: FlightPlan, t_s, true_xy, hit_t_s, hit_xy, world: World) -> LiveTiming:
-    """First contact and orbit-established time from the true path and radar hits of a flight."""
+def live_timing(
+    plan: FlightPlan, t_s, true_xy, hit_t_s, hit_xy, world: World, first_any_s: float | None = None
+) -> LiveTiming:
+    """First contact and orbit-established time from the true path and radar hits of a flight.
+    ``first_any_s`` is the first detection by any sensor, s after launch (default: the radar's)."""
     site = world.sites[plan.installation_id]
     t0 = float(hit_t_s[0])
     fence_m = float(site.fence_distance(np.asarray(hit_xy[:1]))[0])
@@ -90,4 +95,5 @@ def live_timing(plan: FlightPlan, t_s, true_xy, hit_t_s, hit_xy, world: World) -
         t0,
         fence_m,
         None if est is None else est - t0,
+        0.0 if first_any_s is None else t0 - float(first_any_s),
     )

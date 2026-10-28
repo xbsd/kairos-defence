@@ -68,3 +68,42 @@ def g42(cfg):
     from kairos_defense.sim.generate import generate
 
     return generate(cfg, 42, window=WINDOW)
+
+
+@dataclass
+class Swarms:
+    plans: list  # center plans, one per swarm event
+    centers: list  # flown center paths
+    drones: list  # per event: list of drone paths
+
+
+@pytest.fixture(scope="session")
+def swarms(cfg, world, cal) -> Swarms:
+    """Every swarm event at seed 42 (random and planted), flown with its drones."""
+    from kairos_defense.sim.kinematics import fly_plans
+    from kairos_defense.sim.swarm import drone_paths, swarm_plans
+
+    plans = swarm_plans(cfg, world, cal, 42)
+    centers = fly_plans(plans, world, cal, 42)
+    drones = [drone_paths(p, c, 42) for p, c in zip(plans, centers, strict=True)]
+    return Swarms(plans, centers, drones)
+
+
+PLANTED_NIGHTS = (date(2026, 3, 3), date(2026, 4, 19), date(2026, 5, 3), date(2026, 6, 14))
+
+
+@pytest.fixture(scope="session")
+def planted(cfg):
+    """The nights of the planted ALPHA and DELTA flights and both planted swarm events."""
+    from kairos_defense.sim.generate import generate
+
+    return generate(cfg, 42, nights=PLANTED_NIGHTS)
+
+
+@pytest.fixture(scope="session")
+def world_names(world) -> list[str]:
+    """Road, park and installation names: world vocabulary the guardrail scan allows."""
+    from kairos_defense.sim.lexicon import park_name
+
+    names = [r.name for r in world.roads] + [park_name(p.park_id) for p in world.parks]
+    return names + [f"Installation {s.title()}" for s in world.sites]

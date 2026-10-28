@@ -4,7 +4,7 @@
 |---|---|---|---|---|
 | 0 | Scaffold | done | Exit check exit 0 in 12 s: ruff clean; pytest 89 passed; web lint, typecheck, Vitest 5 passed; help lists 14 commands; web build 223 kB JS | 2026-10-28 |
 | 1 | World, flights and radar | done | Exit check exit 0 in 46 s from `make clean`: 1,869 incidents and 1,869 tracks (≈1,900 / ≈1,950, within ±15%); figures for all 7 patterns; 53 selected tests pass; live first contact 21:39:51, orbit T+94 s | 2026-10-28 |
-| 2 | Swarms, RF, Remote ID, reports and assessments | not started | | |
+| 2 | Swarms, RF, Remote ID, reports and assessments | done | Exit check exit 0 in 31 s from `make clean`: 1,878 incidents (9 swarms), 956 reports, 1,876 assessments; planted DELTA report, wrong label and both swarm events present; 109 selected tests pass; live orbit T+79 s (D-033 b) | 2026-10-28 |
 | 3 | Features, windows, Euclidean baseline and eval skeleton | not started | | |
 | 4 | DTW matcher and fusion model | not started | | |
 | 5 | Report recall and analog forecast | not started | | |
@@ -24,6 +24,77 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Open issues: …
 - Next: …
 -->
+
+### 2026-10-28 · Phase 2
+- Built: D-033 resolved with option (b): BRAVO's fuel farm (the live target) keeps its template
+  place (`world.unjittered_assets`). `sim/`: `formations.py` (formations, actions, timeline, swarm
+  center path, D-035), `swarm.py` (schedule, center plans, drone paths), RF and Remote ID in
+  `sensors.py` (D-036, D-037), `incidents.py` (sensing, incidents across all sensors, ids, D-038),
+  `tables.py` (raw and truth tables), `facts.py` (what the paperwork knows, actor clue profiles,
+  D-040), `lexicon.py` (clue vocabulary, clue scanner, guardrail scan, D-045), `reports.py`
+  (sources, delays, grades, base styles, Appendix A templates, clue model, D-040, D-041),
+  `assessments.py` (rules, 20% mislabel, truth labels, D-042), `paperwork.py` (planted report and
+  assessment, D-011, D-043), `figures.py` and `datacard_paper.py` (data card split to stay under
+  400 lines). `generate.py` flies single flights and swarm centers in one batch; `gen` prints the
+  new counts. Kinematics gained one hook (the `choreography` pattern); existing flights are unchanged.
+- Tests: `test_swarm_formations` (layouts, spacing, rotate direction, expand, split, blend and hold,
+  center path), `test_swarm` (schedule incl. D-009, jitter ±10%, spacing ±20% on every event, rotation
+  sense, orbit radius, plausible speeds, adding a team changes no other event), `test_rf` (family
+  per actor, bands, rate, airborne only, range, mask, bearing noise, SNR), `test_rid` (on / off /
+  spoofed, stable serials, operator positions, range, mask), `test_reports` (every clue in the text
+  has a `clue_truth` row and back, delays and grades per source, counts per actor type, hobbyist
+  rate and template, clue rates on 3,000 synthetic incidents, styles, swarm wording, paraphrase
+  flag), `test_reports_lexicon` (forbidden-content scan over >1,000 texts; the scanner catches
+  made-up plates, names, titles, addresses, phones and e-mail and allows world vocabulary; name
+  lexicon shares no world word), `test_assessments` (one per history incident, 2–36 h, rules,
+  mislabel rate, truth labels), `test_planted` (DELTA report and wrong label, other P1 paperwork,
+  swarm events, no paperwork for live incidents, RF families, live T+0 = first radar contact),
+  `test_generate` (incident span over all sensors, swarm tracks, no-radar flights make no incident),
+  `test_world` (D-033), slow test (report and assessment volumes, swarm count, paperwork coverage).
+- Exit check (after `make clean`):
+  ```bash
+  make data && uv run pytest tests/unit -q -k "swarm or rf or rid or reports or assessments or planted"
+  ```
+  → exit 0, 31.0 s wall. Key lines:
+  ```text
+  kairos-defense gen --seed 42
+  incidents 1,878 (≈1,900) · tracks 1,904 (≈1,950) · track_points 560,884 (≈1,000,000, D-030)
+  rf_detections 414,999 (≈500,000, D-044) · reports 956 (≈1,000) · assessments 1,876 (≈1,900)
+  remote_id 686,263 · swarm incidents 9 · drones flown 1,904 · drones not tracked 0
+  live first contact 21:40:06 (21:39:30-21:40:30) · live orbit established T+79 s (T+65-100 s)
+  elapsed 19.5 s
+  109 passed, 177 deselected in 9.07s
+  ```
+  Planted items, read back from the written DuckDB files:
+  ```text
+  reports  R-P1-DELTA-260419-1 security_forces B2 2026-04-20 03:40 UTC (22:40 local):
+    "Security forces patrol observed a small drone near the fuel farm at about 21:35, est. 300 ft,
+     a flashing white light. A white pickup was parked on County Rd 12 from 21:20 to 22:05 and left
+     shortly after the drone flew northwest. The drone departed to the northwest at about 21:46.
+     No contact with the operator."
+  clue_truth  vehicle white pickup True · road County Rd 12 True · lights True · departure True
+  assessments  P1-DELTA-260419 hobbyist, DELTA BDOC, 2026-04-20 14:10 UTC (09:10 local)
+  assessment_truth  P1-DELTA-260419 probing
+  incidents  S1-GOLF-260503 GOLF 5 tracks swarm history · DEMO-SWARM-ECHO-0614 ECHO 5 tracks swarm live
+  ```
+  `reports/data_card.md` now has swarm incidents, sensors, reports (sources, counts per actor type,
+  delay histogram, styles), clue rates, an assessment confusion table, planted items and live
+  timing; figures `reports/figures/swarm_S1.png` and `swarm_S2.png` are new.
+  `make check`: ruff clean, 286 passed (4 slow deselected), web lint, typecheck and Vitest pass.
+  `pytest tests/slow`: 4 passed in 39 s (full volumes, swarms and paperwork; two full runs give
+  identical hashes).
+- Figures reviewed by eye: swarm snapshots show line abreast across the heading, the cw quarter turn
+  carrying drone 0 to the front, the split, the V apex leading; S2's triangle, expand, ccw half
+  turn and trail. Fixed: the pattern-figure legend overlapped the middle panel's axis label (also in
+  phase 1's figures).
+- Open issues:
+  - D-024 (still open): phase 3 must read §9.4's `loiter_dir` as `ccw` when the bearing rate is negative.
+  - D-044: RF detections ≈415 k against ≈0.5 M (83%), the same cause as D-030.
+  - D-038: RF hears takeoff, so most incidents now start at launch, before the first track point;
+    phase 3's no-look-ahead filter compares `start_ts`, which is consistent across flights.
+  - D-040: blotter reports are upper case; phase 5's clue extraction must be case-insensitive.
+  - D-037: a copycat's Remote ID flights share one serial (same drone); fine for eval, worth knowing.
+- Next: phase 3 (features, windows, Euclidean baseline and eval skeleton).
 
 ### 2026-10-28 · Phase 1
 - Built: `store/ddl.py` (§7.1 and §7.3 DDL, column lists). `sim/`: `world.py` (sites, jittered
@@ -62,6 +133,7 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Open issues:
   - **D-033 (needs a decision):** BRAVO's seeded fuel-farm jitter puts the live orbit at T+94 s, not
     ≈T+80 s. That passes the 65–100 s window, but the T+90 top-3 beat would match on transit only.
+    (Resolved in phase 2: option (b), orbit at T+79 s.)
   - D-024: phase 3 must read §9.4's `loiter_dir` as `ccw` when the bearing rate is *negative*.
   - D-028: phase 2 must recompute incident `start_ts`/`end_ts` across radar, RF and Remote ID.
   - D-030: track points ≈0.54 M against ≈1 M in §8.11 (by design; incident and track counts are on target).

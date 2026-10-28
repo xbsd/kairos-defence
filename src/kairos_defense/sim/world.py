@@ -2,8 +2,8 @@
 
 All coordinates are region-frame ENU meters; bearings are true bearings, clockwise from north
 (D-007). The installation template is rotated clockwise by ``rotation_deg``, each asset center is
-jittered by ``N(0, jitter_m)`` from its own seeded stream, then everything is shifted by
-``origin_m``.
+jittered by ``N(0, jitter_m)`` from its own seeded stream (except the live flight's target, D-033),
+then everything is shifted by ``origin_m``.
 """
 
 from __future__ import annotations
@@ -185,8 +185,11 @@ def _build_site(cfg: Config, seed: int, region: Region, inst_id: str, park_id: s
     tpl = w.installation_template
     fence = Polygon(geo.installation_to_region(np.asarray(tpl.fence), origin, rot))
     assets = {}
+    fixed = unjittered_assets(cfg)
     for kind, a in tpl.assets.items():
         jitter = rng_for(seed, "world", inst_id, "asset", kind).normal(0.0, tpl.jitter_m, 2)
+        if (inst_id, kind) in fixed:
+            jitter = np.zeros(2)  # the live flight's target keeps its template place (D-033)
         center = geo.rotate(a.center, rot) + jitter + origin
         axis = 90.0 + rot if a.size[0] >= a.size[1] else rot
         assets[kind] = Asset(
@@ -203,6 +206,18 @@ def _build_site(cfg: Config, seed: int, region: Region, inst_id: str, park_id: s
         inst_id, region.id, region.utc_offset_hours, origin, rot, fence, assets, sensors,
         inst.terrain_mask, park_id,
     )  # fmt: skip
+
+
+def unjittered_assets(cfg: Config) -> set[tuple[str, str]]:
+    """``(installation, asset kind)`` pairs placed without jitter: the live P1 flight's target at
+    its base, so the demo's orbit timing follows the template layout (D-033). The jitter is still
+    drawn, so no other stream moves."""
+    p1 = next((p for p in cfg.actors.probers if p.id == "P1"), None)
+    out = set()
+    for f in cfg.scenario.p1_flights:
+        if f.status == "live" and p1 is not None:
+            out.add((f.base, f.target_override or p1.target))
+    return out
 
 
 def _road_bases(cfg: Config, region: Region, actor_id: str) -> list[str]:

@@ -160,3 +160,20 @@ def test_world_tables_match_ddl(world) -> None:
     assert len(tables["assets"]) == 60
     assert len(tables["sensors"]) == 36
     assert tables["roads"].road_id.is_unique
+
+
+def test_live_target_is_not_jittered(cfg, world) -> None:
+    """D-033 (b): BRAVO's fuel farm (the live P1 target) sits at its template place; every other
+    asset keeps its seeded jitter."""
+    from kairos_defense.sim.world import unjittered_assets
+
+    assert unjittered_assets(cfg) == {("BRAVO", "fuel_farm")}
+    for sid, site in world.sites.items():
+        for kind, a in site.assets.items():
+            tpl = cfg.world.installation_template.assets[kind].center
+            nominal = geo.installation_to_region(tpl, site.origin, site.rotation_deg)
+            off = float(np.hypot(*(a.centroid - nominal)))
+            if (sid, kind) == ("BRAVO", "fuel_farm"):
+                assert off == pytest.approx(0.0, abs=1e-9)
+            else:
+                assert off > 0.0, (sid, kind)

@@ -25,6 +25,7 @@ from scipy.ndimage import gaussian_filter1d
 from scipy.signal import lfilter
 
 from kairos_defense.rng import rng_for
+from kairos_defense.sim import formations
 from kairos_defense.sim import patterns as pat
 from kairos_defense.sim.calendar import Calendar
 from kairos_defense.sim.plan import FlightPlan
@@ -193,6 +194,8 @@ def pattern_path(plan: FlightPlan, site: Site, rng: np.random.Generator) -> pat.
         return pat.transit_dips(
             site, target, approach, p["transit_alt_m"], p["dip_alt_m"], p["dips"], v
         )
+    if kind == "choreography":  # a swarm's center (§8.7)
+        return formations.centroid_path(p, c, entry, approach, v)
     raise ValueError(f"unknown pattern {kind!r}")
 
 
