@@ -8,7 +8,7 @@
 | 3 | Features, windows, Euclidean baseline and eval skeleton | done | Exit check exit 0 in 87 s after `make clean data`: 1,898 history tracks indexed (6 live skipped), 136,266 windows; baseline Recall@5 0.435, MRR 0.302, time to match 26%, copycat-first 57%, prefilter p95 83 ms; demo first contact and orbit pass | 2026-10-28 |
 | 4 | DTW matcher and fusion model | done (2026-10-28, autopilot gate passed) | | |
 | 5 | Report recall and analog forecast | done (2026-10-28, autopilot gate passed) | | |
-| 6 | Case memory (Kairos-lite) | not started | | |
+| 6 | Case memory (Kairos-lite) | done (2026-10-28, autopilot gate passed) | | |
 | 7 | Streaming API and Command Center foundation | not started | | |
 | 8 | Command Center: the memorable moments | not started | | |
 | 9 | Swarms, agent, MCP, hardening and runbook | not started | | |
