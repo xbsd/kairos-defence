@@ -272,6 +272,8 @@ Where this file and the SPEC ever disagree, this file wins.
 - Consequences: **§9.4 says `loiter_dir` is `ccw` "if positive" (bearing rate). With bearings
   clockwise from north, a positive rate is clockwise. Phase 3 must read it as `ccw` when the rate is
   negative, or P1 (ccw) will be labeled `cw`.**
+- **Resolved in phase 3 (D-047):** `loiter_dir` is `ccw` when the net bearing change around the
+  target is negative; all six P1 flights and every C1 flight read `ccw` (tested).
 
 ## D-025 · Flight model details · 2026-10-28
 - Context: §8.3 fixes the physics (10 Hz, τ = 1.5 s, 45°/s, 4 m/s, 0.3 × wind) but not the guidance.
@@ -535,3 +537,179 @@ Where this file and the SPEC ever disagree, this file wins.
 - Why: catches the realistic mistakes without false alarms on the synthetic world's own words.
 - Consequences: every report text, rationale and author passes; the scanner is also tested on
   made-up offenders.
+
+## D-046 · Target choice: where the drone lingers · 2026-10-28
+- Context: §9.2's rule (smallest *mean* distance over the slowest 50% of seconds) picked the true
+  target for only 48 of the 131 prober, copycat and swarm tracks at seed 42. For P1 at ALPHA it
+  picked the fence: the radar sees takeoff and landing 2 km out, and those near-zero-speed seconds
+  outweigh the orbit. That broke the planted-signature test and put ALPHA's distance channel in a
+  different frame from DELTA's.
+- Decision: candidate seconds are in flight (leading and trailing seconds below 0.8 × the track's
+  median altitude are takeoff and landing), have a speed, and lie within 500 m of the fence (0
+  inside); with fewer than 10 such seconds, every in-flight second counts. The slowest 50% of them
+  vote, and the target with the smallest *median* distance wins (ties: asset id order, fence last).
+- Why: compared on all 131 tracks (mean or median, with or without the in-flight mask, near the
+  fence within 300, 500 or 800 m): this rule gets 93/131. Every P1 flight is right (CHARLIE picks
+  the flight line, its target override), and so are all of P2, P3, P4, P5 and C1. Still wrong: P6
+  picks the flight line on all 10 flights (consistent; its dips cover three assets), C2 mostly the
+  fence (its figure-eight is flown at cruise after a long transit across the base), swarm drones
+  are mixed (swarm matching uses its own descriptors, phase 9).
+- Consequences: a partial live track recomputes its target every update (§9.2): the live P1 flight
+  picks the fence while inbound and the fuel farm from T+90. Hobbyists launching from parks 2.2 km
+  out fall back to all seconds, so 1,800 of 1,898 history tracks have the fence as target. Phase 4
+  may revisit P6 and C2.
+
+## D-047 · Signature details · 2026-10-28
+- Context: §9.4 leaves the "target radius", loiter coverage, takeoff and landing, and the meaning of
+  a stable Remote ID serial open.
+- Decision:
+  - `loiter_radius_m` is the median distance from the target *centroid* over the loiter seconds
+    (at least 10, else no loiter). The spec's "median `dist_target_m` + target radius" gives about
+    250 m for CHARLIE's 180 m orbit around the 1 km flight line.
+  - `loiter_dir` sums the bearing change between consecutive loiter seconds outside the target
+    polygon; under 180° net it is `none`, otherwise `ccw` when negative (D-024). A hover over its
+    target therefore reads `none` instead of a random direction.
+  - `dwell_s`: seconds with `dist_target_m` ≤ 1.5 × `loiter_radius_m` (0 without a loiter).
+  - `alt_median_m`: median over in-flight seconds (D-046's mask).
+  - `approach_bearing_deg`: first second with `dist_target_m` ≤ 1,000 m, bearing from the centroid.
+  - `tod_minutes`: local times before noon add 1,440 (01:00 → 1500).
+  - Launch: the Remote ID operator's median position when exactly one serial was heard on the
+    track; else the first radar point if below 30 m; else unknown. Recovery: the last radar point
+    if below 30 m.
+- Why: the simplest reading that keeps the planted P1 values (approach 315°, radius 180 m, ccw)
+  true for every P1 flight, including CHARLIE and the partial BRAVO 2025-11-14 flight.
+- Consequences: the app cannot tell a spoofed serial from a registered one (both are stable within
+  a flight), so P2's launch area comes from its fake operator position. That is how spoofing works.
+
+## D-048 · RF and Remote ID association · 2026-10-28
+- Context: §11.2 asks for a bearing check "with concurrent drones" but not which track point to
+  compare with; the literal range joins took 19 s (RF) and 38 s (Remote ID).
+- Decision: an RF detection belongs to a track if it is within ±30 s of one of its points at the
+  same installation. When another track at that base is within ±60 s (their ±30 s windows can
+  touch), the detection's bearing must also be within 15° of the bearing from the RF sensor to the
+  track point nearest in time (ties go to the earlier point). `rf_family` is the most frequent
+  family (ties alphabetical). Remote ID: broadcasts within ±5 s and 100 m of a track point; the
+  most frequent serial wins. Both joins bucket time and repeat each track point for its own and
+  both neighbor buckets inside the CTE, so DuckDB plans an equi-join: RF 1.6 s, Remote ID 0.9 s.
+- Why: the nearest point is the best estimate of where the drone was when it was heard. With the
+  bucket offset in the join condition, DuckDB 2.0 still plans a range join (37 s).
+- Consequences: `rf_family` is known for all 1,898 history tracks (22 heard more than one family);
+  Remote ID is present on 1,634 (10 heard more than one serial).
+
+## D-049 · Derived tables hold history tracks only · 2026-10-28
+- Context: §9.5 keeps live tracks out of LanceDB but says nothing about `track_features` and
+  `track_signatures`, which would otherwise hold the live tracks' future (for example the live
+  recovery point, which a forecast must never see).
+- Decision: `index` skips live tracks everywhere. A live track's features and signature are
+  computed from its points up to the replay time (`match/query.py`).
+- Why: no table can leak tonight's future, whatever reads it later.
+- Consequences: `TrackStore.features()` is empty for live tracks; phase 7's replay computes them
+  on the fly. The planted-signature test computes the live P1 signature from its points.
+
+## D-050 · Query start, T and early queries · 2026-10-28
+- Context: §10.3 filters on the "live start", §19.2 counts T from the first point, and D-038 makes
+  an incident's start its first detection by any sensor (usually RF hearing takeoff). §10.1's
+  "largest window ≤ elapsed" has no answer before 60 s, yet §1.2 runs the matcher at T+45.
+- Decision: a track starts at its first radar point, on both sides of the filter (`start_ts_ms` in
+  LanceDB, `start_ts` in `track_signatures`), and T counts from it. The query is rebuilt from the
+  points up to T (target, smoothing, derivatives), never sliced from full-track features. Before
+  60 s are seen (T = 45 → 46 rows) the query uses every row against the 60 s windows; PAA
+  normalizes the length. Below `min_track_s` (T = 30) the matcher does not run, and eval counts a
+  miss. The prefilter raises `LookAheadError` if a store returns a row that did not start strictly
+  earlier or that belongs to the query's own incident.
+- Why: one consistent clock for both sides; the raise is defense in depth against an adapter that
+  ignores the filter (tested with a leaky fake store).
+- Consequences: the spec rule is kept as written, so a past track that started earlier but was
+  still flying contributes all its windows. One drone per actor at a time means this cannot help a
+  same-actor match.
+
+## D-051 · Window vectors: NaN and PAA details · 2026-10-28
+- Context: §9.5 does not say how to average 60 s into 16 segments or what to do with NaN.
+- Decision: exact fractional PAA weights (3.75 s segments for 60 s). After z-normalizing and
+  weighting, NaN is filled by linear interpolation along time and an all-NaN channel becomes 0
+  (§10.4's rule for DTW). One function builds both indexed and query vectors (tested identical);
+  windows of one size are built in a batch (strided view, one matrix product).
+- Why: same answer for query and index by construction. Batching, a closed-form median of three
+  in the smoothing and skipping an unneeded sort cut `index` from 96 s to 55 s.
+- Consequences: 136,266 windows at seed 42 (57,462 / 51,297 / 27,507 for 60 / 120 / 300 s).
+
+## D-052 · LanceDB 0.40 adapter details · 2026-10-28
+- Context: `create_scalar_index` and `table_names` are deprecated in lancedb 0.40, and
+  `table_exists` raises on a local connection.
+- Decision: `LanceVectorStore.replace()` drops and rewrites a table, then adds scalar indexes
+  (`window_s` bitmap; `start_ts_ms`, `incident_id` B-tree) with `create_index(column,
+  config=...)`. `upsert()` merges by the table's key column. `search()` always pre-filters and
+  drops the vector column. Tables are listed with `list_tables().tables`.
+- Why: CLAUDE.md asks for a thin adapter around version differences.
+- Consequences: scalar indexes cut filtered search from about 120 to 80 ms in a 160k-row test.
+
+## D-053 · Index build uses the adapters; matching uses the ports · 2026-10-28
+- Context: the ports (§4.1) are read-only plus `sql()`, but `index` must bulk-write DuckDB and
+  LanceDB tables.
+- Decision: `features/build.py` uses `DuckTrackStore` and `LanceVectorStore` directly (bulk RF and
+  Remote ID association, `write_table`, `replace`). Matching and evaluation depend only on
+  `TrackStore` and `VectorStore`; site geometry is read through `TrackStore.sql`.
+- Why: the index build is I/O orchestration; the ports stay as §4.1 defines them.
+- Consequences: a KDB-X swap needs a new build module or adapter-level bulk writers; matching and
+  eval code do not change.
+
+## D-054 · Euclidean baseline output · 2026-10-28
+- Context: §10.8's `Match` is shaped for the fused DTW matcher.
+- Decision: the baseline fills only what it computes: `score` = `shape_sim` = 1 − d²/4 (vectors
+  are unit length, so this is the cosine mapped to 0..1), `features` = squared distance and
+  window size, no reasons, `warp_ratio` NaN, `model_version` `euclidean-v1`.
+- Why: no invented numbers (CLAUDE.md rule 10 in spirit).
+- Consequences: phase 4's matcher fills the rest.
+
+## D-055 · Evaluation definitions · 2026-10-28
+- Context: §19 leaves several definitions open.
+- Decision:
+  - Months 13-18 are the local nights 2026-03-01 to 2026-08-31 (a night is local time minus 12 h).
+    Query sets: prober tracks (23) and copycat tracks (10) of history incidents; swarm incidents
+    (5) are listed for phase 9. Hobbyists are candidates only.
+  - Time to match: a query's earliest protocol T with a same-actor track in the top 3; the metric
+    is the share with that T ≤ 90 s.
+  - Copycat-first: prober queries at T = 120 s where a copycat track ranks above every same-actor
+    track among the returned candidates (up to 50), including queries whose own actor is not
+    returned at all.
+  - MRR counts 0 when no same-actor track is returned.
+  - Latency: query build (resample, target, PAA), prefilter (LanceDB search plus grouping), end to
+    end.
+  - Demo assertions: first contact on the radar data, the orbit on the truth path with phase 1's
+    definition, the live top 3 for information only.
+- Why: the simplest readings of §19.
+- Consequences: one query moves the prober metrics by about 4 points.
+
+## D-056 · `baseline.json` waits for phase 4 · 2026-10-28
+- Context: §19.4's gate fails a run that is more than 5% worse than `reports/baseline.json`.
+- Decision: `eval --baseline` and the gate are built (gated: Recall@5, MRR, time to match,
+  copycat-first, copycat Recall@5, prefilter and end-to-end p95 latency, plus any failed demo
+  assertion), but phase 3 writes no `baseline.json`; phase 4's exit check does.
+- Why: DTW makes the end-to-end latency slower by design, so a Euclidean baseline would fail
+  phase 4's first run.
+- Consequences: with 23 prober queries a single query changes Recall@5 by 0.043, more than 5% of
+  0.80. Phase 4 should decide whether the gate needs an absolute floor.
+
+## D-057 · Prefilter latency above the §10.9 budget · 2026-10-28
+- Context: §10.9 asks for a prefilter p95 of at most 50 ms.
+- Decision: no tuning in phase 3, which has no targets. Measured here (cloud sandbox, 4 threads):
+  prefilter p50 64 ms, p95 83 ms; end to end 93 / 117 ms.
+- Why: tried during planning on 160k synthetic rows: IVF_PQ was no faster and kept only 30-57% of
+  the exact top 200; one table per window size gave about 42 / 50 ms; scalar indexes are in.
+- Consequences: phase 4 or phase 9 (performance pass) decides between per-size tables, a cached
+  numpy brute force (about 13 ms) or measuring on the laptop first.
+
+## D-058 · Open: the Euclidean prefilter does not surface P1 for the live query · 2026-10-28
+- Context: phase 4 re-ranks only the prefilter's 50 candidate tracks, and its exit check needs the
+  three planted P1 flights in the live top 3 at T+90.
+- Finding: best-window rank of each earlier P1 flight among 1,882 earlier tracks, live query:
+  T+45: 501-1,775. T+60: ALPHA 05-02 8, ALPHA 03-03 53, DELTA 197. T+90: CHARLIE 176, others
+  1,149-1,194. T+120: CHARLIE 59, ALPHA 03-03 84, DELTA 644. So at T+90 none of the three is in
+  the 50 candidates. Diagnostic only, not adopted: speed and distance channels alone put DELTA at
+  912; a 9 s mean on every channel gives 586-1,543. Radar noise in the turn and vertical channels
+  is therefore not the main cause; per-window z-normalization probably erases what makes P1
+  distinctive (orbit radius, speeds), so "approach, then circle" looks like many hobbyist windows.
+- Decision: none yet; this needs phase 4's attention before DTW work starts.
+- Options: (a) scale `dist_target_m` and speed by fixed units instead of per window; (b) pass more
+  candidate tracks (200-500) to DTW, with LB_Keogh pruning to stay within 800 ms; (c) a longer or
+  multi-window query for the prefilter. Ask the product owner if a fix changes the demo story.

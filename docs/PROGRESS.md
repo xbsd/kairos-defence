@@ -5,7 +5,7 @@
 | 0 | Scaffold | done | Exit check exit 0 in 12 s: ruff clean; pytest 89 passed; web lint, typecheck, Vitest 5 passed; help lists 14 commands; web build 223 kB JS | 2026-10-28 |
 | 1 | World, flights and radar | done | Exit check exit 0 in 46 s from `make clean`: 1,869 incidents and 1,869 tracks (≈1,900 / ≈1,950, within ±15%); figures for all 7 patterns; 53 selected tests pass; live first contact 21:39:51, orbit T+94 s | 2026-10-28 |
 | 2 | Swarms, RF, Remote ID, reports and assessments | done | Exit check exit 0 in 31 s from `make clean`: 1,878 incidents (9 swarms), 956 reports, 1,876 assessments; planted DELTA report, wrong label and both swarm events present; 109 selected tests pass; live orbit T+79 s (D-033 b) | 2026-10-28 |
-| 3 | Features, windows, Euclidean baseline and eval skeleton | not started | | |
+| 3 | Features, windows, Euclidean baseline and eval skeleton | done | Exit check exit 0 in 87 s after `make clean data`: 1,898 history tracks indexed (6 live skipped), 136,266 windows; baseline Recall@5 0.435, MRR 0.302, time to match 26%, copycat-first 57%, prefilter p95 83 ms; demo first contact and orbit pass | 2026-10-28 |
 | 4 | DTW matcher and fusion model | not started | | |
 | 5 | Report recall and analog forecast | not started | | |
 | 6 | Case memory (Kairos-lite) | not started | | |
@@ -24,6 +24,77 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Open issues: …
 - Next: …
 -->
+
+### 2026-10-28 · Phase 3
+- Built: this branch fast-forwarded onto phase 2's commit (it started at the kit). `features/`:
+  `resample.py` (§9.1), `channels.py` (§9.2-§9.3, target choice D-046), `signatures.py` (§9.4,
+  D-047), `windows.py` (§9.5 PAA, query vector, D-050, D-051), `build.py` (`kairos-defense index`,
+  history tracks only, D-049, D-053). `store/duck.py` (`TrackStore`, §11.1 as-of weather and base
+  events, §11.2 RF and §9.4 Remote ID association with time-bucketed joins, §11.3, D-048),
+  `store/lance.py` (`VectorStore`, D-052), derived DDL in `store/ddl.py`. `match/`: `query.py`
+  (rebuilt from points up to T), `prefilter.py` (§10.3, `LookAheadError`), `baseline.py` (§10.2,
+  D-054), `types.py` (§10.8 `Match`). `eval/`: `truth.py` (the only truth reader), `harness.py`
+  (§19.1-§19.2, D-055), `metrics.py`, `demo.py`, `report.py` (md, json, figure, `--baseline` gate,
+  D-056). CLI: `index`, `match --method euclidean --incident --at [--track --top]`, `eval
+  [--baseline]` are real.
+- Tests: `test_resample` (straight line and circle known answers, ccw turn negative, gaps,
+  duplicates, smoothing inside runs), `test_channels` (target choice incl. far takeoff, distances,
+  normalization), `test_signatures` (cw/ccw/none, radius, approach, tod wrap, launch and recovery
+  rules, Remote ID operator), `test_duck_store` (RF bearing gate on concurrent tracks, Remote ID
+  ±5 s/100 m, as-of weather, events, strict `tracks_before`, truth refused), `test_windows` (PAA
+  known answers, channel-major order, gap skipping, query = indexed vector), `test_index` (six P1
+  nights generated and indexed: planted P1 signatures approach 315° ± 15°, radius 180 ± 25 m,
+  `ccw` on all six flights incl. the live one from its points; live incidents absent from every
+  derived table and LanceDB; filters return only the requested window size; metadata; rebuild
+  gives identical hashes), `test_no_lookahead` (written before the matcher: filter text, every
+  result started before the query for every track at T = 45/90/180, later P1 flights never
+  returned, tampering with points after T leaves the query unchanged, a leaky store raises),
+  `test_eval_metrics`, `test_eval_harness` (query sets, protocol, outputs, gate, CLI), slow
+  `test_full_index` (full volumes, two builds give identical hashes, full eval passes the gate).
+- Exit check (after `make clean && make data`; data card unchanged):
+  ```bash
+  make index && make eval
+  ```
+  → exit 0, 87.1 s wall. Key lines:
+  ```text
+  kairos-defense index
+  tracks 1,904 · history tracks indexed 1,898 · live tracks skipped 6
+  track_features rows 800,148 · gap seconds 62,850 (7.9%) · track_signatures rows 1,898
+  flight_windows 60 s 57,462 · 120 s 51,297 · 300 s 27,507
+  targets fence 1,800, flight_line 35, fuel_farm 19, hq 16, munitions 28
+  loiter direction ccw 20, cw 1, none 1,877 · RF family unknown 0 · Remote ID present 1,634
+  elapsed 55.0 s
+  kairos-defense eval · euclidean
+  prober queries 23 (0 unanswerable) · copycat queries 10 (0 unanswerable) · swarm incidents 5
+  Recall@5 at T=120 s 0.435 · MRR at T=120 s 0.302 · time to match (top 3 by T=90 s) 26%
+  copycat-first at T=120 s 57% · Recall@5 at T=120 s, copycats 0.500
+  latency query build p50/p95 25/38 ms · prefilter 64/83 ms · end to end 93/117 ms
+  demo live_first_contact_local pass: 21:40:06, 71 m · live_orbit_established_s pass: T+79 s
+  demo live_top3_incidents info (target from phase 4): 0/3 in top 3
+  demo live_rank1_report_for, forecast_error_max_m: pending (phase 5) · swarm_top1: pending (phase 9)
+  elapsed 23.1 s
+  ```
+  **Euclidean baseline (phase 3, no targets):** Recall@5 0.435 · MRR 0.302 · time to match 26% ·
+  copycat-first 57% · prefilter p50/p95 64/83 ms · end to end 93/117 ms. Recall@5 by T (probers):
+  T=45 0.087, 60 0.304, 90 0.130, 120 0.435, 180 0.261. Per actor at T=120: P4 1.00, P3 0.60,
+  C2 0.60, P5 0.50, C1 0.40, P6 0.33, P2 0.25, P1 0.00. Full report: `reports/eval_2026-10-28.md`,
+  figure `reports/figures/eval_recall_by_t.png` (reviewed by eye: no collisions, legend and end
+  labels, T = 30 omitted because the matcher does not run).
+  `match --method euclidean --incident DEMO-BRAVO-0828 --at 90` runs in 164 ms (window 60 s,
+  target BRAVO-fuel_farm, 50 candidates).
+  `make check`: ruff clean, 367 passed (7 slow deselected), web lint, typecheck and Vitest pass.
+  `pytest tests/slow`: 7 passed in 246 s.
+- Open issues:
+  - **D-058 (phase 4 must start here):** at T+90 the three planted P1 flights rank 1,149-1,194 of
+    1,882 earlier tracks in the Euclidean prefilter, outside its 50 candidates, so DTW cannot
+    re-rank them into the top 3 as the pipeline stands. Dropping noisy channels or smoothing more
+    does not fix it; per-window z-normalization is the likely cause. Options are in D-058.
+  - D-057: prefilter p95 83 ms against the 50 ms budget (§10.9) on this sandbox.
+  - D-046: target choice is still wrong for P6 (consistently the flight line), C2 and swarm drones.
+  - D-056: `reports/baseline.json` is first written by phase 4's exit check; with 23 prober
+    queries the 5% gate moves on a single query.
+  - Copycat-first (57%) counts queries whose own actor is not in the candidates at all (D-055).
+- Next: phase 4 (DTW matcher and fusion model), starting with D-058.
 
 ### 2026-10-28 · Phase 2
 - Built: D-033 resolved with option (b): BRAVO's fuel farm (the live target) keeps its template

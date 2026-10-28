@@ -107,3 +107,37 @@ def world_names(world) -> list[str]:
 
     names = [r.name for r in world.roads] + [park_name(p.park_id) for p in world.parks]
     return names + [f"Installation {s.title()}" for s in world.sites]
+
+
+P1_NIGHTS = (date(2025, 11, 14), date(2026, 3, 3), date(2026, 4, 19), date(2026, 5, 2),
+             date(2026, 7, 10), date(2026, 8, 28))  # fmt: skip
+
+
+def tmp_config(cfg, folder: Path):
+    """``cfg`` with every data path under ``folder`` (app, truth, memory, LanceDB)."""
+    paths = cfg.app.paths.model_copy(
+        update={"duckdb": str(folder / "kd.duckdb"), "truth": str(folder / "gt.duckdb"),
+                "memory": str(folder / "mem.duckdb"), "lancedb": str(folder / "lancedb"),
+                "reports": str(folder / "reports")}
+    )  # fmt: skip
+    return cfg.model_copy(update={"app": cfg.app.model_copy(update={"paths": paths})})
+
+
+@dataclass
+class Indexed:
+    cfg: object  # Config with temporary paths
+    gen: object  # Generated
+    summary: object  # IndexSummary
+
+
+@pytest.fixture(scope="session")
+def p1_index(cfg, tmp_path_factory) -> Indexed:
+    """The nights of all six P1 flights (live included) generated, written and indexed."""
+    from kairos_defense.features.build import build_index
+    from kairos_defense.sim.generate import generate
+    from kairos_defense.sim.writers import write_all
+
+    c = tmp_config(cfg, tmp_path_factory.mktemp("p1"))
+    g = generate(cfg, 42, nights=P1_NIGHTS)
+    write_all(c.app, g.tables, g.truth)
+    return Indexed(c, g, build_index(c))

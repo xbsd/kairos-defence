@@ -1,4 +1,4 @@
-"""Table definitions (SPEC §7.1 raw tables, §7.3 ground truth).
+"""Table definitions (SPEC §7.1 raw tables, §7.2 derived tables, §7.3 ground truth).
 
 ``RAW_DDL`` belongs to the app database; ``TRUTH_DDL`` belongs to the ground-truth file, which only
 ``kairos_defense.sim.writers`` writes and only ``kairos_defense.eval`` reads (CLAUDE.md rule 2).
@@ -66,6 +66,22 @@ TRUTH_DDL: dict[str, str] = {
   incident_id VARCHAR PRIMARY KEY, correct_label VARCHAR)""",
 }
 
+DERIVED_DDL: dict[str, str] = {  # written by `kairos-defense index`, history tracks only (D-049)
+    "track_features": """CREATE TABLE track_features (
+  track_id VARCHAR, incident_id VARCHAR, installation_id VARCHAR, t_s INTEGER, ts TIMESTAMP,
+  x_m DOUBLE, y_m DOUBLE, x_rel_m DOUBLE, y_rel_m DOUBLE, alt_m DOUBLE,
+  speed_ms DOUBLE, vspeed_ms DOUBLE, heading_deg DOUBLE, turn_rate_dps DOUBLE,
+  dist_target_m DOUBLE, bearing_rel_deg DOUBLE, in_gap BOOLEAN)""",
+    "track_signatures": """CREATE TABLE track_signatures (
+  track_id VARCHAR PRIMARY KEY, incident_id VARCHAR, installation_id VARCHAR, region_id VARCHAR,
+  start_ts TIMESTAMP, end_ts TIMESTAMP, duration_s DOUBLE,
+  target_asset_id VARCHAR, target_kind VARCHAR,
+  approach_bearing_deg DOUBLE, loiter_radius_m DOUBLE, loiter_dir VARCHAR,
+  dwell_s DOUBLE, alt_median_m DOUBLE, tod_minutes INTEGER,
+  launch_x_rel_m DOUBLE, launch_y_rel_m DOUBLE, recovery_x_rel_m DOUBLE, recovery_y_rel_m DOUBLE,
+  rf_family VARCHAR, rid_present BOOLEAN, rid_serial VARCHAR)""",
+}
+
 _COL = re.compile(r"^\s*([a-z_][a-z0-9_]*)\s+[A-Z]", re.M)
 
 
@@ -77,3 +93,4 @@ def columns(ddl: str) -> list[str]:
 
 RAW_COLUMNS: dict[str, list[str]] = {t: columns(sql) for t, sql in RAW_DDL.items()}
 TRUTH_COLUMNS: dict[str, list[str]] = {t: columns(sql) for t, sql in TRUTH_DDL.items()}
+DERIVED_COLUMNS: dict[str, list[str]] = {t: columns(sql) for t, sql in DERIVED_DDL.items()}

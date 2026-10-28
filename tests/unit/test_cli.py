@@ -15,7 +15,7 @@ COMMANDS = [
 runner = CliRunner()
 
 
-BUILT = ["gen"]  # real commands; the rest are stubs until their phase
+BUILT = ["gen", "index", "match", "eval"]  # real commands; the rest are stubs until their phase
 
 
 def test_help_lists_every_command() -> None:
@@ -49,3 +49,27 @@ def test_version() -> None:
     res = runner.invoke(app, ["--version"])
     assert res.exit_code == 0
     assert "kairos-defense 0.0.1" in res.output
+
+
+def test_index_needs_data(cfg, tmp_path, monkeypatch) -> None:
+    import kairos_defense.cli as cli
+    from tests.conftest import tmp_config
+
+    monkeypatch.setattr(cli, "_load_config", lambda _c: tmp_config(cfg, tmp_path))
+    res = runner.invoke(app, ["index"])
+    assert res.exit_code == 1 and "make data" in res.output
+
+
+def test_match_dtw_is_phase_4() -> None:
+    res = runner.invoke(app, ["match", "--method", "dtw", "--incident", "X", "--at", "90"])
+    assert res.exit_code == 1 and "phase 4" in res.output
+
+
+def test_match_runs_on_the_p1_nights(p1_index, monkeypatch) -> None:
+    import kairos_defense.cli as cli
+
+    monkeypatch.setattr(cli, "_load_config", lambda _c: p1_index.cfg)
+    res = runner.invoke(app, ["match", "--incident", "DEMO-BRAVO-0828", "--at", "90"],
+                        terminal_width=200)  # fmt: skip
+    assert res.exit_code == 0, res.output
+    assert "query DEMO-BRAVO-0828-T1 at T+90 s" in res.output and "P1-" in res.output
