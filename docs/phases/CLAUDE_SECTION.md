@@ -6,8 +6,8 @@
   (templates in `docs/phases/TEMPLATES.md`).
 - Every package under `src/kairos_defense/`, and `web/`, has a current `README.md` (template in
   `docs/phases/TEMPLATES.md`). The root README keeps a "Status" section.
-- Never push, never rewrite history, never edit `.claude/`, `scripts/autopilot.py` or
-  `docs/phases/gates.json`, and never weaken or skip a test or lower a target to pass a gate.
+- Never push, never rewrite history, never edit `.claude/`, `scripts/autopilot.py`,
+  `scripts/check_targets.py` or `docs/phases/gates.json`, and never weaken or skip a test or lower a target to pass a gate.
 - End-to-end tests start and stop their own servers (Playwright `webServer`), so gates never hang.
   Serving commands in exit checks (`make demo`, `make mcp`) run in the background with a time limit
   and are stopped afterwards.

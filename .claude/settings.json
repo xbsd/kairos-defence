@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make *)",
+      "Bash(uv *)",
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)"
+    ],
+    "deny": [
+      "Bash(git push *)",
+      "Bash(git push)",
+      "Bash(git reset --hard *)",
+      "Bash(git rebase *)",
+      "Bash(git commit --amend *)",
+      "Bash(git tag *)",
+      "Bash(git checkout -- *)",
+      "Bash(git clean *)",
+      "Edit(scripts/autopilot.py)",
+      "Write(scripts/autopilot.py)",
+      "Edit(scripts/check_targets.py)",
+      "Write(scripts/check_targets.py)",
+      "Edit(docs/phases/gates.json)",
+      "Write(docs/phases/gates.json)",
+      "Edit(.claude/**)",
+      "Write(.claude/**)"
+    ]
+  }
+}
