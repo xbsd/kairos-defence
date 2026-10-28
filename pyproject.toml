@@ -53,6 +53,7 @@ ignore = ["RUF001", "RUF002", "RUF003"]  # ×, §, – in docs and messages
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["T20"]
+"scripts/**" = ["T20", "E501"]  # stdlib CLI scripts print by design (autopilot)
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

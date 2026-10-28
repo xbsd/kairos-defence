@@ -1,0 +1,16 @@
+{
+  "_comment": "Commands the autopilot runs after each phase. Every command must exit 0 and must not block (no servers left running). check_targets.py enforces the SPEC §19/§10.9 numbers. Edited by humans only.",
+  "always": ["make check"],
+  "phases": {
+    "0": ["uv run kairos-defense --help", "npm --prefix web run build"],
+    "1": ["make data", "uv run pytest tests/unit -q -k \"world or kinematics or patterns or scenario or determinism\""],
+    "2": ["make data", "uv run pytest tests/unit -q -k \"swarm or rf or rid or reports or assessments or planted\""],
+    "3": ["make index", "make eval"],
+    "4": ["make models", "make eval", "uv run kairos-defense match --method dtw --incident DEMO-BRAVO-0828 --at 90", "python3 scripts/check_targets.py 4"],
+    "5": ["make index", "make eval", "uv run kairos-defense forecast --incident DEMO-BRAVO-0828 --at 105", "python3 scripts/check_targets.py 5"],
+    "6": ["uv run kairos-defense memory reseed", "uv run kairos-defense memory verify", "uv run pytest tests/unit -q -k memory"],
+    "7": ["npm --prefix web run build", "make e2e"],
+    "8": ["make eval", "python3 scripts/check_targets.py 8", "npm --prefix web run build", "make e2e"],
+    "9": ["make clean", "make data index models eval", "python3 scripts/check_targets.py 9", "npm --prefix web run build", "make e2e", "uv run pytest tests -q -k mcp"]
+  }
+}
