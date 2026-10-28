@@ -9,7 +9,7 @@
 | 4 | DTW matcher and fusion model | done (2026-10-28, autopilot gate passed) | | |
 | 5 | Report recall and analog forecast | done (2026-10-28, autopilot gate passed) | | |
 | 6 | Case memory (Kairos-lite) | done (2026-10-28, autopilot gate passed) | | |
-| 7 | Streaming API and Command Center foundation | not started | | |
+| 7 | Streaming API and Command Center foundation | done (2026-10-28, autopilot gate passed) | | |
 | 8 | Command Center: the memorable moments | not started | | |
 | 9 | Swarms, agent, MCP, hardening and runbook | not started | | |
 
