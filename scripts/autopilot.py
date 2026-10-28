@@ -55,12 +55,13 @@ REVIEW_SCHEMA = {
 }
 REQUIRED_DOCS = ("PLAN.md", "REPORT.md", "EXIT_CHECK.md")
 CLAUDE_MD_MARKER = "## Autopilot and documentation"
+SETTINGS_REL = ".claude/settings.autopilot.json"
 # Files only a human may change. The gate blocks the run if any of them differs from the run's start.
 PROTECTED = (
     "scripts/autopilot.py",
     "scripts/check_targets.py",
     "docs/phases/gates.json",
-    ".claude/settings.json",
+    ".claude/settings.autopilot.json",
     ".claude/skills/phase-auto/SKILL.md",
 )
 # Never passed to child processes: an API key would bill sessions to the API instead of the
@@ -88,6 +89,7 @@ def _root() -> Path:
 ROOT = _root()
 PH = ROOT / "docs" / "phases"
 LOG = PH / "AUTOPILOT.log"
+SETTINGS = ROOT / SETTINGS_REL
 
 
 def now() -> str:
@@ -191,6 +193,8 @@ def claude_cmd(
     opts, prompt: str, resume: str | None, schema: dict | None, extra: list[str]
 ) -> list[str]:
     cmd = [CLAUDE, "-p", prompt, "--permission-mode", opts.mode, "--permission-prompts", "none"]
+    if SETTINGS.exists():  # allow/deny rules for autopilot sessions only, not for interactive use
+        cmd += ["--settings", str(SETTINGS)]
     if resume:
         cmd += ["--resume", resume]
     if opts.budget:
@@ -707,19 +711,11 @@ def cmd_init(opts) -> None:
     if cm.exists() and section.exists() and CLAUDE_MD_MARKER not in cm.read_text():
         cm.write_text(cm.read_text().rstrip() + "\n\n" + section.read_text())
         print("✓ appended the autopilot section to CLAUDE.md")
-    extra = ROOT / ".claude" / "settings.autopilot.json"
-    target = ROOT / ".claude" / "settings.json"
-    if extra.exists():
-        cur = json.loads(target.read_text()) if target.exists() else {}
-        add = json.loads(extra.read_text())
-        perms = cur.setdefault("permissions", {})
-        for key in ("allow", "deny"):
-            merged = list(
-                dict.fromkeys(perms.get(key, []) + add.get("permissions", {}).get(key, []))
-            )
-            perms[key] = merged
-        target.write_text(json.dumps(cur, indent=2) + "\n")
-        print("✓ merged autopilot allow/deny rules into .claude/settings.json")
+    print(
+        ("✓ " if SETTINGS.exists() else "✗ missing: ")
+        + f"{SETTINGS_REL} (passed to every autopilot session with --settings)"
+    )
+    ok = ok and SETTINGS.exists()
     gi = ROOT / ".gitignore"
     if gi.exists() and ".autopilot/" not in gi.read_text():
         gi.write_text(gi.read_text().rstrip() + "\n.autopilot/\n")
@@ -769,11 +765,24 @@ def cmd_run(opts) -> None:
         )
     gates = load_gates()
     start = opts.from_phase if opts.from_phase is not None else first_pending()
+    if opts.dry_run:
+        # Print only. Running run_phase in dry-run mode would mark phases done, edit PROGRESS.md,
+        # commit and tag, after which a real run finds nothing to do.
+        print(
+            f"[dry run] phases {start}..{opts.to}, mode {opts.mode}, push {'on' if opts.push else 'off'}"
+        )
+        for n in range(start, opts.to + 1):
+            cmds = list(gates.get("always", [])) + list(gates.get("phases", {}).get(str(n), []))
+            print(
+                f"[dry run] phase {n}: plan, review (up to {opts.review_rounds}), build, gate: "
+                + " && ".join(cmds)
+            )
+        return
     if start > opts.to:
         log("Nothing to do: every phase up to --to is done.")
         commit_log(opts)
         return
-    t = tag(f"autopilot-start-{dt.datetime.now():%Y%m%d-%H%M}") if not opts.dry_run else "(dry run)"
+    t = tag(f"autopilot-start-{dt.datetime.now():%Y%m%d-%H%M}")
     opts.start_sha = head()
     opts.min_tests = None if opts.dry_run else collected_tests()
     log(

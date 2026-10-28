@@ -713,3 +713,29 @@ Where this file and the SPEC ever disagree, this file wins.
 - Options: (a) scale `dist_target_m` and speed by fixed units instead of per window; (b) pass more
   candidate tracks (200-500) to DTW, with LB_Keogh pruning to stay within 800 ms; (c) a longer or
   multi-window query for the prefilter. Ask the product owner if a fix changes the demo story.
+
+## D-059 · Autopilot for phases 4 to 9 · 2026-10-28
+- Context: the user wants the remaining phases to run unattended, one fresh Claude Code session per
+  step, without approving each plan. They supplied an autopilot add-on (`scripts/autopilot.py`, skill
+  `phase-auto`, `docs/AUTOPILOT.md`); a review before launch found gaps that would have stopped or
+  misled the run.
+- Decision: adopt the add-on, with these changes:
+  - Gate times follow D-003: phase 4 runs `match … --at 90`, phase 5 `forecast … --at 105` (the add-on
+    had 60 and 75).
+  - `scripts/check_targets.py N` enforces the SPEC §19.3 and §10.9 targets and the demo assertions from
+    the newest eval JSON, cumulatively from phase 4. `make eval` alone only fails on regressions.
+  - The gate checks for a clean tree before its commands, since `make data` and `make eval` rewrite
+    tracked reports and figures; the closing commit records those outputs.
+  - Protected files (the scripts, the gate list, the autopilot settings and skill) must not change during
+    a run; the passing count of fast Python tests must not drop; added skip or xfail markers are logged.
+  - The allow and deny rules live in `.claude/settings.autopilot.json` and are passed with `--settings`
+    to autopilot sessions only; a repo-wide `.claude/settings.json` also bound interactive sessions.
+  - Child sessions run without `ANTHROPIC_API_KEY` (subscription login, not API billing), `GITHUB_TOKEN`
+    or the launcher's `CLAUDE*` variables. `--dry-run` only prints (it used to mark every phase done and
+    commit). `--push` lets the script, never Claude, push after each phase. The scripts pass ruff, which
+    `make check` runs over the whole repo.
+- Why: each change closes a way the run could fail for reasons unrelated to the phase, or pass while
+  missing a target. Rejected: trusting REPORT.md to state targets honestly.
+- Consequences: phase 4 must write `metrics.dtw_lift`, `latency_dtw_p95_ms` and the other keys
+  `check_targets.py` names. Phase 3's prefilter p95 (83 ms) is above the 50 ms target, so phase 4 must
+  speed it up. A phase that cannot meet a target stops the run with BLOCKED.md for a human decision.

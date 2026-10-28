@@ -35,8 +35,9 @@ If you've been building in cloud sessions, push from there, then `git pull` into
 1. Copy the add-on files into the repository root, then `git add -A && git commit -m "add autopilot"`.
 2. Update Claude Code (`claude update`). The script needs v2.1.259 or later.
 3. Run `python3 scripts/autopilot.py init`. It checks the toolchain and appends the autopilot section to
-   CLAUDE.md. It also merges the allow and deny rules into `.claude/settings.json` and runs a one-line
-   smoke session. Read its output, then commit: `git add -A && git commit -m "autopilot init"`.
+   CLAUDE.md, checks that `.claude/settings.autopilot.json` exists (the allow and deny rules, passed to
+   every autopilot session with `--settings`, so they never bind your interactive sessions) and runs a
+   one-line smoke session. Read its output, then commit: `git add -A && git commit -m "autopilot init"`.
 4. Optional but recommended: run `python3 scripts/autopilot.py backfill --phases 0-3` to write
    REPORT/EXIT_CHECK documents for the phases you built by hand, so every phase has the same paper trail.
 
@@ -46,7 +47,8 @@ If you've been building in cloud sessions, push from there, then `git pull` into
 tmux new -s autopilot                         # so it keeps running if the terminal closes
 python3 scripts/autopilot.py run              # from the first phase not done in PROGRESS.md, through 9
 python3 scripts/autopilot.py run --from 5 --to 7
-python3 scripts/autopilot.py run --dry-run    # print what it would do
+python3 scripts/autopilot.py run --dry-run    # print what it would do (changes nothing)
+python3 scripts/autopilot.py run --push       # also push the branch and tags after each phase
 ```
 
 Useful flags: `--model <id>`, `--budget <usd per session>`, `--review-rounds`, `--fix-attempts`,
@@ -100,17 +102,28 @@ frame-rate target.
 - Sessions run in Claude Code's **auto mode**: a classifier reviews each action before it runs and blocks
   risky ones, such as force pushes, `git reset --hard` and downloading and running scripts.
   `--permission-prompts none` means a blocked action is denied rather than waiting for you.
-- Deny rules in `.claude/settings.json` forbid `git push`, history rewrites, and edits to the script and
-  the gate list. These rules hold in every permission mode.
+- Deny rules in `.claude/settings.autopilot.json` (passed with `--settings`) forbid `git push`, tags,
+  history rewrites, and edits to `.claude/`, the scripts and the gate list. These rules hold in every
+  permission mode.
+- Before every gate the script checks that `scripts/autopilot.py`, `scripts/check_targets.py`,
+  `docs/phases/gates.json` and the autopilot settings and skill are unchanged since the run started,
+  and blocks if not. Review any such change before rerunning: a rerun starts from the current commit.
+- `scripts/check_targets.py N` (in the gate for phases 4, 5, 8 and 9) enforces the SPEC §19.3 and §10.9
+  targets and the demo assertions from the newest `reports/eval_<date>.json`, cumulatively.
+- The gate fails if fewer fast Python tests pass than at the start of the run, and lists every skip or
+  xfail marker added during the run in the gate log.
+- Sessions and gate commands run without `ANTHROPIC_API_KEY` (so they use the subscription login),
+  `GITHUB_TOKEN` or the launching session's `CLAUDE*` variables.
 - The skill forbids weakening or skipping tests or lowering targets to pass a gate.
-- Nothing is pushed. Review the tags and push yourself when you're satisfied.
+- Claude never pushes. With `--push`, the script itself fast-forward pushes the branch and tags after
+  each phase (never forced); a failed push is logged and the run continues.
 
 ## If auto mode is unavailable
 
 Auto mode needs a supported model, and your organization must not have turned it off. `init` reports the
 mode its smoke session actually got. Alternatives:
 
-- `--mode dontAsk` runs only the commands allowed in `.claude/settings.json` and denies everything else. It's
+- `--mode dontAsk` runs only the commands allowed in `.claude/settings.autopilot.json` and denies everything else. It's
   safer but may block a phase that needs a new command; add the rule and rerun.
 - `--mode bypassPermissions` skips all checks. Use it only inside a container or VM, such as Claude Code's
   dev container, running as a non-root user with `KD_IN_CONTAINER=1`. The script refuses it elsewhere.
