@@ -1,0 +1,15 @@
+{
+  "phase": 1,
+  "status": "done (manual, docs backfilled)",
+  "steps": [
+    {
+      "step": "backfill",
+      "at": "2026-10-28 19:54:53",
+      "ok": true,
+      "session_id": "21e05552-2665-4179-a221-c8f3fcf80241",
+      "cost_usd": 4.3414636,
+      "minutes": 11.0,
+      "permission_denials": 1
+    }
+  ]
+}

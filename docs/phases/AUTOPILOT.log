@@ -2,3 +2,7 @@
 [2026-10-28 19:36:03]   … running 3 min. last tool: Bash uv run pytest tests/unit/test_config.py tests/unit/test_geo.py tests/unit/test_r
 [2026-10-28 19:39:03]   … running 6 min. last tool: Edit /Users/ndkx/work/kairos_defence/docs/phases/phase-00/EXIT_CHECK.md
 [2026-10-28 19:42:03]   … running 9 min. last tool: Bash sed -n 30,60p web/src/theme/tokens.css && cat web/tests/setup.ts && grep -n "con
+[2026-10-28 19:43:53] phase 1: backfilling documentation
+[2026-10-28 19:46:53]   … running 3 min. last tool: Bash git log --format='%h %s' -- src/kairos_defense/sim src/kairos_defense/store/ddl.
+[2026-10-28 19:49:53]   … running 6 min. last tool: Bash uv run python --version; uv --version; ls -la reports/figures/pattern_*.png | aw
+[2026-10-28 19:52:53]   … running 9 min. last tool: Bash tail -5 docs/DECISIONS.md; echo ---; sed -n 1,12p docs/DECISIONS.md
