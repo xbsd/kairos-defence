@@ -739,3 +739,20 @@ Where this file and the SPEC ever disagree, this file wins.
 - Consequences: phase 4 must write `metrics.dtw_lift`, `latency_dtw_p95_ms` and the other keys
   `check_targets.py` names. Phase 3's prefilter p95 (83 ms) is above the 50 ms target, so phase 4 must
   speed it up. A phase that cannot meet a target stops the run with BLOCKED.md for a human decision.
+
+## D-060 · Latency does not block; phase 10 documentation · 2026-10-28
+- Context: the user asked the run to go to the end without them, not to worry about latency for now,
+  and to finish with a user guide with screenshots, a one-pager, READMEs and rollback documentation.
+  `test_cli_eval` also failed one run in three: eval flagged a 5% latency rise as a regression, and
+  millisecond timings vary more than that between identical runs.
+- Decision:
+  - The §10.9 latency targets are still measured and printed by `scripts/check_targets.py` (WARN), but
+    no longer fail a gate. The eval regression check treats latency as worse only above 1.5 × baseline
+    + 2 ms; accuracy metrics keep the §19.4 5% rule.
+  - New phase 10 (`docs/phases/PHASE_10.md`): `docs/USER_GUIDE.md` with at least 10 real screenshots
+    captured by a Playwright spec, `docs/ONE_PAGER.md`, `docs/ROLLBACK.md`, root README links; gated by
+    `scripts/check_docs.py`. `docs/phases/INDEX.md` lists every tag as a rollback point.
+  - Phase 9's gate also runs `make test-all` (slow tests included).
+- Why: the user's instructions; a gate that fails on timing noise sends fix sessions after nothing.
+- Consequences: §19's latency row is a known, logged gap until a human revisits it. PROGRESS.md has a
+  phase 10 row.

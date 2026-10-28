@@ -60,6 +60,11 @@ def test_regressions_respect_direction() -> None:
     base = {"recall_at_5_t120": 0.80, "copycat_first_t120": 0.10, "latency_prefilter_p95_ms": 50.0}
     ok = {"recall_at_5_t120": 0.77, "copycat_first_t120": 0.104, "latency_prefilter_p95_ms": 52.0}
     assert regressions(ok, base) == []
-    bad = {"recall_at_5_t120": 0.75, "copycat_first_t120": 0.2, "latency_prefilter_p95_ms": 60.0}
+    bad = {"recall_at_5_t120": 0.75, "copycat_first_t120": 0.2, "latency_prefilter_p95_ms": 78.0}
     assert len(regressions(bad, base)) == 3
+    # D-060: latency regresses only above 1.5 x baseline + 2 ms (77 ms here); 60 ms is timing noise
+    assert regressions({**bad, "latency_prefilter_p95_ms": 77.0}, base) == regressions(
+        {**bad, "latency_prefilter_p95_ms": 60.0}, base
+    )
+    assert len(regressions({**bad, "latency_prefilter_p95_ms": 77.0}, base)) == 2
     assert regressions({"recall_at_5_t120": None}, base) == []

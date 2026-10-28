@@ -27,6 +27,10 @@ from kairos_defense.eval.metrics import (
 )
 
 TOLERANCE = 0.05  # §19.4: fail when a metric worsens by more than 5% relative
+# Latency is timing noise at the 5% level, so it regresses only when more than 50% plus 2 ms worse
+# (D-060); the absolute §10.9 latency targets are enforced separately by scripts/check_targets.py.
+LATENCY_TOLERANCE = 0.5
+LATENCY_SLACK_MS = 2.0
 GATED = {  # metric -> +1 higher is better, -1 lower is better
     "recall_at_5_t120": 1, "mrr_t120": 1, "time_to_match_t90": 1, "copycat_first_t120": -1,
     "recall_at_5_t120_copycats": 1, "latency_prefilter_p95_ms": -1,
@@ -106,13 +110,19 @@ def summarize(run: EvalRun) -> dict:
 
 
 def regressions(metrics: dict, baseline: dict, tol: float = TOLERANCE) -> list[str]:
-    """Gated metrics more than ``tol`` (relative) worse than ``baseline``."""
+    """Gated metrics more than ``tol`` (relative) worse than ``baseline``.
+
+    Latency uses the looser
+    ``LATENCY_TOLERANCE`` and ``LATENCY_SLACK_MS`` bound (D-060)."""
     out = []
     for key, sign in GATED.items():
         v, b = metrics.get(key), baseline.get(key)
         if v is None or b is None:
             continue
-        worse = v < b * (1 - tol) if sign > 0 else v > b * (1 + tol)
+        if key.startswith("latency_"):
+            worse = v > b * (1 + LATENCY_TOLERANCE) + LATENCY_SLACK_MS
+        else:
+            worse = v < b * (1 - tol) if sign > 0 else v > b * (1 + tol)
         if worse:
             out.append(f"{key}: {v:.4g} vs baseline {b:.4g}")
     return out

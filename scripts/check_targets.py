@@ -39,6 +39,10 @@ METRICS: dict[int, list[tuple[str, str, float, str]]] = {
     ],
 }
 
+# Measured and printed, never failing: the user asked on 2026-10-28 not to let latency block the
+# run (D-060). A missing key still fails, so the numbers are always produced.
+REPORT_ONLY = {"latency_prefilter_p95_ms", "latency_dtw_p95_ms", "latency_end_to_end_p95_ms"}
+
 # phase -> demo assertion keys (eval JSON "demo" rows) that must have status "pass"
 DEMO: dict[int, list[str]] = {
     4: ["live_first_contact_local", "live_orbit_established_s", "live_top3_incidents"],
@@ -81,8 +85,10 @@ def check(n: int) -> list[str]:
                 problems.append(f"{label}: metrics.{key} missing from {f.name}")
                 continue
             ok = v >= target if op == ">=" else v <= target
-            print(f"{'PASS' if ok else 'FAIL'}  {label}: {v:.4g} (target {op} {target:g})")
-            if not ok:
+            warn_only = key in REPORT_ONLY
+            word = "PASS" if ok else ("WARN" if warn_only else "FAIL")
+            print(f"{word}  {label}: {v:.4g} (target {op} {target:g})")
+            if not ok and not warn_only:
                 problems.append(f"{label}: {v:.4g}, target {op} {target:g}")
     rows = {r.get("key"): r for r in d.get("demo", [])}
     want: set[str] = set()

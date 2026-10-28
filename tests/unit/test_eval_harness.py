@@ -81,7 +81,15 @@ def test_outputs_and_gate(run, tmp_path: Path) -> None:
     assert "Recall@5 at T = 120 s" in md.read_text()
     assert gate(s, tmp_path / "baseline.json") == []  # no baseline yet, demo checks pass
     worse = {"metrics": {k: (v * 2 if "latency" in k else v) for k, v in s["metrics"].items()}}
-    worse["metrics"]["latency_prefilter_p95_ms"] = s["metrics"]["latency_prefilter_p95_ms"] / 2
+    worse["metrics"]["latency_prefilter_p95_ms"] = s["metrics"]["latency_prefilter_p95_ms"] / 10
+    jitter = {
+        "metrics": {
+            **s["metrics"],
+            "latency_prefilter_p95_ms": s["metrics"]["latency_prefilter_p95_ms"] / 1.2,
+        }
+    }
+    (tmp_path / "jitter.json").write_text(json.dumps(jitter))
+    assert gate(s, tmp_path / "jitter.json") == []  # 20% timing noise is not a regression (D-060)
     (tmp_path / "baseline.json").write_text(json.dumps(worse))
     assert any("latency_prefilter_p95_ms" in p for p in gate(s, tmp_path / "baseline.json"))
 

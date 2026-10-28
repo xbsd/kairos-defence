@@ -56,10 +56,13 @@ REVIEW_SCHEMA = {
 REQUIRED_DOCS = ("PLAN.md", "REPORT.md", "EXIT_CHECK.md")
 CLAUDE_MD_MARKER = "## Autopilot and documentation"
 SETTINGS_REL = ".claude/settings.autopilot.json"
+LAST_PHASE = 10  # phase 10 (docs/phases/PHASE_10.md): user guide, one-pager, rollback guide
 # Files only a human may change. The gate blocks the run if any of them differs from the run's start.
 PROTECTED = (
     "scripts/autopilot.py",
     "scripts/check_targets.py",
+    "scripts/check_docs.py",
+    "docs/phases/PHASE_10.md",
     "docs/phases/gates.json",
     ".claude/settings.autopilot.json",
     ".claude/skills/phase-auto/SKILL.md",
@@ -172,7 +175,7 @@ def first_pending() -> int:
             return n
         if not is_done(st):
             return n
-    return 10
+    return LAST_PHASE + 1
 
 
 def set_progress_status(n: int, status: str) -> None:
@@ -478,7 +481,7 @@ def write_index() -> None:
         "|---|---|---|---|---|---|---|",
     ]
     prog = progress_rows()
-    for n in range(0, 10):
+    for n in range(0, LAST_PHASE + 1):
         f = PH / f"phase-{n:02d}" / "meta.json"
         m = json.loads(f.read_text()) if f.exists() else {}
         cost = sum((s.get("cost_usd") or 0) for s in m.get("steps", []))
@@ -492,6 +495,24 @@ def write_index() -> None:
             f"| {n} | {status} | {m.get('started', '')} | {m.get('finished', '')} | "
             f"{cost:.2f} | {len(m.get('steps', []))} | {rep} |"
         )
+    tags = git(
+        "for-each-ref",
+        "--sort=creatordate",
+        "--format=| `%(refname:short)` | `%(objectname:short)` | %(creatordate:iso) |",
+        "refs/tags",
+    ).stdout
+    rows += [
+        "",
+        "## Rollback points",
+        "",
+        "Every tag below is a safe point. Inspect with `git diff <tag> HEAD --stat`; roll back on a new",
+        "branch with `git switch -c rollback <tag>`, then `make clean data index models eval`.",
+        "See docs/ROLLBACK.md.",
+        "",
+        "| Tag | Commit | Created |",
+        "|---|---|---|",
+    ]
+    rows += [x for x in tags.splitlines() if x.strip()] or ["| (none yet) | | |"]
     (PH / "INDEX.md").write_text("\n".join(rows) + "\n")
 
 
@@ -515,9 +536,14 @@ def block(n: int, m: dict, reason: str) -> bool:
 
 
 def review_prompt(n: int) -> str:
+    block = (
+        "docs/phases/PHASE_10.md (the phase block for phase 10)"
+        if n == LAST_PHASE
+        else f"the Phase {n} block in docs/SPEC.md §20"
+    )
     return (
         f"You are an independent reviewer of a build plan. Do not modify any file.\n"
-        f"Read CLAUDE.md, the Phase {n} block in docs/SPEC.md §20 and every SPEC section it lists under "
+        f"Read CLAUDE.md, {block} and every SPEC section it lists under "
         f"'Read first', docs/phases/TEMPLATES.md, and docs/phases/phase-{n:02d}/PLAN.md.\n"
         "Approve only if the plan: (1) covers every task checkbox in the phase block; (2) names concrete tests "
         "for every test bullet; (3) maps every exit-check criterion to a command and the evidence it produces; "
@@ -885,7 +911,7 @@ def main() -> None:
     p = sub.add_parser("run")
     common(p)
     p.add_argument("--from", dest="from_phase", type=int)
-    p.add_argument("--to", type=int, default=9)
+    p.add_argument("--to", type=int, default=LAST_PHASE)
     p.add_argument("--redo", action="store_true", help="restart the --from phase from planning")
     p.add_argument("--review-rounds", type=int, default=3)
     p.add_argument("--fix-attempts", type=int, default=3)

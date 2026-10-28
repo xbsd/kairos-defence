@@ -12,6 +12,7 @@
 | 7 | Streaming API and Command Center foundation | not started | | |
 | 8 | Command Center: the memorable moments | not started | | |
 | 9 | Swarms, agent, MCP, hardening and runbook | not started | | |
+| 10 | User guide, one-pager and rollback guide (docs/phases/PHASE_10.md) | not started | | |
 
 Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 

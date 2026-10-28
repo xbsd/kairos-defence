@@ -15,7 +15,7 @@ approval, do not enter plan mode, and do not stop to wait. When something is amb
 
 ## Every step
 
-- Read `CLAUDE.md`, `docs/PROGRESS.md`, the Phase N block in `docs/SPEC.md` §20 and every section it lists
+- Read `CLAUDE.md`, `docs/PROGRESS.md`, the Phase N block in `docs/SPEC.md` §20 (for N = 10: `docs/phases/PHASE_10.md`) and every section it lists
   under "Read first", `docs/phases/TEMPLATES.md`, and the previous phase's `docs/phases/phase-(N-1)/REPORT.md`
   if it exists.
 - Work only inside this repository. Never push. Never rewrite git history (no `reset --hard`, rebase or
@@ -34,6 +34,12 @@ approval, do not enter plan mode, and do not stop to wait. When something is amb
   `swarm_top1`). Use those keys.
 - The gate also fails if the number of passing fast Python tests drops below its count at the start of
   the run, and it lists every skip or xfail marker added during the run.
+
+- Test thoroughly: unit tests with known answers and edge cases for every new function, tests for every
+  CLI command and API route you add, Vitest for components and Playwright for every page and Director
+  beat you touch. Run `make test-all` (slow tests included) before committing.
+- The user's standing instruction (2026-10-28): use your best judgement and do not wait for them; latency
+  targets are reported but do not block (D-060); keep every README current so a phase can be rolled back.
 
 ## plan N
 
