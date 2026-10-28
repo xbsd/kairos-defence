@@ -11,7 +11,7 @@
 | 6 | Case memory (Kairos-lite) | done (2026-10-28, autopilot gate passed) | | |
 | 7 | Streaming API and Command Center foundation | done (2026-10-28, autopilot gate passed) | | |
 | 8 | Command Center: the memorable moments | done (2026-10-28, autopilot gate passed) | | |
-| 9 | Swarms, agent, MCP, hardening and runbook | not started | | |
+| 9 | Swarms, agent, MCP, hardening and runbook | done (2026-10-28, autopilot gate passed) | | |
 
 Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 
