@@ -32,7 +32,9 @@
       "Edit(scripts/check_docs.py)",
       "Write(scripts/check_docs.py)",
       "Edit(docs/phases/PHASE_10.md)",
-      "Write(docs/phases/PHASE_10.md)"
+      "Write(docs/phases/PHASE_10.md)",
+      "Edit(docs/phases/accepted_gaps.json)",
+      "Write(docs/phases/accepted_gaps.json)"
     ]
   }
 }

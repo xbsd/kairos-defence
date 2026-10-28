@@ -32,6 +32,12 @@ approval, do not enter plan mode, and do not stop to wait. When something is amb
   and names the exact metric keys `make eval` must write into `reports/eval_<date>.json` under
   `metrics` (for example `dtw_lift`, `latency_dtw_p95_ms`, `report_linkage`, `forecast_median_t90_m`,
   `swarm_top1`). Use those keys.
+- Target shortfalls are soft (D-061): when `check_targets.py` reports only `GAP` lines, you get up to
+  three fix attempts to close them honestly; after that the autopilot records them in
+  `docs/phases/phase-NN/GAPS.md` and the run continues. Gaps accepted in earlier phases show as WARN; do
+  not spend the current phase on them unless the plan says so. Never touch the §19 protocol, query sets,
+  truth handling or metric definitions to raise a number. Broken things (tests, crashes, a metric not
+  produced, e2e) still block.
 - The gate also fails if the number of passing fast Python tests drops below its count at the start of
   the run, and it lists every skip or xfail marker added during the run.
 

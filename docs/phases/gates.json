@@ -1,5 +1,5 @@
 {
-  "_comment": "Commands the autopilot runs after each phase. Every command must exit 0 and must not block (no servers left running). check_targets.py enforces the SPEC \u00a719/\u00a710.9 numbers. Edited by humans only.",
+  "_comment": "Commands the autopilot runs after each phase. Every command must exit 0 and must not block (no servers left running). A 'soft:' command that exits 1 reports target gaps: they get --target-attempts fix attempts, then are recorded in GAPS.md and the run continues (D-061); exit 2 or anything else is a hard failure. Edited by humans only.",
   "always": [
     "make check"
   ],
@@ -22,15 +22,15 @@
     ],
     "4": [
       "make models",
-      "make eval",
+      "make eval || echo 'make eval exited non-zero; check_targets.py judges the targets'",
       "uv run kairos-defense match --method dtw --incident DEMO-BRAVO-0828 --at 90",
-      "python3 scripts/check_targets.py 4"
+      "soft: python3 scripts/check_targets.py 4"
     ],
     "5": [
       "make index",
-      "make eval",
+      "make eval || echo 'make eval exited non-zero; check_targets.py judges the targets'",
       "uv run kairos-defense forecast --incident DEMO-BRAVO-0828 --at 105",
-      "python3 scripts/check_targets.py 5"
+      "soft: python3 scripts/check_targets.py 5"
     ],
     "6": [
       "uv run kairos-defense memory reseed",
@@ -42,15 +42,16 @@
       "make e2e"
     ],
     "8": [
-      "make eval",
-      "python3 scripts/check_targets.py 8",
+      "make eval || echo 'make eval exited non-zero; check_targets.py judges the targets'",
+      "soft: python3 scripts/check_targets.py 8",
       "npm --prefix web run build",
       "make e2e"
     ],
     "9": [
       "make clean",
-      "make data index models eval",
-      "python3 scripts/check_targets.py 9",
+      "make data index models",
+      "make eval || echo 'make eval exited non-zero; check_targets.py judges the targets'",
+      "soft: python3 scripts/check_targets.py 9",
       "make test-all",
       "npm --prefix web run build",
       "make e2e",

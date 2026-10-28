@@ -402,10 +402,19 @@ SKIP_MARK = re.compile(
 )
 
 
-def run_gate(n: int, attempt: int, gates: dict, minutes: int, opts) -> tuple[bool, str, Path]:
+def run_gate(
+    n: int, attempt: int, gates: dict, minutes: int, opts
+) -> tuple[bool, str, Path, list[str]]:
+    """Run the gate. Returns (passed, hard failure reason, log, target gaps).
+
+    A command prefixed `soft:` that exits 1 reports target shortfalls (its `GAP ...` lines) instead of
+    failing the gate outright; any other non-zero exit is a hard failure (D-061)."""
     cmds = list(gates.get("always", [])) + list(gates.get("phases", {}).get(str(n), []))
     logf = pdir(n) / f"gate-{attempt}.log"
     reason = ""
+    gaps: list[str] = []
+    write_accepted(opts)  # rewritten from memory before every gate, so edits to it never count
+    env = {**child_env(), "KD_GATE_STARTED": str(time.time() - 1)}
     with logf.open("w") as f:
         f.write(f"# Gate for phase {n}, attempt {attempt}, {now()}\n")
         # Checked before the commands run: gate commands rewrite tracked outputs (eval reports,
@@ -416,8 +425,11 @@ def run_gate(n: int, attempt: int, gates: dict, minutes: int, opts) -> tuple[boo
             )
             f.write("\n# Git (before gate commands)\n" + git("status", "--short").stdout)
         for c in [] if reason else cmds:
+            soft = c.startswith("soft:")
+            c = c.removeprefix("soft:").strip()
             f.write(f"\n$ {c}\n")
             f.flush()
+            pos = f.tell()
             t0 = time.time()
             try:
                 rc = subprocess.run(
@@ -428,12 +440,19 @@ def run_gate(n: int, attempt: int, gates: dict, minutes: int, opts) -> tuple[boo
                     stderr=subprocess.STDOUT,
                     text=True,
                     timeout=minutes * 60,
-                    env=child_env(),
+                    env=env,
                 ).returncode
             except subprocess.TimeoutExpired:
                 rc = 124
                 f.write(f"\n[timed out after {minutes} min]\n")
             f.write(f"[exit {rc} after {time.time() - t0:.0f} s]\n")
+            f.flush()
+            if rc == 1 and soft:
+                with logf.open(errors="replace") as rf:
+                    rf.seek(pos)
+                    found = [x[4:].strip() for x in rf.read().splitlines() if x.startswith("GAP ")]
+                gaps += found or [f"{c}: exited 1 without GAP lines"]
+                continue
             if rc != 0:
                 reason = f"command failed: {c}"
                 break
@@ -466,8 +485,43 @@ def run_gate(n: int, attempt: int, gates: dict, minutes: int, opts) -> tuple[boo
             + ("\n".join(added) or "none")
             + "\n"
         )
-        f.write(f"\n# Result: {'PASS' if not reason else 'FAIL: ' + reason}\n")
-    return (not reason), reason, logf
+        if gaps:
+            f.write("\n# Target gaps\n" + "\n".join(gaps) + "\n")
+        result = "FAIL: " + reason if reason else ("GAPS ONLY" if gaps else "PASS")
+        f.write(f"\n# Result: {result}\n")
+    return (not reason and not gaps), reason, logf, gaps
+
+
+ACCEPTED_FILE = PH / "accepted_gaps.json"
+
+
+def gap_key(line: str) -> str:
+    """'demo:live_top3_incidents: status ...' -> 'demo:live_top3_incidents'; 'dtw_lift: ...' -> 'dtw_lift'."""
+    if line.startswith("demo:"):
+        return "demo:" + line[5:].split(":", 1)[0]
+    return line.split(":", 1)[0]
+
+
+def write_accepted(opts) -> None:
+    ACCEPTED_FILE.write_text(json.dumps({"keys": sorted(opts.accepted)}, indent=2) + "\n")
+
+
+def accept_gaps(n: int, m: dict, gaps: list[str], logf: Path, opts) -> None:
+    """Record target shortfalls that survived the fix attempts and let the run continue (D-061)."""
+    keys = sorted({gap_key(g) for g in gaps})
+    opts.accepted |= set(keys)
+    write_accepted(opts)
+    m["gaps"] = gaps
+    with (pdir(n) / "GAPS.md").open("w") as f:
+        f.write(
+            f"# Phase {n}: targets not met, accepted by the autopilot\n\n"
+            f"After {opts.target_attempts} fix attempts these targets were still short. Per the user's "
+            "instruction of 2026-10-28 (D-061) the run recorded them and continued; later phases report "
+            "them as WARN and do not retry them. Every other check in the gate passed.\n\n"
+            + "\n".join(f"- {g}" for g in gaps)
+            + f"\n\nLast gate log: `{logf.relative_to(ROOT)}`. Accepted keys: {', '.join(keys)}.\n"
+        )
+    log(f"phase {n}: accepting {len(gaps)} target gap(s) and continuing: {', '.join(keys)}")
 
 
 # ---------------------------------------------------------------- index and outcomes
@@ -636,7 +690,8 @@ def run_phase(n: int, opts, gates: dict) -> bool:
         if not r["ok"]:
             return block(n, m, "build session failed (see transcripts/build.jsonl.gz)")
 
-    for a in range(1, opts.fix_attempts + 2):
+    gaps: list[str] = []
+    for a in range(1, max(opts.fix_attempts, opts.target_attempts) + 2):
         changed = [] if opts.dry_run else protected_changes(opts.start_sha)
         if changed:
             return block(
@@ -647,21 +702,37 @@ def run_phase(n: int, opts, gates: dict) -> bool:
                 + f" (compare with `git diff {opts.start_sha[:10]} -- <file>`)",
             )
         log(f"phase {n}: gate attempt {a}")
-        ok, reason, logf = (
-            (True, "", None) if opts.dry_run else run_gate(n, a, gates, opts.gate_minutes, opts)
+        ok, reason, logf, gaps = (
+            (True, "", None, []) if opts.dry_run else run_gate(n, a, gates, opts.gate_minutes, opts)
         )
         if ok:
             log(f"phase {n}: gate passed")
             break
-        log(f"phase {n}: gate failed: {reason}")
-        if a > opts.fix_attempts:
-            return block(
-                n, m, f"gate still failing after {opts.fix_attempts} fix attempts: {reason}"
+        if reason:
+            log(f"phase {n}: gate failed: {reason}")
+            if a > opts.fix_attempts:
+                return block(
+                    n, m, f"gate still failing after {opts.fix_attempts} fix attempts: {reason}"
+                )
+            note = ""
+        else:
+            log(
+                f"phase {n}: everything else passed; {len(gaps)} target gap(s): "
+                + "; ".join(gaps)[:300]
+            )
+            if a > opts.target_attempts:
+                accept_gaps(n, m, gaps, logf, opts)
+                break
+            note = (
+                f"\n\nEverything in the gate passed except target shortfalls (the GAP lines). This is "
+                f"attempt {a} of {opts.target_attempts} at them: improve the method honestly (no changes "
+                "to the §19 protocol, query sets, truth handling or metric definitions to raise a number). "
+                "If they are still short after that, the autopilot records them in GAPS.md and moves on."
             )
         rel = f"docs/phases/phase-{n:02d}/{logf.name}"
         r = run_claude(
             opts,
-            f"/phase-auto fix {n} {rel}",
+            f"/phase-auto fix {n} {rel}{note}",
             d / "transcripts" / f"fix-{a}.jsonl",
             resume=m.get("build_session"),
             hours=opts.build_hours / 2,
@@ -669,7 +740,7 @@ def run_phase(n: int, opts, gates: dict) -> bool:
         if not r["ok"]:
             r = run_claude(
                 opts,
-                f"/phase-auto fix {n} {rel}",
+                f"/phase-auto fix {n} {rel}{note}",
                 d / "transcripts" / f"fix-{a}-fresh.jsonl",
                 hours=opts.build_hours / 2,
             )
@@ -677,14 +748,21 @@ def run_phase(n: int, opts, gates: dict) -> bool:
         save_meta(n, m)
 
     m.update(status="done", finished=now(), sha_after=head())
-    set_progress_status(n, f"done ({dt.date.today()}, autopilot gate passed)")
+    if gaps:
+        set_progress_status(
+            n, f"done with gaps ({dt.date.today()}, see docs/phases/phase-{n:02d}/GAPS.md)"
+        )
+    else:
+        set_progress_status(n, f"done ({dt.date.today()}, autopilot gate passed)")
     (d / "diffstat.txt").write_text(git("diff", "--stat", m["sha_before"], "HEAD").stdout)
     save_meta(n, m)
     write_index()
     commit_all(f"phase {n}: autopilot artifacts (plan reviews, gate logs, transcripts)")
     t = tag(f"phase-{n:02d}-done")
     cost = sum((s.get("cost_usd") or 0) for s in m["steps"])
-    log(f"=== Phase {n}: done, tagged {t}, estimated cost ${cost:.2f} ===")
+    log(
+        f"=== Phase {n}: done{' with gaps' if gaps else ''}, tagged {t}, estimated cost ${cost:.2f} ==="
+    )
     push(opts)
     return True
 
@@ -810,6 +888,10 @@ def cmd_run(opts) -> None:
         return
     t = tag(f"autopilot-start-{dt.datetime.now():%Y%m%d-%H%M}")
     opts.start_sha = head()
+    try:
+        opts.accepted = set(json.loads(ACCEPTED_FILE.read_text()).get("keys", []))
+    except (OSError, ValueError):
+        opts.accepted = set()
     opts.min_tests = None if opts.dry_run else collected_tests()
     log(
         f"Autopilot run: phases {start}..{opts.to}, mode {opts.mode}, rollback tag {t}, "
@@ -915,6 +997,12 @@ def main() -> None:
     p.add_argument("--redo", action="store_true", help="restart the --from phase from planning")
     p.add_argument("--review-rounds", type=int, default=3)
     p.add_argument("--fix-attempts", type=int, default=3)
+    p.add_argument(
+        "--target-attempts",
+        type=int,
+        default=3,
+        help="fix attempts for target shortfalls before they are recorded as gaps and the run continues",
+    )
     p.add_argument("--gate-minutes", type=int, default=60)
     p.add_argument("--build-hours", type=float, default=6.0)
     p = sub.add_parser("status")
