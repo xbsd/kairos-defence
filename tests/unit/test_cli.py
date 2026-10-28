@@ -15,15 +15,30 @@ COMMANDS = [
 runner = CliRunner()
 
 
+BUILT = ["gen"]  # real commands; the rest are stubs until their phase
+
+
 def test_help_lists_every_command() -> None:
     res = runner.invoke(app, ["--help"], terminal_width=200)
     assert res.exit_code == 0
     listed = set(re.findall(r"^│ ([a-z-]+)\s", res.output, flags=re.M))
     assert set(COMMANDS) <= listed
-    assert list(STUBS) == COMMANDS
+    assert [c for c in COMMANDS if c not in BUILT] == list(STUBS)
 
 
-@pytest.mark.parametrize("name", COMMANDS)
+def test_gen_help() -> None:
+    res = runner.invoke(app, ["gen", "--help"], terminal_width=200)
+    assert res.exit_code == 0
+    assert "--seed" in res.output and "--config" in res.output
+
+
+def test_gen_reports_config_errors(tmp_path) -> None:
+    res = runner.invoke(app, ["gen", "--config", str(tmp_path)])
+    assert res.exit_code == 1
+    assert "config error" in res.output
+
+
+@pytest.mark.parametrize("name", list(STUBS))
 def test_stub_names_its_phase(name: str) -> None:
     res = runner.invoke(app, [name, "--incident", "DEMO-BRAVO-0828", "--at", "90"])
     assert res.exit_code == 0, res.output

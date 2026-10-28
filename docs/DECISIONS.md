@@ -239,3 +239,142 @@ Where this file and the SPEC ever disagree, this file wins.
   Python code blocks inside Markdown and would rewrite the spec.
 - Why: the simplest option that satisfies the exit check without inventing behavior.
 - Consequences: each later phase replaces its stubs with real commands and keeps `test_cli.py` green.
+
+## D-023 · Calendar and weather model · 2026-10-28
+- Context: §8.2 gives the weather marginals and event rates but not how hours relate, which way the
+  wind direction points, or when exercises and visits happen.
+- Decision: hourly weather at 19:00 … 03:00 local (9 rows per region-night) from a per-night stream.
+  Wind speed has a Weibull(k = 2) marginal with mean 5 m/s through a Gaussian AR(1) copula (ρ = 0.7 per
+  hour). Direction is the direction the wind blows *from*, as a random walk (σ 10° per hour). Visibility
+  is a random walk clipped to 2–15 km. Values are rounded like a METAR (0.1 m/s, 1°, 0.1 km), and the
+  flight model uses the rounded table values as of the current hour. Exercises: Bernoulli(1/7) per base-night,
+  start 17:00–23:00, 2–6 h. VIP visits: Bernoulli(1/30), start 16:00–21:00, 4–8 h, so a visit always
+  overlaps its night. Shift change: 22:00–22:30 every night. Public events: Friday and Saturday nights,
+  p = 0.3 per public park, start 17:00–20:00, 3–5 h, uniform in the park.
+- Why: correlated hours avoid unphysical jumps while keeping the specified marginal; "blows from"
+  is the meteorological convention; using the rounded values means the flight model sees exactly what
+  the `weather` table shows.
+- Consequences: phase 3's as-of join (§11.1) returns the same wind the drone flew in.
+
+## D-024 · Pattern geometry conventions · 2026-10-28
+- Context: §8.4 names the patterns but not their orientation, start point or size.
+- Decision: `ccw` means counter-clockwise seen from above on a north-up map, so the bearing from the
+  target to the drone *decreases*. Perimeter runs go clockwise. Lawnmower and figure-eight axes follow
+  the target's long axis; for a square target (munitions) that is the installation's local x axis. The
+  figure-eight is a lemniscate of Gerono with half-length a = 2 × lobe radius, so its "size" for the
+  entry point is 2 × lobe radius. Size per pattern: orbit = radius; lawnmower = half the footprint
+  diagonal; hover = 0. For perimeter and transit with dips, size is the distance along the approach ray
+  to the buffered fence and to the fence respectively. The entry point is skipped when the launch is
+  already nearer the target than the entry point (P4's pushed-out launch). Transit with dips crosses
+  the base on the approach line and dips over the target and the next nearest assets. A dip's duration
+  comes from the 2.8 m/s nominal vertical rate, so the drone slows horizontally to make it.
+- Why: the simplest geometry that matches the spec text.
+- Consequences: **§9.4 says `loiter_dir` is `ccw` "if positive" (bearing rate). With bearings
+  clockwise from north, a positive rate is clockwise. Phase 3 must read it as `ccw` when the rate is
+  negative, or P1 (ccw) will be labeled `cw`.**
+
+## D-025 · Flight model details · 2026-10-28
+- Context: §8.3 fixes the physics (10 Hz, τ = 1.5 s, 45°/s, 4 m/s, 0.3 × wind) but not the guidance.
+- Decision: each flight is a timed reference in nominal seconds: takeoff → transit → pattern →
+  egress → landing. The time warp then scales time (durations × w, speeds ÷ w, shapes identical). A
+  smooth altitude wander is added (OU, σ 3 m, 30 s, clipped ±10 m). The reference is smoothed with a
+  2 s Gaussian on a 2 Hz grid and interpolated to 10 Hz. Guidance: desired velocity = reference
+  velocity + 0.3/s × horizontal error (0.4/s vertical). Caps: air speed ≤ 1.3 × cruise ÷ w + 2 m/s;
+  first-order lag; the turn cap rotates the velocity at most 4.5° per step above 0.5 m/s; climb
+  ≤ 4 m/s. Wind drift applies only when airborne. Nominal climb and descent is 2.8 m/s, so the reference
+  stays under 4 m/s after any allowed warp (≥ 0.7). Hover jitter, N(0, 1 m) per second, enters the
+  reference, not the output, so true paths obey the caps. Pauses (Poisson, 0.08 per minute, 5–20 s)
+  happen on transit and egress legs only. A `jitter: none` flight also gets no pauses.
+- Why: a timed reference makes time warp exact and keeps planted timing independent of wind. Smoothing
+  removes corners the dynamics cannot fly. 3.5 m/s climbs left warped flights still climbing into transit
+  (up to 22 m below the band). Pauses on the live flight could move its first contact past the window.
+- Consequences: all 1,869 flights simulate in about 13 s, batched 256 at a time; each row is independent of
+  its batch (tested).
+
+## D-026 · Actor plan details · 2026-10-28
+- Context: §8.2 and §8.5 leave several draws open.
+- Decision: launch jitter and recovery offsets are uniform in a disc. Radius ±8% applies to the orbit
+  radius and the figure-eight lobe radius. C1's radius comes from its override range instead. Copycats
+  fly the mimicked actor's pattern, altitude and cruise speed, but approach along their own launch
+  bearing. "Uniformly by month" is stratified: flight k falls in month ⌊(k + u)·M/n⌋. With
+  `target_override`, P1's launch is measured from the override target (CHARLIE: the flight line).
+  Each hobbyist flight is its own actor (`H-<BASE>-<YYMMDD>-<n>`, truth only), launches uniformly in
+  its base's park, recovers within 300 m, and lasts its drawn duration. With p = 0.3 it first flies to
+  a point 150 m inside the fence, skipped when that round trip takes over 80% of the flight. Hobbyist
+  counts per base-night use one uniform per night from a per-base stream, inverted through the Poisson CDF.
+- Why: the simplest reading of the spec. Unique hobbyist actors keep eval from treating unrelated
+  hobbyists as "the same actor" (D-009). The per-base count stream is about 6,600 fewer random-stream setups.
+- Consequences: 1,773 hobbyist flights (expected ≈1,779).
+
+## D-027 · Radar details · 2026-10-28
+- Context: §8.6 leaves range geometry, `quality` and outage timing open.
+- Decision: range is the slant range from the radar. `quality` is the detection probability at that
+  range. Planted `sensor_outage_s` is measured from launch. Dropouts run per second as alternating
+  geometric up (mean 33 s) and down (mean 6 s) spells, starting up. Each scan draws a fixed number of
+  variates, so what is visible never shifts the stream.
+- Why: stable streams and a quality value that means something.
+- Consequences: about 15% of in-range seconds are lost to dropouts (tested).
+
+## D-028 · Incident ids and boundaries · 2026-10-28
+- Context: §7.1 defines incident ids only for planted flights.
+- Decision: generated ids are `<BASE>-<YYMMDD>-<HHMM>` of the first detection in local time, with
+  `-2`, `-3` … on a clash, so they never reveal the actor. In phase 1 the radar is the only sensor, so
+  `start_ts`/`end_ts` are the first and last radar points.
+- Why: an operator names an incident by when it was first seen; the launch time is truth only (D-003).
+- Consequences: phase 2 must recompute `start_ts`/`end_ts` across radar, RF and Remote ID. That can
+  move a generated id's minute; ids are reassigned on every `gen`.
+
+## D-029 · Writers, truth paths and `memory.duckdb` · 2026-10-28
+- Context: §8.11 says `gen` recreates three DuckDB files, but phase 6 defines `memory.duckdb`.
+- Decision: `gen` deletes `memory.duckdb` and does not create it until phase 6. `sim/writers.py` is
+  the only module that opens the truth file for writing. Noiseless paths go to `true_paths` once per
+  second from launch (`t_s` = 0, 1, 2, …). `table_hashes` hashes each table's rows ordered by all columns.
+- Why: rule 2, and the smallest truth table that still lets eval check recovery and timing.
+- Consequences: none for app code.
+
+## D-030 · Track-point volume below §8.11 · 2026-10-28
+- Context: §8.11 expects ≈1 M track points at 1 Hz; the generator produces about 0.55 M.
+- Decision: keep the specified flight durations and radar model and report the real number.
+- Why: hobbyists are ≈95% of flights and last 180–720 s (mean ≈450 s). At a launch park's range
+  (2.2 km) the radar detects about 80% of scans, dropouts remove ≈15%, and nothing below 15 m is seen.
+  Reaching 1 M would mean stretching flights or inventing detections. The phase 1 exit check covers
+  incident and track counts, which are within ±15%.
+- Consequences: raise radar `rate_hz` (§8.11) to stress-test larger volumes.
+
+## D-031 · County Rd 12 bases come from the scenario · 2026-10-28
+- Context: D-006 says the road runs through P1's ALPHA, BRAVO and DELTA launch points, but P1 also
+  flies CHARLIE.
+- Decision: the road joins P1's nominal launch points at the bases where its planted flights target
+  its own target (no `target_override`). An actor with no planted flights would use all its bases in
+  the region.
+- Why: derives D-006's three bases from config instead of hard-coding them.
+- Consequences: changing CHARLIE's override would reroute the road.
+
+## D-032 · Public events never change hobbyist rates · 2026-10-28
+- Context: D-005 keeps public events in the six original parks, 5.7–8 km from the nearest base.
+- Decision: keep D-005 as written. The doubling rule (event within 5 km) and launching from an event
+  within 3 km are implemented but never trigger with the shipped world.
+- Why: changing it would move parks or redefine "near"; neither is needed for the demo.
+- Consequences: hobbyist volume is the plain Poisson rate.
+
+## D-033 · BRAVO's seeded layout puts the live orbit at T+94 · 2026-10-28
+- Context: D-003 expected the orbit about 78 s after first contact, assuming the template layout
+  (fence about 1.37 km from the fuel farm along the approach). At seed 42 the BRAVO fuel farm's asset
+  jitter (§8.1) is (+57, −121) m in the installation frame. The inbound leg from the 50 m mask edge to the
+  orbit is therefore 1.42 km instead of 1.20 km.
+- Decision: keep §8.1 as written. The live flight still meets both acceptance windows: first contact
+  21:39:51, about 47 m outside the fence, and orbit established T+94 s (allowed 65–100).
+- Why: the timing comes from geometry, not wind (the reference is timed), so capping wind would not
+  help. Changing the jitter rule or the seed would change the world to fit one beat.
+- Consequences: **open for phase 4 and the demo story (§1.2):** at T+90 the drone is still on its
+  final approach, so the top-3 beat would match on transit only. Options: (a) keep it and let phase 4
+  test T+90; (b) leave the P1 target assets at BRAVO un-jittered; (c) cap asset jitter at 1σ. Needs a
+  decision from the product owner.
+
+## D-034 · Data card and figures are committed · 2026-10-28
+- Context: phase 1's exit evidence is the data card and the sample figures.
+- Decision: commit `reports/data_card.md` and `reports/figures/pattern_*.png` (seven PNGs, 90 dpi,
+  ≈0.55 MB in all). Colors come from the dataviz reference palette; blue and orange pass the validator on the
+  light surface.
+- Why: reviewers can see the evidence without running the generator.
+- Consequences: rerunning `make data` rewrites them; commit them again when they change.

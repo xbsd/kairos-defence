@@ -3,7 +3,7 @@
 | Phase | Title | Status | Exit check evidence | Date |
 |---|---|---|---|---|
 | 0 | Scaffold | done | Exit check exit 0 in 12 s: ruff clean; pytest 89 passed; web lint, typecheck, Vitest 5 passed; help lists 14 commands; web build 223 kB JS | 2026-10-28 |
-| 1 | World, flights and radar | not started | | |
+| 1 | World, flights and radar | done | Exit check exit 0 in 46 s from `make clean`: 1,869 incidents and 1,869 tracks (≈1,900 / ≈1,950, within ±15%); figures for all 7 patterns; 53 selected tests pass; live first contact 21:39:51, orbit T+94 s | 2026-10-28 |
 | 2 | Swarms, RF, Remote ID, reports and assessments | not started | | |
 | 3 | Features, windows, Euclidean baseline and eval skeleton | not started | | |
 | 4 | DTW matcher and fusion model | not started | | |
@@ -24,6 +24,50 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Open issues: …
 - Next: …
 -->
+
+### 2026-10-28 · Phase 1
+- Built: `store/ddl.py` (§7.1 and §7.3 DDL, column lists). `sim/`: `world.py` (sites, jittered
+  assets, sensors, launch parks, County Rd 12 per D-006/D-031, push-out rule, terrain mask, world
+  tables), `calendar.py` (549 nights, hourly weather, base and public events, D-023), `patterns.py`
+  (all seven patterns, D-024), `kinematics.py` (timed reference, warp, pauses, batched 10 Hz model,
+  D-025), `plan.py`, `actors.py` (hobbyists, P2–P6, C1, C2, D-026), `scenario.py` (six P1 flights,
+  live timing helpers), `sensors.py` (radar, D-027), `generate.py` (pipeline, incident ids D-028),
+  `writers.py` (the only truth writer, table hashes, D-029), `datacard.py` (data card and figures).
+  `kairos-defense gen --seed --config --figures/--no-figures` is real, with a rich summary.
+- Tests: `test_world`, `test_calendar`, `test_patterns`, `test_kinematics` (speed, climb and turn
+  caps; band ± 15 m; orbit ±10%; warp scales time not shape; no pauses in patterns; batch
+  independence; wind drift), `test_actors`, `test_sensors`, `test_scenario` (planted flights, road
+  within 250 m, outage, live first contact and orbit windows), `test_generate`, `test_determinism`
+  (three-week window twice ⇒ identical SHA-256 per table; extra actor changes no other flight;
+  other seed differs), `tests/slow/test_full_generation.py` (full volumes and full determinism).
+- Exit check (after `make clean`):
+  ```bash
+  make data && uv run pytest tests/unit -q -k "world or kinematics or patterns or scenario or determinism"
+  ```
+  → exit 0, 45.6 s wall. Key lines:
+  ```text
+  kairos-defense gen --seed 42
+  incidents 1,869 (≈1,900) · tracks 1,869 (≈1,950) · track_points 541,913 (≈1,000,000, D-030)
+  flights flown 1,869 · flights not detected 0
+  live first contact 21:39:51 (21:39:30-21:40:30) · live orbit established T+94 s (T+65-100 s)
+  elapsed 23.6 s
+  53 passed, 128 deselected in 18.32s
+  ```
+  `reports/data_card.md`: incidents −1.6% and tracks −4.2% against §8.11 (within ±15%);
+  `reports/figures/pattern_{orbit,lawnmower,figure8,perimeter,hover,transit_dips,random_walk}.png`.
+  `make check`: ruff clean, 181 passed (3 slow deselected), web lint, typecheck and Vitest pass.
+  `make test-all` slow tests: 3 passed in 46 s (full volumes; two full runs give identical hashes).
+- Figures reviewed by eye. Fixed: captions collided with tick labels, radar dots hid the true path,
+  and the legend overlapped the axis label. Palette: dataviz reference blue and orange, validator passes.
+- Open issues:
+  - **D-033 (needs a decision):** BRAVO's seeded fuel-farm jitter puts the live orbit at T+94 s, not
+    ≈T+80 s. That passes the 65–100 s window, but the T+90 top-3 beat would match on transit only.
+  - D-024: phase 3 must read §9.4's `loiter_dir` as `ccw` when the bearing rate is *negative*.
+  - D-028: phase 2 must recompute incident `start_ts`/`end_ts` across radar, RF and Remote ID.
+  - D-030: track points ≈0.54 M against ≈1 M in §8.11 (by design; incident and track counts are on target).
+  - Phase 0's commit lived on branch `claude/charming-einstein-iyqxsd`, not `main`. This branch
+    fast-forwarded onto it, so merging this branch brings phase 0 along.
+- Next: phase 2 (swarms, RF, Remote ID, reports and assessments).
 
 ### 2026-10-28 · Phase 0
 - Built: `pyproject.toml` (uv, src layout, §3 dependencies, script `kairos-defense`), `uv.lock`,
