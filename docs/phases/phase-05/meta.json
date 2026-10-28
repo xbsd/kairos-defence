@@ -1,0 +1,41 @@
+{
+  "phase": 5,
+  "status": "done",
+  "steps": [
+    {
+      "step": "plan",
+      "at": "2026-10-28 19:20:53",
+      "ok": true,
+      "session_id": "dry-run",
+      "cost_usd": 0.0,
+      "minutes": 0,
+      "permission_denials": 0
+    },
+    {
+      "step": "review-1",
+      "at": "2026-10-28 19:20:53",
+      "ok": true,
+      "session_id": "dry-run",
+      "cost_usd": 0.0,
+      "minutes": 0,
+      "permission_denials": 0
+    },
+    {
+      "step": "build",
+      "at": "2026-10-28 19:20:53",
+      "ok": true,
+      "session_id": "dry-run",
+      "cost_usd": 0.0,
+      "minutes": 0,
+      "permission_denials": 0
+    }
+  ],
+  "started": "2026-10-28 19:20:53",
+  "sha_before": "c9366273b37a060acd64d0236c75c30d68e84de3",
+  "plan_session": "dry-run",
+  "plan_approved": true,
+  "build_session": "dry-run",
+  "built": true,
+  "finished": "2026-10-28 19:20:53",
+  "sha_after": "c9366273b37a060acd64d0236c75c30d68e84de3"
+}
