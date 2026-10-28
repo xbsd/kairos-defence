@@ -26,6 +26,33 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Next: …
 -->
 
+### 2026-10-28 · Phase 1 (documentation backfill, autopilot)
+- Built: no code. `docs/phases/phase-01/PLAN.md` (as built, from `1a13664`), `REPORT.md` and
+  `EXIT_CHECK.md`, plus `src/kairos_defense/sim/README.md` (phases 1 and 2). The root README's Status
+  links the report. D-065.
+- Exit check rerun at `3b0f06c` on the dev laptop, from `make clean`:
+  `make data && uv run pytest tests/unit -q -k "world or kinematics or patterns or scenario or determinism"`
+  → exit 0 in 12.2 s.
+  - Results: incidents 1,878 (−1.2%) and tracks 1,904 (−2.4%), within ±15% of §8.11. All seven
+    pattern figures written. 62 passed.
+  - Live first contact 21:40:06 and orbit T+79 s.
+  - `reports/data_card.md` came out byte-identical to the committed card.
+  - Differences from phase 1's 1,869 / 1,869, 53 tests, 21:39:51 and T+94 s: phase 2 added 9 swarm
+    incidents and 35 drone tracks, and D-033 (b) moved BRAVO's fuel farm. The `-k` filter now also
+    matches 9 phase 2 tests.
+  - `make check`: 367 passed. `make test-all`: 374 passed in 44 s. Phase 1's own files: 93 fast and
+    4 slow passed.
+  - `make index` and the web build then restored phase 3's working state. Index counts are identical
+    to phase 3's exit check.
+- Open issues:
+  - **D-065:** the figures set no font, so `make data` on the laptop re-renders all nine PNGs in
+    DejaVu Sans. The data is identical. The laptop renders are committed (D-034). The next phase
+    that touches `sim/` should pin a font.
+  - The web CSS bundle is 10.77 kB against 10.45 kB in phase 0's backfill. The likely cause is
+    Tailwind scanning `web/README.md`; this is harmless, and phase 7 may exclude docs with
+    `@source not`.
+- Next: backfills for phases 2 and 3 (the `features/` and `match/` READMEs), then phase 4.
+
 ### 2026-10-28 · Phase 0 (documentation backfill, autopilot)
 - Built: no code. `docs/phases/phase-00/PLAN.md` (as built, from `f9258de`), `REPORT.md` and
   `EXIT_CHECK.md`, plus READMEs for `src/kairos_defense/`, `config/`, `store/`, `eval/` and `web/`,

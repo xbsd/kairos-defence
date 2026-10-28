@@ -830,3 +830,27 @@ Where this file and the SPEC ever disagree, this file wins.
 - Consequences: a fresh machine needs a C compiler (Xcode command-line tools or gcc) for `uv sync`; on
   macOS also `brew install libomp`, or dtaidistance builds without OpenMP. README prerequisites should
   say so (phase 10).
+
+## D-065 · Phase 1 documentation backfill; figure fonts depend on the machine · 2026-10-28
+- Context: `phase-auto backfill 1` reconstructs phase 1's documents (D-061 did the same for phase 0)
+  and reruns the exit check on the dev laptop. `make data` there produced a `reports/data_card.md`
+  byte-identical to the committed one (written on the cloud machine). It also rewrote all nine
+  committed PNGs (seven pattern figures, two swarm figures): the pixels differ and the files are 12 to
+  18% smaller. Compared side by side, the plotted paths, points and markers are the same; only the
+  typeface differs. `sim/figures.py` sets no font family, so matplotlib's default `sans-serif` list
+  applies. That is DejaVu Sans on the laptop and a different sans-serif on the cloud machine.
+- Decision: `docs/phases/phase-01/PLAN.md` is marked "as built" and reconstructed from `1a13664`,
+  PROGRESS.md and D-023 to D-034. The exit check was rerun at HEAD (`3b0f06c`) from `make clean`,
+  and today's output is recorded beside the original numbers. `make index` and the web build then
+  restored the working state. `src/kairos_defense/sim/README.md` describes the package as it is now,
+  covering phases 1 and 2. Following D-034 ("commit them again when they change"), the laptop's
+  figure renders are committed. No code changes.
+- Why: the autopilot runs every later phase on this laptop, and phase 9's gate runs `make clean` and
+  `make data`, so the laptop renders are what the repository will hold anyway. Committing them now
+  keeps font-only churn out of later phase commits. Pinning a font would be a code change, which a
+  backfill may not make.
+- Consequences: follow-up for the next phase that touches `sim/`: set an explicit font family in
+  `sim/figures.py`, for example DejaVu Sans, which matplotlib bundles. The figures will then be
+  byte-stable across machines and can join the determinism checks. The `sim` README now exists, so
+  only the `features/` and `match/` READMEs remain for D-061's documentation check; phase 3's
+  backfill writes them.
