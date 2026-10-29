@@ -1,0 +1,48 @@
+ README.md                                   | 121 ++---
+ docs/DECISIONS.md                           |  67 +++
+ docs/ONE_PAGER.md                           |  61 +++
+ docs/PROGRESS.md                            |  29 +-
+ docs/ROLLBACK.md                            | 119 +++++
+ docs/USER_GUIDE.md                          | 798 ++++++++++++++++++++++++++++
+ docs/guide/img/case-board-known-now.png     | Bin 0 -> 155616 bytes
+ docs/guide/img/case-board-known-then.png    | Bin 0 -> 90214 bytes
+ docs/guide/img/director-01-detection.png    | Bin 0 -> 288334 bytes
+ docs/guide/img/director-02-recording.png    | Bin 0 -> 313033 bytes
+ docs/guide/img/director-03-recognition.png  | Bin 0 -> 206927 bytes
+ docs/guide/img/director-04-time-warp.png    | Bin 0 -> 543202 bytes
+ docs/guide/img/director-05-forecast.png     | Bin 0 -> 531812 bytes
+ docs/guide/img/director-06-recall.png       | Bin 0 -> 550515 bytes
+ docs/guide/img/director-07-known.png        | Bin 0 -> 104000 bytes
+ docs/guide/img/director-08-evidence.png     | Bin 0 -> 122683 bytes
+ docs/guide/img/director-09-encore.png       | Bin 0 -> 325137 bytes
+ docs/guide/img/eval-1440x900.png            | Bin 0 -> 87998 bytes
+ docs/guide/img/eval.png                     | Bin 0 -> 148427 bytes
+ docs/guide/img/evidence.png                 | Bin 0 -> 110784 bytes
+ docs/guide/img/explainer.png                | Bin 0 -> 185249 bytes
+ docs/guide/img/live-watch-t090-1440x900.png | Bin 0 -> 450079 bytes
+ docs/guide/img/live-watch-t090.png          | Bin 0 -> 465747 bytes
+ docs/guide/img/live-watch-t120.png          | Bin 0 -> 571568 bytes
+ docs/guide/img/shift-delta.png              | Bin 0 -> 148992 bytes
+ docs/guide/img/shortcuts.png                | Bin 0 -> 61847 bytes
+ docs/guide/img/swarm-view.png               | Bin 0 -> 311849 bytes
+ docs/phases/AUTOPILOT.log                   |   1 +
+ docs/phases/phase-09/meta.json              |   4 +-
+ docs/phases/phase-10/EXIT_CHECK.md          | 145 +++++
+ docs/phases/phase-10/PLAN.md                | 117 ++++
+ docs/phases/phase-10/PLAN_REVIEW-1.json     |  18 +
+ docs/phases/phase-10/REPORT.md              | 107 ++++
+ docs/phases/phase-10/meta.json              |  23 +
+ src/kairos_defense/README.md                |   7 +-
+ src/kairos_defense/live/README.md           |   7 +-
+ src/kairos_defense/sim/README.md            |   9 +-
+ tests/unit/test_docs.py                     | 112 ++++
+ web/README.md                               |  11 +-
+ web/e2e/guide.spec.ts                       | 207 ++++++++
+ web/src/lens/TimeWarpLens.tsx               | 153 +++---
+ web/src/panels/LensPanel.tsx                |   2 +-
+ web/src/three/Drone.tsx                     |   2 +-
+ web/src/three/Ghosts.tsx                    |  31 +-
+ web/src/three/Installation.tsx              |  11 +-
+ web/src/three/ghostMath.ts                  |  35 ++
+ web/tests/ghostMath.test.ts                 |  19 +
+ 47 files changed, 2063 insertions(+), 153 deletions(-)
