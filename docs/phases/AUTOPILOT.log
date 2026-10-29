@@ -224,3 +224,5 @@ def rep(path, a, b):
 [2026-10-29 01:27:37]   … running 69 min. last tool: Read /Users/ndkx/work/kairos_defence/reports/figures/ui/phase07-t045-1920x1080.png
 [2026-10-29 01:30:37]   … running 72 min. last tool: Bash grep -E "dist/|built in|computed|Running 19" data/cache/exit7/e2e_2.log | head -
 [2026-10-29 01:33:37]   … running 75 min. last tool: Bash until tail -1 data/cache/exit7/test_all.txt 2>/dev/null | grep -qE "passed|faile
+[2026-10-29 01:34:27] phase 7: gate attempt 1
+[2026-10-29 01:37:25] phase 7: gate passed

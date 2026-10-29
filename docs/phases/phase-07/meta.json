@@ -1,6 +1,6 @@
 {
   "phase": 7,
-  "status": "running",
+  "status": "done",
   "steps": [
     {
       "step": "plan",
@@ -19,10 +19,23 @@
       "cost_usd": 1.3069942,
       "minutes": 3.0,
       "permission_denials": 0
+    },
+    {
+      "step": "build",
+      "at": "2026-10-29 01:34:27",
+      "ok": true,
+      "session_id": "639de000-fe93-4a2f-86cc-f061b422adea",
+      "cost_usd": 37.92809359999999,
+      "minutes": 75.9,
+      "permission_denials": 0
     }
   ],
   "started": "2026-10-29 00:00:52",
   "sha_before": "a7f7bf45c9a9adfa3932c93c4d89576b090228a8",
   "plan_session": "153052a1-878c-41b0-9b0a-77c02b24dbe0",
-  "plan_approved": true
+  "plan_approved": true,
+  "build_session": "639de000-fe93-4a2f-86cc-f061b422adea",
+  "built": true,
+  "finished": "2026-10-29 01:37:25",
+  "sha_after": "6a20bd93982b0f5dffaefffe84a1cbdaa5ee3d69"
 }
