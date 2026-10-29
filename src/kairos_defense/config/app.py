@@ -18,6 +18,7 @@ class PathsConfig(StrictModel):
     models: Path
     reports: Path
     exports: Path
+    cache: Path  # downloaded models, e.g. FastEmbed (D-084)
 
     @model_validator(mode="after")
     def _distinct_dbs(self) -> PathsConfig:

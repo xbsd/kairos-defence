@@ -7,7 +7,7 @@
 | 2 | Swarms, RF, Remote ID, reports and assessments | done | Exit check exit 0 in 31 s from `make clean`: 1,878 incidents (9 swarms), 956 reports, 1,876 assessments; planted DELTA report, wrong label and both swarm events present; 109 selected tests pass; live orbit T+79 s (D-033 b) | 2026-10-28 |
 | 3 | Features, windows, Euclidean baseline and eval skeleton | done | Exit check exit 0 in 87 s after `make clean data`: 1,898 history tracks indexed (6 live skipped), 136,266 windows; baseline Recall@5 0.435, MRR 0.302, time to match 26%, copycat-first 57%, prefilter p95 83 ms; demo first contact and orbit pass | 2026-10-28 |
 | 4 | DTW matcher and fusion model | done with gaps (2026-10-28, see docs/phases/phase-04/GAPS.md) | `make index`, `make models` (62 queries, 123,404 pairs, τ 1.645, 44 s), `make eval`: Recall@5 1.000, DTW lift +0.522, copycat-first 0%, time to match 96%, p95 prefilter 30 / DTW (500) 81 / end to end 149 ms; first contact and orbit pass; live top 3 misses by one place (DELTA 1, ALPHA-0303 2, CHARLIE 3, ALPHA-0502 4; soft gap, D-078); `eval --baseline` written; `check_targets.py 4` 8 PASS, 1 GAP; 431 fast, 441 in all | 2026-10-28 |
-| 5 | Report recall and analog forecast | not started | | |
+| 5 | Report recall and analog forecast | not started | `make index`: 956 reports with FTS, 82 `report_clues`; `make eval`: report linkage 1.000 (65/65), forecast median 340 m / P80 495 m at T = 90 s; demo DELTA report rank 1 and forecast 139 m at T+105 pass; `forecast --at 105` exit 0 (2,164 m northwest, County Rd 12 in the zone); `check_targets.py 5` 12 PASS, 1 WARN (accepted top 3); 497 fast, 509 in all | 2026-10-28 |
 | 6 | Case memory (Kairos-lite) | not started | | |
 | 7 | Streaming API and Command Center foundation | not started | | |
 | 8 | Command Center: the memorable moments | not started | | |
@@ -25,6 +25,43 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Open issues: …
 - Next: …
 -->
+
+### 2026-10-28 · Phase 5 (autopilot build)
+- Built: report recall and the analog forecast (SPEC §12, §13).
+  - `recall/embed.py`: the hashing embedder (offline default, D-083), a FastEmbed adapter that
+    refuses to start unless the model is cached, and `kairos-defense fetch-models`, the only
+    downloader (D-084, new key `paths.cache`).
+  - `make index` also builds LanceDB `reports` (FTS on `text` with positions) and DuckDB
+    `report_clues` (D-085, D-089).
+  - `recall/search.py`: the §12.3 filter plus no look-ahead (D-082), LanceDB native hybrid with an
+    RRF tie-break by `report_id`, and the §12.5 fallback, identical row for row (D-085).
+  - `recall/clues.py`: vehicles and gazetteer roads with spans, linked across matches and to the
+    forecast zone (D-086; the color is optional because the paperwork writes "a motorcycle").
+  - `forecast/analog.py`: §13 steps 1 to 7 (D-087; j* uses the shape distance's scaling).
+    `forecast.anchor: match_kind`, adopted by the rule registered first in D-090 (training split:
+    median 311 m against 502 m, P80 492 m against 1,000 m).
+  - `eval/downstream.py`: forecast error and report linkage (D-088); two demo assertions;
+    `eval/forecast_choice.py`; real `recall`, `forecast` and `fetch-models` commands (D-091).
+- Exit check (`docs/phases/phase-05/EXIT_CHECK.md`), dev laptop:
+  - `make index` 7.2 s: 956 reports indexed, `report_clues` 82 rows (equal to the generator's
+    vehicle and gazetteer-road clues), `hashing-v1-384`.
+  - `make eval` 36 s: report linkage 1.000 (65 of 65), forecast median 340 m / P80 495 m at
+    T = 90 s; demo `live_rank1_report_for` pass (DELTA report rank 1, County Rd 12 linked to the
+    zone) and `forecast_error_max_m` pass (139 m at T+105). Phase 4 metrics unchanged; no
+    regression. Exit 1 only for the accepted `live_top3_incidents` row.
+  - `forecast --incident DEMO-BRAVO-0828 --at 105` exit 0: 2,164 m at 320° (northwest) of BRAVO's
+    fuel farm, radius 370 m, County Rd 12 crosses the zone. `recall --at 120` exit 0.
+  - `check_targets.py 5`: 12 PASS, 1 WARN (accepted), exit 0. `eval --baseline` refreshed.
+  - `make check` 497 passed (443 at the start); `make test-all` 509 passed in 3 min 12 s.
+- Deviations: CLAUDE.md's `create_fts_index` note (deprecated), §12.4 vehicle form, §13 step 4
+  while tonight reads the fence; the plan's colored-only vehicles and j* alignment. D-082 to D-091.
+- Open issues:
+  - Report linkage is near-trivial on this data (at most 4 reports per incident in a filter
+    window, k = 5); the DELTA rank-1 beat is structural (one report in its window).
+  - The forecast median's margin is 60 m; the demo forecast uses two rotated P3 analogs, since
+    only 2 of 5 earlier P1 flights have a known recovery.
+  - FastEmbed tested with a fake module only; the phase 4 top-3 gap carries over.
+- Next: phase 6 (case memory).
 
 ### 2026-10-28 · Phase 4 (gate fix attempt 3, autopilot)
 - Gate 3: the same single GAP, `demo:live_top3_incidents`.

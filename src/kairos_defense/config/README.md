@@ -72,12 +72,22 @@ Phase 4 additions and changed values in `scoring.yaml` (D-068):
 - `dtw.normalize`: `series` (§9.3), `floored` or `fixed` (the default since the first gate fix,
   D-079): how the DTW shape distance scales each channel. Changing it needs `make models`.
 
+Phase 5 additions:
+
+- `app.yaml` `paths.cache` (`data/cache`, resolved against the project root like the other paths):
+  where `kairos-defense fetch-models` puts the optional FastEmbed model (D-084). Required.
+- `scoring.yaml` `forecast.anchor`: `target` (§13 as written: tonight's target centroid) or
+  `match_kind` (while tonight's target reads the fence, anchor each analog on tonight's asset of
+  the analog's own kind). Ships `match_kind`, chosen by the pre-registered training-split rule
+  (D-090).
+
 ## Tests
 
-- `tests/unit/test_config.py`, 40 tests: the shipped files load; decision values survive (D-003,
-  D-004, D-006); YAML 1.2 booleans; root-relative paths; frozen models; 33 invalid variants rejected
+- `tests/unit/test_config.py`, 42 tests: the shipped files load; decision values survive (D-003,
+  D-004, D-006); YAML 1.2 booleans; root-relative paths; frozen models; 35 invalid variants rejected
   (phase 4 added `channel_scales` of the wrong length or not positive, and unknown
-  `windows.normalize` and `dtw.normalize` values); missing and unparsable files reported.
+  `windows.normalize` and `dtw.normalize` values; phase 5 an unknown `forecast.anchor` and a
+  missing `paths.cache`); missing and unparsable files reported.
 - Run: `uv run pytest tests/unit/test_config.py -q`.
 
 ## Gotchas
@@ -96,3 +106,4 @@ Phase 4 additions and changed values in `scoring.yaml` (D-068):
 - Phase 4: `features.channel_scales`, `windows.normalize`; prefilter widened to 10,000 windows and
   500 tracks (D-068). Changing either vector key needs `make index`.
 - Phase 4 gate fix 1: `dtw.normalize` (D-079).
+- Phase 5: `paths.cache` (D-084) and `forecast.anchor` (D-090).

@@ -6,6 +6,7 @@ paths:
   models: models
   reports: reports
   exports: exports
+  cache: data/cache                 # downloaded embedding models (fetch-models), D-084
 embeddings:
   provider: hashing                 # hashing | fastembed
   dim: 384

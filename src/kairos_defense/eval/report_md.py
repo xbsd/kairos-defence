@@ -15,6 +15,13 @@ def _ms(v) -> str:
     return "-" if v is None else f"{v:.0f}"
 
 
+def _m(v) -> str:
+    """Meters: ``-`` when missing, ``inf`` when no forecast."""
+    if v is None:
+        return "-"
+    return "inf" if v == float("inf") else f"{v:,.0f} m"
+
+
 def _intro(s: dict) -> list[str]:
     day = s["created_at"][:10]
     if s["method"] == "dtw":
@@ -66,8 +73,11 @@ def markdown(s: dict, figure: str) -> str:
         f"| Copycat-first rate at T = 120 s | {_fmt(m['copycat_first_t120'], True)} | ≤ 5% |",
         f"| Recall@5 at T = 120 s, copycat queries | {_fmt(m['recall_at_5_t120_copycats'])} "
         "| report only |",
-        "| Report linkage | - | ≥ 0.70 (phase 5) |",
-        "| Forecast error at T = 90 s | - | median ≤ 400 m (phase 5) |",
+        f"| Report linkage (T = 120 s, top 3 matched incidents, k = 5) | "
+        f"{_fmt(m.get('report_linkage'))} ({m.get('report_linkage_retrieved', 0)} of "
+        f"{m.get('report_linkage_relevant', 0)} true-clue reports) | ≥ 0.70 |",
+        f"| Forecast error at T = 90 s, median | {_m(m.get('forecast_median_t90_m'))} | ≤ 400 m |",
+        f"| Forecast error at T = 90 s, P80 | {_m(m.get('forecast_p80_t90_m'))} | report only |",
         "| Swarm top-1 | - | ≥ 0.80 (phase 9) |",
         "",
         "## Recall by time since first contact",
@@ -100,6 +110,7 @@ def markdown(s: dict, figure: str) -> str:
     for stage, (label, budget) in names.items():
         lines.append(f"| {label} | {_ms(m.get(f'latency_{stage}_p50_ms'))} | "
                      f"{_ms(m.get(f'latency_{stage}_p95_ms'))} | {budget} |")  # fmt: skip
+    lines += _downstream(m)
     lines += ["", "Latency is reported, never gating (D-060).", "",
               "## Demo assertions (`scenario_demo.yaml`)", "",
               "| Expectation | Expected | Observed | Status |", "|---|---|---|---|"]  # fmt: skip
@@ -109,3 +120,28 @@ def markdown(s: dict, figure: str) -> str:
               "rule 2); every search is filtered to tracks that started before the query "
               "(rule 3).", ""]  # fmt: skip
     return "\n".join(lines)
+
+
+def _downstream(m: dict) -> list[str]:
+    """The "Forecast and recall" section (phase 5, D-088)."""
+    return [
+        "",
+        "## Forecast and recall (§12, §13; probers)",
+        "",
+        "| Measure | T = 90 s | T = 120 s |",
+        "|---|---:|---:|",
+        f"| Forecast error, median | {_m(m.get('forecast_median_t90_m'))} | "
+        f"{_m(m.get('forecast_median_t120_m'))} |",
+        f"| Forecast error, P80 | {_m(m.get('forecast_p80_t90_m'))} | "
+        f"{_m(m.get('forecast_p80_t120_m'))} |",
+        f"| Queries without a forecast (no analog with a known recovery) | "
+        f"{m.get('forecast_missing_t90', '-')} | {m.get('forecast_missing_t120', '-')} |",
+        f"| Report linkage | - | {_fmt(m.get('report_linkage'))} |",
+        "",
+        "Forecast error: §13 center to the true recovery point (truth). Report linkage: the share "
+        "of the top 3 matched incidents' reports with a true clue, filed by T, that the hybrid "
+        "search returns in its top 5 for that match (D-088). Forecast p50 / p95 "
+        f"{_ms(m.get('latency_forecast_p50_ms'))} / {_ms(m.get('latency_forecast_p95_ms'))} ms; "
+        f"recall per matched incident {_ms(m.get('latency_recall_p50_ms'))} / "
+        f"{_ms(m.get('latency_recall_p95_ms'))} ms (outside the matcher's timed span).",
+    ]

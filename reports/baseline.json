@@ -2,8 +2,8 @@
  "method": "dtw",
  "model_version": "fusion-v1",
  "candidate_tracks": 500,
- "created_at": "2026-10-29T01:47:20",
- "elapsed_s": 34.9,
+ "created_at": "2026-10-29T03:02:38",
+ "elapsed_s": 35.6,
  "metrics": {
   "recall_at_5_t120": 1.0,
   "recall_at_5_t120_baseline": 0.4782608695652174,
@@ -13,14 +13,28 @@
   "copycat_first_t120": 0.0,
   "recall_at_5_t120_copycats": 1.0,
   "median_time_to_match_s": 45.0,
-  "latency_query_build_p50_ms": 3.8834590086480603,
-  "latency_query_build_p95_ms": 4.241241392446682,
-  "latency_prefilter_p50_ms": 27.174457994988188,
-  "latency_prefilter_p95_ms": 29.744999608374197,
-  "latency_dtw_p50_ms": 31.442792009329423,
-  "latency_dtw_p95_ms": 55.56106659932993,
-  "latency_end_to_end_p50_ms": 95.71433399105445,
-  "latency_end_to_end_p95_ms": 123.91017478948925
+  "latency_query_build_p50_ms": 3.8066660054028034,
+  "latency_query_build_p95_ms": 4.157641404890454,
+  "latency_prefilter_p50_ms": 26.901416989858262,
+  "latency_prefilter_p95_ms": 29.471692006336525,
+  "latency_dtw_p50_ms": 31.575499990140088,
+  "latency_dtw_p95_ms": 55.71589979517739,
+  "latency_end_to_end_p50_ms": 95.15966600156389,
+  "latency_end_to_end_p95_ms": 122.25097499904223,
+  "forecast_median_t90_m": 340.44519747018904,
+  "forecast_p80_t90_m": 494.75183136355906,
+  "forecast_queries_t90": 23,
+  "forecast_missing_t90": 0,
+  "forecast_median_t120_m": 346.4726082388439,
+  "forecast_p80_t120_m": 531.5928189259681,
+  "forecast_missing_t120": 0,
+  "report_linkage": 1.0,
+  "report_linkage_retrieved": 65,
+  "report_linkage_relevant": 65,
+  "latency_forecast_p50_ms": 8.102708503429312,
+  "latency_forecast_p95_ms": 8.814093245746335,
+  "latency_recall_p50_ms": 4.661291667919916,
+  "latency_recall_p95_ms": 5.946873600866334
  },
  "counts": {
   "prober_queries": 23,
@@ -136,8 +150,6 @@
   }
  },
  "pending": {
-  "report_linkage": "phase 5",
-  "forecast_error_t90": "phase 5",
   "swarm_top1": "phase 9"
  },
  "demo": [
@@ -161,15 +173,15 @@
   },
   {
    "key": "live_rank1_report_for",
-   "expected": "P1-DELTA-260419",
-   "observed": "-",
-   "status": "pending (phase 5)"
+   "expected": "P1-DELTA-260419 among the top 3 matched incidents, its own report rank 1 (T+120)",
+   "observed": "R-P1-DELTA-260419-1 rank 1 of 1 for P1-DELTA-260419 (match #1, score 0.0328); clues: white pickup; County Rd 12 (County Rd 12 runs through tonight's predicted zone.)",
+   "status": "pass"
   },
   {
    "key": "forecast_error_max_m",
    "expected": "<= 400 m at T+105 s",
-   "observed": "-",
-   "status": "pending (phase 5)"
+   "observed": "139 m (radius 370 m; analogs P1-ALPHA-260303, HOTEL-250818-2126, FOXTROT-251215-2125; roads County Rd 12)",
+   "status": "pass"
   },
   {
    "key": "swarm_top1",

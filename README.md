@@ -11,16 +11,22 @@ bitemporal, tamper-evident case memory, built on DuckDB and LanceDB. **Synthetic
 | 1 | World, flights and radar | done | [report](docs/phases/phase-01/REPORT.md) |
 | 2 | Swarms, RF, Remote ID, reports and assessments | done | [report](docs/phases/phase-02/REPORT.md) |
 | 3 | Features, windows, Euclidean baseline and eval skeleton | done | [report](docs/phases/phase-03/REPORT.md) |
-| 4 | DTW matcher and fusion model | built; awaiting the autopilot gate (one soft gap: live top 3) | [report](docs/phases/phase-04/REPORT.md) |
-| 5 to 10 | Report recall through the user guide | not started | `docs/SPEC.md` §20, `docs/phases/PHASE_10.md` |
+| 4 | DTW matcher and fusion model | done with one accepted gap (live top 3, [GAPS](docs/phases/phase-04/GAPS.md)) | [report](docs/phases/phase-04/REPORT.md) |
+| 5 | Report recall and analog forecast | built; awaiting the autopilot gate | [report](docs/phases/phase-05/REPORT.md), [exit check](docs/phases/phase-05/EXIT_CHECK.md) |
+| 6 to 10 | Case memory through the user guide | not started | `docs/SPEC.md` §20, `docs/phases/PHASE_10.md` |
 
 Works today: `make check`, `make data` (seeded synthetic world, flights, swarms, sensors, paperwork
-and truth), `make index`, `make models` (fusion model and DTW calibration, about 45 s), `make eval`
-(DTW + fusion: Recall@5 1.000, DTW lift +0.522, copycat-first 0%) and
+and truth), `make index` (tracks, windows, and the report index with full-text search), `make
+models` (fusion model and DTW calibration, about 45 s), `make eval` (DTW + fusion: Recall@5 1.000,
+DTW lift +0.522, copycat-first 0%, report linkage 1.000, forecast median 340 m at T = 90 s),
 `uv run kairos-defense match --incident DEMO-BRAVO-0828 --at 90` (DTW by default; `--method
-euclidean` for the baseline). The web app is a placeholder Live watch screen. Each phase's plan,
-report and exit-check evidence is in `docs/phases/phase-NN/`, and the per-session log is in
-`docs/PROGRESS.md`.
+euclidean` for the baseline), `uv run kairos-defense forecast --incident DEMO-BRAVO-0828 --at 105`
+(the recovery zone, 2.2 km northwest of BRAVO's fuel farm, with County Rd 12 crossing it) and
+`uv run kairos-defense recall --incident DEMO-BRAVO-0828 --at 120` (the DELTA report at rank 1,
+clues linked). Everything runs offline; `kairos-defense fetch-models` is the only command that
+downloads (an optional embedding model). The web app is a placeholder Live watch screen. Each
+phase's plan, report and exit-check evidence is in `docs/phases/phase-NN/`, and the per-session log
+is in `docs/PROGRESS.md`.
 
 ## Run it (after Phase 9)
 

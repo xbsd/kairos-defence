@@ -82,3 +82,34 @@ def test_dtw_lift_known_answer() -> None:
     assert fused == pytest.approx(3 / 5) and base == pytest.approx(2 / 5)  # e did not run: a miss
     assert lift == pytest.approx(1 / 5)
     assert dtw_lift([], 5, 120) == (None, None, None)
+
+
+def test_report_linkage_known_answer() -> None:
+    from kairos_defense.eval.metrics import report_linkage
+
+    def lk(tid, hits, total, at=120):
+        return Outcome(tid, "P9", "prober", at, True, linkage_hits=hits, linkage_total=total)
+
+    rows = [lk("a", 3, 4), lk("b", 1, 1), lk("c", 0, 0), lk("a", 0, 7, at=90),
+            Outcome("d", "P9", "prober", 120, True)]  # fmt: skip
+    assert report_linkage(rows, 120) == (pytest.approx(0.8), 4, 5)  # (3 + 1) / (4 + 1 + 0)
+    assert report_linkage([lk("c", 0, 0)], 120) == (None, 0, 0)
+
+
+def test_forecast_summary_known_answer() -> None:
+    from kairos_defense.eval.metrics import forecast_summary
+
+    def fe(tid, err, at=90, ran=True):
+        return Outcome(tid, "P9", "prober", at, ran, forecast_error_m=err)
+
+    errs = [100.0, 200.0, 300.0, 400.0, 500.0]
+    rows = [fe(str(i), e) for i, e in enumerate(errs)] + [fe("x", 9.0, at=120)]
+    assert forecast_summary(rows, 90) == (300.0, pytest.approx(420.0), 5, 0)  # numpy's linear P80
+    # a missing forecast counts as an infinite error, never as NaN
+    rows = [fe("a", 100.0), fe("b", 200.0), fe("c", float("inf"))]
+    assert forecast_summary(rows, 90) == (200.0, float("inf"), 3, 1)
+    rows = [fe("a", 100.0), fe("b", float("inf")), fe("c", float("inf")), fe("d", 50.0)]
+    med, p80, n, missing = forecast_summary(rows, 90)
+    assert med == float("inf") and p80 == float("inf") and (n, missing) == (4, 2)
+    assert forecast_summary([fe("a", None)], 90) == (None, None, 0, 0)
+    assert forecast_summary([fe("a", 5.0, ran=False)], 90) == (None, None, 0, 0)

@@ -131,3 +131,64 @@ def test_dtw_results_never_start_after_the_query(toy_models, stores) -> None:
                 later_p1 += len(later)
                 assert not {m.track_id for m in res.matches} & set(later.track_id)
     assert later_p1 > 0
+
+
+@pytest.fixture(scope="module")
+def recall_tools(toy_models):
+    """The toy matcher, the report recall and the stores over the P1 nights."""
+    from kairos_defense.match.matcher import DtwMatcher
+    from kairos_defense.recall.embed import HashingEmbedder
+    from kairos_defense.recall.search import ReportRecall
+    from kairos_defense.store.lance import LanceReportIndex
+
+    cfg = toy_models
+    duck = DuckTrackStore(cfg.app.paths.duckdb, cfg.app)
+    lance = LanceVectorStore(cfg.app.paths.lancedb)
+    matcher = DtwMatcher(duck, lance, cfg.scoring, cfg.app.paths.models)
+    rr = ReportRecall(duck, LanceReportIndex(cfg.app.paths.lancedb), lance, HashingEmbedder(384),
+                      cfg.scoring)  # fmt: skip
+    yield cfg, duck, matcher, rr
+    duck.close()
+
+
+def test_recall_never_returns_later_reports(recall_tools) -> None:
+    """Phase 5: for every track at T = 120 s, every recalled report's event started before the
+    query's first contact and was filed by the replay time (CLAUDE.md rule 3, D-082)."""
+    from kairos_defense.features.resample import epoch_ms
+
+    cfg, duck, matcher, rr = recall_tools
+    recalled = 0
+    for row in duck.tracks().itertuples():
+        q = load_query(duck, row.track_id, 120, cfg.scoring)
+        out = rr.for_matches(q, matcher.match(q), n=5)
+        for mr in out.matches:
+            for r in mr.reports:
+                assert r.event_ts_ms < q.start_ms, (row.track_id, r.report_id)
+                assert r.report_ts_ms <= epoch_ms(q.until), (row.track_id, r.report_id)
+                recalled += 1
+    assert recalled > 0
+
+
+def test_forecast_and_recall_ignore_points_after_t(recall_tools) -> None:
+    """Tampering with the live track after T changes neither the forecast nor the recall."""
+    from kairos_defense.forecast.analog import forecast
+
+    cfg, duck, matcher, rr = recall_tools
+    track = "DEMO-BRAVO-0828-T1"
+    pts = duck.track_points(track)
+    site = load_site(duck, "BRAVO")
+    ids = {"track_id": track, "incident_id": "DEMO-BRAVO-0828"}
+    for at in (105, 120):
+        cut = pts.ts.iloc[0] + pd.Timedelta(seconds=at)
+        tampered = pts.copy()
+        after = tampered.ts > cut
+        assert after.any()
+        tampered.loc[after, ["x_m", "y_m"]] += 3000.0
+        tampered.loc[after, "alt_m"] = 10.0
+        out = []
+        for p in (pts, tampered):
+            q = query_at(p, site, at, cfg.scoring, ids)
+            res = matcher.match(q)
+            fc = forecast(duck, q, res, cfg.scoring)
+            out.append((fc.to_dict(), rr.for_matches(q, res, fc.roads).to_dict()))
+        assert out[0] == out[1]

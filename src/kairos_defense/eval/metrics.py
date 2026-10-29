@@ -3,7 +3,8 @@
 An outcome is one query track at one protocol time T: whether the matcher ran, the 1-based rank of
 the best same-actor track (``true_rank``, None if absent) and of the best copycat track
 (``copycat_rank``), the same two ranks in the prefilter's Euclidean order of the same candidates
-(``baseline_*``, D-076), and latencies in milliseconds. Unanswerable queries (no earlier same-actor
+(``baseline_*``, D-076), the forecast error and report linkage counts (phase 5, D-088), and
+latencies in milliseconds. Unanswerable queries (no earlier same-actor
 track, D-009) are excluded before these functions are called.
 """
 
@@ -33,6 +34,11 @@ class Outcome:
     baseline_copycat_rank: int | None = None
     dtw_ms: float | None = None  # DTW re-rank of every candidate (phase 4)
     candidates: int | None = None
+    forecast_error_m: float | None = None  # §13 center to the true recovery (inf: no forecast)
+    forecast_ms: float | None = None
+    linkage_hits: int | None = None  # true-clue reports of the top 3 matches retrieved (D-088)
+    linkage_total: int | None = None  # true-clue reports of the top 3 matches filed by T
+    recall_ms: float | None = None  # hybrid search per matched incident
 
 
 def _at(outcomes: Iterable[Outcome], at_s: int) -> list[Outcome]:
@@ -111,3 +117,38 @@ def percentiles(
     """Percentiles of the non-missing values (None when there are none)."""
     v = np.asarray([x for x in values if x is not None], dtype=np.float64)
     return [float(np.percentile(v, q)) if len(v) else None for q in qs]
+
+
+def report_linkage(outcomes: Iterable[Outcome], at_s: int = 120) -> tuple[float | None, int, int]:
+    """§19.3 report linkage at ``at_s``: Σ retrieved / Σ relevant true-clue reports of the
+    matched incidents; ``(value, retrieved, relevant)``. None when nothing was relevant."""
+    rows = [o for o in _at(outcomes, at_s) if o.linkage_total is not None]
+    hits = sum(o.linkage_hits or 0 for o in rows)
+    total = sum(o.linkage_total or 0 for o in rows)
+    return (hits / total if total else None), hits, total
+
+
+def forecast_summary(
+    outcomes: Iterable[Outcome], at_s: int
+) -> tuple[float | None, float | None, int, int]:
+    """Median and P80 forecast error (m) at ``at_s`` over queries that ran; a missing forecast
+    counts as an infinite error. ``(median, p80, n, missing)``; None when no query ran."""
+    errs = [
+        o.forecast_error_m for o in _at(outcomes, at_s) if o.ran and o.forecast_error_m is not None
+    ]
+    if not errs:
+        return None, None, 0, 0
+    v = np.sort(np.asarray(errs, dtype=np.float64))
+    return inf_percentile(v, 50), inf_percentile(v, 80), len(v), int(np.isinf(v).sum())
+
+
+def inf_percentile(v: np.ndarray, q: float) -> float:
+    """Linear-interpolated percentile of sorted ``v`` that keeps ``inf`` as the largest value
+    (numpy's ``0 × inf`` would give NaN next to an infinite element)."""
+    h = (len(v) - 1) * q / 100.0
+    lo, hi = int(np.floor(h)), int(np.ceil(h))
+    if lo == hi or v[lo] == v[hi]:
+        return float(v[lo])
+    if np.isinf(v[hi]):
+        return float("inf")
+    return float(v[lo] + (h - lo) * (v[hi] - v[lo]))

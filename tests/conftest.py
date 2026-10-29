@@ -118,7 +118,8 @@ def tmp_config(cfg, folder: Path):
     paths = cfg.app.paths.model_copy(
         update={"duckdb": str(folder / "kd.duckdb"), "truth": str(folder / "gt.duckdb"),
                 "memory": str(folder / "mem.duckdb"), "lancedb": str(folder / "lancedb"),
-                "reports": str(folder / "reports"), "models": str(folder / "models")}
+                "reports": str(folder / "reports"), "models": str(folder / "models"),
+                "cache": str(folder / "cache")}
     )  # fmt: skip
     return cfg.model_copy(update={"app": cfg.app.model_copy(update={"paths": paths})})
 
@@ -164,16 +165,20 @@ class Indexed:
     cfg: object  # Config with temporary paths
     gen: object  # Generated
     summary: object  # IndexSummary
+    reports: object = None  # ReportsSummary (phase 5)
 
 
 @pytest.fixture(scope="session")
 def p1_index(cfg, tmp_path_factory) -> Indexed:
-    """The nights of all six P1 flights (live included) generated, written and indexed."""
+    """The nights of all six P1 flights (live included) generated, written and indexed, report
+    index included (what `make index` builds)."""
     from kairos_defense.features.build import build_index
+    from kairos_defense.recall.index import build_reports_index
     from kairos_defense.sim.generate import generate
     from kairos_defense.sim.writers import write_all
 
     c = tmp_config(cfg, tmp_path_factory.mktemp("p1"))
     g = generate(cfg, 42, nights=P1_NIGHTS)
     write_all(c.app, g.tables, g.truth)
-    return Indexed(c, g, build_index(c))
+    summary = build_index(c)
+    return Indexed(c, g, summary, build_reports_index(c))

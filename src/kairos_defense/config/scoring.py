@@ -69,6 +69,9 @@ class ForecastConfig(StrictModel):
     top_k: Annotated[int, Field(gt=0)]
     min_radius_m: Pos
     radius_factor: Pos
+    # target: tonight's target centroid (§13); match_kind: while tonight reads the fence, the
+    # analog's own asset kind at tonight's base (D-090)
+    anchor: Literal["target", "match_kind"]
 
 
 class SwarmScoringConfig(StrictModel):

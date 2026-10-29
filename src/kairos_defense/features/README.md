@@ -62,7 +62,9 @@ through the `TrackStore` port.
 - `windows.query_window_size(n_seconds, scoring) -> int` and `query_vector(features, scoring) ->
   (vector (80,), W, rows used)`.
 - `build.build_index(cfg) -> IndexSummary` (counts, target kinds, loiter directions, failures,
-  elapsed); `build.windows_table(rows, vectors, dim) -> pyarrow.Table`.
+  elapsed); `build.windows_table(rows, vectors, dim) -> pyarrow.Table`. `kairos-defense index`
+  runs `build_index` and then `recall.index.build_reports_index` (phase 5, D-089); `build.py`
+  itself is unchanged.
 
 ## Data in and out
 
@@ -155,3 +157,5 @@ through the `TrackStore` port.
   D-046 to D-051, D-053.
 - Phase 4: `windows.normalize` (`fixed` by default) and `features.channel_scales`; `scales` on the
   vector functions; `vector_scales`; `fill_nan` made public (D-068). Window counts unchanged.
+- Phase 5: no code change. `kairos-defense index` also builds the report index after this
+  package's tables (D-089).

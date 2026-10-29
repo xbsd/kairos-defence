@@ -80,6 +80,8 @@ DERIVED_DDL: dict[str, str] = {  # written by `kairos-defense index`, history tr
   dwell_s DOUBLE, alt_median_m DOUBLE, tod_minutes INTEGER,
   launch_x_rel_m DOUBLE, launch_y_rel_m DOUBLE, recovery_x_rel_m DOUBLE, recovery_y_rel_m DOUBLE,
   rf_family VARCHAR, rid_present BOOLEAN, rid_serial VARCHAR)""",
+    "report_clues": """CREATE TABLE report_clues (
+  report_id VARCHAR, clue_type VARCHAR, clue_value VARCHAR)""",  # §12.4, history reports only
 }
 
 _COL = re.compile(r"^\s*([a-z_][a-z0-9_]*)\s+[A-Z]", re.M)

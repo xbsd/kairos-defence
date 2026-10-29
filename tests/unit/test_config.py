@@ -89,6 +89,16 @@ def _set(path: str, value: Any) -> Callable[[Any], None]:
     return mutate
 
 
+def _del(path: str) -> Callable[[Any], None]:
+    def mutate(d: Any) -> None:
+        *keys, last = path.split(".")
+        for k in keys:
+            d = d[k]
+        del d[last]
+
+    return mutate
+
+
 BAD = [
     ("app", _set("paths.extra_db", "data/x.duckdb"), "extra"),
     ("app", _set("paths.truth", "data/kairos_defense.duckdb"), "three different files"),
@@ -123,6 +133,8 @@ BAD = [
     ("scoring", _set("dtw.band_fraction", 0.0), "band_fraction"),
     ("scoring", _set("dtw.tau", "manual"), "tau"),
     ("scoring", _set("dtw.normalize", "window"), "normalize"),
+    ("scoring", _set("forecast.anchor", "nearest"), "anchor"),
+    ("app", _del("paths.cache"), "cache"),
 ]
 
 

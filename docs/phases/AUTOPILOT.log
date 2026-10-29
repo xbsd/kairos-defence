@@ -95,3 +95,43 @@ rep =
 [2026-10-28 22:09:55] phase 4: gate attempt 4
 [2026-10-28 22:11:32] phase 4: everything else passed; 2 target gap(s): demo live_top3_incidents: fail; demo:live_top3_incidents: status 'fail', observed 2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of night'); P1-ALPHA-260303 #2 (1.00, 'Same time of night'); P1-ALPHA-260502 #5 (0.99, 'Same time of night')
 [2026-10-28 22:11:32] phase 4: accepting 2 target gap(s) and continuing: demo live_top3_incidents, demo:live_top3_incidents
+[2026-10-28 22:11:32] === Phase 4: done with gaps, tagged phase-04-done, estimated cost $92.87 ===
+[2026-10-28 22:11:38]   git push origin main: ok
+[2026-10-28 22:11:40]   git push origin --tags: ok
+[2026-10-28 22:11:40] === Phase 5: start (auto mode) ===
+[2026-10-28 22:11:40] phase 5: planning
+[2026-10-28 22:14:40]   … running 3 min. last tool: Bash cat pyproject.toml && uv run python -c "import importlib.util as u; print('faste
+[2026-10-28 22:17:40]   … running 6 min. last tool: Bash grep -n "asset_name\|ASSET_NAMES\|def _asset\|kind.replace\|hq" src/kairos_defen
+[2026-10-28 22:20:40]   … running 9 min. last tool: Bash sed -n 1134,1160p docs/SPEC.md && sed -n 1,24p src/kairos_defense/rng.py && grep
+[2026-10-28 22:23:40]   … running 12 min. last tool: Bash sed -n 1,51p src/kairos_defense/match/baseline.py | sed -n 20,51p; sed -n 40,75p
+[2026-10-28 22:26:41]   … running 15 min. last tool: Bash rm -rf /tmp/kd_lance_probe /tmp/kd_probe*.py && git status --short && wc -l docs
+[2026-10-28 22:26:41] phase 5: independent plan review 1
+[2026-10-28 22:29:41]   … running 3 min. 
+[2026-10-28 22:30:21] phase 5: review 1 found blocking issues; revising the plan
+[2026-10-28 22:31:01] phase 5: independent plan review 2
+[2026-10-28 22:33:41] phase 5: plan approved on review 2: I approve the plan; there are no blocking issues.
+
+1. **Task checkboxes.** All four Phase 5 checkboxes are covered:
+   -
+[2026-10-28 22:33:41] phase 5: building in a fresh session
+[2026-10-28 22:36:41]   … running 3 min. last tool: Bash uv run python - <<'EOF'
+import duckdb
+con = duckdb.connect("data/kairos_defense.
+[2026-10-28 22:39:41]   … running 6 min. last tool: Bash cd /tmp/kd5 && cat > scratch_hybrid_k.py <<'EOF'
+# does native hybrid limit each
+[2026-10-28 22:42:41]   … running 9 min. last tool: Write /Users/ndkx/work/kairos_defence/src/kairos_defense/cli_recall.py
+[2026-10-28 22:45:41]   … running 12 min. last tool: Bash python3 - <<'EOF'
+from pathlib import Path
+p = Path("src/kairos_defense/eval/rep
+[2026-10-28 22:48:42]   … running 15 min. last tool: Bash python3 - <<'EOF'
+from pathlib import Path
+p = Path("tests/unit/test_embed.py");
+[2026-10-28 22:51:42]   … running 18 min. last tool: Bash python3 - <<'EOF'
+from pathlib import Path
+p = Path("tests/unit/test_recall_sear
+[2026-10-28 22:54:42]   … running 21 min. last tool: Bash sed -n 55,70p tests/unit/test_index.py && sed -n 100,115p tests/unit/test_index.
+[2026-10-28 22:57:42]   … running 24 min. last tool: Bash sed -n "$(grep -n '^## D-075' docs/DECISIONS.md | cut -d: -f1),+14p" docs/DECISI
+[2026-10-28 23:00:42]   … running 27 min. last tool: Bash tail -5 /tmp/kd5/test_all.log
+[2026-10-28 23:03:42]   … running 30 min. last tool: Bash uv run python -c "
+import duckdb
+t = duckdb.connect('data/truth.duckdb', read_on

@@ -20,9 +20,11 @@ from kairos_defense.eval.metrics import (
     Outcome,
     copycat_first_rate,
     dtw_lift,
+    forecast_summary,
     mrr,
     percentiles,
     recall_at_k,
+    report_linkage,
     time_to_match_share,
     times_to_match,
 )
@@ -37,12 +39,9 @@ GATED = {  # metric -> +1 higher is better, -1 lower is better
     "recall_at_5_t120": 1, "mrr_t120": 1, "time_to_match_t90": 1, "copycat_first_t120": -1,
     "recall_at_5_t120_copycats": 1, "dtw_lift": 1, "latency_prefilter_p95_ms": -1,
     "latency_dtw_p95_ms": -1, "latency_end_to_end_p95_ms": -1,
+    "report_linkage": 1, "forecast_median_t90_m": -1,
 }  # fmt: skip
-PENDING = {
-    "report_linkage": "phase 5",
-    "forecast_error_t90": "phase 5",
-    "swarm_top1": "phase 9",
-}
+PENDING = {"swarm_top1": "phase 9"}
 LATENCY_STAGES = (("query_build", "query_ms"), ("prefilter", "prefilter_ms"), ("dtw", "dtw_ms"),
                   ("end_to_end", "total_ms"))  # fmt: skip
 # §10.9 p95 budgets. The DTW budget is for 50 candidates; phase 4 re-ranks 500 (D-068, D-076).
@@ -58,6 +57,30 @@ def _actor_table(outcomes: list[Outcome], at_s: int = 120) -> dict[str, dict]:
         out[actor] = {"queries": n, "recall_at_5": r5,
                       "median_best_rank": float(np.median(ranks)) if ranks else None,
                       "found_in_candidates": len(ranks)}  # fmt: skip
+    return out
+
+
+def downstream_metrics(probers: list[Outcome]) -> dict:
+    """Phase 5 keys (D-088): forecast error at T = 90 and 120 s, report linkage at 120 s, and
+    the forecast and recall timings (report only, outside the timed matcher span)."""
+    med90, p80_90, n90, miss90 = forecast_summary(probers, 90)
+    med120, p80_120, _, miss120 = forecast_summary(probers, 120)
+    link, hits, total = report_linkage(probers, 120)
+    out = {
+        "forecast_median_t90_m": med90,
+        "forecast_p80_t90_m": p80_90,
+        "forecast_queries_t90": n90,
+        "forecast_missing_t90": miss90,
+        "forecast_median_t120_m": med120,
+        "forecast_p80_t120_m": p80_120,
+        "forecast_missing_t120": miss120,
+        "report_linkage": link,
+        "report_linkage_retrieved": hits,
+        "report_linkage_relevant": total,
+    }
+    for stage in ("forecast", "recall"):
+        p50, p95 = percentiles([getattr(o, f"{stage}_ms") for o in probers])
+        out[f"latency_{stage}_p50_ms"], out[f"latency_{stage}_p95_ms"] = p50, p95
     return out
 
 
@@ -81,6 +104,7 @@ def summarize(run: EvalRun) -> dict:
     for stage, (p50, p95) in lat.items():
         metrics[f"latency_{stage}_p50_ms"] = p50
         metrics[f"latency_{stage}_p95_ms"] = p95
+    metrics.update(downstream_metrics(p))
     sets = run.sets
     counts = {
         "prober_queries": len(sets.probers),
@@ -110,7 +134,7 @@ def summarize(run: EvalRun) -> dict:
         "counts": counts,
         "recall_by_t": by_t,
         "per_actor": _actor_table(p + c),
-        "pending": PENDING,
+        "pending": PENDING if run.reports_indexed else {**PENDING, "report_linkage": "no index"},
         "demo": [asdict(r) for r in run.demo],
     }
 

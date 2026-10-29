@@ -10,7 +10,8 @@ truth-isolation guard every app connection goes through.
 - Hold the DDL for the raw, derived and truth tables (`ddl.py`; §7.1 to §7.3).
 - Implement `TrackStore` over DuckDB, including the §11 context joins and the bulk queries the index
   build needs (`duck.py`).
-- Implement `VectorStore` over LanceDB. All LanceDB calls live here (`lance.py`, D-014).
+- Implement `VectorStore` and `ReportIndex` over LanceDB. All LanceDB calls live here (`lance.py`,
+  D-014).
 - Business logic imports the ports, never these modules directly (rule 6). Only index builds and
   composition roots such as `cli.py` construct the adapters (D-053).
 
@@ -53,8 +54,18 @@ truth-isolation guard every app connection goes through.
     unit vectors.
   - `upsert(table, rows)`, keyed by `KEYS` (`window_id`, `incident_id`, `report_id`).
   - `replace(table, data) -> int`: a full rewrite, which also creates the scalar indexes in
-    `SCALAR_INDEXES`.
+    `SCALAR_INDEXES` and the full-text index in `FTS_COLUMNS` (`reports.text`, with token
+    positions for phrase queries, D-085).
   - `tables()`, `has()`, `count(table, where)`, `to_pandas(table, columns)`.
+- `lance.LanceReportIndex(uri, table="reports")` (the `ReportIndex` port, §12):
+  - `hybrid(text, vector, where, k)`: LanceDB's native hybrid search, pre-filtered on both sides,
+    fused by `ReportRRF` (`RRFReranker`, K = 60, equal scores ordered by `report_id`); returns
+    `REPORT_COLUMNS` plus `_relevance_score`. Raises `NotImplementedError` when the installed
+    LanceDB cannot run it (§12.5, D-085).
+  - `fts(text, where, k)`: native BM25 keyword search; `REPORT_COLUMNS` plus `_score`. A quoted
+    phrase matches exactly; the tokenizer lowercases.
+  - Empty results keep the columns.
+- `lance.REPORTS_TABLE`, `lance.REPORT_COLUMNS` (§7.5 without the vector), `lance.FTS_COLUMNS`.
 
 ## Data in and out
 
@@ -63,12 +74,13 @@ truth-isolation guard every app connection goes through.
     `parks`, `sensors`, `incidents`, `track_points`, `rf_detections`, `remote_id`, `weather`,
     `base_events`, `public_events`, `reports`, `assessments`;
   - derived tables (§7.2), written by `kairos-defense index`, history tracks only (D-049):
-    `track_features`, `track_signatures`.
+    `track_features`, `track_signatures`, and `report_clues` (phase 5, history reports, D-089).
 - `data/truth.duckdb` (§7.3): `track_truth`, `true_paths`, `clue_truth`, `assessment_truth`.
   Only `sim.writers` writes it and only `kairos_defense.eval` reads it; this package defines the
   DDL only.
 - `data/lancedb/`: `flight_windows`, with scalar indexes on `window_s`, `start_ts_ms` and
-  `incident_id`. `reports` and `swarm_windows` are keyed here for phases 5 and 9.
+  `incident_id`; `reports` (§7.5, phase 5) with a full-text index on `text`. `swarm_windows` is
+  keyed here for phase 9.
 
 ## How it works
 
@@ -92,7 +104,10 @@ truth-isolation guard every app connection goes through.
   everything heard after `until`, concurrency uses only tracks seen by `until`, `features_many`
   equals `features` per track.
 - `tests/unit/test_index.py` and `tests/unit/test_no_lookahead.py` exercise both adapters end to end.
-- Run: `uv run pytest tests/unit -q -k "truth or duck or index or lookahead"`.
+- `tests/unit/test_recall_index.py` (phase 5): the `reports` schema, an exact phrase through FTS,
+  filters on base and time for hybrid, FTS and vector search, `report_clues`, the stale guard;
+  `tests/unit/test_recall_search.py`: native hybrid equals the §12.5 fallback row for row.
+- Run: `uv run pytest tests/unit -q -k "truth or duck or index or lookahead or recall"`.
 
 ## Gotchas
 
@@ -105,6 +120,10 @@ truth-isolation guard every app connection goes through.
   length.
 - `sensor_context_until` runs the RF association SQL for one track: about 17 ms on the laptop,
   once per live query. A KDB-X adapter (§22) needs `features_many` and `sensor_context_until` too.
+- LanceDB filters reject a float literal on an int64 column (`event_ts_ms < 9e15` fails): write
+  integers.
+- `create_fts_index` (CLAUDE.md's library note) is deprecated in LanceDB 0.40; `replace` uses
+  `create_index(col, config=FTS(with_position=True))` (D-085).
 
 ## Changelog
 
@@ -114,3 +133,5 @@ truth-isolation guard every app connection goes through.
   (`LanceVectorStore`, D-052).
 - Phase 4: `features_many`, `sensor_context_until` and the `until` bound on the association
   queries (D-071, D-072).
+- Phase 5: `report_clues` DDL; the `reports` FTS index; `LanceReportIndex` and `ReportRRF`
+  (D-085, D-089).

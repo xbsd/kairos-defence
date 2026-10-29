@@ -20,9 +20,16 @@ def _read(app: AppConfig, query: str, params: dict | None = None) -> pd.DataFram
 
 
 def track_truth(app: AppConfig) -> pd.DataFrame:
-    """``track_id, incident_id, actor_id, actor_type, launch_ts`` for every track."""
-    return _read(app, "SELECT track_id, incident_id, actor_id, actor_type, launch_ts "
-                      "FROM track_truth ORDER BY track_id")  # fmt: skip
+    """``track_id, incident_id, actor_id, actor_type, launch_ts, recovery_x_m, recovery_y_m``
+    (region meters, the true recovery point, §13 step 8) for every track."""
+    return _read(app, "SELECT track_id, incident_id, actor_id, actor_type, launch_ts, "
+                      "recovery_x_m, recovery_y_m FROM track_truth ORDER BY track_id")  # fmt: skip
+
+
+def clue_truth(app: AppConfig) -> pd.DataFrame:
+    """``report_id, clue_type, clue_value, is_true`` for every clue the generator wrote (§8.8)."""
+    return _read(app, "SELECT report_id, clue_type, clue_value, is_true FROM clue_truth "
+                      "ORDER BY report_id, clue_type, clue_value")  # fmt: skip
 
 
 def true_path(app: AppConfig, track_id: str) -> pd.DataFrame:

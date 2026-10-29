@@ -1229,3 +1229,236 @@ Where this file and the SPEC ever disagree, this file wins.
     early radius reasons unreliable; FOXTROT-251215's "Same orbit radius (~240 m)" at T+90 is one
     example. A target-aware re-rank can then be tested on the training split once a settled
     target exists.
+
+## D-082 · Recall filter: §12.3 plus no look-ahead · 2026-10-28
+- Context: §12.3's filter (the match's base, ±3 h around its flight, a 5 km box) bounds where and
+  when a report is about the match, but not what existed tonight. An FAA summary can be filed days
+  after its event, and a same-night match's paperwork may still be unwritten at the replay time.
+- Decision: `recall.search.recall_filter` builds, from the match's **stored** signature:
+  `installation_id = '<m base>' AND event_ts_ms BETWEEN <m.start − 3 h> AND <m.end + 3 h> AND x_m
+  BETWEEN … AND y_m BETWEEN …` (a box around the match's target centroid and, when known, its
+  launch point, widened by `recall.radius_m`), plus `AND event_ts_ms < <tonight's first contact>
+  AND report_ts_ms <= <tonight's replay time>`. Installation ids are checked against a safe
+  pattern before they enter the filter.
+- Why: CLAUDE.md rule 3 applied to paperwork: a report filed after T did not exist at T.
+- Consequences: `test_recall_never_returns_later_reports` checks every recalled report for every
+  P1-night track at T = 120 s, and a tamper test checks that points after T change nothing. The
+  `reports` table holds history reports only (D-041); live reports are appended by the phase 7
+  replay.
+
+## D-083 · Hashing embedder details · 2026-10-28
+- Context: §12.1 says "tokens plus character 3-grams; each feature hashed (`stable_int`) to an
+  index and a ±1 sign; sum; L2-normalize" without fixing the tokenizer or the sign bit.
+- Decision: lowercase; tokens are `[a-z0-9]+`; features `t:<token>` and the 3-grams of `<token>`
+  as `g:<gram>` (the prefixes keep a token and a gram apart); `h = stable_int(f)`, index
+  `h % dim`, sign −1 when bit 32 of `h` is set; sum, L2-normalize, float32. A text with no
+  feature is an all-zero row (never NaN). `stable_int` is memoized per feature. Name
+  `hashing-v1-384`.
+- Why: deterministic across runs and platforms (SHA-256), offline, and robust to blotter capitals
+  and punctuation.
+- Consequences: a pinned known answer (`test_hashing_known_answer`). Changing any of these rules
+  changes every report vector; `check_reports_index` then asks for `make index`.
+
+## D-084 · FastEmbed never downloads at runtime; `fetch-models`; reports-index guard · 2026-10-28
+- Context: §12.1 allows FastEmbed "when the model is cached locally" and forbids downloads except
+  by `kairos-defense fetch-models`. `fastembed` is not installed (optional extra), so its
+  `local_files_only` keyword could not be checked against the installed version.
+- Decision:
+  - `FastEmbedEmbedder` imports `fastembed` lazily, **refuses to start unless a folder for the model
+    already exists in `paths.cache/fastembed`** (a check in our adapter, independent of the
+    package), and then constructs `TextEmbedding(model_name, cache_dir, local_files_only=True)`.
+  - `fetch_model` (`kairos-defense fetch-models [--model M]`) is the only code path that downloads,
+    into the same cache. Without the package it exits 1 naming `uv sync --extra fastembed`.
+  - With `embeddings.provider: fastembed` and no cached model, `make_embedder` raises
+    `EmbedderUnavailable` naming `fetch-models`; there is no silent switch to hashing (index and
+    query vectors must come from one embedder).
+  - New key `paths.cache: data/cache` (§5 lists `data/cache/`), resolved against the project root.
+  - `recall.index.check_reports_index` raises `ReportIndexStale` ("run `make index`") unless the
+    LanceDB `reports` table holds exactly the history reports (a search with k = n + 1 through
+    the `VectorStore` port) and the lowest `report_id`'s stored vector is within 1e-6 (squared
+    L2) of its text embedded now. `recall` and `eval` call it.
+- Why: CLAUDE.md rule 5 (offline by default) and D-075's reasoning: a stale index would give wrong
+  numbers silently.
+- Consequences: tests use a fake `fastembed` module (no skip). If the installed `fastembed` rejects
+  `local_files_only`, the cache check still keeps the no-download guarantee.
+
+## D-085 · Hybrid search: native LanceDB, a deterministic tie-break, and the §12.5 fallback · 2026-10-28
+- Context: CLAUDE.md's library note uses `tbl.create_fts_index("text")`, which LanceDB 0.40
+  deprecates. Phrase queries ("County Rd 12") need token positions. LanceDB's `RRFReranker` sorts
+  the fused rows by score alone and then cuts to k, so a tie at the cut follows merge order.
+- Decision:
+  - `LanceVectorStore.replace` builds the `reports` FTS index with
+    `create_index("text", config=FTS(with_position=True))` (0.40's replacement; the default
+    tokenizer lowercases, so blotter capitals match).
+  - `LanceReportIndex` (the `ReportIndex` port): `hybrid()` runs LanceDB's native hybrid search with
+    `ReportRRF`, a thin `RRFReranker` subclass (K = 60) that orders equal scores by `report_id`
+    before LanceDB's k cut; `fts()` runs native FTS. Both pre-filter. Empty results keep the
+    §7.5 columns.
+  - If the native hybrid builder raises `AttributeError`, `TypeError` or `ValueError`, the adapter
+    raises `NotImplementedError` (a builtin, so `ports.py` is unchanged). `recall.search` then runs
+    `VectorStore.search` and `ReportIndex.fts` with the same filter and k and fuses them with
+    `rrf_fuse` (Σ 1/(60 + rank), 1-based ranks; scores rounded to float32 as LanceDB stores them;
+    ties by `report_id`).
+  - Keyword text is sanitized to `[a-z0-9]+` tokens joined by spaces, so report text with colons
+    or quotes cannot break the FTS parser. With no token left, the vector list alone is
+    RRF-scored.
+- Why: LanceDB 0.40 has native hybrid search (verified); the fallback keeps an older or newer
+  LanceDB working. The tie-break makes the two paths identical row for row
+  (`test_fallback_equals_native_hybrid` checks order and scores exactly on 5 queries over 40 rows).
+- Consequences: a KDB-X adapter may implement `hybrid` natively or raise `NotImplementedError`.
+
+## D-086 · Clue extraction and linking · 2026-10-28
+- Context: §12.4 lists "road names from the `roads` table" and "`<color> <type>`" vehicles. The
+  generator's paperwork also writes a bare "a motorcycle" (4 reports carry the clue
+  `vehicle/motorcycle` in `clue_truth`).
+- Decision:
+  - Two clue types, each with a canonical value and its character span: `vehicle` from the
+    generator's lexicons (`sim.lexicon.VEHICLE_COLORS` × `VEHICLE_TYPES`) with the color
+    **optional**, and `road` from the `roads` table only ("Ridge Rd" and the other minor roads are
+    false clues outside the gazetteer). Case-insensitive (D-040). **Deviation from the plan (A5),
+    which said colored vehicles only**: the planned agreement test with `clue_truth` failed on the
+    bare motorcycle.
+  - `report_clues` (§7.2 DDL) is written by `make index` from the same function: one row per
+    distinct (report, type, value). Spans are recomputed from the text when shown.
+  - Linking, among the reports recalled for the top 3 matched incidents: a clue is linked when the
+    same (type, value) appears in another report recalled for another matched incident ("white
+    pickup also appears in reports of P1-ALPHA-260303."), or when it is a road that crosses
+    tonight's predicted zone ("County Rd 12 runs through tonight's predicted zone."). A report
+    recalled for two matches does not link with itself.
+- Why: the agreement test against the generator's truth is the strongest check available, and it
+  holds exactly on the full data (82 of 82 vehicle and gazetteer-road clues).
+- Consequences: the UI (phase 8) gets spans and link sentences from `RecallResult.to_dict()`.
+
+## D-087 · Forecast details (§13) · 2026-10-28
+- Context: §13 leaves open which matches count as "known recovery", which alignment gives j*, and
+  where the matcher's work is reused.
+- Decision:
+  1. Step 1 walks the fused ranking and keeps the first `top_k` matches whose stored signature has
+     a recovery point **and whose flight had ended by tonight's replay time** (`end_ts <= until`;
+     a history flight still in the air at T has no known recovery yet: rule 3).
+  2. Step 2: j* is the segment row paired with tonight's last row on `dtw_rerank.warp_path`, with
+     relaxed ends and **the shape distance's scaling** (`dtw.normalize: fixed`, D-079), on the
+     match's anchored segment; `j*_track = lo + j*`. **Deviation from the plan (A6)**, which named
+     the warp ratio's §9.3 per-series z: on an exact copy (tonight = rows 100 to 159 of a flight),
+     that alignment put j* at row 164, because a 60 s window and a 180 s segment z-normalize
+     differently; the shape's fixed scaling puts it at 159, also with radar-like noise. j* moves
+     only the exit path: the center uses recovery points alone.
+  3. Step 3: the remainder is the match's `track_features` `(x_rel_m, y_rel_m)` after `j*_track`,
+     gap and NaN rows dropped, ending at the stored recovery point.
+  4. Step 4: rotate the remainder clockwise by `wrap180(tonight − match approach)` when its size
+     exceeds 30°; no rotation when either approach is unknown. Anchor: D-090.
+  5. Step 5: weights are the fused scores (equal weights if they sum to zero); radius =
+     max(150, 1.5 × weighted RMS distance to the center).
+  6. Step 6: the top analog's mapped remainder, resampled to 60 points by arc length.
+  7. Step 7: roads of tonight's region whose line intersects the circle.
+  8. `None` when no match qualifies.
+  - `MatchResult` gains optional `signature` (the query's partial signature) and `signatures`
+    (the candidates' stored signatures), filled by the DTW matcher from `Candidates`; the
+    forecast and recall reuse them, and read them through the ports when absent (Euclidean).
+  - `dtw_rerank.warp_path` gains optional `mode` and `scales` (default `series`, so the warp ratio
+    is unchanged).
+- Why: the plan's alignment failed its own known-answer test; the shape's scaling is the §10.4
+  path the score comes from.
+- Consequences: `test_aligned_index_on_a_shifted_copy` and `test_top_k_counts_only_known_recoveries`
+  (which also checks the end-time rule).
+
+## D-088 · Evaluation of phase 5: linkage, forecast error, demo rows · 2026-10-28
+- Context: §19.3 defines report linkage ("share of true clue-bearing reports of matched incidents
+  retrieved in the top 5") and forecast error (median and P80 at T = 90 s) loosely.
+- Decision:
+  - Report linkage: answerable prober queries at T = 120 s; the top 3 distinct matched incidents
+    of the fused ranking; *relevant* = that incident's reports with at least one
+    `clue_truth.is_true` clue, filed by the replay time; *retrieved* = relevant reports in the
+    recall top 5 for that match with tonight's default query. `report_linkage` = Σ retrieved /
+    Σ relevant, reported with both counts.
+  - Forecast error: the §13 center to `track_truth.recovery_{x,y}_m` (truth, eval only), at
+    T = 90 s (gated) and 120 s (information). A query without a forecast counts as an infinite
+    error (a percentile next to it is infinite, never NaN). Keys: `forecast_median_t90_m`,
+    `forecast_p80_t90_m`, `forecast_queries_t90`, `forecast_missing_t90`, the same at 120, and
+    `report_linkage`, `report_linkage_retrieved`, `report_linkage_relevant`.
+  - Labelling lives in `eval/downstream.py` and runs after the ranker's timing, so the §10.9
+    latency keys keep their meaning. New report-only keys: `latency_forecast_p50/p95_ms` and
+    `latency_recall_p50/p95_ms` (per matched incident). Copycat queries are not labelled.
+  - Demo rows: `live_rank1_report_for` (live query at T+120: the expected incident is among the
+    top 3 matched incidents and its recall rank 1 is its own report) and `forecast_error_max_m`
+    (live forecast at `forecast_at_s` = T+105 within 400 m of the true recovery). Both assert under
+    DTW and are `info (Euclidean baseline)` under `--method euclidean`, as D-076 did for the top 3.
+  - `GATED` adds `report_linkage` (higher is better) and `forecast_median_t90_m` (lower is
+    better); keys missing from an older `baseline.json` are skipped. `PENDING` keeps only
+    `swarm_top1`.
+  - `kairos-defense eval` refuses a missing or stale reports index (D-084).
+  - `eval/truth.py`: `track_truth` adds `recovery_x_m`, `recovery_y_m`; new `clue_truth(app)`.
+- Why: per-incident labels make the metric auditable; a missing forecast must not look good.
+- Consequences: linkage is close to trivial on this data. Within each match's filter window no
+  incident has more than 4 reports (k = 5), so every relevant report reaches the top 5 once the
+  filter admits it. REPORT.md says so; the DELTA rank-1 beat rests on the same fact (D-011: DELTA
+  has a lone report in its window).
+
+## D-089 · Index build wiring for reports · 2026-10-28
+- Context: §12.2 rebuilds the `reports` table on `make index`.
+- Decision: `kairos-defense index` runs `features.build.build_index`, then
+  `recall.index.build_reports_index`, which (like D-053) uses the adapters directly: history
+  reports through `DuckTrackStore.sql`, `report_clues` through `write_table` (it joins
+  `DERIVED_DDL`), LanceDB `reports` through `replace` (with its FTS index). Reports are sorted by
+  `report_id`; nothing is random. The `p1_index` test fixture and the slow `full` fixture build it
+  too.
+- Why: one command builds every derived table, as the Makefile promises.
+- Consequences: about 0.1 s for 956 reports with the hashing embedder.
+
+## D-090 · Forecast anchor while tonight's target is unsettled; rule registered before measuring · 2026-10-28
+- Context: §13 step 4 adds each analog's target-relative remainder to "tonight's target centroid".
+  Every prober query reads its target as the fence pseudo-asset until its loiter settles (D-046,
+  D-081), while an analog's stored recovery point is relative to its own final target (a P3 flight:
+  the munitions area). Added to tonight's fence centroid, such a vector lands 0.9 to 1.4 km off.
+- Registered here, in the phase 5 build, before any build code that could measure it:
+  - New key `forecast.anchor: target | match_kind`. Initial value `target` (§13 as written).
+  - `match_kind`: when tonight's target is the fence pseudo-asset and the analog's stored target
+    kind is a named asset (not the fence) that exists at tonight's installation, add the analog's
+    relative vectors to tonight's asset of that kind. In every other case both modes are
+    identical. Nothing is special-cased for an incident, actor, base or the demo (D-070).
+  - Criterion: prober queries on the training nights 2025-03-01 to 2026-02-28 (answerable, as
+    §19.1 defines them, but on months 1 to 12), T = 90 s, the shipped model
+    (`models/fusion_v1.json`). Adopt `match_kind` if and only if its median forecast error is at
+    least 50 m lower than `target`'s **and** its P80 is not higher. Otherwise `target` stays.
+  - The comparison is `uv run python -m kairos_defense.eval.forecast_choice`; it prints both modes
+    and writes `reports/forecast_choice.json`.
+- Disclosure: the phase 5 plan (fact 5) already measured both modes on the training split with a
+  scratch script (median 502 m against 311 m, P80 1,000 m against 492 m), so the verdict this rule
+  would give was known when it was written. The rule is the plan's A9 unchanged; the build reruns
+  it with the shipped code and records the result below, whatever it is. The plan also looked at
+  the evaluation queries and the demo under the as-written mode (fact 4); that is not an input to
+  this rule.
+- Outcome (build step 12, `uv run python -m kairos_defense.eval.forecast_choice`, shipped model
+  `418c5edf`, 36 answerable prober queries on the training nights, none without a forecast):
+  - `target`: median 502 m, P80 1,000 m;
+  - `match_kind`: median 311 m, P80 492 m.
+  - The median is 191 m lower and the P80 lower, so by the rule **`match_kind` is adopted**:
+    `config/scoring.yaml` ships `forecast.anchor: match_kind`. The result is in
+    `reports/forecast_choice.json`. This is the planning number of fact 5, reproduced by the
+    shipped code.
+- Consequences: a deviation from §13 step 4 only while tonight's target reads the fence. The demo
+  is unaffected: the live target is BRAVO's fuel farm from T+90 (D-046), so both modes give the same
+  live forecast at T+105 and T+120. REPORT.md gives both modes' month 13 to 18 numbers for the
+  record; they were not used to choose.
+
+## D-091 · CLI shapes for `forecast`, `recall` and `fetch-models` · 2026-10-28
+- Context: §20 names `kairos-defense recall …` and `forecast --incident <id> --at <s>`.
+- Decision:
+  - `forecast --incident ID --at S [--track T] [--method dtw|euclidean]` prints tonight's target,
+    the center (region meters, and "2,164 m at 320° (northwest) of BRAVO-fuel_farm"), the radius,
+    the anchor mode, an analog table (incident, score, own recovery, rotation, anchor, j*, mapped
+    recovery), the exit path's ends and the roads crossing the zone.
+  - `recall --incident ID --at S [--track T] [--matches 3] [--k 5] [--query TEXT] [--method …]`
+    prints tonight's keyword text and the forecast zone, then per matched incident a table (rank,
+    report, source, grade, local event time, score, text with clue spans underlined and linked
+    spans bold) and the link sentences.
+  - `fetch-models [--model M]`: D-084.
+  - Fix-it exits (exit 1): unknown incident or track, unknown method, missing models, stale or
+    missing index, missing or stale reports index, DTW unavailable, embedder unavailable.
+  - The three commands live in `cli_recall.py` and are registered on the Typer app by `cli.py`;
+    shared helpers are looked up on `kairos_defense.cli` at call time, so tests that patch
+    `cli._load_config` cover them. `cli.py` stays under 400 lines.
+- Why: the CLI is the phase 5 demo surface until the UI exists; it never reads truth, so it prints
+  no error.
+- Consequences: the agent tools `recall_reports` and `forecast_recovery` (phase 9) wrap the same
+  functions.

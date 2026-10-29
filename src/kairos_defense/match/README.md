@@ -43,7 +43,9 @@ truth (training lives in `kairos_defense.eval.training`).
     filled (D-079);
   - `shape_distance(live, seg, weights, band_fraction, mode="series", scales=None) -> d_norm`;
     `shape_sim(d_norm, tau)`;
-  - `warp_path(live, seg, weights) -> (p, 2) int`; `warp_ratio(live, seg, weights, speed_col=0)`
+  - `warp_path(live, seg, weights, mode="series", scales=None) -> (p, 2) int` (the forecast's j*
+    passes the shape distance's `dtw.normalize` and scales, D-087);
+    `warp_ratio(live, seg, weights, speed_col=0)`
     (NaN outside `WARP_RANGE` 0.5–2.0); `warp_text(k) -> "flown X% slower" | "... faster" | None`;
   - `explain_alignment(live_dist, full_dist) -> (first row, last row, value)` (for phase 8).
 - `live_signature.query_signature(store, q) -> dict`: the §9.4 fields from what was known at T.
@@ -61,7 +63,10 @@ truth (training lives in `kairos_defense.eval.training`).
 - `matcher.DtwMatcher(store, vstore, scoring, models_dir, *, verify_index=True)`:
   `match(q) -> MatchResult` (`matches` by fused score, `baseline` in prefilter order, `timings`
   in ms: `prefilter_ms`, `signature_ms`, `dtw_ms`, `features_ms`, `fusion_ms`, `explain_ms`,
-  `total_ms`); `model`, `tau`, `model_version`. `matcher.load_models(models_dir, scoring)`.
+  `total_ms`; from phase 5 also `signature`, the query's partial signature, and `signatures`, the
+  candidates' stored signatures by track id, which the forecast and recall reuse; both are None
+  for the Euclidean baseline, D-087); `model`, `tau`, `model_version`.
+  `matcher.load_models(models_dir, scoring)`.
   `EXPLAIN_TOP = 20`.
 - `types.Match` (frozen, §10.8) and `Match.to_dict()` (JSON-safe: NaN becomes None).
 
@@ -71,8 +76,9 @@ truth (training lives in `kairos_defense.eval.training`).
   (`load_query`, `sensor_context_until`); `track_signatures` (`tracks_before`) and
   `track_features` (`features_many`); LanceDB `flight_windows` through `VectorStore.search`;
   `models/fusion_v1.json` and `models/dtw_calibration.json` (written by `kairos-defense models`).
-- Out: `MatchResult` / `Match` lists, printed by `kairos-defense match` and ranked by
-  `eval/harness.py`. Nothing is written.
+- Out: `MatchResult` / `Match` lists, printed by `kairos-defense match`, ranked by
+  `eval/harness.py`, and handed to `forecast.analog.forecast` and `recall.search.ReportRecall`
+  (phase 5). Nothing is written.
 
 ## How it works
 
@@ -157,3 +163,4 @@ D-079; retrain with `make models` after changing it); `fusion.features` (the mod
   `matcher.py`; `Query.site`, `points`, `until`; `Match.to_dict`; 500 candidates on fixed-unit
   vectors; `match --method dtw` is the default (D-068 to D-076, D-078).
 - Phase 4 gate fix 1: `dtw.normalize` (`fixed` adopted on the training split, D-079).
+- Phase 5: `MatchResult.signature` and `signatures`; `warp_path` takes the scaling mode (D-087).

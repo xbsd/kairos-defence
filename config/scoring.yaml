@@ -32,6 +32,7 @@ forecast:
   top_k: 3
   min_radius_m: 150
   radius_factor: 1.5
+  anchor: match_kind                # target (§13) | match_kind: analog's kind while tonight reads the fence (D-090)
 swarm:
   min_drones: 3
   max_spacing_m: 300

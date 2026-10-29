@@ -2,8 +2,8 @@
  "method": "dtw",
  "model_version": "fusion-v1",
  "candidate_tracks": 500,
- "created_at": "2026-10-29T02:11:30",
- "elapsed_s": 35.3,
+ "created_at": "2026-10-29T03:02:38",
+ "elapsed_s": 35.6,
  "metrics": {
   "recall_at_5_t120": 1.0,
   "recall_at_5_t120_baseline": 0.4782608695652174,
@@ -13,14 +13,28 @@
   "copycat_first_t120": 0.0,
   "recall_at_5_t120_copycats": 1.0,
   "median_time_to_match_s": 45.0,
-  "latency_query_build_p50_ms": 3.9172920078272,
-  "latency_query_build_p95_ms": 4.395199407008476,
-  "latency_prefilter_p50_ms": 27.267750003375113,
-  "latency_prefilter_p95_ms": 30.08975000120699,
-  "latency_dtw_p50_ms": 31.78416700393427,
-  "latency_dtw_p95_ms": 56.46073360112495,
-  "latency_end_to_end_p50_ms": 96.08175000175834,
-  "latency_end_to_end_p95_ms": 125.75936640787404
+  "latency_query_build_p50_ms": 3.8066660054028034,
+  "latency_query_build_p95_ms": 4.157641404890454,
+  "latency_prefilter_p50_ms": 26.901416989858262,
+  "latency_prefilter_p95_ms": 29.471692006336525,
+  "latency_dtw_p50_ms": 31.575499990140088,
+  "latency_dtw_p95_ms": 55.71589979517739,
+  "latency_end_to_end_p50_ms": 95.15966600156389,
+  "latency_end_to_end_p95_ms": 122.25097499904223,
+  "forecast_median_t90_m": 340.44519747018904,
+  "forecast_p80_t90_m": 494.75183136355906,
+  "forecast_queries_t90": 23,
+  "forecast_missing_t90": 0,
+  "forecast_median_t120_m": 346.4726082388439,
+  "forecast_p80_t120_m": 531.5928189259681,
+  "forecast_missing_t120": 0,
+  "report_linkage": 1.0,
+  "report_linkage_retrieved": 65,
+  "report_linkage_relevant": 65,
+  "latency_forecast_p50_ms": 8.102708503429312,
+  "latency_forecast_p95_ms": 8.814093245746335,
+  "latency_recall_p50_ms": 4.661291667919916,
+  "latency_recall_p95_ms": 5.946873600866334
  },
  "counts": {
   "prober_queries": 23,
@@ -136,8 +150,6 @@
   }
  },
  "pending": {
-  "report_linkage": "phase 5",
-  "forecast_error_t90": "phase 5",
   "swarm_top1": "phase 9"
  },
  "demo": [
@@ -161,15 +173,15 @@
   },
   {
    "key": "live_rank1_report_for",
-   "expected": "P1-DELTA-260419",
-   "observed": "-",
-   "status": "pending (phase 5)"
+   "expected": "P1-DELTA-260419 among the top 3 matched incidents, its own report rank 1 (T+120)",
+   "observed": "R-P1-DELTA-260419-1 rank 1 of 1 for P1-DELTA-260419 (match #1, score 0.0328); clues: white pickup; County Rd 12 (County Rd 12 runs through tonight's predicted zone.)",
+   "status": "pass"
   },
   {
    "key": "forecast_error_max_m",
    "expected": "<= 400 m at T+105 s",
-   "observed": "-",
-   "status": "pending (phase 5)"
+   "observed": "139 m (radius 370 m; analogs P1-ALPHA-260303, HOTEL-250818-2126, FOXTROT-251215-2125; roads County Rd 12)",
+   "status": "pass"
   },
   {
    "key": "swarm_top1",
@@ -195,7 +207,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-ALPHA-260303-T1",
@@ -206,9 +223,9 @@
    "true_rank": null,
    "copycat_rank": null,
    "window_s": 60,
-   "query_ms": 4.462999990209937,
-   "prefilter_ms": 28.051500004949048,
-   "total_ms": 205.7556669897167,
+   "query_ms": 4.370916009065695,
+   "prefilter_ms": 27.535666988114826,
+   "total_ms": 200.09866599866655,
    "top": [
     "FOXTROT-250418-2022-T1",
     "HOTEL-250314-2030-T1",
@@ -218,8 +235,13 @@
    ],
    "baseline_rank": null,
    "baseline_copycat_rank": null,
-   "dtw_ms": 139.59470800182316,
-   "candidates": 500
+   "dtw_ms": 135.4038749996107,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-ALPHA-260303-T1",
@@ -230,9 +252,9 @@
    "true_rank": null,
    "copycat_rank": 284,
    "window_s": 60,
-   "query_ms": 4.260707995854318,
-   "prefilter_ms": 24.921040996559896,
-   "total_ms": 127.06804099434521,
+   "query_ms": 4.232792009133846,
+   "prefilter_ms": 25.236499990569428,
+   "total_ms": 124.78129200462718,
    "top": [
     "HOTEL-250521-2059-T1",
     "ECHO-250813-2034-T1",
@@ -242,8 +264,13 @@
    ],
    "baseline_rank": null,
    "baseline_copycat_rank": 498,
-   "dtw_ms": 66.39004200405907,
-   "candidates": 500
+   "dtw_ms": 63.952374999644235,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-ALPHA-260303-T1",
@@ -254,9 +281,9 @@
    "true_rank": null,
    "copycat_rank": 85,
    "window_s": 60,
-   "query_ms": 3.981292000389658,
-   "prefilter_ms": 24.406374999671243,
-   "total_ms": 125.68250000185799,
+   "query_ms": 4.2325829999754205,
+   "prefilter_ms": 24.619999996502884,
+   "total_ms": 122.48145799094345,
    "top": [
     "HOTEL-260220-2126-T1",
     "HOTEL-250521-2059-T1",
@@ -266,8 +293,13 @@
    ],
    "baseline_rank": null,
    "baseline_copycat_rank": 2,
-   "dtw_ms": 65.71937499393243,
-   "candidates": 500
+   "dtw_ms": 63.27429100929294,
+   "candidates": 500,
+   "forecast_error_m": 643.9927990776303,
+   "forecast_ms": 8.394750009756535,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-ALPHA-260303-T1",
@@ -278,9 +310,9 @@
    "true_rank": 1,
    "copycat_rank": 69,
    "window_s": 60,
-   "query_ms": 3.9436250081053004,
-   "prefilter_ms": 24.330290994839743,
-   "total_ms": 102.1976670017466,
+   "query_ms": 3.471750009339303,
+   "prefilter_ms": 24.23116599675268,
+   "total_ms": 101.24429200368468,
    "top": [
     "P1-BRAVO-251114-T1",
     "HOTEL-260220-2126-T1",
@@ -290,8 +322,13 @@
    ],
    "baseline_rank": 106,
    "baseline_copycat_rank": 8,
-   "dtw_ms": 42.42287500528619,
-   "candidates": 500
+   "dtw_ms": 42.31270799937192,
+   "candidates": 500,
+   "forecast_error_m": 644.2426852648515,
+   "forecast_ms": 7.890916996984743,
+   "linkage_hits": 2,
+   "linkage_total": 2,
+   "recall_ms": 7.276514001811544
   },
   {
    "track_id": "P1-ALPHA-260303-T1",
@@ -302,9 +339,9 @@
    "true_rank": 1,
    "copycat_rank": 65,
    "window_s": 120,
-   "query_ms": 3.845457991701551,
-   "prefilter_ms": 24.92675000394229,
-   "total_ms": 121.21408300299663,
+   "query_ms": 3.739624997251667,
+   "prefilter_ms": 23.760000010952353,
+   "total_ms": 116.03124999965075,
    "top": [
     "P1-BRAVO-251114-T1",
     "HOTEL-260220-2126-T1",
@@ -314,8 +351,13 @@
    ],
    "baseline_rank": 59,
    "baseline_copycat_rank": 13,
-   "dtw_ms": 57.46162499417551,
-   "candidates": 500
+   "dtw_ms": 54.74762499216013,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260322-2013-T1",
@@ -333,7 +375,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260322-2013-T1",
@@ -344,9 +391,9 @@
    "true_rank": 1,
    "copycat_rank": 44,
    "window_s": 60,
-   "query_ms": 4.262207992724143,
-   "prefilter_ms": 25.815125001827255,
-   "total_ms": 101.1227080016397,
+   "query_ms": 4.078458005096763,
+   "prefilter_ms": 25.233125008526258,
+   "total_ms": 98.94533299666364,
    "top": [
     "INDIA-250528-2000-T1",
     "INDIA-260223-2005-T1",
@@ -356,8 +403,13 @@
    ],
    "baseline_rank": 267,
    "baseline_copycat_rank": 390,
-   "dtw_ms": 39.79533399979118,
-   "candidates": 500
+   "dtw_ms": 39.28500000620261,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260322-2013-T1",
@@ -368,9 +420,9 @@
    "true_rank": 1,
    "copycat_rank": 52,
    "window_s": 60,
-   "query_ms": 4.0729160100454465,
-   "prefilter_ms": 25.538583999150433,
-   "total_ms": 91.42991600674577,
+   "query_ms": 3.890042004059069,
+   "prefilter_ms": 25.340624997625127,
+   "total_ms": 90.04879200074356,
    "top": [
     "KILO-250315-2022-T1",
     "INDIA-250528-2000-T1",
@@ -380,8 +432,13 @@
    ],
    "baseline_rank": 44,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 30.970209001679905,
-   "candidates": 500
+   "dtw_ms": 30.174917003023438,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260322-2013-T1",
@@ -392,9 +449,9 @@
    "true_rank": 1,
    "copycat_rank": 63,
    "window_s": 60,
-   "query_ms": 3.888916995492764,
-   "prefilter_ms": 24.42141599021852,
-   "total_ms": 87.29479199973866,
+   "query_ms": 3.7871249951422215,
+   "prefilter_ms": 24.38570899539627,
+   "total_ms": 86.58483299950603,
    "top": [
     "KILO-250315-2022-T1",
     "INDIA-260128-1931-T1",
@@ -404,8 +461,13 @@
    ],
    "baseline_rank": 18,
    "baseline_copycat_rank": 3,
-   "dtw_ms": 27.68229099456221,
-   "candidates": 500
+   "dtw_ms": 27.175875002285466,
+   "candidates": 500,
+   "forecast_error_m": 132.1601102173444,
+   "forecast_ms": 7.605624996358529,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260322-2013-T1",
@@ -416,9 +478,9 @@
    "true_rank": 1,
    "copycat_rank": 61,
    "window_s": 120,
-   "query_ms": 3.8843340007588267,
-   "prefilter_ms": 24.63908400386572,
-   "total_ms": 113.97079200833105,
+   "query_ms": 3.6179580056341365,
+   "prefilter_ms": 24.5217909978237,
+   "total_ms": 112.34008299652487,
    "top": [
     "KILO-250315-2022-T1",
     "INDIA-260128-1931-T1",
@@ -428,8 +490,13 @@
    ],
    "baseline_rank": 21,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 50.981459004106,
-   "candidates": 500
+   "dtw_ms": 49.948500003665686,
+   "candidates": 500,
+   "forecast_error_m": 252.7376687986147,
+   "forecast_ms": 8.128125002258457,
+   "linkage_hits": 1,
+   "linkage_total": 1,
+   "recall_ms": 6.006000000828256
   },
   {
    "track_id": "INDIA-260322-2013-T1",
@@ -440,9 +507,9 @@
    "true_rank": 1,
    "copycat_rank": 56,
    "window_s": 120,
-   "query_ms": 3.966042000683956,
-   "prefilter_ms": 24.532958006602712,
-   "total_ms": 113.60620900813956,
+   "query_ms": 3.7926250079181045,
+   "prefilter_ms": 23.80054199602455,
+   "total_ms": 110.92291701061185,
    "top": [
     "KILO-250315-2022-T1",
     "LIMA-251008-2019-T1",
@@ -452,8 +519,13 @@
    ],
    "baseline_rank": 27,
    "baseline_copycat_rank": 12,
-   "dtw_ms": 50.374500002362765,
-   "candidates": 500
+   "dtw_ms": 49.25424999964889,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260323-2034-T1",
@@ -471,7 +543,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260323-2034-T1",
@@ -482,9 +559,9 @@
    "true_rank": 1,
    "copycat_rank": 28,
    "window_s": 60,
-   "query_ms": 3.7037079891888425,
-   "prefilter_ms": 24.243124993517995,
-   "total_ms": 101.79408299154602,
+   "query_ms": 3.7677499931305647,
+   "prefilter_ms": 24.812999996356666,
+   "total_ms": 101.54216700175311,
    "top": [
     "HOTEL-250314-2030-T1",
     "FOXTROT-251215-2125-T1",
@@ -494,8 +571,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 9,
-   "dtw_ms": 43.88762499729637,
-   "candidates": 500
+   "dtw_ms": 43.145207993802615,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260323-2034-T1",
@@ -506,9 +588,9 @@
    "true_rank": 1,
    "copycat_rank": 32,
    "window_s": 60,
-   "query_ms": 3.730874988832511,
-   "prefilter_ms": 24.247666995506734,
-   "total_ms": 88.03933399030939,
+   "query_ms": 3.8876670005265623,
+   "prefilter_ms": 24.128292003297247,
+   "total_ms": 86.62695800012443,
    "top": [
     "HOTEL-250314-2030-T1",
     "FOXTROT-251215-2125-T1",
@@ -518,8 +600,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 28.61737499188166,
-   "candidates": 500
+   "dtw_ms": 28.327916996204294,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260323-2034-T1",
@@ -530,9 +617,9 @@
    "true_rank": 1,
    "copycat_rank": 38,
    "window_s": 60,
-   "query_ms": 3.7831670051673427,
-   "prefilter_ms": 24.451082994346507,
-   "total_ms": 85.65858400834259,
+   "query_ms": 3.9903750002849847,
+   "prefilter_ms": 25.02683400234673,
+   "total_ms": 86.76808400196023,
    "top": [
     "HOTEL-250314-2030-T1",
     "FOXTROT-251215-2125-T1",
@@ -542,8 +629,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 16,
-   "dtw_ms": 26.65549999801442,
-   "candidates": 500
+   "dtw_ms": 26.79866598919034,
+   "candidates": 500,
+   "forecast_error_m": 327.3798769531046,
+   "forecast_ms": 7.96483299927786,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260323-2034-T1",
@@ -554,9 +646,9 @@
    "true_rank": 1,
    "copycat_rank": 101,
    "window_s": 120,
-   "query_ms": 3.9057500107446685,
-   "prefilter_ms": 24.843082996085286,
-   "total_ms": 120.92191701231059,
+   "query_ms": 3.557707997970283,
+   "prefilter_ms": 24.349875006009825,
+   "total_ms": 118.52975000510924,
    "top": [
     "HOTEL-250314-2030-T1",
     "FOXTROT-251215-2125-T1",
@@ -566,8 +658,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 57.91312499786727,
-   "candidates": 500
+   "dtw_ms": 56.40491699159611,
+   "candidates": 500,
+   "forecast_error_m": 327.3533996705286,
+   "forecast_ms": 8.105333006824367,
+   "linkage_hits": 3,
+   "linkage_total": 3,
+   "recall_ms": 4.974694665482578
   },
   {
    "track_id": "ECHO-260323-2034-T1",
@@ -578,9 +675,9 @@
    "true_rank": 1,
    "copycat_rank": 35,
    "window_s": 120,
-   "query_ms": 4.013458004919812,
-   "prefilter_ms": 24.82370799407363,
-   "total_ms": 119.11283301014919,
+   "query_ms": 3.761125000892207,
+   "prefilter_ms": 24.302833000547253,
+   "total_ms": 118.19554200337734,
    "top": [
     "HOTEL-250314-2030-T1",
     "FOXTROT-251215-2125-T1",
@@ -590,8 +687,13 @@
    ],
    "baseline_rank": 3,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 56.24208399967756,
-   "candidates": 500
+   "dtw_ms": 55.72770799335558,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "GOLF-260409-2248-T1",
@@ -609,7 +711,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "GOLF-260409-2248-T1",
@@ -620,9 +727,9 @@
    "true_rank": 1,
    "copycat_rank": 365,
    "window_s": 60,
-   "query_ms": 3.906040990841575,
-   "prefilter_ms": 27.013375001843087,
-   "total_ms": 96.36529099952895,
+   "query_ms": 4.020042004412971,
+   "prefilter_ms": 26.580667006783187,
+   "total_ms": 94.0322499955073,
    "top": [
     "GOLF-251117-2305-T1",
     "GOLF-250512-2256-T1",
@@ -632,8 +739,13 @@
    ],
    "baseline_rank": 2,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 34.4467909890227,
-   "candidates": 500
+   "dtw_ms": 33.67129199614283,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "GOLF-260409-2248-T1",
@@ -644,9 +756,9 @@
    "true_rank": 1,
    "copycat_rank": 363,
    "window_s": 60,
-   "query_ms": 3.8487909914692864,
-   "prefilter_ms": 26.28558300784789,
-   "total_ms": 90.26475000428036,
+   "query_ms": 4.1728340002009645,
+   "prefilter_ms": 26.37950000644196,
+   "total_ms": 89.61558400187641,
    "top": [
     "GOLF-250512-2256-T1",
     "GOLF-251117-2305-T1",
@@ -656,8 +768,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 28.355292000924237,
-   "candidates": 500
+   "dtw_ms": 27.56937500089407,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "GOLF-260409-2248-T1",
@@ -668,9 +785,9 @@
    "true_rank": 1,
    "copycat_rank": 344,
    "window_s": 60,
-   "query_ms": 3.6760410002898425,
-   "prefilter_ms": 25.575749998097308,
-   "total_ms": 87.35404099570587,
+   "query_ms": 4.088083005626686,
+   "prefilter_ms": 25.882041998556815,
+   "total_ms": 86.62054099841043,
    "top": [
     "GOLF-250512-2256-T1",
     "GOLF-251117-2305-T1",
@@ -680,8 +797,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 27.182165998965502,
-   "candidates": 500
+   "dtw_ms": 26.140250003663823,
+   "candidates": 500,
+   "forecast_error_m": 314.2212650306146,
+   "forecast_ms": 7.978374997037463,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "GOLF-260409-2248-T1",
@@ -692,9 +814,9 @@
    "true_rank": 1,
    "copycat_rank": 363,
    "window_s": 120,
-   "query_ms": 3.9381250098813325,
-   "prefilter_ms": 25.93883300141897,
-   "total_ms": 114.86154100566637,
+   "query_ms": 3.6433339992072433,
+   "prefilter_ms": 25.792250002268702,
+   "total_ms": 112.62658399937209,
    "top": [
     "GOLF-251117-2305-T1",
     "GOLF-250512-2256-T1",
@@ -704,8 +826,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 9,
-   "dtw_ms": 50.41291599627584,
-   "candidates": 500
+   "dtw_ms": 49.267583002801985,
+   "candidates": 500,
+   "forecast_error_m": 314.2210510750858,
+   "forecast_ms": 8.008415999938734,
+   "linkage_hits": 4,
+   "linkage_total": 4,
+   "recall_ms": 5.414736001209046
   },
   {
    "track_id": "GOLF-260409-2248-T1",
@@ -716,9 +843,9 @@
    "true_rank": 1,
    "copycat_rank": 357,
    "window_s": 120,
-   "query_ms": 3.996332990936935,
-   "prefilter_ms": 25.38016600010451,
-   "total_ms": 112.24495799979195,
+   "query_ms": 3.941625007428229,
+   "prefilter_ms": 23.91045799595304,
+   "total_ms": 108.35404200770427,
    "top": [
     "GOLF-251117-2305-T1",
     "GOLF-250512-2256-T1",
@@ -728,8 +855,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 8,
-   "dtw_ms": 47.912416004692204,
-   "candidates": 500
+   "dtw_ms": 46.922334004193544,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-DELTA-260419-T1",
@@ -747,7 +879,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-DELTA-260419-T1",
@@ -758,9 +895,9 @@
    "true_rank": null,
    "copycat_rank": 288,
    "window_s": 60,
-   "query_ms": 4.012125005829148,
-   "prefilter_ms": 27.509667008416727,
-   "total_ms": 95.0971669954015,
+   "query_ms": 3.6676659947261214,
+   "prefilter_ms": 27.187792002223432,
+   "total_ms": 93.18604100553785,
    "top": [
     "LIMA-250406-2217-T1",
     "LIMA-250508-2204-T1",
@@ -770,8 +907,13 @@
    ],
    "baseline_rank": null,
    "baseline_copycat_rank": 31,
-   "dtw_ms": 33.048375000362284,
-   "candidates": 500
+   "dtw_ms": 32.4889999901643,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-DELTA-260419-T1",
@@ -782,9 +924,9 @@
    "true_rank": 1,
    "copycat_rank": 192,
    "window_s": 60,
-   "query_ms": 3.878624993376434,
-   "prefilter_ms": 27.033124992158264,
-   "total_ms": 96.08175000175834,
+   "query_ms": 3.8100419915281236,
+   "prefilter_ms": 26.66462500928901,
+   "total_ms": 94.37049999542069,
    "top": [
     "P1-ALPHA-260303-T1",
     "HOTEL-260220-2126-T1",
@@ -794,8 +936,13 @@
    ],
    "baseline_rank": 399,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 33.325917000183836,
-   "candidates": 500
+   "dtw_ms": 32.56208400125615,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-DELTA-260419-T1",
@@ -806,9 +953,9 @@
    "true_rank": 1,
    "copycat_rank": 139,
    "window_s": 60,
-   "query_ms": 3.762625012313947,
-   "prefilter_ms": 25.943000000552274,
-   "total_ms": 93.15750001405831,
+   "query_ms": 3.7103749928064644,
+   "prefilter_ms": 25.696500000776723,
+   "total_ms": 92.60208399791736,
    "top": [
     "P1-BRAVO-251114-T1",
     "P1-ALPHA-260303-T1",
@@ -818,8 +965,13 @@
    ],
    "baseline_rank": 101,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 32.09570799663197,
-   "candidates": 500
+   "dtw_ms": 32.126833000802435,
+   "candidates": 500,
+   "forecast_error_m": 620.1126667830918,
+   "forecast_ms": 7.7602079982170835,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-DELTA-260419-T1",
@@ -830,9 +982,9 @@
    "true_rank": 1,
    "copycat_rank": 144,
    "window_s": 120,
-   "query_ms": 3.9362499956041574,
-   "prefilter_ms": 25.53754199470859,
-   "total_ms": 120.25758399977349,
+   "query_ms": 3.468415990937501,
+   "prefilter_ms": 25.295208004536107,
+   "total_ms": 117.47587499849033,
    "top": [
     "P1-BRAVO-251114-T1",
     "P1-ALPHA-260303-T1",
@@ -842,8 +994,13 @@
    ],
    "baseline_rank": 101,
    "baseline_copycat_rank": 3,
-   "dtw_ms": 55.770457998733036,
-   "candidates": 500
+   "dtw_ms": 54.56762500398327,
+   "candidates": 500,
+   "forecast_error_m": 616.6364346468912,
+   "forecast_ms": 7.894958995166235,
+   "linkage_hits": 2,
+   "linkage_total": 2,
+   "recall_ms": 5.176583334105089
   },
   {
    "track_id": "P1-DELTA-260419-T1",
@@ -854,9 +1011,9 @@
    "true_rank": 1,
    "copycat_rank": 85,
    "window_s": 120,
-   "query_ms": 3.871583001455292,
-   "prefilter_ms": 25.355666992254555,
-   "total_ms": 118.42641601106152,
+   "query_ms": 4.215792010654695,
+   "prefilter_ms": 24.74220801377669,
+   "total_ms": 116.78141700394917,
    "top": [
     "P1-ALPHA-260303-T1",
     "HOTEL-260220-2126-T1",
@@ -866,8 +1023,13 @@
    ],
    "baseline_rank": 49,
    "baseline_copycat_rank": 3,
-   "dtw_ms": 54.38304199196864,
-   "candidates": 500
+   "dtw_ms": 52.930125006241724,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "KILO-260419-2014-T1",
@@ -885,7 +1047,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "KILO-260419-2014-T1",
@@ -896,9 +1063,9 @@
    "true_rank": 1,
    "copycat_rank": 37,
    "window_s": 60,
-   "query_ms": 3.7523339997278526,
-   "prefilter_ms": 26.718749999417923,
-   "total_ms": 96.34920900862198,
+   "query_ms": 3.774790995521471,
+   "prefilter_ms": 26.614375005010515,
+   "total_ms": 95.15966600156389,
    "top": [
     "INDIA-250528-2000-T1",
     "LIMA-251008-2019-T1",
@@ -908,8 +1075,13 @@
    ],
    "baseline_rank": 256,
    "baseline_copycat_rank": 149,
-   "dtw_ms": 34.434915985912085,
-   "candidates": 500
+   "dtw_ms": 33.62624999135733,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "KILO-260419-2014-T1",
@@ -920,9 +1092,9 @@
    "true_rank": 1,
    "copycat_rank": 8,
    "window_s": 60,
-   "query_ms": 3.9559589931741357,
-   "prefilter_ms": 26.694749991293065,
-   "total_ms": 94.48979199805763,
+   "query_ms": 3.6755000037373975,
+   "prefilter_ms": 26.356542002758943,
+   "total_ms": 93.87604199582711,
    "top": [
     "KILO-250315-2022-T1",
     "INDIA-250528-2000-T1",
@@ -932,8 +1104,13 @@
    ],
    "baseline_rank": 247,
    "baseline_copycat_rank": 59,
-   "dtw_ms": 32.62016600638162,
-   "candidates": 500
+   "dtw_ms": 32.315834003384225,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "KILO-260419-2014-T1",
@@ -944,9 +1121,9 @@
    "true_rank": 1,
    "copycat_rank": 10,
    "window_s": 60,
-   "query_ms": 3.910625004209578,
-   "prefilter_ms": 26.444167000590824,
-   "total_ms": 92.97745799995027,
+   "query_ms": 3.7824580067535862,
+   "prefilter_ms": 25.668375004897825,
+   "total_ms": 90.03887500148267,
    "top": [
     "KILO-250315-2022-T1",
     "LIMA-250610-1936-T1",
@@ -956,8 +1133,13 @@
    ],
    "baseline_rank": 9,
    "baseline_copycat_rank": 2,
-   "dtw_ms": 30.33466701162979,
-   "candidates": 500
+   "dtw_ms": 29.461291996994987,
+   "candidates": 500,
+   "forecast_error_m": 473.7235069384993,
+   "forecast_ms": 7.782208995195106,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "KILO-260419-2014-T1",
@@ -968,9 +1150,9 @@
    "true_rank": 1,
    "copycat_rank": 10,
    "window_s": 120,
-   "query_ms": 3.9172090037027374,
-   "prefilter_ms": 25.770625012228265,
-   "total_ms": 116.77079201035667,
+   "query_ms": 3.530125002725981,
+   "prefilter_ms": 25.211291998857632,
+   "total_ms": 115.35254199407063,
    "top": [
     "KILO-250315-2022-T1",
     "INDIA-260322-2013-T1",
@@ -980,8 +1162,13 @@
    ],
    "baseline_rank": 13,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 52.026500008651055,
-   "candidates": 500
+   "dtw_ms": 51.34179200103972,
+   "candidates": 500,
+   "forecast_error_m": 367.69641730910473,
+   "forecast_ms": 8.342208006069995,
+   "linkage_hits": 2,
+   "linkage_total": 2,
+   "recall_ms": 4.502222334849648
   },
   {
    "track_id": "KILO-260419-2014-T1",
@@ -992,9 +1179,9 @@
    "true_rank": 1,
    "copycat_rank": 10,
    "window_s": 120,
-   "query_ms": 3.976124993641861,
-   "prefilter_ms": 25.079917002585717,
-   "total_ms": 113.33258399099577,
+   "query_ms": 3.8682919985149056,
+   "prefilter_ms": 24.575291987275705,
+   "total_ms": 110.63058300351258,
    "top": [
     "KILO-250315-2022-T1",
     "INDIA-260128-1931-T1",
@@ -1004,8 +1191,13 @@
    ],
    "baseline_rank": 13,
    "baseline_copycat_rank": 11,
-   "dtw_ms": 48.738375000539236,
-   "candidates": 500
+   "dtw_ms": 47.49024999910034,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260421-0217-T1",
@@ -1023,7 +1215,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260421-0217-T1",
@@ -1034,9 +1231,9 @@
    "true_rank": 1,
    "copycat_rank": 199,
    "window_s": 60,
-   "query_ms": 3.948707992094569,
-   "prefilter_ms": 25.769291998585686,
-   "total_ms": 83.89579199138097,
+   "query_ms": 3.912000000127591,
+   "prefilter_ms": 25.795541994739324,
+   "total_ms": 82.8544999967562,
    "top": [
     "BRAVO-250725-0208-T1",
     "GOLF-260212-0152-T1",
@@ -1046,8 +1243,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 4,
-   "dtw_ms": 23.47866700438317,
-   "candidates": 500
+   "dtw_ms": 22.791208000853658,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260421-0217-T1",
@@ -1058,9 +1260,9 @@
    "true_rank": 1,
    "copycat_rank": 185,
    "window_s": 60,
-   "query_ms": 3.86925000930205,
-   "prefilter_ms": 25.19162501266692,
-   "total_ms": 82.55029100109823,
+   "query_ms": 3.7017909926362336,
+   "prefilter_ms": 25.497499998891726,
+   "total_ms": 82.41133300180081,
    "top": [
     "GOLF-260212-0152-T1",
     "BRAVO-250725-0208-T1",
@@ -1070,8 +1272,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 4,
-   "dtw_ms": 22.480166007881053,
-   "candidates": 500
+   "dtw_ms": 22.402582995709963,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260421-0217-T1",
@@ -1082,9 +1289,9 @@
    "true_rank": 1,
    "copycat_rank": 193,
    "window_s": 60,
-   "query_ms": 3.966000003856607,
-   "prefilter_ms": 25.595708008040674,
-   "total_ms": 85.87041699502151,
+   "query_ms": 3.6181250034132972,
+   "prefilter_ms": 25.504833000013605,
+   "total_ms": 84.08950000011828,
    "top": [
     "GOLF-260212-0152-T1",
     "BRAVO-250725-0208-T1",
@@ -1094,8 +1301,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 12,
-   "dtw_ms": 24.770041010924615,
-   "candidates": 500
+   "dtw_ms": 23.94608300528489,
+   "candidates": 500,
+   "forecast_error_m": 395.68196070232096,
+   "forecast_ms": 8.053500001551583,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260421-0217-T1",
@@ -1106,9 +1318,9 @@
    "true_rank": 1,
    "copycat_rank": 163,
    "window_s": 120,
-   "query_ms": 4.403416009154171,
-   "prefilter_ms": 25.595125000108965,
-   "total_ms": 111.08525001327507,
+   "query_ms": 3.570625005522743,
+   "prefilter_ms": 25.704749990836717,
+   "total_ms": 109.0769580041524,
    "top": [
     "GOLF-260212-0152-T1",
     "BRAVO-250725-0208-T1",
@@ -1118,8 +1330,13 @@
    ],
    "baseline_rank": 3,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 45.64962499716785,
-   "candidates": 500
+   "dtw_ms": 45.421707996865734,
+   "candidates": 500,
+   "forecast_error_m": 548.7078422342623,
+   "forecast_ms": 8.813499996904284,
+   "linkage_hits": 5,
+   "linkage_total": 5,
+   "recall_ms": 5.120027664816007
   },
   {
    "track_id": "BRAVO-260421-0217-T1",
@@ -1130,9 +1347,9 @@
    "true_rank": 1,
    "copycat_rank": 202,
    "window_s": 120,
-   "query_ms": 4.044166998937726,
-   "prefilter_ms": 25.37224999105092,
-   "total_ms": 112.53966699587181,
+   "query_ms": 3.8057909987401217,
+   "prefilter_ms": 23.923000000650063,
+   "total_ms": 108.64095798751805,
    "top": [
     "GOLF-260212-0152-T1",
     "BRAVO-250725-0208-T1",
@@ -1142,8 +1359,13 @@
    ],
    "baseline_rank": 2,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 47.54062500433065,
-   "candidates": 500
+   "dtw_ms": 45.95204100769479,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260427-0053-T1",
@@ -1161,7 +1383,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260427-0053-T1",
@@ -1172,9 +1399,9 @@
    "true_rank": 1,
    "copycat_rank": 412,
    "window_s": 60,
-   "query_ms": 4.3623329984257,
-   "prefilter_ms": 27.08724999683909,
-   "total_ms": 92.05558300891425,
+   "query_ms": 3.9836250070948154,
+   "prefilter_ms": 26.82191699568648,
+   "total_ms": 90.2727080101613,
    "top": [
     "CHARLIE-260120-0016-T1",
     "DELTA-251126-0018-T1",
@@ -1184,8 +1411,13 @@
    ],
    "baseline_rank": 221,
    "baseline_copycat_rank": 278,
-   "dtw_ms": 28.703290998237208,
-   "candidates": 500
+   "dtw_ms": 28.325833001872525,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260427-0053-T1",
@@ -1196,9 +1428,9 @@
    "true_rank": 1,
    "copycat_rank": 414,
    "window_s": 60,
-   "query_ms": 3.9431670011254027,
-   "prefilter_ms": 26.81783400475979,
-   "total_ms": 90.76558300876059,
+   "query_ms": 3.7995839957147837,
+   "prefilter_ms": 26.779374995385297,
+   "total_ms": 89.29604200238828,
    "top": [
     "CHARLIE-250603-2306-T1",
     "DELTA-250401-2344-T1",
@@ -1208,8 +1440,13 @@
    ],
    "baseline_rank": 176,
    "baseline_copycat_rank": 241,
-   "dtw_ms": 27.917708997847512,
-   "candidates": 500
+   "dtw_ms": 27.24258399393875,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260427-0053-T1",
@@ -1220,9 +1457,9 @@
    "true_rank": 1,
    "copycat_rank": 377,
    "window_s": 60,
-   "query_ms": 3.9143330068327487,
-   "prefilter_ms": 26.404707998153754,
-   "total_ms": 89.14741600165144,
+   "query_ms": 3.9320420037256554,
+   "prefilter_ms": 26.762667010189034,
+   "total_ms": 88.21833299589343,
    "top": [
     "CHARLIE-260120-0016-T1",
     "CHARLIE-260212-0037-T1",
@@ -1232,8 +1469,13 @@
    ],
    "baseline_rank": 39,
    "baseline_copycat_rank": 19,
-   "dtw_ms": 27.269124999293126,
-   "candidates": 500
+   "dtw_ms": 25.9989170008339,
+   "candidates": 500,
+   "forecast_error_m": 227.26918111186475,
+   "forecast_ms": 7.876667004893534,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260427-0053-T1",
@@ -1244,9 +1486,9 @@
    "true_rank": 1,
    "copycat_rank": 397,
    "window_s": 60,
-   "query_ms": 4.034708006656729,
-   "prefilter_ms": 25.845374999335036,
-   "total_ms": 88.4707080113003,
+   "query_ms": 3.5017089976463467,
+   "prefilter_ms": 25.947040994651616,
+   "total_ms": 86.83924999786541,
    "top": [
     "CHARLIE-260120-0016-T1",
     "CHARLIE-250528-0047-T1",
@@ -1256,8 +1498,13 @@
    ],
    "baseline_rank": 13,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 26.394583997898735,
-   "candidates": 500
+   "dtw_ms": 25.780500000109896,
+   "candidates": 500,
+   "forecast_error_m": 319.361918343393,
+   "forecast_ms": 8.127833003527485,
+   "linkage_hits": 3,
+   "linkage_total": 3,
+   "recall_ms": 4.7407916669423384
   },
   {
    "track_id": "DELTA-260427-0053-T1",
@@ -1268,9 +1515,9 @@
    "true_rank": 1,
    "copycat_rank": 317,
    "window_s": 120,
-   "query_ms": 3.9244579966180027,
-   "prefilter_ms": 25.84954199846834,
-   "total_ms": 121.7613749904558,
+   "query_ms": 3.9939580019563437,
+   "prefilter_ms": 24.806583009194583,
+   "total_ms": 120.33237500872929,
    "top": [
     "CHARLIE-260120-0016-T1",
     "CHARLIE-250528-0047-T1",
@@ -1280,8 +1527,13 @@
    ],
    "baseline_rank": 12,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 56.28900000010617,
-   "candidates": 500
+   "dtw_ms": 55.81779200292658,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "HOTEL-260428-2016-T1",
@@ -1299,7 +1551,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "HOTEL-260428-2016-T1",
@@ -1310,9 +1567,9 @@
    "true_rank": 1,
    "copycat_rank": 15,
    "window_s": 60,
-   "query_ms": 4.292083001928404,
-   "prefilter_ms": 26.85379200556781,
-   "total_ms": 91.65762500197161,
+   "query_ms": 3.808500012382865,
+   "prefilter_ms": 25.40370900533162,
+   "total_ms": 85.67079200292937,
    "top": [
     "FOXTROT-250418-2022-T1",
     "HOTEL-250521-2059-T1",
@@ -1322,8 +1579,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 4,
-   "dtw_ms": 26.906708008027636,
-   "candidates": 500
+   "dtw_ms": 25.441082994802855,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "HOTEL-260428-2016-T1",
@@ -1334,9 +1596,9 @@
    "true_rank": 1,
    "copycat_rank": 15,
    "window_s": 60,
-   "query_ms": 4.831540994928218,
-   "prefilter_ms": 27.165499996044673,
-   "total_ms": 88.54300000530202,
+   "query_ms": 3.8430830027209595,
+   "prefilter_ms": 25.919542007613927,
+   "total_ms": 84.25870799692348,
    "top": [
     "HOTEL-250521-2059-T1",
     "FOXTROT-250418-2022-T1",
@@ -1346,8 +1608,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 24.2430000071181,
-   "candidates": 500
+   "dtw_ms": 23.583416987094097,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "HOTEL-260428-2016-T1",
@@ -1358,9 +1625,9 @@
    "true_rank": 1,
    "copycat_rank": 15,
    "window_s": 60,
-   "query_ms": 4.330457988544367,
-   "prefilter_ms": 26.25020800041966,
-   "total_ms": 88.82979198824614,
+   "query_ms": 3.85054100479465,
+   "prefilter_ms": 26.030791996163316,
+   "total_ms": 87.0064160117181,
    "top": [
     "FOXTROT-250718-2029-T1",
     "FOXTROT-250418-2022-T1",
@@ -1370,8 +1637,13 @@
    ],
    "baseline_rank": 5,
    "baseline_copycat_rank": 11,
-   "dtw_ms": 26.412417006213218,
-   "candidates": 500
+   "dtw_ms": 25.75204099412076,
+   "candidates": 500,
+   "forecast_error_m": 461.61981328801414,
+   "forecast_ms": 7.372207997832447,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "HOTEL-260428-2016-T1",
@@ -1382,9 +1654,9 @@
    "true_rank": 1,
    "copycat_rank": 14,
    "window_s": 120,
-   "query_ms": 3.9408339944202453,
-   "prefilter_ms": 26.118124995264225,
-   "total_ms": 112.18712500703987,
+   "query_ms": 3.714083999511786,
+   "prefilter_ms": 25.42258299945388,
+   "total_ms": 109.98829200980254,
    "top": [
     "FOXTROT-250418-2022-T1",
     "HOTEL-250521-2059-T1",
@@ -1394,8 +1666,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 22,
-   "dtw_ms": 47.461333000683226,
-   "candidates": 500
+   "dtw_ms": 46.27566700219177,
+   "candidates": 500,
+   "forecast_error_m": 461.61750252376305,
+   "forecast_ms": 8.223415992688388,
+   "linkage_hits": 2,
+   "linkage_total": 2,
+   "recall_ms": 4.53572233285134
   },
   {
    "track_id": "HOTEL-260428-2016-T1",
@@ -1406,9 +1683,9 @@
    "true_rank": 1,
    "copycat_rank": 19,
    "window_s": 120,
-   "query_ms": 4.0660830127308145,
-   "prefilter_ms": 26.375375004136004,
-   "total_ms": 115.69012500694953,
+   "query_ms": 3.6792920000152662,
+   "prefilter_ms": 24.60374998918269,
+   "total_ms": 113.23358399386052,
    "top": [
     "FOXTROT-250418-2022-T1",
     "HOTEL-250521-2059-T1",
@@ -1418,8 +1695,13 @@
    ],
    "baseline_rank": 5,
    "baseline_copycat_rank": 12,
-   "dtw_ms": 50.3498329926515,
-   "candidates": 500
+   "dtw_ms": 50.363125003059395,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-ALPHA-260502-T1",
@@ -1437,7 +1719,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-ALPHA-260502-T1",
@@ -1448,9 +1735,9 @@
    "true_rank": null,
    "copycat_rank": 149,
    "window_s": 60,
-   "query_ms": 3.912083004252054,
-   "prefilter_ms": 26.996583997970447,
-   "total_ms": 88.38562500022817,
+   "query_ms": 3.707791998749599,
+   "prefilter_ms": 26.379582996014506,
+   "total_ms": 86.26024999830406,
    "top": [
     "FOXTROT-250418-2022-T1",
     "FOXTROT-251215-2125-T1",
@@ -1460,8 +1747,13 @@
    ],
    "baseline_rank": null,
    "baseline_copycat_rank": 82,
-   "dtw_ms": 27.04499999526888,
-   "candidates": 500
+   "dtw_ms": 25.938624996342696,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-ALPHA-260502-T1",
@@ -1472,9 +1764,9 @@
    "true_rank": null,
    "copycat_rank": 277,
    "window_s": 60,
-   "query_ms": 4.1817080054897815,
-   "prefilter_ms": 26.907791994744912,
-   "total_ms": 90.19708300183993,
+   "query_ms": 3.689916993607767,
+   "prefilter_ms": 26.729250006610528,
+   "total_ms": 87.73729199310765,
    "top": [
     "FOXTROT-260224-2059-T1",
     "FOXTROT-251215-2125-T1",
@@ -1484,8 +1776,13 @@
    ],
    "baseline_rank": null,
    "baseline_copycat_rank": 33,
-   "dtw_ms": 27.324541995767504,
-   "candidates": 500
+   "dtw_ms": 26.821749997907318,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-ALPHA-260502-T1",
@@ -1496,9 +1793,9 @@
    "true_rank": 1,
    "copycat_rank": 63,
    "window_s": 60,
-   "query_ms": 3.958040993893519,
-   "prefilter_ms": 26.425874995766208,
-   "total_ms": 88.27216600184329,
+   "query_ms": 3.612209009588696,
+   "prefilter_ms": 26.769375006551854,
+   "total_ms": 87.82045901170932,
    "top": [
     "P1-ALPHA-260303-T1",
     "HOTEL-260220-2126-T1",
@@ -1508,8 +1805,13 @@
    ],
    "baseline_rank": 16,
    "baseline_copycat_rank": 9,
-   "dtw_ms": 26.506416004849598,
-   "candidates": 500
+   "dtw_ms": 26.502041990170255,
+   "candidates": 500,
+   "forecast_error_m": 508.7707143135988,
+   "forecast_ms": 7.940582989249378,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-ALPHA-260502-T1",
@@ -1520,9 +1822,9 @@
    "true_rank": 1,
    "copycat_rank": 67,
    "window_s": 120,
-   "query_ms": 3.7730420008301735,
-   "prefilter_ms": 25.97662499465514,
-   "total_ms": 113.10691699327435,
+   "query_ms": 3.4706250007729977,
+   "prefilter_ms": 25.534457992762327,
+   "total_ms": 110.61241698917001,
    "top": [
     "P1-ALPHA-260303-T1",
     "HOTEL-260220-2126-T1",
@@ -1532,8 +1834,13 @@
    ],
    "baseline_rank": 96,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 48.903832997893915,
-   "candidates": 500
+   "dtw_ms": 47.66220900637563,
+   "candidates": 500,
+   "forecast_error_m": 505.9202839635266,
+   "forecast_ms": 8.38262499019038,
+   "linkage_hits": 2,
+   "linkage_total": 2,
+   "recall_ms": 4.983610997442156
   },
   {
    "track_id": "P1-ALPHA-260502-T1",
@@ -1544,9 +1851,9 @@
    "true_rank": 1,
    "copycat_rank": 35,
    "window_s": 120,
-   "query_ms": 3.7513330025831237,
-   "prefilter_ms": 25.98391700303182,
-   "total_ms": 118.53599999449216,
+   "query_ms": 3.7252500042086467,
+   "prefilter_ms": 25.192417000653222,
+   "total_ms": 117.1190419991035,
    "top": [
     "P1-ALPHA-260303-T1",
     "HOTEL-260220-2126-T1",
@@ -1556,8 +1863,13 @@
    ],
    "baseline_rank": 45,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 53.801292000571266,
-   "candidates": 500
+   "dtw_ms": 53.20866699912585,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260531-0005-T1",
@@ -1575,7 +1887,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260531-0005-T1",
@@ -1586,9 +1903,9 @@
    "true_rank": 1,
    "copycat_rank": 447,
    "window_s": 60,
-   "query_ms": 3.7299999967217445,
-   "prefilter_ms": 27.140209000208415,
-   "total_ms": 99.88041598990094,
+   "query_ms": 3.7604170065606013,
+   "prefilter_ms": 26.966167002683505,
+   "total_ms": 99.46966700954363,
    "top": [
     "DELTA-250401-2344-T1",
     "DELTA-260427-0053-T1",
@@ -1598,8 +1915,13 @@
    ],
    "baseline_rank": 12,
    "baseline_copycat_rank": 239,
-   "dtw_ms": 37.530292000155896,
-   "candidates": 500
+   "dtw_ms": 37.09516700473614,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260531-0005-T1",
@@ -1610,9 +1932,9 @@
    "true_rank": 1,
    "copycat_rank": 393,
    "window_s": 60,
-   "query_ms": 3.9271249988814816,
-   "prefilter_ms": 27.323457994498312,
-   "total_ms": 97.95574999589007,
+   "query_ms": 3.9451659977203235,
+   "prefilter_ms": 47.14916700322647,
+   "total_ms": 116.21949999243952,
    "top": [
     "DELTA-250401-2344-T1",
     "JULIET-260316-2209-T1",
@@ -1622,8 +1944,13 @@
    ],
    "baseline_rank": 16,
    "baseline_copycat_rank": 470,
-   "dtw_ms": 34.34416699747089,
-   "candidates": 500
+   "dtw_ms": 33.38541599805467,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260531-0005-T1",
@@ -1634,9 +1961,9 @@
    "true_rank": 1,
    "copycat_rank": 410,
    "window_s": 60,
-   "query_ms": 3.899792005540803,
-   "prefilter_ms": 27.02500000305008,
-   "total_ms": 97.3577499971725,
+   "query_ms": 3.789499998674728,
+   "prefilter_ms": 27.34575000067707,
+   "total_ms": 97.85174998978619,
    "top": [
     "CHARLIE-260120-0016-T1",
     "DELTA-250401-2344-T1",
@@ -1646,8 +1973,13 @@
    ],
    "baseline_rank": 153,
    "baseline_copycat_rank": 244,
-   "dtw_ms": 35.03762499894947,
-   "candidates": 500
+   "dtw_ms": 34.64783298841212,
+   "candidates": 500,
+   "forecast_error_m": 121.65355676567627,
+   "forecast_ms": 8.122500003082678,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260531-0005-T1",
@@ -1658,9 +1990,9 @@
    "true_rank": 1,
    "copycat_rank": 405,
    "window_s": 120,
-   "query_ms": 4.126041996642016,
-   "prefilter_ms": 27.77633299410809,
-   "total_ms": 127.32262499048375,
+   "query_ms": 3.677290995256044,
+   "prefilter_ms": 27.307583004585467,
+   "total_ms": 124.63716599449981,
    "top": [
     "DELTA-250401-2344-T1",
     "CHARLIE-260120-0016-T1",
@@ -1670,8 +2002,13 @@
    ],
    "baseline_rank": 34,
    "baseline_copycat_rank": 143,
-   "dtw_ms": 59.436791998450644,
-   "candidates": 500
+   "dtw_ms": 57.939584003179334,
+   "candidates": 500,
+   "forecast_error_m": 149.029042281957,
+   "forecast_ms": 9.413874999154359,
+   "linkage_hits": 5,
+   "linkage_total": 5,
+   "recall_ms": 4.675166666856967
   },
   {
    "track_id": "DELTA-260531-0005-T1",
@@ -1682,9 +2019,9 @@
    "true_rank": 1,
    "copycat_rank": 283,
    "window_s": 120,
-   "query_ms": 4.259124994860031,
-   "prefilter_ms": 27.63724999385886,
-   "total_ms": 119.83979100477882,
+   "query_ms": 3.9876670052763075,
+   "prefilter_ms": 26.803749991813675,
+   "total_ms": 119.03933400753886,
    "top": [
     "DELTA-250401-2344-T1",
     "DELTA-251126-0018-T1",
@@ -1694,8 +2031,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 24,
-   "dtw_ms": 52.4644580000313,
-   "candidates": 500
+   "dtw_ms": 52.03841699403711,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "KILO-260612-1950-T1",
@@ -1713,7 +2055,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "KILO-260612-1950-T1",
@@ -1724,9 +2071,9 @@
    "true_rank": 1,
    "copycat_rank": 4,
    "window_s": 60,
-   "query_ms": 3.8669170025968924,
-   "prefilter_ms": 28.25775000383146,
-   "total_ms": 91.39391699864063,
+   "query_ms": 3.9742920052958652,
+   "prefilter_ms": 28.49366600275971,
+   "total_ms": 92.38020899647381,
    "top": [
     "KILO-260419-2014-T1",
     "INDIA-260128-1931-T1",
@@ -1736,8 +2083,13 @@
    ],
    "baseline_rank": 64,
    "baseline_copycat_rank": 82,
-   "dtw_ms": 28.42991700163111,
-   "candidates": 500
+   "dtw_ms": 28.561708008055575,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "KILO-260612-1950-T1",
@@ -1748,9 +2100,9 @@
    "true_rank": 1,
    "copycat_rank": 14,
    "window_s": 60,
-   "query_ms": 3.832540998701006,
-   "prefilter_ms": 27.74820900231134,
-   "total_ms": 90.73574999638367,
+   "query_ms": 3.6745410034200177,
+   "prefilter_ms": 27.687957990565337,
+   "total_ms": 88.60758299124427,
    "top": [
     "KILO-250315-2022-T1",
     "KILO-260419-2014-T1",
@@ -1760,8 +2112,13 @@
    ],
    "baseline_rank": 25,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 27.468125001178123,
-   "candidates": 500
+   "dtw_ms": 26.120583002921194,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "KILO-260612-1950-T1",
@@ -1772,9 +2129,9 @@
    "true_rank": 1,
    "copycat_rank": 11,
    "window_s": 60,
-   "query_ms": 3.954667001380585,
-   "prefilter_ms": 27.074375000665896,
-   "total_ms": 90.09837500343565,
+   "query_ms": 3.8838750042486936,
+   "prefilter_ms": 26.853165996726602,
+   "total_ms": 89.00495900888927,
    "top": [
     "KILO-250315-2022-T1",
     "KILO-260419-2014-T1",
@@ -1784,8 +2141,13 @@
    ],
    "baseline_rank": 11,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 27.67583300010301,
-   "candidates": 500
+   "dtw_ms": 27.108249996672384,
+   "candidates": 500,
+   "forecast_error_m": 341.70121756055414,
+   "forecast_ms": 8.147916989400983,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "KILO-260612-1950-T1",
@@ -1796,9 +2158,9 @@
    "true_rank": 1,
    "copycat_rank": 11,
    "window_s": 120,
-   "query_ms": 3.77466699865181,
-   "prefilter_ms": 27.802333002910018,
-   "total_ms": 117.6389579923125,
+   "query_ms": 3.495832992484793,
+   "prefilter_ms": 27.511999986018054,
+   "total_ms": 115.97095799515955,
    "top": [
     "KILO-250315-2022-T1",
     "KILO-260419-2014-T1",
@@ -1808,8 +2170,13 @@
    ],
    "baseline_rank": 9,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 51.056209005764686,
-   "candidates": 500
+   "dtw_ms": 49.730707993148826,
+   "candidates": 500,
+   "forecast_error_m": 347.7292401534451,
+   "forecast_ms": 7.8213329979917035,
+   "linkage_hits": 2,
+   "linkage_total": 2,
+   "recall_ms": 4.594305666008343
   },
   {
    "track_id": "KILO-260612-1950-T1",
@@ -1820,9 +2187,9 @@
    "true_rank": 1,
    "copycat_rank": 11,
    "window_s": 120,
-   "query_ms": 4.163374993368052,
-   "prefilter_ms": 27.05154099385254,
-   "total_ms": 114.86474999401253,
+   "query_ms": 3.7229169975034893,
+   "prefilter_ms": 26.699333000578918,
+   "total_ms": 114.01037500763778,
    "top": [
     "KILO-250315-2022-T1",
     "KILO-260419-2014-T1",
@@ -1832,8 +2199,13 @@
    ],
    "baseline_rank": 28,
    "baseline_copycat_rank": 21,
-   "dtw_ms": 48.1396249961108,
-   "candidates": 500
+   "dtw_ms": 47.82274999888614,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260623-2053-T1",
@@ -1851,7 +2223,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260623-2053-T1",
@@ -1862,9 +2239,9 @@
    "true_rank": 1,
    "copycat_rank": 36,
    "window_s": 60,
-   "query_ms": 3.698708998854272,
-   "prefilter_ms": 27.395958997658454,
-   "total_ms": 92.58266699907836,
+   "query_ms": 3.80045898782555,
+   "prefilter_ms": 27.793208995717578,
+   "total_ms": 92.11149999464396,
    "top": [
     "HOTEL-260428-2016-T1",
     "HOTEL-250521-2059-T1",
@@ -1874,8 +2251,13 @@
    ],
    "baseline_rank": 4,
    "baseline_copycat_rank": 81,
-   "dtw_ms": 29.99104199989233,
-   "candidates": 500
+   "dtw_ms": 29.353042002185248,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260623-2053-T1",
@@ -1886,9 +2268,9 @@
    "true_rank": 1,
    "copycat_rank": 22,
    "window_s": 60,
-   "query_ms": 3.893667002557777,
-   "prefilter_ms": 27.12650000466965,
-   "total_ms": 90.80849999736529,
+   "query_ms": 3.941791001125239,
+   "prefilter_ms": 26.97983299731277,
+   "total_ms": 89.47520800575148,
    "top": [
     "ECHO-250813-2034-T1",
     "HOTEL-260428-2016-T1",
@@ -1898,8 +2280,13 @@
    ],
    "baseline_rank": 6,
    "baseline_copycat_rank": 63,
-   "dtw_ms": 27.796000009402633,
-   "candidates": 500
+   "dtw_ms": 27.061208005761728,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260623-2053-T1",
@@ -1910,9 +2297,9 @@
    "true_rank": 1,
    "copycat_rank": 19,
    "window_s": 60,
-   "query_ms": 3.7370420031948015,
-   "prefilter_ms": 26.862541999435052,
-   "total_ms": 89.89991700218525,
+   "query_ms": 3.8015840109437704,
+   "prefilter_ms": 27.345540991518646,
+   "total_ms": 89.43562500644475,
    "top": [
     "ECHO-250813-2034-T1",
     "HOTEL-250521-2059-T1",
@@ -1922,8 +2309,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 14,
-   "dtw_ms": 27.414583004429005,
-   "candidates": 500
+   "dtw_ms": 26.5059579978697,
+   "candidates": 500,
+   "forecast_error_m": 272.79243104895664,
+   "forecast_ms": 7.957292007631622,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260623-2053-T1",
@@ -1934,9 +2326,9 @@
    "true_rank": 1,
    "copycat_rank": 54,
    "window_s": 120,
-   "query_ms": 4.281124987755902,
-   "prefilter_ms": 28.58804199786391,
-   "total_ms": 125.02604199107736,
+   "query_ms": 3.5857920011039823,
+   "prefilter_ms": 27.826707999338396,
+   "total_ms": 122.59787500079256,
    "top": [
     "ECHO-250813-2034-T1",
     "FOXTROT-250418-2022-T1",
@@ -1946,8 +2338,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 30,
-   "dtw_ms": 56.503667001379654,
-   "candidates": 500
+   "dtw_ms": 55.83887499233242,
+   "candidates": 500,
+   "forecast_error_m": 272.78745345962983,
+   "forecast_ms": 7.845540996640921,
+   "linkage_hits": 3,
+   "linkage_total": 3,
+   "recall_ms": 4.517263999635664
   },
   {
    "track_id": "ECHO-260623-2053-T1",
@@ -1958,9 +2355,9 @@
    "true_rank": 1,
    "copycat_rank": 28,
    "window_s": 120,
-   "query_ms": 4.345583001850173,
-   "prefilter_ms": 27.960499995970167,
-   "total_ms": 125.77858300937805,
+   "query_ms": 3.7129999982425943,
+   "prefilter_ms": 27.12787498603575,
+   "total_ms": 122.10987499565817,
    "top": [
     "ECHO-250813-2034-T1",
     "FOXTROT-250418-2022-T1",
@@ -1970,8 +2367,13 @@
    ],
    "baseline_rank": 2,
    "baseline_copycat_rank": 14,
-   "dtw_ms": 56.87374999979511,
-   "candidates": 500
+   "dtw_ms": 55.8279160031816,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260625-0136-T1",
@@ -1989,7 +2391,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260625-0136-T1",
@@ -2000,9 +2407,9 @@
    "true_rank": 1,
    "copycat_rank": 238,
    "window_s": 60,
-   "query_ms": 4.054916003951803,
-   "prefilter_ms": 26.859834004426375,
-   "total_ms": 88.85966599336825,
+   "query_ms": 3.709833006723784,
+   "prefilter_ms": 26.860040990868583,
+   "total_ms": 87.08645800652448,
    "top": [
     "BRAVO-250725-0208-T1",
     "GOLF-260212-0152-T1",
@@ -2012,8 +2419,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 14,
-   "dtw_ms": 26.03370900033042,
-   "candidates": 500
+   "dtw_ms": 25.239916998543777,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260625-0136-T1",
@@ -2024,9 +2436,9 @@
    "true_rank": 1,
    "copycat_rank": 213,
    "window_s": 60,
-   "query_ms": 3.989709002780728,
-   "prefilter_ms": 26.853667004616,
-   "total_ms": 85.90791700407863,
+   "query_ms": 4.121874997508712,
+   "prefilter_ms": 26.548584006377496,
+   "total_ms": 84.48424999369308,
    "top": [
     "BRAVO-250725-0208-T1",
     "GOLF-260212-0152-T1",
@@ -2036,8 +2448,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 14,
-   "dtw_ms": 22.888708001119085,
-   "candidates": 500
+   "dtw_ms": 22.69466700090561,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260625-0136-T1",
@@ -2048,9 +2465,9 @@
    "true_rank": 1,
    "copycat_rank": 204,
    "window_s": 60,
-   "query_ms": 3.9603750046808273,
-   "prefilter_ms": 26.83079199050553,
-   "total_ms": 91.61087500979193,
+   "query_ms": 3.7640410009771585,
+   "prefilter_ms": 26.655624998966232,
+   "total_ms": 90.54316599213053,
    "top": [
     "GOLF-260212-0152-T1",
     "BRAVO-250423-0107-T1",
@@ -2060,8 +2477,13 @@
    ],
    "baseline_rank": 2,
    "baseline_copycat_rank": 18,
-   "dtw_ms": 28.540749990497716,
-   "candidates": 500
+   "dtw_ms": 28.27324999088887,
+   "candidates": 500,
+   "forecast_error_m": 352.53614756137483,
+   "forecast_ms": 8.468832995276898,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260625-0136-T1",
@@ -2072,9 +2494,9 @@
    "true_rank": 1,
    "copycat_rank": 202,
    "window_s": 120,
-   "query_ms": 3.8231670041568577,
-   "prefilter_ms": 27.147707995027304,
-   "total_ms": 119.91179200413171,
+   "query_ms": 3.719625005032867,
+   "prefilter_ms": 27.30129100382328,
+   "total_ms": 118.96912500378676,
    "top": [
     "BRAVO-250423-0107-T1",
     "BRAVO-250725-0208-T1",
@@ -2084,8 +2506,13 @@
    ],
    "baseline_rank": 6,
    "baseline_copycat_rank": 16,
-   "dtw_ms": 53.44383300689515,
-   "candidates": 500
+   "dtw_ms": 52.699084000778385,
+   "candidates": 500,
+   "forecast_error_m": 352.53614306980097,
+   "forecast_ms": 8.814290995360352,
+   "linkage_hits": 4,
+   "linkage_total": 4,
+   "recall_ms": 4.689485998824239
   },
   {
    "track_id": "BRAVO-260625-0136-T1",
@@ -2096,9 +2523,9 @@
    "true_rank": 1,
    "copycat_rank": 176,
    "window_s": 120,
-   "query_ms": 4.430415996466763,
-   "prefilter_ms": 27.92116699856706,
-   "total_ms": 126.32620800286531,
+   "query_ms": 3.880791991832666,
+   "prefilter_ms": 26.587582993670367,
+   "total_ms": 121.81004199374001,
    "top": [
     "BRAVO-250725-0208-T1",
     "BRAVO-250423-0107-T1",
@@ -2108,8 +2535,13 @@
    ],
    "baseline_rank": 2,
    "baseline_copycat_rank": 12,
-   "dtw_ms": 57.080875005340204,
-   "candidates": 500
+   "dtw_ms": 55.668667002464645,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "JULIET-260625-2308-T1",
@@ -2127,7 +2559,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "JULIET-260625-2308-T1",
@@ -2138,9 +2575,9 @@
    "true_rank": 1,
    "copycat_rank": 342,
    "window_s": 60,
-   "query_ms": 4.4291250087553635,
-   "prefilter_ms": 28.799374995287508,
-   "total_ms": 91.74441700452007,
+   "query_ms": 3.981292000389658,
+   "prefilter_ms": 27.884708004421555,
+   "total_ms": 89.15145799983293,
    "top": [
     "JULIET-250815-2326-T1",
     "JULIET-260228-2244-T1",
@@ -2150,8 +2587,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 26.411416998598725,
-   "candidates": 500
+   "dtw_ms": 25.55200000642799,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "JULIET-260625-2308-T1",
@@ -2162,9 +2604,9 @@
    "true_rank": 1,
    "copycat_rank": 350,
    "window_s": 60,
-   "query_ms": 3.698457992868498,
-   "prefilter_ms": 27.64266599842813,
-   "total_ms": 89.3315419962164,
+   "query_ms": 3.7802500010002404,
+   "prefilter_ms": 27.292250000755303,
+   "total_ms": 88.60862499568611,
    "top": [
     "JULIET-250815-2326-T1",
     "JULIET-260228-2244-T1",
@@ -2174,8 +2616,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 4,
-   "dtw_ms": 25.976499993703328,
-   "candidates": 500
+   "dtw_ms": 25.850917008938268,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "JULIET-260625-2308-T1",
@@ -2186,9 +2633,9 @@
    "true_rank": 1,
    "copycat_rank": 341,
    "window_s": 60,
-   "query_ms": 3.9631669933442026,
-   "prefilter_ms": 27.267750003375113,
-   "total_ms": 89.85620900057256,
+   "query_ms": 3.8206250028451905,
+   "prefilter_ms": 27.002957998774946,
+   "total_ms": 89.81824999500532,
    "top": [
     "JULIET-250815-2326-T1",
     "JULIET-260228-2244-T1",
@@ -2198,8 +2645,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 9,
-   "dtw_ms": 26.920082993456163,
-   "candidates": 500
+   "dtw_ms": 26.81062500050757,
+   "candidates": 500,
+   "forecast_error_m": 273.03365233373137,
+   "forecast_ms": 7.694833999266848,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "JULIET-260625-2308-T1",
@@ -2210,9 +2662,9 @@
    "true_rank": 1,
    "copycat_rank": 352,
    "window_s": 120,
-   "query_ms": 3.8372499984689057,
-   "prefilter_ms": 27.706666995072737,
-   "total_ms": 113.38504200102761,
+   "query_ms": 3.5104590060655028,
+   "prefilter_ms": 27.26958299172111,
+   "total_ms": 111.03595900931396,
    "top": [
     "JULIET-250815-2326-T1",
     "GOLF-250512-2256-T1",
@@ -2222,8 +2674,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 11,
-   "dtw_ms": 46.27262499707285,
-   "candidates": 500
+   "dtw_ms": 45.674458000576124,
+   "candidates": 500,
+   "forecast_error_m": 346.4726082388439,
+   "forecast_ms": 8.100084000034258,
+   "linkage_hits": 4,
+   "linkage_total": 4,
+   "recall_ms": 4.637138665808986
   },
   {
    "track_id": "JULIET-260625-2308-T1",
@@ -2234,9 +2691,9 @@
    "true_rank": 1,
    "copycat_rank": 336,
    "window_s": 120,
-   "query_ms": 3.8887090049684048,
-   "prefilter_ms": 27.10170800855849,
-   "total_ms": 115.10150000685826,
+   "query_ms": 3.8486249977722764,
+   "prefilter_ms": 26.42879199993331,
+   "total_ms": 113.31595899537206,
    "top": [
     "JULIET-250815-2326-T1",
     "GOLF-260409-2248-T1",
@@ -2246,8 +2703,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 48.55099999986123,
-   "candidates": 500
+   "dtw_ms": 47.79645899543539,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260629-0045-T1",
@@ -2265,7 +2727,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260629-0045-T1",
@@ -2276,9 +2743,9 @@
    "true_rank": 1,
    "copycat_rank": 438,
    "window_s": 60,
-   "query_ms": 3.9795830089133233,
-   "prefilter_ms": 28.167541007860564,
-   "total_ms": 90.65083300811239,
+   "query_ms": 3.717166997375898,
+   "prefilter_ms": 27.868499993928708,
+   "total_ms": 89.24812500481494,
    "top": [
     "DELTA-260427-0053-T1",
     "DELTA-260531-0005-T1",
@@ -2288,8 +2755,13 @@
    ],
    "baseline_rank": 93,
    "baseline_copycat_rank": 235,
-   "dtw_ms": 26.83004100981634,
-   "candidates": 500
+   "dtw_ms": 26.451875004568137,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260629-0045-T1",
@@ -2300,9 +2772,9 @@
    "true_rank": 1,
    "copycat_rank": 440,
    "window_s": 60,
-   "query_ms": 3.9347499987343326,
-   "prefilter_ms": 28.235541001777165,
-   "total_ms": 90.34466600860469,
+   "query_ms": 3.8889580027898774,
+   "prefilter_ms": 27.84891599731054,
+   "total_ms": 90.79829099937342,
    "top": [
     "CHARLIE-260120-0016-T1",
     "CHARLIE-260212-0037-T1",
@@ -2312,8 +2784,13 @@
    ],
    "baseline_rank": 378,
    "baseline_copycat_rank": 266,
-   "dtw_ms": 26.301042002160102,
-   "candidates": 500
+   "dtw_ms": 26.64595900569111,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260629-0045-T1",
@@ -2324,9 +2801,9 @@
    "true_rank": 1,
    "copycat_rank": 386,
    "window_s": 60,
-   "query_ms": 3.8901670050108805,
-   "prefilter_ms": 27.586041993345134,
-   "total_ms": 86.75666700582951,
+   "query_ms": 3.8731670065317303,
+   "prefilter_ms": 26.901416989858262,
+   "total_ms": 86.37004200136289,
    "top": [
     "DELTA-260427-0053-T1",
     "CHARLIE-250810-0015-T1",
@@ -2336,8 +2813,13 @@
    ],
    "baseline_rank": 58,
    "baseline_copycat_rank": 28,
-   "dtw_ms": 22.862375000840984,
-   "candidates": 500
+   "dtw_ms": 22.88504200987518,
+   "candidates": 500,
+   "forecast_error_m": 155.93187287290945,
+   "forecast_ms": 7.872000001952983,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260629-0045-T1",
@@ -2348,9 +2830,9 @@
    "true_rank": 1,
    "copycat_rank": 402,
    "window_s": 120,
-   "query_ms": 3.8760409952374175,
-   "prefilter_ms": 28.51408300921321,
-   "total_ms": 119.25550000160001,
+   "query_ms": 3.559624994522892,
+   "prefilter_ms": 28.37549999821931,
+   "total_ms": 117.38941699150018,
    "top": [
     "DELTA-260427-0053-T1",
     "CHARLIE-250810-0015-T1",
@@ -2360,8 +2842,13 @@
    ],
    "baseline_rank": 28,
    "baseline_copycat_rank": 31,
-   "dtw_ms": 50.52645799878519,
-   "candidates": 500
+   "dtw_ms": 49.7683749999851,
+   "candidates": 500,
+   "forecast_error_m": 154.56740531534933,
+   "forecast_ms": 8.633166988147423,
+   "linkage_hits": 4,
+   "linkage_total": 4,
+   "recall_ms": 4.69962499725322
   },
   {
    "track_id": "DELTA-260629-0045-T1",
@@ -2372,9 +2859,9 @@
    "true_rank": 1,
    "copycat_rank": 302,
    "window_s": 120,
-   "query_ms": 4.037000006064773,
-   "prefilter_ms": 28.78820800106041,
-   "total_ms": 119.08770800800994,
+   "query_ms": 3.870667002047412,
+   "prefilter_ms": 26.92995899997186,
+   "total_ms": 115.4708749963902,
    "top": [
     "DELTA-260427-0053-T1",
     "CHARLIE-250810-0015-T1",
@@ -2384,8 +2871,13 @@
    ],
    "baseline_rank": 25,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 50.064208000549115,
-   "candidates": 500
+   "dtw_ms": 49.09275000682101,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-CHARLIE-260710-T1",
@@ -2403,7 +2895,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-CHARLIE-260710-T1",
@@ -2414,9 +2911,9 @@
    "true_rank": null,
    "copycat_rank": 193,
    "window_s": 60,
-   "query_ms": 3.9172920078272,
-   "prefilter_ms": 29.4519580056658,
-   "total_ms": 99.02741700352635,
+   "query_ms": 3.876333008520305,
+   "prefilter_ms": 28.978209011256695,
+   "total_ms": 98.33770801196806,
    "top": [
     "ECHO-250813-2034-T1",
     "HOTEL-260428-2016-T1",
@@ -2426,8 +2923,13 @@
    ],
    "baseline_rank": null,
    "baseline_copycat_rank": 72,
-   "dtw_ms": 33.87583298899699,
-   "candidates": 500
+   "dtw_ms": 34.19362498971168,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-CHARLIE-260710-T1",
@@ -2438,9 +2940,9 @@
    "true_rank": 1,
    "copycat_rank": 92,
    "window_s": 60,
-   "query_ms": 3.707625000970438,
-   "prefilter_ms": 29.62083301099483,
-   "total_ms": 98.19116699509323,
+   "query_ms": 3.6525000032270327,
+   "prefilter_ms": 29.361084001720883,
+   "total_ms": 97.56966699205805,
    "top": [
     "P1-ALPHA-260303-T1",
     "P1-DELTA-260419-T1",
@@ -2450,8 +2952,13 @@
    ],
    "baseline_rank": 327,
    "baseline_copycat_rank": 15,
-   "dtw_ms": 32.72191699943505,
-   "candidates": 500
+   "dtw_ms": 31.910665988107212,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-CHARLIE-260710-T1",
@@ -2462,9 +2969,9 @@
    "true_rank": 1,
    "copycat_rank": 80,
    "window_s": 60,
-   "query_ms": 3.5661669971887022,
-   "prefilter_ms": 28.525707995868288,
-   "total_ms": 92.57058300136123,
+   "query_ms": 3.8960000092629343,
+   "prefilter_ms": 28.41262500442099,
+   "total_ms": 93.11575000174344,
    "top": [
     "P1-ALPHA-260303-T1",
     "P1-ALPHA-260502-T1",
@@ -2474,8 +2981,13 @@
    ],
    "baseline_rank": 39,
    "baseline_copycat_rank": 9,
-   "dtw_ms": 28.119374997913837,
-   "candidates": 500
+   "dtw_ms": 28.216000006068498,
+   "candidates": 500,
+   "forecast_error_m": 632.8942318443895,
+   "forecast_ms": 7.667833007872105,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "P1-CHARLIE-260710-T1",
@@ -2486,9 +2998,9 @@
    "true_rank": 1,
    "copycat_rank": 79,
    "window_s": 120,
-   "query_ms": 3.877709008520469,
-   "prefilter_ms": 28.477332991315052,
-   "total_ms": 141.9440419995226,
+   "query_ms": 3.4178329951828346,
+   "prefilter_ms": 28.10729200427886,
+   "total_ms": 118.79429199325386,
    "top": [
     "P1-ALPHA-260303-T1",
     "P1-ALPHA-260502-T1",
@@ -2498,8 +3010,13 @@
    ],
    "baseline_rank": 126,
    "baseline_copycat_rank": 4,
-   "dtw_ms": 53.0693749897182,
-   "candidates": 500
+   "dtw_ms": 51.81445799826179,
+   "candidates": 500,
+   "forecast_error_m": 632.5769493032402,
+   "forecast_ms": 8.214749992475845,
+   "linkage_hits": 4,
+   "linkage_total": 4,
+   "recall_ms": 4.661291667919916
   },
   {
    "track_id": "P1-CHARLIE-260710-T1",
@@ -2510,9 +3027,9 @@
    "true_rank": 1,
    "copycat_rank": 55,
    "window_s": 120,
-   "query_ms": 4.015915998024866,
-   "prefilter_ms": 28.53879200119991,
-   "total_ms": 117.98191598791163,
+   "query_ms": 3.8179590046638623,
+   "prefilter_ms": 27.07191700756084,
+   "total_ms": 136.13354200788308,
    "top": [
     "P1-ALPHA-260303-T1",
     "P1-ALPHA-260502-T1",
@@ -2522,8 +3039,13 @@
    ],
    "baseline_rank": 31,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 48.82125000585802,
-   "candidates": 500
+   "dtw_ms": 48.538999995798804,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260710-2048-T1",
@@ -2541,7 +3063,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260710-2048-T1",
@@ -2552,9 +3079,9 @@
    "true_rank": 1,
    "copycat_rank": 23,
    "window_s": 60,
-   "query_ms": 5.113084000186063,
-   "prefilter_ms": 29.09850000287406,
-   "total_ms": 98.35012498660944,
+   "query_ms": 3.9813750045141205,
+   "prefilter_ms": 27.849292004248127,
+   "total_ms": 95.30462500697467,
    "top": [
     "HOTEL-250314-2030-T1",
     "HOTEL-260220-2126-T1",
@@ -2564,8 +3091,13 @@
    ],
    "baseline_rank": 4,
    "baseline_copycat_rank": 22,
-   "dtw_ms": 32.097542003612034,
-   "candidates": 500
+   "dtw_ms": 32.04004099825397,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260710-2048-T1",
@@ -2576,9 +3108,9 @@
    "true_rank": 1,
    "copycat_rank": 26,
    "window_s": 60,
-   "query_ms": 4.078874990227632,
-   "prefilter_ms": 28.416833010851406,
-   "total_ms": 95.58154198748525,
+   "query_ms": 4.79691699729301,
+   "prefilter_ms": 27.96241600299254,
+   "total_ms": 95.32008299720474,
    "top": [
     "HOTEL-260220-2126-T1",
     "ECHO-251026-2046-T1",
@@ -2588,8 +3120,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 32,
-   "dtw_ms": 30.533791999914683,
-   "candidates": 500
+   "dtw_ms": 30.016749995411374,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260710-2048-T1",
@@ -2600,9 +3137,9 @@
    "true_rank": 1,
    "copycat_rank": 48,
    "window_s": 60,
-   "query_ms": 3.884500009007752,
-   "prefilter_ms": 28.809042007196695,
-   "total_ms": 90.03504199790768,
+   "query_ms": 3.8862090004840866,
+   "prefilter_ms": 27.81216699804645,
+   "total_ms": 87.94941700762138,
    "top": [
     "ECHO-251026-2046-T1",
     "HOTEL-260220-2126-T1",
@@ -2612,8 +3149,13 @@
    ],
    "baseline_rank": 4,
    "baseline_copycat_rank": 19,
-   "dtw_ms": 24.393083003815264,
-   "candidates": 500
+   "dtw_ms": 24.23920801084023,
+   "candidates": 500,
+   "forecast_error_m": 85.76835374808378,
+   "forecast_ms": 8.424792002188042,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260710-2048-T1",
@@ -2624,9 +3166,9 @@
    "true_rank": 1,
    "copycat_rank": 97,
    "window_s": 120,
-   "query_ms": 3.918625006917864,
-   "prefilter_ms": 28.451249992940575,
-   "total_ms": 122.29154200758785,
+   "query_ms": 3.72362500638701,
+   "prefilter_ms": 27.786666993051767,
+   "total_ms": 120.55487500037998,
    "top": [
     "HOTEL-260428-2016-T1",
     "HOTEL-250521-2059-T1",
@@ -2636,8 +3178,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 20,
-   "dtw_ms": 53.97216699202545,
-   "candidates": 500
+   "dtw_ms": 53.341624996392056,
+   "candidates": 500,
+   "forecast_error_m": 257.96718489329146,
+   "forecast_ms": 7.950291997985914,
+   "linkage_hits": 1,
+   "linkage_total": 1,
+   "recall_ms": 4.4767499978964524
   },
   {
    "track_id": "ECHO-260710-2048-T1",
@@ -2648,9 +3195,9 @@
    "true_rank": 1,
    "copycat_rank": 37,
    "window_s": 120,
-   "query_ms": 4.02754099923186,
-   "prefilter_ms": 28.456749991164543,
-   "total_ms": 119.4269580009859,
+   "query_ms": 3.8066660054028034,
+   "prefilter_ms": 27.21137499611359,
+   "total_ms": 116.56437499914318,
    "top": [
     "ECHO-251026-2046-T1",
     "HOTEL-260220-2126-T1",
@@ -2660,8 +3207,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 19,
-   "dtw_ms": 50.6324160087388,
-   "candidates": 500
+   "dtw_ms": 49.855457997182384,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "GOLF-260714-0256-T1",
@@ -2679,7 +3231,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "GOLF-260714-0256-T1",
@@ -2690,9 +3247,9 @@
    "true_rank": 1,
    "copycat_rank": 239,
    "window_s": 60,
-   "query_ms": 3.8270829973043874,
-   "prefilter_ms": 28.999165995628573,
-   "total_ms": 91.41912499035243,
+   "query_ms": 3.9613330009160563,
+   "prefilter_ms": 28.435000000172295,
+   "total_ms": 88.84108300844673,
    "top": [
     "BRAVO-250725-0208-T1",
     "CHARLIE-251023-0249-T1",
@@ -2702,8 +3259,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 17,
-   "dtw_ms": 26.229584007523954,
-   "candidates": 500
+   "dtw_ms": 25.1581670017913,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "GOLF-260714-0256-T1",
@@ -2714,9 +3276,9 @@
    "true_rank": 1,
    "copycat_rank": 215,
    "window_s": 60,
-   "query_ms": 3.809125002590008,
-   "prefilter_ms": 28.52487500058487,
-   "total_ms": 95.48237500712276,
+   "query_ms": 3.7137500039534643,
+   "prefilter_ms": 28.03195900924038,
+   "total_ms": 93.61516700300854,
    "top": [
     "BRAVO-250725-0208-T1",
     "BRAVO-260421-0217-T1",
@@ -2726,8 +3288,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 16,
-   "dtw_ms": 30.33300000242889,
-   "candidates": 500
+   "dtw_ms": 30.071374989347532,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "GOLF-260714-0256-T1",
@@ -2738,9 +3305,9 @@
    "true_rank": 1,
    "copycat_rank": 209,
    "window_s": 60,
-   "query_ms": 3.8183750002644956,
-   "prefilter_ms": 28.369958003167994,
-   "total_ms": 97.34491699782666,
+   "query_ms": 3.7442499888129532,
+   "prefilter_ms": 28.222209002706222,
+   "total_ms": 96.74437499779742,
    "top": [
     "BRAVO-250725-0208-T1",
     "BRAVO-260625-0136-T1",
@@ -2750,8 +3317,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 20,
-   "dtw_ms": 32.64970799500588,
-   "candidates": 500
+   "dtw_ms": 32.01729099964723,
+   "candidates": 500,
+   "forecast_error_m": 114.86981309700798,
+   "forecast_ms": 8.435000010649674,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "GOLF-260714-0256-T1",
@@ -2762,9 +3334,9 @@
    "true_rank": 1,
    "copycat_rank": 205,
    "window_s": 120,
-   "query_ms": 3.8038330094423145,
-   "prefilter_ms": 28.18249999836553,
-   "total_ms": 120.5398750025779,
+   "query_ms": 3.5060840018559247,
+   "prefilter_ms": 28.03045899781864,
+   "total_ms": 119.60125000041444,
    "top": [
     "BRAVO-250725-0208-T1",
     "BRAVO-260625-0136-T1",
@@ -2774,8 +3346,13 @@
    ],
    "baseline_rank": 3,
    "baseline_copycat_rank": 19,
-   "dtw_ms": 52.245917002437636,
-   "candidates": 500
+   "dtw_ms": 51.91979100345634,
+   "candidates": 500,
+   "forecast_error_m": 114.86981283180211,
+   "forecast_ms": 8.957583995652385,
+   "linkage_hits": 2,
+   "linkage_total": 2,
+   "recall_ms": 4.553721999400295
   },
   {
    "track_id": "GOLF-260714-0256-T1",
@@ -2786,9 +3363,9 @@
    "true_rank": 1,
    "copycat_rank": 191,
    "window_s": 120,
-   "query_ms": 3.9199169987114146,
-   "prefilter_ms": 28.040666991728358,
-   "total_ms": 115.64158399414737,
+   "query_ms": 3.9096249965950847,
+   "prefilter_ms": 26.548708003247157,
+   "total_ms": 112.13012499501929,
    "top": [
     "BRAVO-250725-0208-T1",
     "CHARLIE-251023-0249-T1",
@@ -2798,8 +3375,13 @@
    ],
    "baseline_rank": 6,
    "baseline_copycat_rank": 11,
-   "dtw_ms": 47.08445900178049,
-   "candidates": 500
+   "dtw_ms": 46.296917003928684,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "GOLF-260718-2227-T1",
@@ -2817,7 +3399,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "GOLF-260718-2227-T1",
@@ -2828,9 +3415,9 @@
    "true_rank": 1,
    "copycat_rank": 358,
    "window_s": 60,
-   "query_ms": 3.6919169942848384,
-   "prefilter_ms": 29.61758400488179,
-   "total_ms": 91.2371250014985,
+   "query_ms": 3.8473340100608766,
+   "prefilter_ms": 29.46079199318774,
+   "total_ms": 90.70958400843665,
    "top": [
     "GOLF-251117-2305-T1",
     "GOLF-250512-2256-T1",
@@ -2840,8 +3427,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 15,
-   "dtw_ms": 26.00916600204073,
-   "candidates": 500
+   "dtw_ms": 25.93516699562315,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "GOLF-260718-2227-T1",
@@ -2852,9 +3444,9 @@
    "true_rank": 1,
    "copycat_rank": 336,
    "window_s": 60,
-   "query_ms": 3.700917004607618,
-   "prefilter_ms": 29.875250009354204,
-   "total_ms": 91.99379199708346,
+   "query_ms": 3.701875000842847,
+   "prefilter_ms": 29.442750004818663,
+   "total_ms": 90.57620800740551,
    "top": [
     "GOLF-251117-2305-T1",
     "GOLF-250512-2256-T1",
@@ -2864,8 +3456,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 26.103624986717477,
-   "candidates": 500
+   "dtw_ms": 25.511083003948443,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "GOLF-260718-2227-T1",
@@ -2876,9 +3473,9 @@
    "true_rank": 1,
    "copycat_rank": 331,
    "window_s": 60,
-   "query_ms": 3.7730000040028244,
-   "prefilter_ms": 28.200041997479275,
-   "total_ms": 89.63945900904946,
+   "query_ms": 3.716708000865765,
+   "prefilter_ms": 28.141957998741418,
+   "total_ms": 87.90545800002292,
    "top": [
     "GOLF-251117-2305-T1",
     "GOLF-250512-2256-T1",
@@ -2888,8 +3485,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 25.118917008512653,
-   "candidates": 500
+   "dtw_ms": 24.164041999028996,
+   "candidates": 500,
+   "forecast_error_m": 367.1163206003046,
+   "forecast_ms": 7.500708001316525,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "GOLF-260718-2227-T1",
@@ -2900,9 +3502,9 @@
    "true_rank": 1,
    "copycat_rank": 336,
    "window_s": 120,
-   "query_ms": 4.0065420034807175,
-   "prefilter_ms": 28.51662499597296,
-   "total_ms": 114.71233400516212,
+   "query_ms": 3.4856669954024255,
+   "prefilter_ms": 27.906125003937632,
+   "total_ms": 113.60704200342298,
    "top": [
     "GOLF-251117-2305-T1",
     "GOLF-250512-2256-T1",
@@ -2912,8 +3514,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 11,
-   "dtw_ms": 46.82408399821725,
-   "candidates": 500
+   "dtw_ms": 46.97683399717789,
+   "candidates": 500,
+   "forecast_error_m": 367.11635960318176,
+   "forecast_ms": 8.256916000391357,
+   "linkage_hits": 3,
+   "linkage_total": 3,
+   "recall_ms": 4.576138666986178
   },
   {
    "track_id": "GOLF-260718-2227-T1",
@@ -2924,9 +3531,9 @@
    "true_rank": 1,
    "copycat_rank": 332,
    "window_s": 120,
-   "query_ms": 3.87708299967926,
-   "prefilter_ms": 28.885457999422215,
-   "total_ms": 116.82766700687353,
+   "query_ms": 3.80045898782555,
+   "prefilter_ms": 27.26583299227059,
+   "total_ms": 113.31858398625627,
    "top": [
     "GOLF-250512-2256-T1",
     "JULIET-251227-2224-T1",
@@ -2936,8 +3543,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 48.17029199330136,
-   "candidates": 500
+   "dtw_ms": 46.9539580080891,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "FOXTROT-260802-2020-T1",
@@ -2955,7 +3567,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "FOXTROT-260802-2020-T1",
@@ -2966,9 +3583,9 @@
    "true_rank": 1,
    "copycat_rank": 42,
    "window_s": 60,
-   "query_ms": 3.9293330046348274,
-   "prefilter_ms": 29.725499989581294,
-   "total_ms": 94.1257910017157,
+   "query_ms": 3.8170000043464825,
+   "prefilter_ms": 28.752041995176114,
+   "total_ms": 92.74575000745244,
    "top": [
     "HOTEL-250314-2030-T1",
     "FOXTROT-251215-2125-T1",
@@ -2978,8 +3595,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 80,
-   "dtw_ms": 28.206417002365924,
-   "candidates": 500
+   "dtw_ms": 28.312084003118798,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "FOXTROT-260802-2020-T1",
@@ -2990,9 +3612,9 @@
    "true_rank": 1,
    "copycat_rank": 54,
    "window_s": 60,
-   "query_ms": 3.6945000028936192,
-   "prefilter_ms": 29.01095899869688,
-   "total_ms": 93.6369170085527,
+   "query_ms": 3.8344580098055303,
+   "prefilter_ms": 28.620707991649397,
+   "total_ms": 92.27908300817944,
    "top": [
     "HOTEL-250314-2030-T1",
     "HOTEL-260220-2126-T1",
@@ -3002,8 +3624,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 23,
-   "dtw_ms": 27.828291000332683,
-   "candidates": 500
+   "dtw_ms": 27.287666001939215,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "FOXTROT-260802-2020-T1",
@@ -3014,9 +3641,9 @@
    "true_rank": 1,
    "copycat_rank": 40,
    "window_s": 60,
-   "query_ms": 3.7318329996196553,
-   "prefilter_ms": 29.19354099140037,
-   "total_ms": 93.92037498764694,
+   "query_ms": 3.771583011257462,
+   "prefilter_ms": 28.69854200980626,
+   "total_ms": 93.01425000012387,
    "top": [
     "HOTEL-260220-2126-T1",
     "FOXTROT-260224-2059-T1",
@@ -3026,8 +3653,13 @@
    ],
    "baseline_rank": 3,
    "baseline_copycat_rank": 78,
-   "dtw_ms": 27.897499996470287,
-   "candidates": 500
+   "dtw_ms": 27.789041996584274,
+   "candidates": 500,
+   "forecast_error_m": 94.66958483257332,
+   "forecast_ms": 8.486125007038936,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "FOXTROT-260802-2020-T1",
@@ -3038,9 +3670,9 @@
    "true_rank": 1,
    "copycat_rank": 34,
    "window_s": 120,
-   "query_ms": 3.8722079916624352,
-   "prefilter_ms": 28.87366700451821,
-   "total_ms": 120.50574999011587,
+   "query_ms": 3.637166999396868,
+   "prefilter_ms": 28.77291600452736,
+   "total_ms": 119.40054201113526,
    "top": [
     "HOTEL-250314-2030-T1",
     "HOTEL-260220-2126-T1",
@@ -3050,8 +3682,13 @@
    ],
    "baseline_rank": 5,
    "baseline_copycat_rank": 77,
-   "dtw_ms": 51.33016699983273,
-   "candidates": 500
+   "dtw_ms": 50.47108299913816,
+   "candidates": 500,
+   "forecast_error_m": 162.85819908502157,
+   "forecast_ms": 8.424165993346833,
+   "linkage_hits": 2,
+   "linkage_total": 2,
+   "recall_ms": 4.638902998218934
   },
   {
    "track_id": "FOXTROT-260802-2020-T1",
@@ -3062,9 +3699,9 @@
    "true_rank": 1,
    "copycat_rank": 55,
    "window_s": 120,
-   "query_ms": 4.179040988674387,
-   "prefilter_ms": 29.36245800810866,
-   "total_ms": 119.98274999496061,
+   "query_ms": 3.9947079931152984,
+   "prefilter_ms": 28.34358399559278,
+   "total_ms": 117.64620800386183,
    "top": [
     "FOXTROT-251215-2125-T1",
     "ECHO-260323-2034-T1",
@@ -3074,8 +3711,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 60,
-   "dtw_ms": 49.8925409920048,
-   "candidates": 500
+   "dtw_ms": 49.594916999922134,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "CHARLIE-260802-2316-T1",
@@ -3093,7 +3735,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "CHARLIE-260802-2316-T1",
@@ -3104,9 +3751,9 @@
    "true_rank": 1,
    "copycat_rank": 188,
    "window_s": 60,
-   "query_ms": 3.853457994409837,
-   "prefilter_ms": 30.482417001621798,
-   "total_ms": 98.56687499268446,
+   "query_ms": 3.9344999968307093,
+   "prefilter_ms": 30.261832987889647,
+   "total_ms": 97.34279199619778,
    "top": [
     "DELTA-260629-0045-T1",
     "CHARLIE-250603-2306-T1",
@@ -3116,8 +3763,13 @@
    ],
    "baseline_rank": 164,
    "baseline_copycat_rank": 22,
-   "dtw_ms": 31.687915994552895,
-   "candidates": 500
+   "dtw_ms": 30.977082991739735,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "CHARLIE-260802-2316-T1",
@@ -3128,9 +3780,9 @@
    "true_rank": 1,
    "copycat_rank": 177,
    "window_s": 60,
-   "query_ms": 4.091833005077206,
-   "prefilter_ms": 30.49358401040081,
-   "total_ms": 100.58016699622385,
+   "query_ms": 3.8002499932190403,
+   "prefilter_ms": 29.598541994346306,
+   "total_ms": 99.01274999720044,
    "top": [
     "DELTA-260531-0005-T1",
     "CHARLIE-260120-0016-T1",
@@ -3140,8 +3792,13 @@
    ],
    "baseline_rank": 22,
    "baseline_copycat_rank": 15,
-   "dtw_ms": 32.99329099536408,
-   "candidates": 500
+   "dtw_ms": 33.15758401004132,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "CHARLIE-260802-2316-T1",
@@ -3152,9 +3809,9 @@
    "true_rank": 1,
    "copycat_rank": 132,
    "window_s": 60,
-   "query_ms": 4.000582994194701,
-   "prefilter_ms": 29.171374990255572,
-   "total_ms": 98.55012499610893,
+   "query_ms": 3.808458990533836,
+   "prefilter_ms": 28.480583991040476,
+   "total_ms": 96.44379199016839,
    "top": [
     "DELTA-260531-0005-T1",
     "DELTA-260629-0045-T1",
@@ -3164,8 +3821,13 @@
    ],
    "baseline_rank": 34,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 32.286500005284324,
-   "candidates": 500
+   "dtw_ms": 31.575499990140088,
+   "candidates": 500,
+   "forecast_error_m": 340.44519747018904,
+   "forecast_ms": 7.92316700972151,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "CHARLIE-260802-2316-T1",
@@ -3176,9 +3838,9 @@
    "true_rank": 1,
    "copycat_rank": 145,
    "window_s": 120,
-   "query_ms": 4.178666989901103,
-   "prefilter_ms": 29.39470899582375,
-   "total_ms": 121.4572919998318,
+   "query_ms": 3.6339999933261424,
+   "prefilter_ms": 28.841540988651104,
+   "total_ms": 119.69204200431705,
    "top": [
     "DELTA-260531-0005-T1",
     "DELTA-260629-0045-T1",
@@ -3188,8 +3850,13 @@
    ],
    "baseline_rank": 14,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 51.77133300458081,
-   "candidates": 500
+   "dtw_ms": 51.4439590042457,
+   "candidates": 500,
+   "forecast_error_m": 219.2322952993308,
+   "forecast_ms": 8.726084008230828,
+   "linkage_hits": 2,
+   "linkage_total": 2,
+   "recall_ms": 4.645708332342717
   },
   {
    "track_id": "CHARLIE-260802-2316-T1",
@@ -3200,9 +3867,9 @@
    "true_rank": 1,
    "copycat_rank": 180,
    "window_s": 120,
-   "query_ms": 4.087833993253298,
-   "prefilter_ms": 29.43783400405664,
-   "total_ms": 119.58591699658427,
+   "query_ms": 3.7849999935133383,
+   "prefilter_ms": 28.081292010028847,
+   "total_ms": 116.66549999790732,
    "top": [
     "DELTA-260531-0005-T1",
     "DELTA-251021-2339-T1",
@@ -3212,8 +3879,13 @@
    ],
    "baseline_rank": 7,
    "baseline_copycat_rank": 21,
-   "dtw_ms": 49.19200000585988,
-   "candidates": 500
+   "dtw_ms": 48.84154199680779,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260828-2021-T1",
@@ -3231,7 +3903,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260828-2021-T1",
@@ -3242,9 +3919,9 @@
    "true_rank": 1,
    "copycat_rank": 83,
    "window_s": 60,
-   "query_ms": 4.311374999815598,
-   "prefilter_ms": 31.618374996469356,
-   "total_ms": 98.06070799822919,
+   "query_ms": 3.77820800349582,
+   "prefilter_ms": 30.739708003238775,
+   "total_ms": 96.05095800361596,
    "top": [
     "INDIA-260223-2005-T1",
     "GOLF-260503-1922-T1",
@@ -3254,8 +3931,13 @@
    ],
    "baseline_rank": 362,
    "baseline_copycat_rank": 175,
-   "dtw_ms": 29.906417010352015,
-   "candidates": 500
+   "dtw_ms": 29.67183300643228,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260828-2021-T1",
@@ -3266,9 +3948,9 @@
    "true_rank": 1,
    "copycat_rank": 27,
    "window_s": 60,
-   "query_ms": 4.095291995326988,
-   "prefilter_ms": 30.963625002186745,
-   "total_ms": 115.60933399596252,
+   "query_ms": 4.028333001770079,
+   "prefilter_ms": 30.359791999217123,
+   "total_ms": 95.24012499605305,
    "top": [
     "KILO-260612-1950-T1",
     "INDIA-260223-2005-T1",
@@ -3278,8 +3960,13 @@
    ],
    "baseline_rank": 372,
    "baseline_copycat_rank": 189,
-   "dtw_ms": 27.639959007501602,
-   "candidates": 500
+   "dtw_ms": 28.116041998146102,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260828-2021-T1",
@@ -3290,9 +3977,9 @@
    "true_rank": 1,
    "copycat_rank": 56,
    "window_s": 60,
-   "query_ms": 4.2754579917527735,
-   "prefilter_ms": 30.47112500644289,
-   "total_ms": 95.92279099160805,
+   "query_ms": 3.837917000055313,
+   "prefilter_ms": 29.503291996661574,
+   "total_ms": 92.89354200882372,
    "top": [
     "KILO-260612-1950-T1",
     "KILO-250315-2022-T1",
@@ -3302,8 +3989,13 @@
    ],
    "baseline_rank": 29,
    "baseline_copycat_rank": 3,
-   "dtw_ms": 28.007417000480928,
-   "candidates": 500
+   "dtw_ms": 27.2957499983022,
+   "candidates": 500,
+   "forecast_error_m": 561.1407550107342,
+   "forecast_ms": 7.935916990390979,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260828-2021-T1",
@@ -3314,9 +4006,9 @@
    "true_rank": 1,
    "copycat_rank": 55,
    "window_s": 60,
-   "query_ms": 3.8619579863734543,
-   "prefilter_ms": 29.519000003347173,
-   "total_ms": 94.33887498744298,
+   "query_ms": 3.64550000813324,
+   "prefilter_ms": 28.816957987146452,
+   "total_ms": 112.830958008999,
    "top": [
     "KILO-260612-1950-T1",
     "KILO-260419-2014-T1",
@@ -3326,8 +4018,13 @@
    ],
    "baseline_rank": 2,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 27.81966599286534,
-   "candidates": 500
+   "dtw_ms": 27.249624996329658,
+   "candidates": 500,
+   "forecast_error_m": 561.1418957797379,
+   "forecast_ms": 8.185042010154575,
+   "linkage_hits": 3,
+   "linkage_total": 3,
+   "recall_ms": 4.502291665024434
   },
   {
    "track_id": "INDIA-260828-2021-T1",
@@ -3338,9 +4035,9 @@
    "true_rank": 1,
    "copycat_rank": 55,
    "window_s": 120,
-   "query_ms": 3.938417008612305,
-   "prefilter_ms": 29.778583004372194,
-   "total_ms": 126.11325000762008,
+   "query_ms": 4.048457994940691,
+   "prefilter_ms": 28.88029199675657,
+   "total_ms": 123.34483298764098,
    "top": [
     "KILO-260612-1950-T1",
     "KILO-250315-2022-T1",
@@ -3350,8 +4047,13 @@
    ],
    "baseline_rank": 52,
    "baseline_copycat_rank": 8,
-   "dtw_ms": 55.177959002321586,
-   "candidates": 500
+   "dtw_ms": 53.922666993457824,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260313-2032-T1",
@@ -3369,7 +4071,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260313-2032-T1",
@@ -3380,9 +4087,9 @@
    "true_rank": 8,
    "copycat_rank": 257,
    "window_s": 60,
-   "query_ms": 3.7344169977586716,
-   "prefilter_ms": 25.504040997475386,
-   "total_ms": 81.36041699617635,
+   "query_ms": 3.829583991318941,
+   "prefilter_ms": 24.74699998856522,
+   "total_ms": 81.09762499225326,
    "top": [
     "KILO-250410-1945-T1",
     "KILO-251216-2200-T1",
@@ -3392,8 +4099,13 @@
    ],
    "baseline_rank": 283,
    "baseline_copycat_rank": 26,
-   "dtw_ms": 21.845291994395666,
-   "candidates": 500
+   "dtw_ms": 21.916666999459267,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260313-2032-T1",
@@ -3404,9 +4116,9 @@
    "true_rank": 1,
    "copycat_rank": 243,
    "window_s": 60,
-   "query_ms": 3.64587499643676,
-   "prefilter_ms": 25.266083001042716,
-   "total_ms": 82.32695898914244,
+   "query_ms": 3.606291997130029,
+   "prefilter_ms": 24.502250002115034,
+   "total_ms": 80.69429200259037,
    "top": [
     "INDIA-251027-2036-T1",
     "KILO-250410-1945-T1",
@@ -3416,8 +4128,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 49,
-   "dtw_ms": 22.140250002848916,
-   "candidates": 500
+   "dtw_ms": 21.887541995965876,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260313-2032-T1",
@@ -3428,9 +4145,9 @@
    "true_rank": 1,
    "copycat_rank": 209,
    "window_s": 60,
-   "query_ms": 3.8040829967940226,
-   "prefilter_ms": 23.850957994000055,
-   "total_ms": 81.31104199856054,
+   "query_ms": 3.84512500022538,
+   "prefilter_ms": 23.98858299420681,
+   "total_ms": 81.05279199662618,
    "top": [
     "INDIA-251027-2036-T1",
     "KILO-250410-1945-T1",
@@ -3440,8 +4157,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 12,
-   "dtw_ms": 22.68329099752009,
-   "candidates": 500
+   "dtw_ms": 22.38687500357628,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260313-2032-T1",
@@ -3452,9 +4174,9 @@
    "true_rank": 3,
    "copycat_rank": 164,
    "window_s": 120,
-   "query_ms": 4.745042009744793,
-   "prefilter_ms": 31.233834000886418,
-   "total_ms": 117.35641700215638,
+   "query_ms": 3.7927090015728027,
+   "prefilter_ms": 24.25550000043586,
+   "total_ms": 106.53795899997931,
    "top": [
     "LIMA-251208-2020-T1",
     "LIMA-251231-2123-T1",
@@ -3464,8 +4186,13 @@
    ],
    "baseline_rank": 19,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 45.302250000531785,
-   "candidates": 500
+   "dtw_ms": 44.36162499769125,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260313-2032-T1",
@@ -3476,9 +4203,9 @@
    "true_rank": 1,
    "copycat_rank": 199,
    "window_s": 120,
-   "query_ms": 4.179833995294757,
-   "prefilter_ms": 24.92166699084919,
-   "total_ms": 112.28620899782982,
+   "query_ms": 3.930249993572943,
+   "prefilter_ms": 24.655999994138256,
+   "total_ms": 110.45158299384639,
    "top": [
     "INDIA-251027-2036-T1",
     "INDIA-260228-1955-T1",
@@ -3488,8 +4215,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 252,
-   "dtw_ms": 48.30554198997561,
-   "candidates": 500
+   "dtw_ms": 47.83570898871403,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260322-1913-T1",
@@ -3507,7 +4239,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260322-1913-T1",
@@ -3518,9 +4255,9 @@
    "true_rank": 8,
    "copycat_rank": 351,
    "window_s": 60,
-   "query_ms": 3.932959007215686,
-   "prefilter_ms": 26.229790993966162,
-   "total_ms": 82.43791700806469,
+   "query_ms": 3.7250419991323724,
+   "prefilter_ms": 25.102375002461486,
+   "total_ms": 79.70737499999814,
    "top": [
     "ALPHA-260307-1928-T1",
     "CHARLIE-251207-2124-T1",
@@ -3530,8 +4267,13 @@
    ],
    "baseline_rank": 358,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 21.114000002853572,
-   "candidates": 500
+   "dtw_ms": 20.749540999531746,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260322-1913-T1",
@@ -3542,9 +4284,9 @@
    "true_rank": 1,
    "copycat_rank": 286,
    "window_s": 60,
-   "query_ms": 3.944542011595331,
-   "prefilter_ms": 25.710667003295384,
-   "total_ms": 83.57120800064877,
+   "query_ms": 3.5857920011039823,
+   "prefilter_ms": 25.07833299750928,
+   "total_ms": 81.60108400625177,
    "top": [
     "BRAVO-250830-1907-T1",
     "ALPHA-260118-2026-T1",
@@ -3554,8 +4296,13 @@
    ],
    "baseline_rank": 28,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 22.245833999477327,
-   "candidates": 500
+   "dtw_ms": 22.316249989671633,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260322-1913-T1",
@@ -3566,9 +4313,9 @@
    "true_rank": 1,
    "copycat_rank": 198,
    "window_s": 60,
-   "query_ms": 3.8859589985804632,
-   "prefilter_ms": 24.784584005828947,
-   "total_ms": 82.64383400091901,
+   "query_ms": 3.8883340021129698,
+   "prefilter_ms": 23.92945799510926,
+   "total_ms": 80.92220900289249,
    "top": [
     "DELTA-250517-2008-T1",
     "DELTA-250723-1948-T1",
@@ -3578,8 +4325,13 @@
    ],
    "baseline_rank": 5,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 22.82083299360238,
-   "candidates": 500
+   "dtw_ms": 22.384667012374848,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260322-1913-T1",
@@ -3590,9 +4342,9 @@
    "true_rank": 1,
    "copycat_rank": 172,
    "window_s": 60,
-   "query_ms": 3.883166005834937,
-   "prefilter_ms": 23.954332995344885,
-   "total_ms": 81.77916600834578,
+   "query_ms": 3.7892079999437556,
+   "prefilter_ms": 24.378166999667883,
+   "total_ms": 82.5612079934217,
    "top": [
     "DELTA-250517-2008-T1",
     "BRAVO-251106-2017-T1",
@@ -3602,8 +4354,13 @@
    ],
    "baseline_rank": 13,
    "baseline_copycat_rank": 2,
-   "dtw_ms": 22.5639999989653,
-   "candidates": 500
+   "dtw_ms": 22.4756669922499,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260322-1913-T1",
@@ -3614,9 +4371,9 @@
    "true_rank": 1,
    "copycat_rank": 146,
    "window_s": 120,
-   "query_ms": 3.92850000935141,
-   "prefilter_ms": 24.954082997282967,
-   "total_ms": 109.76712500269059,
+   "query_ms": 3.8952080067247152,
+   "prefilter_ms": 25.1419579872163,
+   "total_ms": 109.41325000021607,
    "top": [
     "BRAVO-251106-2017-T1",
     "DELTA-250723-1948-T1",
@@ -3626,8 +4383,13 @@
    ],
    "baseline_rank": 2,
    "baseline_copycat_rank": 13,
-   "dtw_ms": 46.45120799250435,
-   "candidates": 500
+   "dtw_ms": 46.03004199452698,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260407-1940-T1",
@@ -3645,7 +4407,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260407-1940-T1",
@@ -3656,9 +4423,9 @@
    "true_rank": 3,
    "copycat_rank": 332,
    "window_s": 60,
-   "query_ms": 3.7158749910304323,
-   "prefilter_ms": 27.17554199625738,
-   "total_ms": 83.05320799991023,
+   "query_ms": 3.8655829994240776,
+   "prefilter_ms": 27.059375002863817,
+   "total_ms": 82.49683299800381,
    "top": [
     "ALPHA-251002-2037-T1",
     "ALPHA-260307-1928-T1",
@@ -3668,8 +4435,13 @@
    ],
    "baseline_rank": 275,
    "baseline_copycat_rank": 31,
-   "dtw_ms": 20.92020900454372,
-   "candidates": 500
+   "dtw_ms": 20.562792007694952,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260407-1940-T1",
@@ -3680,9 +4452,9 @@
    "true_rank": 4,
    "copycat_rank": 274,
    "window_s": 60,
-   "query_ms": 3.8147500017657876,
-   "prefilter_ms": 26.92087499599438,
-   "total_ms": 83.6336670035962,
+   "query_ms": 3.714709004270844,
+   "prefilter_ms": 26.488542003789917,
+   "total_ms": 82.66091700352263,
    "top": [
     "ALPHA-251119-1940-T1",
     "ALPHA-251002-2037-T1",
@@ -3692,8 +4464,13 @@
    ],
    "baseline_rank": 205,
    "baseline_copycat_rank": 99,
-   "dtw_ms": 21.405500010587275,
-   "candidates": 500
+   "dtw_ms": 21.218291003606282,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260407-1940-T1",
@@ -3704,9 +4481,9 @@
    "true_rank": 1,
    "copycat_rank": 208,
    "window_s": 60,
-   "query_ms": 3.8650420028716326,
-   "prefilter_ms": 25.845665993983857,
-   "total_ms": 90.40329199342523,
+   "query_ms": 4.022249995614402,
+   "prefilter_ms": 25.250374994357117,
+   "total_ms": 88.63083299365826,
    "top": [
     "DELTA-250517-2008-T1",
     "DELTA-250723-1948-T1",
@@ -3716,8 +4493,13 @@
    ],
    "baseline_rank": 3,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 28.567415996803902,
-   "candidates": 500
+   "dtw_ms": 27.628333002212457,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260407-1940-T1",
@@ -3728,9 +4510,9 @@
    "true_rank": 1,
    "copycat_rank": 215,
    "window_s": 60,
-   "query_ms": 3.7503329949686304,
-   "prefilter_ms": 25.29845800017938,
-   "total_ms": 89.98666600382421,
+   "query_ms": 3.7938340101391077,
+   "prefilter_ms": 25.41120800015051,
+   "total_ms": 88.96487500169314,
    "top": [
     "DELTA-250517-2008-T1",
     "DELTA-250723-1948-T1",
@@ -3740,8 +4522,13 @@
    ],
    "baseline_rank": 12,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 28.537292004330084,
-   "candidates": 500
+   "dtw_ms": 28.248082991922274,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260407-1940-T1",
@@ -3752,9 +4539,9 @@
    "true_rank": 1,
    "copycat_rank": 150,
    "window_s": 120,
-   "query_ms": 4.133958005695604,
-   "prefilter_ms": 25.82691599673126,
-   "total_ms": 118.24495799373835,
+   "query_ms": 4.3032499961555,
+   "prefilter_ms": 24.744209003983997,
+   "total_ms": 116.51224999513943,
    "top": [
     "DELTA-250723-1948-T1",
     "BRAVO-260322-1913-T1",
@@ -3764,8 +4551,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 8,
-   "dtw_ms": 52.99612499948125,
-   "candidates": 500
+   "dtw_ms": 52.50229199009482,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260408-2055-T1",
@@ -3783,7 +4575,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260408-2055-T1",
@@ -3794,9 +4591,9 @@
    "true_rank": 1,
    "copycat_rank": 203,
    "window_s": 60,
-   "query_ms": 3.9957910048542544,
-   "prefilter_ms": 27.155458999914117,
-   "total_ms": 82.44137499423232,
+   "query_ms": 3.871249995427206,
+   "prefilter_ms": 26.42787499644328,
+   "total_ms": 81.03337499778718,
    "top": [
     "INDIA-251027-2036-T1",
     "INDIA-260228-1955-T1",
@@ -3806,8 +4603,13 @@
    ],
    "baseline_rank": 14,
    "baseline_copycat_rank": 106,
-   "dtw_ms": 20.716209008242004,
-   "candidates": 500
+   "dtw_ms": 20.345416996860877,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260408-2055-T1",
@@ -3818,9 +4620,9 @@
    "true_rank": 1,
    "copycat_rank": 187,
    "window_s": 60,
-   "query_ms": 3.944291005609557,
-   "prefilter_ms": 26.40454198990483,
-   "total_ms": 84.31854100490455,
+   "query_ms": 3.9414170023519546,
+   "prefilter_ms": 26.1306250031339,
+   "total_ms": 83.17479200195521,
    "top": [
     "INDIA-260228-1955-T1",
     "ECHO-250401-2027-T1",
@@ -3830,8 +4632,13 @@
    ],
    "baseline_rank": 4,
    "baseline_copycat_rank": 24,
-   "dtw_ms": 22.423417001846246,
-   "candidates": 500
+   "dtw_ms": 21.910458002821542,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260408-2055-T1",
@@ -3842,9 +4649,9 @@
    "true_rank": 1,
    "copycat_rank": 165,
    "window_s": 60,
-   "query_ms": 3.876749993651174,
-   "prefilter_ms": 25.63150000059977,
-   "total_ms": 84.05474999744911,
+   "query_ms": 3.601709002396092,
+   "prefilter_ms": 24.983041002997197,
+   "total_ms": 82.175792005728,
    "top": [
     "INDIA-260228-1955-T1",
     "INDIA-251027-2036-T1",
@@ -3854,8 +4661,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 22.933833010029048,
-   "candidates": 500
+   "dtw_ms": 22.757375001674518,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260408-2055-T1",
@@ -3866,9 +4678,9 @@
    "true_rank": 1,
    "copycat_rank": 151,
    "window_s": 120,
-   "query_ms": 4.742582998005673,
-   "prefilter_ms": 25.34374999231659,
-   "total_ms": 110.81908299820498,
+   "query_ms": 3.835708004771732,
+   "prefilter_ms": 25.029875003383495,
+   "total_ms": 107.94258299574722,
    "top": [
     "ECHO-260313-2032-T1",
     "ECHO-250401-2027-T1",
@@ -3878,8 +4690,13 @@
    ],
    "baseline_rank": 9,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 45.37608299870044,
-   "candidates": 500
+   "dtw_ms": 44.53500000818167,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "ECHO-260408-2055-T1",
@@ -3890,9 +4707,9 @@
    "true_rank": 1,
    "copycat_rank": 181,
    "window_s": 120,
-   "query_ms": 3.919708004104905,
-   "prefilter_ms": 25.30279100756161,
-   "total_ms": 132.52670801011845,
+   "query_ms": 4.908582995994948,
+   "prefilter_ms": 25.347540999064222,
+   "total_ms": 112.1102909964975,
    "top": [
     "INDIA-260228-1955-T1",
     "INDIA-251027-2036-T1",
@@ -3902,8 +4719,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 20,
-   "dtw_ms": 47.846416011452675,
-   "candidates": 500
+   "dtw_ms": 47.14941700513009,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260517-2013-T1",
@@ -3921,7 +4743,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260517-2013-T1",
@@ -3932,9 +4759,9 @@
    "true_rank": 4,
    "copycat_rank": 300,
    "window_s": 60,
-   "query_ms": 4.14066699158866,
-   "prefilter_ms": 27.625457994872704,
-   "total_ms": 91.76450000086334,
+   "query_ms": 4.166583006735891,
+   "prefilter_ms": 26.55587499612011,
+   "total_ms": 90.8834160072729,
    "top": [
     "CHARLIE-260428-2107-T1",
     "ALPHA-251002-2037-T1",
@@ -3944,8 +4771,13 @@
    ],
    "baseline_rank": 51,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 28.680041010375135,
-   "candidates": 500
+   "dtw_ms": 28.671707987086847,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260517-2013-T1",
@@ -3956,9 +4788,9 @@
    "true_rank": 2,
    "copycat_rank": 293,
    "window_s": 60,
-   "query_ms": 3.8086249987827614,
-   "prefilter_ms": 27.12554100435227,
-   "total_ms": 91.8501669948455,
+   "query_ms": 3.824875006102957,
+   "prefilter_ms": 26.626250008121133,
+   "total_ms": 90.57745800237171,
    "top": [
     "CHARLIE-260428-2107-T1",
     "DELTA-250607-2023-T1",
@@ -3968,8 +4800,13 @@
    ],
    "baseline_rank": 37,
    "baseline_copycat_rank": 3,
-   "dtw_ms": 28.740708003169857,
-   "candidates": 500
+   "dtw_ms": 28.10820800368674,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260517-2013-T1",
@@ -3980,9 +4817,9 @@
    "true_rank": 1,
    "copycat_rank": 184,
    "window_s": 60,
-   "query_ms": 3.7387079937616363,
-   "prefilter_ms": 26.84525000222493,
-   "total_ms": 90.44716699281707,
+   "query_ms": 4.012082994449884,
+   "prefilter_ms": 25.92862499295734,
+   "total_ms": 89.76449999317992,
    "top": [
     "DELTA-250607-2023-T1",
     "DELTA-260207-1901-T1",
@@ -3992,8 +4829,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 27.799916002550162,
-   "candidates": 500
+   "dtw_ms": 27.846666998811997,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260517-2013-T1",
@@ -4004,9 +4846,9 @@
    "true_rank": 1,
    "copycat_rank": 204,
    "window_s": 120,
-   "query_ms": 3.6806669959332794,
-   "prefilter_ms": 27.553916996112093,
-   "total_ms": 118.04387500160374,
+   "query_ms": 3.8701659941580147,
+   "prefilter_ms": 27.458416996523738,
+   "total_ms": 117.34766598965507,
    "top": [
     "DELTA-250607-2023-T1",
     "DELTA-260207-1901-T1",
@@ -4016,8 +4858,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 46,
-   "dtw_ms": 51.087291998555884,
-   "candidates": 500
+   "dtw_ms": 50.480707999668084,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260517-2013-T1",
@@ -4028,9 +4875,9 @@
    "true_rank": 1,
    "copycat_rank": 179,
    "window_s": 120,
-   "query_ms": 4.006000002846122,
-   "prefilter_ms": 26.96770799229853,
-   "total_ms": 115.01304100966081,
+   "query_ms": 3.8499999936902896,
+   "prefilter_ms": 26.83245799562428,
+   "total_ms": 112.95366699050646,
    "top": [
     "DELTA-250607-2023-T1",
     "DELTA-260207-1901-T1",
@@ -4040,8 +4887,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 48.6607499915408,
-   "candidates": 500
+   "dtw_ms": 47.55079199094325,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260629-2035-T1",
@@ -4059,7 +4911,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260629-2035-T1",
@@ -4070,9 +4927,9 @@
    "true_rank": 1,
    "copycat_rank": 189,
    "window_s": 60,
-   "query_ms": 3.6297500046202913,
-   "prefilter_ms": 28.897165990201756,
-   "total_ms": 86.87250000366475,
+   "query_ms": 3.9101250004023314,
+   "prefilter_ms": 28.37591600837186,
+   "total_ms": 86.2139159871731,
    "top": [
     "ECHO-250401-2027-T1",
     "INDIA-251027-2036-T1",
@@ -4082,8 +4939,13 @@
    ],
    "baseline_rank": 13,
    "baseline_copycat_rank": 96,
-   "dtw_ms": 22.572500005480833,
-   "candidates": 500
+   "dtw_ms": 22.27787500305567,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260629-2035-T1",
@@ -4094,9 +4956,9 @@
    "true_rank": 1,
    "copycat_rank": 200,
    "window_s": 60,
-   "query_ms": 3.6094590032007545,
-   "prefilter_ms": 27.812500004074536,
-   "total_ms": 86.71895899169613,
+   "query_ms": 3.780166996875778,
+   "prefilter_ms": 27.693083000485785,
+   "total_ms": 85.51287499722093,
    "top": [
     "ECHO-250401-2027-T1",
     "INDIA-251027-2036-T1",
@@ -4106,8 +4968,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 15,
-   "dtw_ms": 22.72379100031685,
-   "candidates": 500
+   "dtw_ms": 22.072292005759664,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260629-2035-T1",
@@ -4118,9 +4985,9 @@
    "true_rank": 1,
    "copycat_rank": 168,
    "window_s": 60,
-   "query_ms": 3.746832997421734,
-   "prefilter_ms": 27.028875003452413,
-   "total_ms": 86.18616699823178,
+   "query_ms": 3.847208005026914,
+   "prefilter_ms": 26.83025000442285,
+   "total_ms": 86.17029100423679,
    "top": [
     "ECHO-250401-2027-T1",
     "INDIA-260228-1955-T1",
@@ -4130,8 +4997,13 @@
    ],
    "baseline_rank": 3,
    "baseline_copycat_rank": 2,
-   "dtw_ms": 23.131333000492305,
-   "candidates": 500
+   "dtw_ms": 23.19591600098647,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260629-2035-T1",
@@ -4142,9 +5014,9 @@
    "true_rank": 1,
    "copycat_rank": 160,
    "window_s": 120,
-   "query_ms": 3.878457995597273,
-   "prefilter_ms": 28.140666996478103,
-   "total_ms": 114.75804200745188,
+   "query_ms": 3.805041007581167,
+   "prefilter_ms": 27.673582997522317,
+   "total_ms": 114.45379100041464,
    "top": [
     "ECHO-250401-2027-T1",
     "INDIA-260228-1955-T1",
@@ -4154,8 +5026,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 17,
-   "dtw_ms": 47.32837500341702,
-   "candidates": 500
+   "dtw_ms": 47.49787499895319,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260629-2035-T1",
@@ -4166,9 +5043,9 @@
    "true_rank": 1,
    "copycat_rank": 155,
    "window_s": 120,
-   "query_ms": 3.892374996212311,
-   "prefilter_ms": 27.599958993960172,
-   "total_ms": 115.98758300533518,
+   "query_ms": 3.8593329954892397,
+   "prefilter_ms": 26.7898750025779,
+   "total_ms": 115.49920799734537,
    "top": [
     "ECHO-250401-2027-T1",
     "INDIA-260228-1955-T1",
@@ -4178,8 +5055,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 4,
-   "dtw_ms": 49.10350000136532,
-   "candidates": 500
+   "dtw_ms": 48.49458301032428,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260704-1929-T1",
@@ -4197,7 +5079,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260704-1929-T1",
@@ -4208,9 +5095,9 @@
    "true_rank": 3,
    "copycat_rank": 259,
    "window_s": 60,
-   "query_ms": 3.8372910057660192,
-   "prefilter_ms": 29.32829198834952,
-   "total_ms": 86.6817079950124,
+   "query_ms": 3.699166001752019,
+   "prefilter_ms": 28.211958007887006,
+   "total_ms": 85.25508300226647,
    "top": [
     "CHARLIE-260428-2107-T1",
     "ALPHA-251119-1925-T1",
@@ -4220,8 +5107,13 @@
    ],
    "baseline_rank": 168,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 21.422083998913877,
-   "candidates": 500
+   "dtw_ms": 21.293875004630536,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260704-1929-T1",
@@ -4232,9 +5124,9 @@
    "true_rank": 2,
    "copycat_rank": 256,
    "window_s": 60,
-   "query_ms": 3.7332500069169328,
-   "prefilter_ms": 28.107999998610467,
-   "total_ms": 86.569083010545,
+   "query_ms": 3.75841700588353,
+   "prefilter_ms": 27.569458005018532,
+   "total_ms": 85.40441699733492,
    "top": [
     "ALPHA-251119-1940-T1",
     "BRAVO-250830-1907-T1",
@@ -4244,8 +5136,13 @@
    ],
    "baseline_rank": 54,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 22.620582996751182,
-   "candidates": 500
+   "dtw_ms": 22.22179199452512,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260704-1929-T1",
@@ -4256,9 +5153,9 @@
    "true_rank": 1,
    "copycat_rank": 234,
    "window_s": 60,
-   "query_ms": 3.7388750060927123,
-   "prefilter_ms": 27.64575000037439,
-   "total_ms": 86.84304200869519,
+   "query_ms": 3.867374995024875,
+   "prefilter_ms": 27.243832999374717,
+   "total_ms": 86.01845899829641,
    "top": [
     "DELTA-250517-2008-T1",
     "BRAVO-250830-1907-T1",
@@ -4268,8 +5165,13 @@
    ],
    "baseline_rank": 9,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 22.70324999699369,
-   "candidates": 500
+   "dtw_ms": 22.446750008384697,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260704-1929-T1",
@@ -4280,9 +5182,9 @@
    "true_rank": 2,
    "copycat_rank": 246,
    "window_s": 120,
-   "query_ms": 3.8247089978540316,
-   "prefilter_ms": 28.242332991794683,
-   "total_ms": 115.91037499601953,
+   "query_ms": 3.927999990992248,
+   "prefilter_ms": 28.982624993659556,
+   "total_ms": 116.50045799615327,
    "top": [
     "ALPHA-251119-1940-T1",
     "DELTA-250517-2008-T1",
@@ -4292,8 +5194,13 @@
    ],
    "baseline_rank": 17,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 47.91720799403265,
-   "candidates": 500
+   "dtw_ms": 47.786750001250766,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "BRAVO-260704-1929-T1",
@@ -4304,9 +5211,9 @@
    "true_rank": 1,
    "copycat_rank": 178,
    "window_s": 120,
-   "query_ms": 4.48662499547936,
-   "prefilter_ms": 28.68454200506676,
-   "total_ms": 117.29491699952632,
+   "query_ms": 4.058000005898066,
+   "prefilter_ms": 27.790416992502287,
+   "total_ms": 115.38975000439677,
    "top": [
     "BRAVO-260407-1940-T1",
     "BRAVO-250830-1907-T1",
@@ -4316,8 +5223,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 20,
-   "dtw_ms": 47.700041992357,
-   "candidates": 500
+   "dtw_ms": 47.179125002003275,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260706-2032-T1",
@@ -4335,7 +5247,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260706-2032-T1",
@@ -4346,9 +5263,9 @@
    "true_rank": 1,
    "copycat_rank": 217,
    "window_s": 60,
-   "query_ms": 3.8952920003794134,
-   "prefilter_ms": 29.480292010703124,
-   "total_ms": 89.03858299890999,
+   "query_ms": 3.8899999926798046,
+   "prefilter_ms": 28.71608399436809,
+   "total_ms": 87.28445899032522,
    "top": [
     "INDIA-250730-2013-T1",
     "INDIA-260228-1955-T1",
@@ -4358,8 +5275,13 @@
    ],
    "baseline_rank": 18,
    "baseline_copycat_rank": 242,
-   "dtw_ms": 23.260458998265676,
-   "candidates": 500
+   "dtw_ms": 22.698957996908575,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260706-2032-T1",
@@ -4370,9 +5292,9 @@
    "true_rank": 1,
    "copycat_rank": 192,
    "window_s": 60,
-   "query_ms": 4.099958998267539,
-   "prefilter_ms": 29.534208006225526,
-   "total_ms": 89.4071249931585,
+   "query_ms": 3.707790994667448,
+   "prefilter_ms": 28.86808299808763,
+   "total_ms": 87.10241600056179,
    "top": [
     "INDIA-251027-2036-T1",
     "ECHO-260408-2055-T1",
@@ -4382,8 +5304,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 28,
-   "dtw_ms": 22.72883299156092,
-   "candidates": 500
+   "dtw_ms": 22.267499996814877,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260706-2032-T1",
@@ -4394,9 +5321,9 @@
    "true_rank": 1,
    "copycat_rank": 170,
    "window_s": 60,
-   "query_ms": 4.141083001741208,
-   "prefilter_ms": 28.166959004011005,
-   "total_ms": 87.4000000039814,
+   "query_ms": 3.8090000016381964,
+   "prefilter_ms": 27.552624989766628,
+   "total_ms": 86.19870799884666,
    "top": [
     "INDIA-251027-2036-T1",
     "ECHO-260408-2055-T1",
@@ -4406,8 +5333,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 2,
-   "dtw_ms": 22.840916004497558,
-   "candidates": 500
+   "dtw_ms": 22.85025001037866,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260706-2032-T1",
@@ -4418,9 +5350,9 @@
    "true_rank": 1,
    "copycat_rank": 170,
    "window_s": 120,
-   "query_ms": 4.066709007020108,
-   "prefilter_ms": 28.346291990601458,
-   "total_ms": 115.20445899805054,
+   "query_ms": 3.7953329883748665,
+   "prefilter_ms": 28.1487920001382,
+   "total_ms": 114.5863329875283,
    "top": [
     "INDIA-251027-2036-T1",
     "ECHO-260408-2055-T1",
@@ -4430,8 +5362,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 19,
-   "dtw_ms": 47.30708399438299,
-   "candidates": 500
+   "dtw_ms": 47.29091699118726,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260706-2032-T1",
@@ -4442,9 +5379,9 @@
    "true_rank": 1,
    "copycat_rank": 166,
    "window_s": 120,
-   "query_ms": 3.9849580061854795,
-   "prefilter_ms": 28.28133400180377,
-   "total_ms": 117.05116700613871,
+   "query_ms": 4.0088340028887615,
+   "prefilter_ms": 27.84737500769552,
+   "total_ms": 115.72437499125954,
    "top": [
     "INDIA-251027-2036-T1",
     "INDIA-260228-1955-T1",
@@ -4454,8 +5391,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 48.37379200034775,
-   "candidates": 500
+   "dtw_ms": 48.262291005812585,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260808-2021-T1",
@@ -4473,7 +5415,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260808-2021-T1",
@@ -4484,9 +5431,9 @@
    "true_rank": 1,
    "copycat_rank": 149,
    "window_s": 60,
-   "query_ms": 3.8592920027440414,
-   "prefilter_ms": 29.8519999923883,
-   "total_ms": 93.50308300054166,
+   "query_ms": 3.670124991913326,
+   "prefilter_ms": 29.47441700962372,
+   "total_ms": 92.40604098886251,
    "top": [
     "INDIA-251217-1947-T1",
     "INDIA-250319-1945-T1",
@@ -4496,8 +5443,13 @@
    ],
    "baseline_rank": 3,
    "baseline_copycat_rank": 28,
-   "dtw_ms": 26.920499993138947,
-   "candidates": 500
+   "dtw_ms": 26.516417012317106,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260808-2021-T1",
@@ -4508,9 +5460,9 @@
    "true_rank": 1,
    "copycat_rank": 137,
    "window_s": 60,
-   "query_ms": 3.823749997536652,
-   "prefilter_ms": 29.613457998493686,
-   "total_ms": 95.25408399349544,
+   "query_ms": 3.5509580047801137,
+   "prefilter_ms": 29.177000003983267,
+   "total_ms": 93.90587500820402,
    "top": [
     "INDIA-251217-1947-T1",
     "INDIA-250319-1945-T1",
@@ -4520,8 +5472,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 18,
-   "dtw_ms": 28.386665988364257,
-   "candidates": 500
+   "dtw_ms": 28.209458003402688,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260808-2021-T1",
@@ -4532,9 +5489,9 @@
    "true_rank": 1,
    "copycat_rank": 148,
    "window_s": 60,
-   "query_ms": 3.9508330082753673,
-   "prefilter_ms": 28.770709002856165,
-   "total_ms": 90.2476250048494,
+   "query_ms": 3.541500002029352,
+   "prefilter_ms": 28.348332998575643,
+   "total_ms": 89.178082998842,
    "top": [
     "INDIA-250319-1945-T1",
     "INDIA-251217-1947-T1",
@@ -4544,8 +5501,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 24.668750003911555,
-   "candidates": 500
+   "dtw_ms": 24.559125013183802,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260808-2021-T1",
@@ -4556,9 +5518,9 @@
    "true_rank": 1,
    "copycat_rank": 143,
    "window_s": 120,
-   "query_ms": 3.778667000005953,
-   "prefilter_ms": 29.11716600647196,
-   "total_ms": 142.65720899857115,
+   "query_ms": 3.8889999996172264,
+   "prefilter_ms": 28.817915997933596,
+   "total_ms": 122.28624999988824,
    "top": [
     "ECHO-250909-2009-T1",
     "INDIA-250319-1945-T1",
@@ -4568,8 +5530,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 53.312000003643334,
-   "candidates": 500
+   "dtw_ms": 53.401666998979636,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "INDIA-260808-2021-T1",
@@ -4580,9 +5547,9 @@
    "true_rank": 1,
    "copycat_rank": 145,
    "window_s": 120,
-   "query_ms": 4.287999996449798,
-   "prefilter_ms": 29.04545800993219,
-   "total_ms": 119.21891701058485,
+   "query_ms": 3.9866660081315786,
+   "prefilter_ms": 28.20320799946785,
+   "total_ms": 116.9403750100173,
    "top": [
     "INDIA-250319-1945-T1",
     "INDIA-251217-1947-T1",
@@ -4592,8 +5559,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 49.366791994543746,
-   "candidates": 500
+   "dtw_ms": 48.51429098926019,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260828-1915-T1",
@@ -4611,7 +5583,12 @@
    "baseline_rank": null,
    "baseline_copycat_rank": null,
    "dtw_ms": null,
-   "candidates": null
+   "candidates": null,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260828-1915-T1",
@@ -4622,9 +5599,9 @@
    "true_rank": 9,
    "copycat_rank": 348,
    "window_s": 60,
-   "query_ms": 3.6967089981772006,
-   "prefilter_ms": 31.775624986039475,
-   "total_ms": 95.02845900715329,
+   "query_ms": 3.7572919973172247,
+   "prefilter_ms": 30.868916990584694,
+   "total_ms": 94.39420800481457,
    "top": [
     "GOLF-251229-1933-T1",
     "ALPHA-250418-2044-T1",
@@ -4634,8 +5611,13 @@
    ],
    "baseline_rank": 141,
    "baseline_copycat_rank": 80,
-   "dtw_ms": 27.29491599893663,
-   "candidates": 500
+   "dtw_ms": 27.34183300344739,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260828-1915-T1",
@@ -4646,9 +5628,9 @@
    "true_rank": 3,
    "copycat_rank": 361,
    "window_s": 60,
-   "query_ms": 3.8776669971412048,
-   "prefilter_ms": 31.382125001982786,
-   "total_ms": 100.39966698968783,
+   "query_ms": 3.773167001781985,
+   "prefilter_ms": 30.777209001826122,
+   "total_ms": 98.99591699650045,
    "top": [
     "ALPHA-260307-1928-T1",
     "GOLF-260628-2012-T1",
@@ -4658,8 +5640,13 @@
    ],
    "baseline_rank": 66,
    "baseline_copycat_rank": 80,
-   "dtw_ms": 31.78416700393427,
-   "candidates": 500
+   "dtw_ms": 31.624083989299834,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260828-1915-T1",
@@ -4670,9 +5657,9 @@
    "true_rank": 1,
    "copycat_rank": 217,
    "window_s": 60,
-   "query_ms": 3.7387500051409006,
-   "prefilter_ms": 29.33091699378565,
-   "total_ms": 94.6698329935316,
+   "query_ms": 3.9526670007035136,
+   "prefilter_ms": 29.222083001513965,
+   "total_ms": 94.91545899072662,
    "top": [
     "BRAVO-260407-1940-T1",
     "DELTA-250723-1948-T1",
@@ -4682,8 +5669,13 @@
    ],
    "baseline_rank": 19,
    "baseline_copycat_rank": 3,
-   "dtw_ms": 28.636332994210534,
-   "candidates": 500
+   "dtw_ms": 28.55437499238178,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260828-1915-T1",
@@ -4694,9 +5686,9 @@
    "true_rank": 1,
    "copycat_rank": 214,
    "window_s": 120,
-   "query_ms": 3.670291989692487,
-   "prefilter_ms": 29.825916004483588,
-   "total_ms": 123.08649999613408,
+   "query_ms": 3.910041006747633,
+   "prefilter_ms": 29.381374988588504,
+   "total_ms": 122.36020799900871,
    "top": [
     "BRAVO-260407-1940-T1",
     "DELTA-250723-1948-T1",
@@ -4706,8 +5698,13 @@
    ],
    "baseline_rank": 60,
    "baseline_copycat_rank": 2,
-   "dtw_ms": 53.163582997513004,
-   "candidates": 500
+   "dtw_ms": 52.51799999678042,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   },
   {
    "track_id": "DELTA-260828-1915-T1",
@@ -4718,9 +5715,9 @@
    "true_rank": 1,
    "copycat_rank": 170,
    "window_s": 120,
-   "query_ms": 4.060833001858555,
-   "prefilter_ms": 30.14337499917019,
-   "total_ms": 118.31391700252425,
+   "query_ms": 3.8351249968400225,
+   "prefilter_ms": 28.649540996411815,
+   "total_ms": 114.58320799283683,
    "top": [
     "BRAVO-260407-1940-T1",
     "DELTA-250723-1948-T1",
@@ -4730,8 +5727,13 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 46.60475000855513,
-   "candidates": 500
+   "dtw_ms": 45.71245799888857,
+   "candidates": 500,
+   "forecast_error_m": null,
+   "forecast_ms": null,
+   "linkage_hits": null,
+   "linkage_total": null,
+   "recall_ms": null
   }
  ]
 }

@@ -10,6 +10,10 @@ out of the rank metrics (D-009). Truth is read here, and only here, to label the
 Methods (``METHODS``): ``euclidean`` is the §10.2 baseline; ``dtw`` is the phase 4 matcher (DTW +
 fusion). Both return the fused ranking and the prefilter order of the same candidates, so the DTW
 lift is measured on one run, one index and one query set (D-076).
+
+After the ranker is timed, ``downstream.Downstream`` forecasts the recovery zone (T = 90 and
+120 s) and, given a report index, recalls the reports of the top 3 matched incidents (T = 120 s);
+truth labels the forecast error and the report linkage (phase 5, D-088).
 """
 
 from __future__ import annotations
@@ -23,13 +27,14 @@ from pathlib import Path
 import pandas as pd
 
 from kairos_defense.config import Config
+from kairos_defense.eval.downstream import Downstream
 from kairos_defense.eval.metrics import Outcome
 from kairos_defense.match.baseline import MODEL_VERSION as EUCLIDEAN_VERSION
 from kairos_defense.match.baseline import rank_candidates
 from kairos_defense.match.matcher import DtwMatcher, MatchResult
 from kairos_defense.match.prefilter import prefilter
 from kairos_defense.match.query import Query, load_query
-from kairos_defense.ports import TrackStore, VectorStore
+from kairos_defense.ports import ReportIndex, TrackStore, VectorStore
 
 T_GRID = (30, 45, 60, 90, 120, 180)
 FIRST_NIGHT, LAST_NIGHT = date(2026, 3, 1), date(2026, 8, 31)  # months 13-18 (§19.1)
@@ -160,8 +165,10 @@ def run_case(
     cfg: Config,
     ranker: Ranker,
     truth_by_track: pd.DataFrame,
+    downstream: Downstream | None = None,
 ) -> Outcome:
-    """One query at one T: run the method, then label ranks with truth."""
+    """One query at one T: run the method, then label ranks with truth; with ``downstream``, also
+    the forecast error and report linkage (outside the timed span)."""
     base = {"track_id": case.track_id, "actor_id": case.actor_id,
             "actor_type": case.actor_type, "at_s": at_s}  # fmt: skip
     if at_s < cfg.scoring.live.min_track_s:
@@ -174,12 +181,13 @@ def run_case(
     true_rank, copycat_rank = _ranks(case, res.matches, truth_by_track)
     b_true, b_copy = _ranks(case, res.baseline, truth_by_track)
     tm = res.timings
+    extra = downstream.outcome_fields(q, res) if downstream is not None else {}
     return Outcome(**base, ran=True, true_rank=true_rank, copycat_rank=copycat_rank,
                    window_s=q.window_s, query_ms=(t1 - t0) * 1000.0,
                    prefilter_ms=tm.get("prefilter_ms"), total_ms=(t2 - t0) * 1000.0,
                    top=tuple(m.track_id for m in res.matches[:5]), baseline_rank=b_true,
                    baseline_copycat_rank=b_copy, dtw_ms=tm.get("dtw_ms"),
-                   candidates=len(res.matches))  # fmt: skip
+                   candidates=len(res.matches), **extra)  # fmt: skip
 
 
 @dataclass
@@ -192,6 +200,7 @@ class EvalRun:
     elapsed_s: float = 0.0
     model_version: str = ""
     candidate_tracks: int = 0
+    reports_indexed: bool = False  # report linkage was measured (a report index was given)
 
 
 def evaluate(
@@ -201,18 +210,21 @@ def evaluate(
     truth: pd.DataFrame,
     method: str,
     models_dir: Path | str | None = None,
+    reports: ReportIndex | None = None,
 ) -> EvalRun:
-    """Run the protocol for ``method`` over the prober and copycat query sets."""
+    """Run the protocol for ``method`` over the prober and copycat query sets. ``truth`` is
+    ``eval.truth.track_truth``; ``reports`` (the report index) enables report linkage."""
     from kairos_defense.eval.demo import demo_rows
 
     t0 = time.perf_counter()
     ranker, version = METHODS[method](cfg, store, vstore, models_dir)
+    down = Downstream(cfg, store, vstore, truth, reports)
     sets = query_sets(track_list(store), truth)
     by_track = truth.set_index("track_id")
     outcomes: dict[str, list[Outcome]] = {}
     for name, cases in (("probers", sets.probers), ("copycats", sets.copycats)):
         outcomes[name] = [
-            run_case(c, at, store, cfg, ranker, by_track)
+            run_case(c, at, store, cfg, ranker, by_track, down if name == "probers" else None)
             for c in cases
             if c.answerable
             for at in T_GRID
@@ -220,6 +232,8 @@ def evaluate(
     run = EvalRun(method, datetime.now(UTC).replace(tzinfo=None), sets, outcomes)
     run.model_version = version
     run.candidate_tracks = cfg.scoring.prefilter.candidate_tracks
-    run.demo = demo_rows(cfg, store, truth, ranker, assert_top3=method != "euclidean")
+    run.reports_indexed = reports is not None
+    run.demo = demo_rows(cfg, store, truth, ranker, assert_top3=method != "euclidean",
+                         downstream=down)  # fmt: skip
     run.elapsed_s = time.perf_counter() - t0
     return run

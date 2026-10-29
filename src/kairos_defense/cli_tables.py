@@ -1,4 +1,5 @@
-"""Rich tables printed by ``kairos-defense match``, ``models`` and ``eval`` (outside ``cli.py``).
+"""Rich tables printed by ``kairos-defense match``, ``models``, ``eval``, ``forecast`` and
+``recall`` (outside ``cli.py``).
 
 Missing numbers print as ``-``: a warp ratio is NaN beyond the explained top 20 or when it is not
 credible (D-069), and the Euclidean baseline has no warp or reasons (D-054).
@@ -10,6 +11,7 @@ import math
 from collections.abc import Callable
 
 from rich.table import Table
+from rich.text import Text
 
 
 def _num(v, fmt: str = "{:.3f}") -> str:
@@ -93,11 +95,54 @@ def eval_table(s: dict, method: str) -> Table:
     t.add_row("time to match (top 3 by T=90 s)", f(m["time_to_match_t90"], True))
     t.add_row("copycat-first at T=120 s", f(m["copycat_first_t120"], True))
     t.add_row("Recall@5 at T=120 s, copycats", f(m["recall_at_5_t120_copycats"]))
-    for stage in ("query_build", "prefilter", "dtw", "end_to_end"):
+    t.add_row("report linkage (T=120 s, top 3, k=5)",
+              f"{f(m.get('report_linkage'))} ({m.get('report_linkage_retrieved', 0)} of "
+              f"{m.get('report_linkage_relevant', 0)})")  # fmt: skip
+    for key, label in (("t90", "T=90 s"), ("t120", "T=120 s")):
+        med, p80 = m.get(f"forecast_median_{key}_m"), m.get(f"forecast_p80_{key}_m")
+        t.add_row(f"forecast error {label} median / P80",
+                  "-" if med is None else f"{med:,.0f} / {p80:,.0f} m")  # fmt: skip
+    for stage in ("query_build", "prefilter", "dtw", "end_to_end", "forecast", "recall"):
         p50, p95 = m.get(f"latency_{stage}_p50_ms"), m.get(f"latency_{stage}_p95_ms")
         t.add_row(f"latency {stage.replace('_', ' ')} p50 / p95",
                   "-" if p50 is None else f"{p50:.0f} / {p95:.0f} ms")  # fmt: skip
     for r in s["demo"]:
         t.add_row(f"demo {r['key']}", f"{r['status']}: {r['observed']}")
     t.add_row("elapsed", f"{s['elapsed_s']:.1f} s")
+    return t
+
+
+def analogs_table(fc) -> Table:
+    """``kairos-defense forecast``: one row per analog (§13 steps 1-4)."""
+    t = Table(title="analogs (top matches with a known recovery point)", title_justify="left")
+    for c in ("#", "incident", "score", "recovery rel. (m)", "rotation", "anchor", "j* (s)",
+              "mapped recovery (m)"):  # fmt: skip
+        t.add_column(c, justify="right" if c in ("#", "score", "rotation", "j* (s)") else "left")
+    for i, a in enumerate(fc.analogs, 1):
+        rx, ry = a.recovery_rel_m
+        t.add_row(str(i), a.incident_id, f"{a.score:.3f}", f"({rx:,.0f}, {ry:,.0f})",
+                  f"{a.rotation_deg:+.0f}°", a.anchor_asset_id, str(a.aligned_t_s),
+                  f"({a.recovery_x_m:,.0f}, {a.recovery_y_m:,.0f})")  # fmt: skip
+    return t
+
+
+def marked_text(text: str, clues) -> Text:
+    """Report text with clue spans underlined; linked clues also bold (§12.4, §17.8)."""
+    out = Text(text)
+    for c in clues:
+        out.stylize("bold underline" if c.linked else "underline", c.start, c.end)
+    return out
+
+
+def recall_table(mr, local: Callable) -> Table:
+    """``kairos-defense recall``: the reports recalled for one matched incident."""
+    t = Table(title=f"match #{mr.match_rank} {mr.incident_id} (score {mr.match_score:.3f})",
+              title_justify="left")  # fmt: skip
+    for c in ("#", "report", "source", "grade", "event (local)", "score", "text"):
+        t.add_column(c, justify="right" if c in ("#", "score") else "left",
+                     overflow="fold")  # fmt: skip
+    for r in mr.reports:
+        t.add_row(str(r.rank), r.report_id, r.source, r.source_grade,
+                  local(r.event_ts_ms, mr.installation_id), f"{r.score:.4f}",
+                  marked_text(r.text, r.clues))  # fmt: skip
     return t

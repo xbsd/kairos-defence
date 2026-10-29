@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
 from kairos_defense.config import ScoringConfig
 from kairos_defense.features.channels import channel_matrix
@@ -43,6 +44,11 @@ class MatchResult:
     matches: list[Match]  # fused score, best first
     baseline: list[Match]  # the same candidates in prefilter (Euclidean) order
     timings: dict[str, float] = field(default_factory=dict)  # ms per stage and total
+    # what the matcher already computed, for the forecast and recall (phase 5, D-087): the
+    # query's partial signature and the candidates' stored signatures by track id (None: the
+    # Euclidean baseline, whose callers read them through the ports)
+    signature: dict | None = None
+    signatures: pd.DataFrame | None = None
 
 
 def load_models(models_dir: Path | str, scoring: ScoringConfig) -> tuple[FusionModel, float]:
@@ -121,4 +127,4 @@ class DtwMatcher:
         t3 = time.perf_counter()
         timings = {**c.timings, "fusion_ms": (t2 - t1) * 1e3, "explain_ms": explain_s * 1e3,
                    "total_ms": (t3 - t0) * 1e3}  # fmt: skip
-        return MatchResult(out, rank_candidates(q, c.rows), timings)
+        return MatchResult(out, rank_candidates(q, c.rows), timings, c.signature, c.signatures)

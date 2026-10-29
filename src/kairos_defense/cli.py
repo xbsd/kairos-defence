@@ -28,13 +28,10 @@ app = typer.Typer(
 
 # name -> (phase that implements it, one-line help)
 STUBS: dict[str, tuple[str, str]] = {
-    "recall": ("5", "Retrieve past reports for an incident's matches (hybrid search)."),
-    "forecast": ("5", "Forecast the recovery area of an incident from its analogs."),
     "replay": ("7", "Replay a live incident; --precompute and --reset."),
     "memory": ("6", "Case memory: seed, verify or reseed the ledger."),
     "export": ("6", "Export a signed evidence package for a case (needs approval)."),
     "verify-evidence": ("6", "Verify an evidence package's hashes, signature and chain."),
-    "fetch-models": ("5", "Download optional embedding models for offline use."),
     "api": ("7", "Serve the FastAPI backend (REST and WebSocket); --dump-openapi."),
     "mcp": ("9", "Run the MCP server over stdio."),
 }
@@ -83,6 +80,24 @@ def _need_index(cfg):
         console.print("[red]no index:[/red] flight_windows is missing; run `make index`.")
         raise typer.Exit(1)
     return lance
+
+
+def _need_reports_index(cfg, store, lance):
+    """The ``ReportIndex``, or exit 1 when LanceDB ``reports`` is missing or stale (D-084)."""
+    from kairos_defense.recall.embed import EmbedderUnavailable, make_embedder
+    from kairos_defense.recall.index import ReportIndexStale, check_reports_index
+    from kairos_defense.store.lance import REPORTS_TABLE, LanceReportIndex
+
+    if not lance.has(REPORTS_TABLE):
+        console.print(
+            "[red]no reports index:[/red] the reports table is missing; run `make index`."
+        )
+        raise typer.Exit(1)
+    try:
+        check_reports_index(store, lance, make_embedder(cfg.app))
+    except (EmbedderUnavailable, ReportIndexStale) as exc:
+        _fail(exc)
+    return LanceReportIndex(cfg.app.paths.lancedb)
 
 
 def _fail(exc: Exception) -> None:
@@ -143,12 +158,19 @@ def gen(
 
 @app.command()
 def index(config: str = typer.Option("config", help="Folder with the five YAML files.")) -> None:
-    """Build features, signatures and LanceDB windows for every history track (reports: phase 5)."""
+    """Build features, signatures and LanceDB windows for every history track, then the report
+    index (LanceDB reports with full-text search) and report_clues."""
     from kairos_defense.features.build import build_index
+    from kairos_defense.recall.embed import EmbedderUnavailable
+    from kairos_defense.recall.index import build_reports_index
 
     cfg = _load_config(config)
     _need_data(cfg)
     s = build_index(cfg)
+    try:
+        r = build_reports_index(cfg)
+    except EmbedderUnavailable as exc:
+        _fail(exc)
     table = Table(title="kairos-defense index", title_justify="left")
     table.add_column("Item")
     table.add_column("Value", justify="right")
@@ -168,10 +190,15 @@ def index(config: str = typer.Option("config", help="Folder with the five YAML f
     table.add_row("Remote ID present", f"{s.rid_present:,}")
     if s.failed:
         table.add_row("[red]failed[/red]", ", ".join(s.failed))
-    table.add_row("elapsed", f"{s.elapsed_s:.1f} s")
+    table.add_row("reports indexed (live skipped)", f"{r.reports:,} ({r.live_reports_skipped:,})")
+    table.add_row("report_clues rows", ", ".join(f"{k} {v:,}" for k, v in r.clues_by_type.items())
+                  + f" ({r.clue_rows:,}, in {r.reports_with_clues:,} reports)")  # fmt: skip
+    table.add_row("embedder", f"{r.embedder} ({r.dim} dims); full-text index on text")
+    table.add_row("elapsed", f"{s.elapsed_s:.1f} s + reports {r.elapsed_s:.1f} s")
     console.print(table)
-    console.print(f"wrote track_features and track_signatures to {cfg.app.paths.duckdb}, "
-                  f"flight_windows to {cfg.app.paths.lancedb}")  # fmt: skip
+    console.print(f"wrote track_features, track_signatures and report_clues to "
+                  f"{cfg.app.paths.duckdb}, flight_windows and reports to "
+                  f"{cfg.app.paths.lancedb}")  # fmt: skip
 
 
 @app.command()
@@ -300,7 +327,8 @@ def eval_(
     truth = track_truth(cfg.app)
     try:
         with DuckTrackStore(cfg.app.paths.duckdb, cfg.app) as store:
-            run = evaluate(cfg, store, lance, truth, method)
+            reports = _need_reports_index(cfg, store, lance)
+            run = evaluate(cfg, store, lance, truth, method, reports=reports)
     except (ModelError, IndexStale, DtwUnavailable) as exc:
         _fail(exc)
     md, js, s = write_reports(run, cfg.app.paths.reports)
@@ -318,6 +346,11 @@ def eval_(
         console.print(f"[red]{p}[/red]")
     if problems:
         raise typer.Exit(1)
+
+
+from kairos_defense import cli_recall  # noqa: E402  (phase 5 commands; imports cli lazily)
+
+cli_recall.register(app)
 
 
 def _version(value: bool) -> None:

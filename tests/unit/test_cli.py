@@ -16,7 +16,7 @@ COMMANDS = [
 runner = CliRunner()
 
 
-BUILT = ["gen", "index", "models", "match", "eval"]  # real commands; the rest are stubs for now
+BUILT = ["gen", "index", "models", "match", "eval", "recall", "forecast", "fetch-models"]
 
 
 def test_help_lists_every_command() -> None:
@@ -126,3 +126,91 @@ def test_models_cli_trains_on_the_p1_nights(p1_index, tmp_path, monkeypatch) -> 
     assert (tmp_path / "models" / "fusion_v1.json").exists()
     assert (tmp_path / "models" / "dtw_calibration.json").exists()
     assert "coefficient shape_sim" in res.output and "validation ROC AUC" in res.output
+
+
+def test_forecast_cli_runs_on_the_p1_nights(toy_models, monkeypatch) -> None:
+    import kairos_defense.cli as cli
+
+    monkeypatch.setattr(cli, "_load_config", lambda _c: toy_models)
+    res = runner.invoke(app, ["forecast", "--incident", "DEMO-BRAVO-0828", "--at", "105"],
+                        terminal_width=250)  # fmt: skip
+    assert res.exit_code == 0, res.output
+    assert "query DEMO-BRAVO-0828-T1 at T+105 s" in res.output
+    assert re.search(
+        r"center \(.+\) m region frame · [\d,]+ m at \d+° \(\w+\) of BRAVO-", res.output
+    )
+    assert "radius" in res.output and "analogs" in res.output and "P1-" in res.output
+    assert "exit path: 60 points" in res.output and "roads crossing the zone:" in res.output
+    res = runner.invoke(app, ["forecast", "--incident", "DEMO-BRAVO-0828", "--at", "105",
+                              "--method", "euclidean"], terminal_width=250)  # fmt: skip
+    assert res.exit_code == 0, res.output
+
+
+def test_recall_cli_runs_on_the_p1_nights(toy_models, monkeypatch) -> None:
+    import kairos_defense.cli as cli
+
+    monkeypatch.setattr(cli, "_load_config", lambda _c: toy_models)
+    res = runner.invoke(app, ["recall", "--incident", "DEMO-BRAVO-0828", "--at", "120",
+                              "--matches", "5"], terminal_width=250)  # fmt: skip
+    assert res.exit_code == 0, res.output
+    assert "keyword text: 'drone" in res.output and "forecast zone:" in res.output
+    assert "R-P1-DELTA-260419-1" in res.output and "security_forces" in res.output
+    args = ["--incident", "DEMO-BRAVO-0828", "--at", "120", "--query", "white pickup", "--k", "1"]
+    res = runner.invoke(app, ["recall", *args], terminal_width=250)
+    assert res.exit_code == 0 and "keyword text: 'white pickup'" in res.output
+
+
+def test_recall_needs_reports_index(p1_index, tmp_path, monkeypatch) -> None:
+    import shutil
+
+    import kairos_defense.cli as cli
+    from kairos_defense.store.lance import LanceVectorStore
+
+    lance_dir = tmp_path / "lancedb"
+    shutil.copytree(p1_index.cfg.app.paths.lancedb, lance_dir)
+    paths = p1_index.cfg.app.paths.model_copy(update={"lancedb": str(lance_dir)})
+    c = p1_index.cfg.model_copy(
+        update={"app": p1_index.cfg.app.model_copy(update={"paths": paths})}
+    )
+    monkeypatch.setattr(cli, "_load_config", lambda _c: c)
+    LanceVectorStore(lance_dir).db.drop_table("reports")
+    for cmd in (["recall", "--incident", "DEMO-BRAVO-0828", "--at", "120"], ["eval"]):
+        res = runner.invoke(app, cmd, terminal_width=200)
+        assert res.exit_code == 1 and "make index" in res.output, (cmd, res.output)
+
+
+def test_forecast_unknown_incident_exits_1(toy_models, monkeypatch) -> None:
+    import kairos_defense.cli as cli
+
+    monkeypatch.setattr(cli, "_load_config", lambda _c: toy_models)
+    for cmd in ("forecast", "recall"):
+        res = runner.invoke(app, [cmd, "--incident", "NOPE-0000", "--at", "105"])
+        assert res.exit_code == 1 and "unknown incident or track" in res.output, res.output
+    res = runner.invoke(app, ["forecast", "--incident", "DEMO-BRAVO-0828", "--track", "X-T9",
+                              "--at", "105"])  # fmt: skip
+    assert res.exit_code == 1 and "X-T9" in res.output
+    res = runner.invoke(app, ["forecast", "--incident", "DEMO-BRAVO-0828", "--at", "105",
+                              "--method", "cosine"])  # fmt: skip
+    assert res.exit_code == 1 and "unknown method" in res.output
+
+
+def test_forecast_needs_models(p1_index, monkeypatch) -> None:
+    import kairos_defense.cli as cli
+
+    monkeypatch.setattr(cli, "_load_config", lambda _c: p1_index.cfg)
+    res = runner.invoke(app, ["forecast", "--incident", "DEMO-BRAVO-0828", "--at", "105"])
+    assert res.exit_code == 1 and "make models" in res.output, res.output
+
+
+def test_fetch_models_without_fastembed_exits_1(cfg, tmp_path, monkeypatch) -> None:
+    import sys
+
+    import kairos_defense.cli as cli
+    from tests.conftest import tmp_config
+
+    monkeypatch.setattr(cli, "_load_config", lambda _c: tmp_config(cfg, tmp_path))
+    monkeypatch.setitem(sys.modules, "fastembed", None)
+    res = runner.invoke(app, ["fetch-models"], terminal_width=200)
+    assert res.exit_code == 1, res.output
+    assert "uv sync --extra fastembed" in res.output
+    assert not (tmp_path / "cache").exists()  # nothing downloaded or created

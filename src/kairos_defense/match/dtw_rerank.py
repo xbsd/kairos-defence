@@ -127,10 +127,18 @@ def shape_sim(d_norm: float | np.ndarray, tau: float) -> float | np.ndarray:
     return np.exp(-np.asarray(d_norm, dtype=np.float64) / tau)
 
 
-def warp_path(live: np.ndarray, seg: np.ndarray, weights: np.ndarray | list[float]) -> np.ndarray:
-    """Best alignment of all of ``live`` to part of ``seg`` with §9.3 normalization: ``(p, 2)`` int
-    (live row, segment row). The segment's start and end may be skipped (``relaxation``)."""
-    a, b = prepare(live, weights), prepare(seg, weights)
+def warp_path(
+    live: np.ndarray,
+    seg: np.ndarray,
+    weights: np.ndarray | list[float],
+    mode: str = "series",
+    scales: np.ndarray | list[float] | None = None,
+) -> np.ndarray:
+    """Best alignment of all of ``live`` to part of ``seg``: ``(p, 2)`` int (live row, segment
+    row). The segment's start and end may be skipped (``relaxation``). ``mode``/``scales`` as in
+    ``prepare``: §9.3 ``series`` for the warp ratio; the forecast's j* uses the shape distance's
+    configured mode (D-087)."""
+    a, b = prepare(live, weights, mode, scales), prepare(seg, weights, mode, scales)
     n, m = len(a), len(b)
     psi = relaxation(n, m)
     _, paths = dtw_ndim.warping_paths(a, b, psi=psi, use_c=True)  # full matrix: module docstring

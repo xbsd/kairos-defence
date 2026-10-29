@@ -6,7 +6,8 @@ The top-level package: the CLI entry point and the four core modules every other
 ## Responsibilities
 
 - `cli.py`: the `kairos-defense` Typer app, and the composition root that builds the store adapters.
-  Commands not built yet are stubs that name their phase (D-022).
+  Commands not built yet are stubs that name their phase (D-022). `cli_recall.py` holds the
+  phase 5 commands (`forecast`, `recall`, `fetch-models`), registered on the same app (D-091).
 - `ports.py`: the §4.1 Protocols business logic depends on, instead of DuckDB or LanceDB (rule 6).
 - `rng.py`: per-component random streams derived from the global seed (rule 4, §8.9).
 - `geo.py`: geometry in local ENU meters. Bearings are clockwise from north in [0, 360) (D-007).
@@ -14,24 +15,40 @@ The top-level package: the CLI entry point and the four core modules every other
 ## Public API
 
 - `cli.app`: the Typer app (script `kairos-defense`).
-  - Real commands: `gen` (phase 1, extended in phase 2), `index` (phase 3), `models` (phase 4),
-    `match --method dtw|euclidean` and `eval [--baseline] [--method dtw|euclidean]` (phase 3; DTW
-    and the `dtw` default from phase 4). `match`, `models` and `eval` exit 1 with a fix-it message
-    for missing data, a missing or stale index, missing models or a missing DTW C extension.
-  - Stubs in `STUBS`: `recall`, `forecast`, `replay`, `memory`, `export`, `verify-evidence`,
-    `fetch-models`, `api` and `mcp`.
+  - Real commands: `gen` (phase 1, extended in phase 2), `index` (phase 3; from phase 5 it also
+    builds the LanceDB `reports` table with its full-text index and the DuckDB `report_clues`
+    table, D-089), `models` (phase 4), `match --method dtw|euclidean` and
+    `eval [--baseline] [--method dtw|euclidean]` (phase 3; DTW and the `dtw` default from phase
+    4), and from phase 5:
+    - `forecast --incident ID --at S [--track T] [--method dtw|euclidean]`: the §13 recovery zone
+      (center, radius, analogs, exit path, roads crossing the zone);
+    - `recall --incident ID --at S [--track T] [--matches 3] [--k 5] [--query TEXT]`: the reports
+      behind the top matched incidents, with clue spans and link sentences (§12);
+    - `fetch-models [--model M]`: the **only** command that downloads anything, and only when run
+      by hand: the optional FastEmbed model into `paths.cache`. Without the `fastembed` extra it
+      exits 1 naming `uv sync --extra fastembed`. The hashing embedder stays the offline default
+      (D-084, CLAUDE.md rule 5).
+  - Fix-it exits (exit 1): missing data, a missing or stale index, a missing or stale reports
+    index, missing models, a missing DTW C extension, an unavailable embedder, an unknown incident,
+    track or method.
+  - Stubs in `STUBS`: `replay`, `memory`, `export`, `verify-evidence`, `api` and `mcp`.
   - `--version`.
 - `ports`:
   - `TrackStore`: `track_points`, `features`, `features_many`, `sensor_context_until`,
     `signature`, `tracks_before`, `context_asof`, `sql` (the two phase 4 additions, D-072).
   - `VectorStore`: `upsert`, `search`.
-  - `ReportIndex`: `hybrid`, `fts`.
+  - `ReportIndex`: `hybrid`, `fts`. `hybrid` may raise `NotImplementedError` when the backend
+    has no native hybrid search; callers then fuse the vector and FTS results themselves
+    (`recall.search.hybrid_search`, §12.5, D-085). The signatures are unchanged.
   - `Embedder`: `dim`, and `embed(texts) -> (n, dim) float32`, L2-normalized.
   - `CaseMemory`: `append`, `as_of`, `diff`, and `verify_chain() -> int | None` (D-014).
   - `LLM`: `chat`.
   - `CaseSnapshot`, a dataclass.
-- `cli_tables`: the `match`, `models` and `eval` tables (`match_table`, `models_table`,
-  `eval_table`); missing numbers print as `-`.
+- `cli_tables`: the `match`, `models`, `eval`, `forecast` and `recall` tables (`match_table`,
+  `models_table`, `eval_table`, `analogs_table`, `recall_table`, and `marked_text`, which
+  underlines clue spans and bolds linked ones); missing numbers print as `-`.
+- `cli_recall`: `forecast_cmd`, `recall_cmd`, `fetch_models_cmd`, `describe_center(fc, q)` and
+  `register(app)`. Shared helpers are looked up on `kairos_defense.cli` at call time.
 - `rng.stable_int(name) -> int`: the first 8 bytes of SHA-256, little-endian.
 - `rng.rng_for(seed, *names) -> numpy.random.Generator`: an independent stream per component, e.g.
   `rng_for(42, "P2", "flight", "7")`.
@@ -48,7 +65,8 @@ The top-level package: the CLI entry point and the four core modules every other
 
 ## Data in and out
 
-None directly. `cli.py` reads `config/` and wires `store`, `sim`, `features`, `match` and `eval`.
+None directly. `cli.py` reads `config/` and wires `store`, `sim`, `features`, `match`, `recall`,
+`forecast` and `eval`.
 
 ## How it works
 
@@ -65,12 +83,17 @@ None directly. `cli.py` reads `config/` and wires `store`, `sim`, `features`, `m
 ## Configuration
 
 `cli.py` takes `--config <folder>` (default `config`) on its real commands. The others read nothing.
+Phase 5 added `paths.cache` (the FastEmbed cache, `app.yaml`) and `forecast.anchor`
+(`scoring.yaml`); see `config/README.md`.
 
 ## Tests
 
-- `tests/unit/test_cli.py`: help lists every command; each stub exits 0 and names its phase;
-  `--version`; the real commands' error and happy paths (`match` with both methods, `models` on
-  the P1 nights, missing data, index and models).
+- `tests/unit/test_cli.py`: help lists every command; each of the six stubs exits 0 and names its
+  phase; `--version`; the real commands' error and happy paths (`match` with both methods,
+  `models` on the P1 nights, missing data, index and models). Phase 5:
+  `test_forecast_cli_runs_on_the_p1_nights`, `test_recall_cli_runs_on_the_p1_nights`,
+  `test_recall_needs_reports_index` (also `eval`), `test_forecast_unknown_incident_exits_1`,
+  `test_forecast_needs_models`, `test_fetch_models_without_fastembed_exits_1`.
 - `tests/unit/test_rng.py`: pinned values and stream independence.
 - `tests/unit/test_geo.py`: cardinals, wrap edges, clockwise rotation, rectangles, frame round trips.
 - Run: `uv run pytest tests/unit -q -k "cli or rng or geo"`.
@@ -91,3 +114,6 @@ None directly. `cli.py` reads `config/` and wires `store`, `sim`, `features`, `m
 - Phase 3: `index`, `match --method euclidean` and `eval [--baseline]` became real.
 - Phase 4: `models` became real; `match` and `eval` default to `--method dtw`; `cli_tables.py`;
   `TrackStore.features_many` and `sensor_context_until` (D-072, D-076).
+- Phase 5: `recall`, `forecast` and `fetch-models` became real (`cli_recall.py`); `index` also
+  builds the `reports` index and `report_clues`; `eval` needs the reports index; forecast and
+  recall tables in `cli_tables.py`.
