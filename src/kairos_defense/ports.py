@@ -6,23 +6,59 @@ Kairos later (SPEC §22).
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
-from dataclasses import dataclass, field
-from datetime import datetime
+from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
 from typing import Protocol
 
 import numpy as np
 import pandas as pd
 
 
+def _jsonable(v: object) -> object:
+    """JSON-safe copy: times as ISO 8601 UTC with ``Z``, NaN and infinities as None."""
+    if isinstance(v, datetime):
+        if v.tzinfo is not None:
+            v = v.astimezone(UTC).replace(tzinfo=None)
+        return v.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    if isinstance(v, float) and not math.isfinite(v):
+        return None
+    if isinstance(v, dict):
+        return {k: _jsonable(x) for k, x in v.items()}
+    if isinstance(v, (list, tuple)):
+        return [_jsonable(x) for x in v]
+    return v
+
+
 @dataclass(frozen=True)
 class CaseSnapshot:
-    """What the case memory believed about one case at ``as_of`` (filled in by phase 6, §15)."""
+    """What the case memory knew about one case at ``as_of`` (transaction time, SPEC §15.4).
+
+    ``members`` are incident ids: the founder, then incidents of approved links. Lists hold plain
+    dicts (summaries of ledger rows, each with its ``seq``); ``events`` are the full rows touching
+    the case, hashes included. Times are naive UTC; ``to_dict`` is JSON-safe (ISO ``Z``).
+    """
 
     case_id: str
     as_of: datetime
+    exists: bool = False
+    status: str = "unknown"  # unknown (not opened by as_of) | open | closed
+    founder: str | None = None
+    members: list[str] = field(default_factory=list)
+    links: list[dict] = field(default_factory=list)  # active link_approved
+    pending: list[dict] = field(default_factory=list)  # undecided proposals, not yet members
+    claims: list[dict] = field(default_factory=list)  # active assessments about members
+    contradictions: list[dict] = field(default_factory=list)  # never auto-resolved
+    decisions: list[dict] = field(default_factory=list)
+    exports: list[dict] = field(default_factory=list)
+    reports: list[dict] = field(default_factory=list)
     events: list[dict] = field(default_factory=list)
-    state: dict = field(default_factory=dict)
+    head_seq: int | None = None  # chain head at as_of
+    head_hash: str | None = None
+
+    def to_dict(self) -> dict:
+        return _jsonable(asdict(self))
 
 
 class TrackStore(Protocol):
@@ -55,6 +91,11 @@ class Embedder(Protocol):
 
 class CaseMemory(Protocol):
     def append(self, event: dict) -> int: ...  # returns ledger seq
+    def append_many(self, events: Sequence[dict]) -> list[int]: ...  # one transaction (D-093)
+    # rows with after < recorded_at <= until, seq order, object_json parsed (D-093)
+    def events(
+        self, after: datetime | None = None, until: datetime | None = None
+    ) -> list[dict]: ...
     def as_of(self, case_id: str, t: datetime) -> CaseSnapshot: ...
     def diff(self, case_id: str, t1: datetime, t2: datetime) -> list[dict]: ...
     def verify_chain(self) -> int | None: ...  # first broken seq; None if intact (D-014)

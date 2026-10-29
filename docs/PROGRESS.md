@@ -8,7 +8,7 @@
 | 3 | Features, windows, Euclidean baseline and eval skeleton | done | Exit check exit 0 in 87 s after `make clean data`: 1,898 history tracks indexed (6 live skipped), 136,266 windows; baseline Recall@5 0.435, MRR 0.302, time to match 26%, copycat-first 57%, prefilter p95 83 ms; demo first contact and orbit pass | 2026-10-28 |
 | 4 | DTW matcher and fusion model | done with gaps (2026-10-28, see docs/phases/phase-04/GAPS.md) | `make index`, `make models` (62 queries, 123,404 pairs, τ 1.645, 44 s), `make eval`: Recall@5 1.000, DTW lift +0.522, copycat-first 0%, time to match 96%, p95 prefilter 30 / DTW (500) 81 / end to end 149 ms; first contact and orbit pass; live top 3 misses by one place (DELTA 1, ALPHA-0303 2, CHARLIE 3, ALPHA-0502 4; soft gap, D-078); `eval --baseline` written; `check_targets.py 4` 8 PASS, 1 GAP; 431 fast, 441 in all | 2026-10-28 |
 | 5 | Report recall and analog forecast | done (2026-10-28, autopilot gate passed) | `make index`: 956 reports with FTS, 82 `report_clues`; `make eval`: report linkage 1.000 (65/65), forecast median 340 m / P80 495 m at T = 90 s; demo DELTA report rank 1 and forecast 139 m at T+105 pass; `forecast --at 105` exit 0 (2,164 m northwest, County Rd 12 in the zone); `check_targets.py 5` 12 PASS, 1 WARN (accepted top 3); 497 fast, 509 in all | 2026-10-28 |
-| 6 | Case memory (Kairos-lite) | not started | | |
+| 6 | Case memory (Kairos-lite) | not started | `memory reseed && memory verify && pytest -k memory` exit 0 in 7.8 s: 4,681 rows seeded in 0.14 s, chain intact, 92 passed; DELTA at 10:00 local hobbyist, closed, no links; `memory demo --approve` known then 1 member → known now 3 (real top 3: DELTA, ALPHA-0303, CHARLIE; D-081); evidence verify PASS, then FAIL after one edited byte; 586 fast, 601 in all | 2026-10-28 |
 | 7 | Streaming API and Command Center foundation | not started | | |
 | 8 | Command Center: the memorable moments | not started | | |
 | 9 | Swarms, agent, MCP, hardening and runbook | not started | | |
@@ -25,6 +25,37 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Open issues: …
 - Next: …
 -->
+
+### 2026-10-28 · Phase 6 (autopilot build)
+- Built: case memory, Kairos-lite (SPEC §15).
+  - `memory/canonical.py` and `memory/ledger.py`: canonical JSON, validation (rule 8 actor
+    permissions, rule 9 ids), sealing with `recorded_at = max(clock, head)`, `verify_rows`
+    (D-094, D-095). DuckDB adapter `store/ledger_duck.py` with the verbatim §15.1 DDL and macro,
+    one locked connection, atomic batches (D-092, D-093); `CaseMemory.append_many` and `events`,
+    typed `CaseSnapshot`.
+  - `memory/asof.py`, `diff.py`, `views.py`: snapshots, contradictions (never auto-resolved),
+    valid time, grouped diffs (D-094, D-101).
+  - `memory/seed.py`: every history event before the live first contact plus the planted DELTA
+    case and close decision at 09:10 local (D-096). `memory/actions.py`: deduplicated proposals,
+    analyst-only approvals (D-097). `memory/delta.py`: the shift delta (D-101).
+  - `memory/evidence.py`, `evidence_html.py`: approved export, Ed25519-signed manifest, static map,
+    verification (D-099). `guard.refuse_truth` (D-102).
+  - CLI: `memory seed|reseed|verify|show|delta|demo`, `export`, `verify-evidence` (D-098, D-100).
+- Exit check (`docs/phases/phase-06/EXIT_CHECK.md`), dev laptop:
+  - `memory reseed && memory verify && pytest tests/unit -q -k memory`: exit 0 in 7.8 s; 4,681
+    rows (1,866 / 949 / 1,864 / 1 / 1), head `a361b4bf…`, chain intact; 92 passed.
+  - DELTA as of 2026-04-20 10:00 local: hobbyist, closed, no links. Unknown at 09:00.
+  - `memory demo --approve`: "known then" 1 member, closed → "known now" 3 members (DELTA,
+    ALPHA-260303, CHARLIE-260710: the real matcher's top 3, accepted phase 4 gap D-081); the diff
+    lists 3 `members_added`. `data/memory.duckdb` unchanged.
+  - `export` without `--approve` exit 1; with it, a signed package; `verify-evidence` all PASS,
+    then `files` FAIL after one byte of `case.html` changed.
+  - `make check` 586 passed (497 at the start − 3 stub cases + 92 new); `make test-all` 601
+    passed in 3 min 25 s.
+- Deviations: three CLI modules (D-100); extra delta groups (D-101); `guard.refuse_truth` (D-102).
+- Open issues: the terminal demo links CHARLIE rather than ALPHA-260502 (D-081); DuckDB's process
+  lock means reseed and verify exit 1 while `make demo` runs (phase 7 adds the admin endpoints).
+- Next: phase 7 (streaming API and Command Center foundation).
 
 ### 2026-10-28 · Phase 5 (autopilot build)
 - Built: report recall and the analog forecast (SPEC §12, §13).

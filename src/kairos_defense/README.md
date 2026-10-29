@@ -8,6 +8,8 @@ The top-level package: the CLI entry point and the four core modules every other
 - `cli.py`: the `kairos-defense` Typer app, and the composition root that builds the store adapters.
   Commands not built yet are stubs that name their phase (D-022). `cli_recall.py` holds the
   phase 5 commands (`forecast`, `recall`, `fetch-models`), registered on the same app (D-091).
+  `cli_memory.py` and `cli_memory_demo.py` hold the phase 6 commands (`memory …`, `export`,
+  `verify-evidence`), with their tables in `cli_memory_view.py` (D-100).
 - `ports.py`: the §4.1 Protocols business logic depends on, instead of DuckDB or LanceDB (rule 6).
 - `rng.py`: per-component random streams derived from the global seed (rule 4, §8.9).
 - `geo.py`: geometry in local ENU meters. Bearings are clockwise from north in [0, 360) (D-007).
@@ -31,7 +33,19 @@ The top-level package: the CLI entry point and the four core modules every other
   - Fix-it exits (exit 1): missing data, a missing or stale index, a missing or stale reports
     index, missing models, a missing DTW C extension, an unavailable embedder, an unknown incident,
     track or method.
-  - Stubs in `STUBS`: `replay`, `memory`, `export`, `verify-evidence`, `api` and `mcp`.
+  - From phase 6 (times need `Z` or an offset, e.g. `2026-04-20T10:00-05:00`; D-100):
+    - `memory seed`: seed an empty ledger (`paths.memory`) with history (§15.5);
+    - `memory reseed`: seed a temporary file, verify it, replace the ledger (exit 1 while another
+      process holds it, D-010);
+    - `memory verify [--ledger P]`: "chain intact: N rows …" or exit 1 "chain broken at seq N";
+    - `memory show CASE --as-of TS [--ledger P]`: a case as known at TS;
+    - `memory delta --since TS [--until TS] [--installation ID] [--ledger P]`: the shift delta;
+    - `memory demo [--at 90] [--approve] [--analyst h] [--case C] [--scratch P]`: the known-then /
+      known-now demo on a scratch copy (D-098);
+    - `export --case ID --approve [--analyst h] [--at TS] [--ledger P] [--out DIR]`: the signed
+      evidence package; without `--approve` it exits 1 and writes nothing (rule 8);
+    - `verify-evidence DIR [--ledger P] [--pubkey PEM]`: PASS/FAIL/SKIP table, exit 1 on a FAIL.
+  - Stubs in `STUBS`: `replay`, `api` and `mcp`.
   - `--version`.
 - `ports`:
   - `TrackStore`: `track_points`, `features`, `features_many`, `sensor_context_until`,
@@ -41,14 +55,23 @@ The top-level package: the CLI entry point and the four core modules every other
     has no native hybrid search; callers then fuse the vector and FTS results themselves
     (`recall.search.hybrid_search`, §12.5, D-085). The signatures are unchanged.
   - `Embedder`: `dim`, and `embed(texts) -> (n, dim) float32`, L2-normalized.
-  - `CaseMemory`: `append`, `as_of`, `diff`, and `verify_chain() -> int | None` (D-014).
+  - `CaseMemory`: `append`, `append_many(events) -> list[int]` (one transaction),
+    `events(after=None, until=None) -> list[dict]` (D-093), `as_of`, `diff`, and
+    `verify_chain() -> int | None` (D-014).
   - `LLM`: `chat`.
-  - `CaseSnapshot`, a dataclass.
+  - `CaseSnapshot`, a dataclass (phase 6, D-093): `case_id`, `as_of`, `exists`, `status`
+    (`unknown`, `open`, `closed`), `founder`, `members`, `links`, `pending`, `claims`,
+    `contradictions`, `decisions`, `exports`, `reports`, `events`, `head_seq`, `head_hash`, and
+    `to_dict()` (JSON-safe, ISO `Z` times).
 - `cli_tables`: the `match`, `models`, `eval`, `forecast` and `recall` tables (`match_table`,
   `models_table`, `eval_table`, `analogs_table`, `recall_table`, and `marked_text`, which
   underlines clue spans and bolds linked ones); missing numbers print as `-`.
 - `cli_recall`: `forecast_cmd`, `recall_cmd`, `fetch_models_cmd`, `describe_center(fc, q)` and
   `register(app)`. Shared helpers are looked up on `kairos_defense.cli` at call time.
+- `cli_memory`: `memory_app` (`seed`, `reseed`, `verify`, `show`, `delta`), `parse_time(s)`,
+  `register(app)`; `cli_memory_demo`: `demo_cmd`, `export_cmd`, `verify_evidence_cmd`;
+  `cli_memory_view`: `snapshot_table`, `side_by_side`, `items_table`, `seed_table`,
+  `checks_table`, `when(t, offset)`.
 - `rng.stable_int(name) -> int`: the first 8 bytes of SHA-256, little-endian.
 - `rng.rng_for(seed, *names) -> numpy.random.Generator`: an independent stream per component, e.g.
   `rng_for(42, "P2", "flight", "7")`.
@@ -66,7 +89,7 @@ The top-level package: the CLI entry point and the four core modules every other
 ## Data in and out
 
 None directly. `cli.py` reads `config/` and wires `store`, `sim`, `features`, `match`, `recall`,
-`forecast` and `eval`.
+`forecast`, `memory` and `eval`.
 
 ## How it works
 
@@ -88,12 +111,16 @@ Phase 5 added `paths.cache` (the FastEmbed cache, `app.yaml`) and `forecast.anch
 
 ## Tests
 
-- `tests/unit/test_cli.py`: help lists every command; each of the six stubs exits 0 and names its
-  phase; `--version`; the real commands' error and happy paths (`match` with both methods,
+- `tests/unit/test_cli.py`: help lists every command; each of the three stubs exits 0 and names
+  its phase; `--version`; the real commands' error and happy paths (`match` with both methods,
   `models` on the P1 nights, missing data, index and models). Phase 5:
   `test_forecast_cli_runs_on_the_p1_nights`, `test_recall_cli_runs_on_the_p1_nights`,
   `test_recall_needs_reports_index` (also `eval`), `test_forecast_unknown_incident_exits_1`,
   `test_forecast_needs_models`, `test_fetch_models_without_fastembed_exits_1`.
+- `tests/unit/test_memory_cli.py` (phase 6, 11 tests): seed and refuse a second seed, reseed
+  gives the same head, verify intact and broken at the tampered seq, show DELTA at 10:00 local,
+  naive times refused, the demo leaves the real ledger untouched and `--approve` links the top 3,
+  export needs `--approve`, export then verify then edit, delta, missing ledger or data.
 - `tests/unit/test_rng.py`: pinned values and stream independence.
 - `tests/unit/test_geo.py`: cardinals, wrap edges, clockwise rotation, rectangles, frame round trips.
 - Run: `uv run pytest tests/unit -q -k "cli or rng or geo"`.
@@ -117,3 +144,6 @@ Phase 5 added `paths.cache` (the FastEmbed cache, `app.yaml`) and `forecast.anch
 - Phase 5: `recall`, `forecast` and `fetch-models` became real (`cli_recall.py`); `index` also
   builds the `reports` index and `report_clues`; `eval` needs the reports index; forecast and
   recall tables in `cli_tables.py`.
+- Phase 6: `memory seed|reseed|verify|show|delta|demo`, `export` and `verify-evidence` became real
+  (`cli_memory.py`, `cli_memory_demo.py`, `cli_memory_view.py`); `CaseMemory.append_many` and
+  `events`; the typed `CaseSnapshot`.

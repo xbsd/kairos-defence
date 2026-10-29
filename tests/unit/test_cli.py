@@ -16,7 +16,8 @@ COMMANDS = [
 runner = CliRunner()
 
 
-BUILT = ["gen", "index", "models", "match", "eval", "recall", "forecast", "fetch-models"]
+BUILT = ["gen", "index", "models", "match", "eval", "recall", "forecast", "fetch-models",
+         "memory", "export", "verify-evidence"]  # fmt: skip
 
 
 def test_help_lists_every_command() -> None:

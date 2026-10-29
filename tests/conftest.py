@@ -114,14 +114,30 @@ P1_NIGHTS = (date(2025, 11, 14), date(2026, 3, 3), date(2026, 4, 19), date(2026,
 
 
 def tmp_config(cfg, folder: Path):
-    """``cfg`` with every data path under ``folder`` (app, truth, memory, LanceDB, models)."""
+    """``cfg`` with every data path under ``folder`` (app, truth, memory, LanceDB, models,
+    exports, cache) and the signing key there too."""
     paths = cfg.app.paths.model_copy(
         update={"duckdb": str(folder / "kd.duckdb"), "truth": str(folder / "gt.duckdb"),
                 "memory": str(folder / "mem.duckdb"), "lancedb": str(folder / "lancedb"),
                 "reports": str(folder / "reports"), "models": str(folder / "models"),
-                "cache": str(folder / "cache")}
+                "exports": str(folder / "exports"), "cache": str(folder / "cache")}
     )  # fmt: skip
-    return cfg.model_copy(update={"app": cfg.app.model_copy(update={"paths": paths})})
+    signing = cfg.app.signing.model_copy(update={"key_path": folder / "keys" / "ed25519.pem"})
+    app = cfg.app.model_copy(update={"paths": paths, "signing": signing})
+    return cfg.model_copy(update={"app": app})
+
+
+def with_paths(cfg, folder: Path, *names: str):
+    """``cfg`` with the named ``paths`` (and ``key`` for the signing key) moved under ``folder``,
+    keeping the others (for example the data and models of ``p1_index``)."""
+    moved = {"memory": "mem.duckdb", "exports": "exports", "cache": "cache", "reports": "reports"}
+    paths = cfg.app.paths.model_copy(update={n: str(folder / moved[n]) for n in names
+                                             if n in moved})  # fmt: skip
+    signing = cfg.app.signing
+    if "key" in names:
+        signing = signing.model_copy(update={"key_path": folder / "keys" / "ed25519.pem"})
+    app = cfg.app.model_copy(update={"paths": paths, "signing": signing})
+    return cfg.model_copy(update={"app": app})
 
 
 def with_models(cfg, folder: Path):
@@ -182,3 +198,34 @@ def p1_index(cfg, tmp_path_factory) -> Indexed:
     write_all(c.app, g.tables, g.truth)
     summary = build_index(c)
     return Indexed(c, g, summary, build_reports_index(c))
+
+
+@dataclass
+class Seeded:
+    path: Path  # a closed, seeded ledger file: copy it, never write it
+    summary: object  # SeedSummary
+    cfg: object  # p1_index.cfg
+
+
+@pytest.fixture(scope="session")
+def seeded_p1(p1_index, tmp_path_factory) -> Seeded:
+    """The six P1 nights seeded once into a ledger of their own (not p1_index's memory path)."""
+    from kairos_defense.memory.seed import seed
+    from kairos_defense.store.duck import DuckTrackStore
+    from kairos_defense.store.ledger_duck import DuckCaseMemory
+
+    path = tmp_path_factory.mktemp("seeded") / "seeded.duckdb"
+    c = p1_index.cfg
+    with DuckTrackStore(c.app.paths.duckdb, c.app) as store, DuckCaseMemory(path, c.app) as mem:
+        summary = seed(mem, store, c.scenario)
+    return Seeded(path, summary, c)
+
+
+@pytest.fixture
+def ledger_copy(seeded_p1, tmp_path):
+    """A fresh, writable copy of the seeded P1 ledger for one test."""
+    from kairos_defense.store.ledger_duck import DuckCaseMemory
+
+    with DuckCaseMemory(tmp_path / "copy.duckdb", seeded_p1.cfg.app) as mem:
+        mem.copy_from(seeded_p1.path)
+        yield mem

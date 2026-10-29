@@ -12,6 +12,8 @@ truth-isolation guard every app connection goes through.
   build needs (`duck.py`).
 - Implement `VectorStore` and `ReportIndex` over LanceDB. All LanceDB calls live here (`lance.py`,
   D-014).
+- Implement `CaseMemory` over DuckDB: the §15.1 ledger in `data/memory.duckdb`, one writer, rows
+  only ever inserted (`ledger_duck.py`, D-092, D-093).
 - Business logic imports the ports, never these modules directly (rule 6). Only index builds and
   composition roots such as `cli.py` construct the adapters (D-053).
 
@@ -20,10 +22,25 @@ truth-isolation guard every app connection goes through.
 - `guard.connect_app_db(path, app, *, read_only=False) -> duckdb.DuckDBPyConnection`: opens an app
   DuckDB file or `:memory:`. Raises `TruthAccessError` if `path` is the truth file (relative, `..`,
   symlink or hard link). Creates the parent folder.
-- `guard.is_truth_path(path, app) -> bool`.
+- `guard.is_truth_path(path, app) -> bool`; `guard.refuse_truth(path, app)` raises
+  `TruthAccessError` for the truth file (for code that reaches a file without `connect_app_db`,
+  such as the ledger's `ATTACH` copy).
 - `guard.TruthAccessError(PermissionError)`.
 - `ddl.RAW_DDL`, `ddl.TRUTH_DDL` and `ddl.DERIVED_DDL` (`dict[name, CREATE TABLE]`),
-  `ddl.DERIVED_COLUMNS`, and `ddl.columns(ddl) -> list[str]`.
+  `ddl.DERIVED_COLUMNS`, and `ddl.columns(ddl) -> list[str]`. `ddl.LEDGER_DDL`,
+  `ddl.LEDGER_ASOF_MACRO` (verbatim §15.1) and `ddl.LEDGER_COLUMNS`.
+- `ledger_duck.DuckCaseMemory(path, app, *, read_only=False)` (the `CaseMemory` port, §15):
+  context manager. Creates the table and macro if missing; refuses a different schema ("run
+  `memory reseed`"); `read_only=True` on a missing file raises `LedgerError` ("run `memory
+  seed`"); a file held by another process raises `LedgerLocked`.
+  - Port: `append(event) -> seq`, `append_many(events) -> seqs` (validated, sealed and inserted in
+    one transaction, all or nothing), `events(after=None, until=None)` (rows with
+    `after < recorded_at <= until`, seq order, `object_json` parsed), `as_of`, `diff`,
+    `verify_chain` (the pure functions in `kairos_defense.memory`).
+  - Extras: `head() -> Head | None`, `count()`, `rows_for_seqs(seqs)`, `checkpoint()`,
+    `copy_from(path)` (copies another ledger's rows unchanged into this empty one through
+    `ATTACH … (READ_ONLY)`; the demo's scratch copy).
+  - One connection behind an `RLock`: appends from several threads get contiguous seqs.
 - `duck.DuckTrackStore(path, app, *, read_only=True)`: context manager.
   - Port methods:
     - `track_points(track_id)`: rows ordered by `ts`; meters in the region frame.
@@ -78,6 +95,8 @@ truth-isolation guard every app connection goes through.
 - `data/truth.duckdb` (§7.3): `track_truth`, `true_paths`, `clue_truth`, `assessment_truth`.
   Only `sim.writers` writes it and only `kairos_defense.eval` reads it; this package defines the
   DDL only.
+- `data/memory.duckdb` (§7.4, §15.1): table `ledger` and macro `ledger_asof(t)`, written only by
+  `DuckCaseMemory` (insert only, rule 7).
 - `data/lancedb/`: `flight_windows`, with scalar indexes on `window_s`, `start_ts_ms` and
   `incident_id`; `reports` (§7.5, phase 5) with a full-text index on `text`. `swarm_windows` is
   keyed here for phase 9.
@@ -94,7 +113,8 @@ truth-isolation guard every app connection goes through.
 
 ## Configuration
 
-- `app.paths.duckdb`, `app.paths.truth` (the guard reads it so it can refuse it), `app.paths.lancedb`.
+- `app.paths.duckdb`, `app.paths.truth` (the guard reads it so it can refuse it), `app.paths.lancedb`,
+  `app.paths.memory` (via the CLI).
 
 ## Tests
 
@@ -107,7 +127,11 @@ truth-isolation guard every app connection goes through.
 - `tests/unit/test_recall_index.py` (phase 5): the `reports` schema, an exact phrase through FTS,
   filters on base and time for hybrid, FTS and vector search, `report_clues`, the stale guard;
   `tests/unit/test_recall_search.py`: native hybrid equals the §12.5 fallback row for row.
-- Run: `uv run pytest tests/unit -q -k "truth or duck or index or lookahead or recall"`.
+- `tests/unit/test_memory_ledger.py` (phase 6): tamper tests caught at the exact seq, atomic
+  batches, concurrent appends, validation, the `ledger_asof` macro against `active_rows`, read-only
+  and truth refusal, schema refusal, `copy_from`; `test_memory_append_only.py` scans `src/` for
+  ledger mutations.
+- Run: `uv run pytest tests/unit -q -k "truth or duck or index or lookahead or recall or memory"`.
 
 ## Gotchas
 
@@ -115,6 +139,11 @@ truth-isolation guard every app connection goes through.
   guard tests will (rightly) fail.
 - `DuckTrackStore` opens read-only by default. Pass `read_only=False` to write derived tables.
 - DuckDB allows one writer per file. Close stores (use `with`) before another process writes.
+  While a process holds `memory.duckdb` read-write, no other process can open it, even read-only
+  (checked on DuckDB 2.0.0).
+- The ledger's `object_json` is stored as canonical JSON text and hashed as a parsed object; the
+  insert goes through a pyarrow table so NULLs stay NULL (a pandas float column would turn them
+  into NaN).
 - `tracks_before` is strict (`<`). A track never matches itself or anything that started after it.
 - `_distance` is squared L2, not cosine. The two rank the same only because window vectors are unit
   length.
@@ -135,3 +164,5 @@ truth-isolation guard every app connection goes through.
   queries (D-071, D-072).
 - Phase 5: `report_clues` DDL; the `reports` FTS index; `LanceReportIndex` and `ReportRRF`
   (D-085, D-089).
+- Phase 6: the §15.1 ledger DDL and macro; `ledger_duck.py` (`DuckCaseMemory`); `guard.refuse_truth`
+  (D-092, D-093, D-102).

@@ -1462,3 +1462,151 @@ Where this file and the SPEC ever disagree, this file wins.
   no error.
 - Consequences: the agent tools `recall_reports` and `forecast_recovery` (phase 9) wrap the same
   functions.
+
+## D-092 · Where the case-memory code lives · 2026-10-28
+- Context: SPEC §5 lists `memory/ledger.py` as the ledger writer; CLAUDE.md rule 6 ("I/O lives in
+  adapters under `kairos_defense.store`") and D-053 put DuckDB code in `store/`.
+- Decision: the DuckDB adapter `DuckCaseMemory` (DDL, lock, reads, inserts) is
+  `store/ledger_duck.py`; the §15.1 DDL and macro are `store/ddl.py` (`LEDGER_DDL`,
+  `LEDGER_ASOF_MACRO`, verbatim). `memory/ledger.py` keeps the store-free parts: event validation,
+  `seal` (seq, `recorded_at`, hash) and `verify_rows`. Snapshots, diffs, delta, seed, actions and
+  evidence are pure functions over the `CaseMemory` port.
+- Why: swapping in `KairosCaseMemory` (§22) replaces one adapter.
+- Consequences: `store` imports `memory` (adapter depends on domain), never the reverse.
+
+## D-093 · `CaseMemory` port additions and the typed `CaseSnapshot` · 2026-10-28
+- Context: §4.1's `CaseMemory` has `append`, `as_of`, `diff`, `verify_chain`; seeding 4,681 rows
+  needs one atomic transaction, and delta, valid time and evidence need the rows.
+- Decision (as D-072 did for `TrackStore`): add `append_many(events) -> list[int]` (validated,
+  sealed and inserted in one transaction, all or nothing) and `events(after=None, until=None)`
+  (rows with `after < recorded_at <= until`, seq order, `object_json` parsed). `CaseSnapshot` gets
+  typed fields (`exists`, `status`, `founder`, `members`, `links`, `pending`, `claims`,
+  `contradictions`, `decisions`, `exports`, `reports`, `events`, `head_seq`, `head_hash`) and
+  `to_dict()` (JSON-safe, ISO `Z`); the unused `state` placeholder is gone.
+- Why: a future adapter implements one read; everything else stays pure.
+- Consequences: phase 7's `GET /api/cases/{id}` and phase 9's `as_of_view` serve `to_dict()`.
+
+## D-094 · Ledger event conventions and actor permissions · 2026-10-28
+- Decision: the event table in `src/kairos_defense/memory/README.md` (one row per §15.2 type:
+  `recorded_at`, `case_id`, `subject_id`, `object_json`, valid time, actor). Times are naive UTC.
+  Rules:
+  - members are the founder (`case_opened`) plus subjects of active `link_approved` rows;
+    `link_approved` names its proposal in `object_json.proposal_seq` (an approval is not a
+    retraction); a proposal is pending while active, undecided and not about a member;
+  - status: `unknown` before `case_opened`; `closed` after an active `close` until a later
+    `reopen`; `escalate` and `notify_law_enforcement` do not change it; linking never reopens;
+  - claims are active assessments of members valued by `label`; a contradiction is two active
+    claims on the same subject and predicate with different values, never resolved automatically;
+  - a row touches a case if its `case_id` is the case, its incident (subject, or a report's
+    `incident_id`) is a member, or it supersedes a row that touches;
+  - actors (rule 8): `generator` writes the seeded types and `claim_retracted`; `system` writes
+    `incident_recorded`, `report_recorded`, `evidence_exported`, `model_registered`;
+    `matcher@<v>` and `agent:<m>` write **only** `match_proposed`; `analyst:<h>` writes
+    assessments, cases, links, retractions and decisions;
+  - ids match `^[A-Z0-9][A-Z0-9-]*$` and case ids `CASE-<founder>` (rule 9: a person's name
+    cannot be a subject); handles match `[a-z0-9_.-]{1,32}`; `link_rejected` supersedes a
+    proposal, `claim_retracted` an assessment, link or decision, and a row can be superseded once.
+- Why: §15.2 names the fields but not their values; these are the simplest that serve §15.4.
+
+## D-095 · Canonical JSON and chain details · 2026-10-28
+- Decision: §15.3 as written, plus: `object_json` is hashed as a parsed object and stored as its
+  canonical text; timestamps `%Y-%m-%dT%H:%M:%S.%fZ` (always 6 digits); floats rounded to 9
+  decimals **before storing**, so a round trip recomputes exactly, and `-0.0` becomes `0.0`; NaN
+  and infinities raise (callers map them to null: `Match.warp_ratio` is NaN beyond the top 20);
+  numpy scalars become Python numbers. `seq` starts at 1, genesis `prev_hash` is 64 zeros. The
+  writer stamps `recorded_at = max(clock, head)` (D-010); every event carries a clock.
+  `verify_rows` returns the first expected seq whose row is missing, does not link, does not
+  recompute, or is recorded before its predecessor; a deleted middle row is reported at its own seq.
+- Consequences: a truncated tail is invisible to the chain alone; an evidence package's head (and
+  phase 7's `ledger` stream) catches it. Documented in the README.
+
+## D-096 · What the seed contains · 2026-10-28
+- Decision: every history event recorded **strictly before the live incident's first contact**
+  (2026-08-29 02:40:06 UTC): 1,866 incidents, 949 reports, 1,864 assessments. The 29 later
+  history events would be look-ahead at demo time; leaving them out also keeps the replay clock
+  ahead of the chain head. Live incidents are not seeded.
+- Planted cases come from the scenario: each `p1_flights` entry with an `assessment` gets
+  `case_opened` (`CASE-<incident>`) and `decision_recorded {decision: close, rationale: "assessed
+  <label>", by: <author>}` at the generator's assessment time, actor `generator`. Only the
+  base-side fields of the generator's assessment row are used (label, author, assessed time),
+  never P1 membership as a label. Missing row → `SeedError` naming `make data`.
+- Order: `(recorded_at, type rank, subject_id)` with incidents, reports, cases, assessments,
+  decisions; the planted trio shares one rank so nothing recorded at the same instant can split
+  it: case, assessment, decision at 09:10 local (D-011). Reads go through `TrackStore.sql` only.
+- Outcome: 4,681 rows, seeded in 0.14 s on the laptop; deterministic head
+  `a361b4bf…5e923`.
+
+## D-097 · Live proposals and analyst decisions · 2026-10-28
+- Context: §15.6 says both "only when the top-3 set changes or a score moves by more than 0.05" and
+  "a proposal already in the ledger for the same query incident and top-3 set is not appended".
+- Decision: `propose_matches` appends a batch (one `match_proposed` per top-3 match, sharing `top3`
+  and `recorded_at`) unless an earlier batch for the same query **and case** has the same top-3
+  set with every score within 0.05. A re-run or seek back appends nothing; a changed set or a real
+  score move appends. `register_model` writes once per (version, sha256). `decide_link` accepts any
+  active, undecided proposal for the case, **whether or not its incident is already a member** (the
+  founder can be confirmed; it stays one member); errors `ProposalNotFound`, `WrongCase`,
+  `ProposalAlreadyDecided`. `open_case` refuses an existing id.
+- Consequences: which case a live proposal targets, and opening cases from the UI, are phase 7/8
+  choices.
+
+## D-098 · The terminal demo · 2026-10-28
+- Decision: `memory demo [--at 90] [--approve] [--analyst demo] [--case …] [--scratch …]` copies the
+  seeded ledger to `data/cache/memory_demo.duckdb` (ATTACH read-only, rows unchanged, head checked),
+  records tonight's incident at first contact, registers the model, proposes the **real**
+  `DtwMatcher` top 3 at T+90 into the planted case and, only with `--approve` (rule 8), approves
+  them. "Known then" is the case's `case_opened` time (09:10 local); "known now" is the scratch head.
+  `data/memory.duckdb` stays at seed state.
+- Outcome: the shipped model proposes DELTA, ALPHA-260303 and CHARLIE-260710 (the accepted phase 4
+  gap, D-081), so the demo links CHARLIE rather than ALPHA-260502. The SPEC unit test uses the
+  scenario's three ids with hand-written proposals and does not depend on the matcher.
+
+## D-099 · Evidence packages · 2026-10-28
+- Decision: §15.7 files (`case.json`, `case.html`, `pubkey.pem`, `manifest.json`, `manifest.sig`),
+  format `kairos-evidence/1`. `export_evidence` raises `ApprovalRequired` unless `approve=True`
+  and then writes and appends nothing. `case.html` is self-contained (no scripts, no external
+  references; one PNG map inlined as base64, DejaVu Sans, `metadata={"Software": None}`, colors
+  from the validated dataviz palette with direct labels). The export appends `evidence_exported`
+  after writing, so the package records the head before its own export event.
+- Signing key: `signing.key_path`, PKCS8 PEM, created on first use with mode 0600 from the OS
+  CSPRNG, never the seeded generator: rule 4 governs the generated data, and a key derived from a
+  public seed would be forgeable. The seed, `case.json` and `case.html` are deterministic;
+  `pubkey.pem`, `manifest.json` (it lists the key's hash), `manifest.sig` and the
+  `evidence_exported` row depend on the key. `signing.enabled: false` writes an unsigned package
+  that verification FAILs.
+- Verification: files (hashes, nothing extra), signature (with the key fingerprint; `--pubkey`
+  pins the expected key), chain continuity of the included rows and head, and with a ledger: every
+  row equals the ledger's, the head still exists there, the ledger chain verifies. A missing or
+  locked ledger is SKIP, not FAIL.
+
+## D-100 · CLI shapes for the phase 6 commands · 2026-10-28
+- Decision: `memory seed|reseed|verify|show|delta|demo`, `export`, `verify-evidence` (shapes in
+  `src/kairos_defense/README.md`). `reseed` checks the file lock, seeds `<memory>.reseed.tmp`,
+  verifies it, closes it (DuckDB checkpoints on close), removes stale WAL files and `os.replace`s.
+  CLI times must carry `Z` or an offset (naive times exit 1 with the hint); output shows the case's
+  local time and UTC. `export` without `--approve` exits 1 before opening anything.
+- Deviation from the plan: three modules, not two. `cli_memory.py` (seed, reseed, verify, show,
+  delta, helpers), `cli_memory_demo.py` (demo, export, verify-evidence) and `cli_memory_view.py`
+  (tables), so each stays well under 400 lines. `cli.py` is 370 lines.
+
+## D-101 · Shift delta and case diff groups · 2026-10-28
+- Decision: `delta` groups rows in `(since, until]` into `incidents`, `reports`, `proposals`,
+  `links_approved`, `links_rejected`, `assessments_added`, `assessments_retracted`, `retractions`
+  (a retracted link or decision), `contradictions_opened` (present at `until`, absent at `since`,
+  keyed to the claim that opened it), `decisions` (including `case_opened`), `exports` and
+  `models`. The installation filter keeps a row when the base of its subject incident, its query
+  incident, its report or its case's founder is the installation; `model_registered` is dropped
+  when filtering. `case_diff` groups the rows touching the case's members as of t2 into
+  `members_added` (with `new_member`), `proposals`, `claims_added`, `claims_retracted`,
+  `contradictions`, `decisions`, `exports` and `facts` (incidents, reports, rejections and the
+  models its proposals used).
+- Deviation from the plan: `retractions` and `models` are extra delta groups (a retracted link is
+  not an assessment; the plan's evidence named the model registration), and `case_opened` sits
+  under `decisions` in both.
+
+## D-102 · `guard.refuse_truth` for the ledger copy · 2026-10-28
+- Context: `DuckCaseMemory.copy_from` reaches another file through DuckDB `ATTACH`, which bypasses
+  `connect_app_db`; the truth-isolation scan forbids the substring `truth_path` outside `eval/`
+  and the guard, so the adapter cannot call `is_truth_path` itself.
+- Decision: `store/guard.py` gains `refuse_truth(path, app)` (raises `TruthAccessError`), which
+  `connect_app_db` now calls too; the adapter calls it before `ATTACH` and on open. The scan is
+  unchanged. Test: `test_copy_from_refuses_truth`.

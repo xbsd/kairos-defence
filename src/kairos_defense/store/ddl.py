@@ -96,3 +96,31 @@ def columns(ddl: str) -> list[str]:
 RAW_COLUMNS: dict[str, list[str]] = {t: columns(sql) for t, sql in RAW_DDL.items()}
 TRUTH_COLUMNS: dict[str, list[str]] = {t: columns(sql) for t, sql in TRUTH_DDL.items()}
 DERIVED_COLUMNS: dict[str, list[str]] = {t: columns(sql) for t, sql in DERIVED_DDL.items()}
+
+# §15.1 case memory (data/memory.duckdb), verbatim. Rows are only ever inserted (rule 7).
+LEDGER_DDL = """CREATE TABLE IF NOT EXISTS ledger (
+  seq BIGINT PRIMARY KEY,
+  recorded_at TIMESTAMP NOT NULL,
+  event_type VARCHAR NOT NULL,
+  case_id VARCHAR,
+  subject_id VARCHAR,
+  predicate VARCHAR,
+  object_json JSON,
+  valid_from TIMESTAMP, valid_to TIMESTAMP,
+  source_type VARCHAR, source_id VARCHAR, source_grade VARCHAR, confidence DOUBLE,
+  actor VARCHAR NOT NULL,
+  supersedes_seq BIGINT,
+  prev_hash VARCHAR NOT NULL,
+  hash VARCHAR NOT NULL)"""
+
+LEDGER_ASOF_MACRO = """CREATE OR REPLACE MACRO ledger_asof(t) AS TABLE
+  SELECT l.* FROM ledger l
+  WHERE l.recorded_at <= t
+    AND l.seq NOT IN (SELECT supersedes_seq FROM ledger
+                      WHERE recorded_at <= t AND supersedes_seq IS NOT NULL)"""
+
+LEDGER_COLUMNS: list[str] = [
+    "seq", "recorded_at", "event_type", "case_id", "subject_id", "predicate", "object_json",
+    "valid_from", "valid_to", "source_type", "source_id", "source_grade", "confidence", "actor",
+    "supersedes_seq", "prev_hash", "hash",
+]  # fmt: skip

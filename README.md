@@ -12,8 +12,9 @@ bitemporal, tamper-evident case memory, built on DuckDB and LanceDB. **Synthetic
 | 2 | Swarms, RF, Remote ID, reports and assessments | done | [report](docs/phases/phase-02/REPORT.md) |
 | 3 | Features, windows, Euclidean baseline and eval skeleton | done | [report](docs/phases/phase-03/REPORT.md) |
 | 4 | DTW matcher and fusion model | done with one accepted gap (live top 3, [GAPS](docs/phases/phase-04/GAPS.md)) | [report](docs/phases/phase-04/REPORT.md) |
-| 5 | Report recall and analog forecast | built; awaiting the autopilot gate | [report](docs/phases/phase-05/REPORT.md), [exit check](docs/phases/phase-05/EXIT_CHECK.md) |
-| 6 to 10 | Case memory through the user guide | not started | `docs/SPEC.md` §20, `docs/phases/PHASE_10.md` |
+| 5 | Report recall and analog forecast | done | [report](docs/phases/phase-05/REPORT.md), [exit check](docs/phases/phase-05/EXIT_CHECK.md) |
+| 6 | Case memory (Kairos-lite) | built; awaiting the autopilot gate | [report](docs/phases/phase-06/REPORT.md), [exit check](docs/phases/phase-06/EXIT_CHECK.md) |
+| 7 to 10 | Streaming API through the user guide | not started | `docs/SPEC.md` §20, `docs/phases/PHASE_10.md` |
 
 Works today: `make check`, `make data` (seeded synthetic world, flights, swarms, sensors, paperwork
 and truth), `make index` (tracks, windows, and the report index with full-text search), `make
@@ -23,7 +24,11 @@ DTW lift +0.522, copycat-first 0%, report linkage 1.000, forecast median 340 m a
 euclidean` for the baseline), `uv run kairos-defense forecast --incident DEMO-BRAVO-0828 --at 105`
 (the recovery zone, 2.2 km northwest of BRAVO's fuel farm, with County Rd 12 crossing it) and
 `uv run kairos-defense recall --incident DEMO-BRAVO-0828 --at 120` (the DELTA report at rank 1,
-clues linked). Everything runs offline; `kairos-defense fetch-models` is the only command that
+clues linked), and the case memory: `uv run kairos-defense memory reseed` (4,681 history events,
+hash-chained), `memory verify`, `memory show CASE-P1-DELTA-260419 --as-of 2026-04-20T10:00-05:00`
+(hobbyist, closed, no links), `memory demo --approve` (the case "known then" and "known now" side
+by side, on a scratch copy), `export --case … --approve` (a signed evidence package) and
+`verify-evidence <dir>`. Everything runs offline; `kairos-defense fetch-models` is the only command that
 downloads (an optional embedding model). The web app is a placeholder Live watch screen. Each
 phase's plan, report and exit-check evidence is in `docs/phases/phase-NN/`, and the per-session log
 is in `docs/PROGRESS.md`.

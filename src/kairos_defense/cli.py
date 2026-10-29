@@ -29,9 +29,6 @@ app = typer.Typer(
 # name -> (phase that implements it, one-line help)
 STUBS: dict[str, tuple[str, str]] = {
     "replay": ("7", "Replay a live incident; --precompute and --reset."),
-    "memory": ("6", "Case memory: seed, verify or reseed the ledger."),
-    "export": ("6", "Export a signed evidence package for a case (needs approval)."),
-    "verify-evidence": ("6", "Verify an evidence package's hashes, signature and chain."),
     "api": ("7", "Serve the FastAPI backend (REST and WebSocket); --dump-openapi."),
     "mcp": ("9", "Run the MCP server over stdio."),
 }
@@ -348,9 +345,10 @@ def eval_(
         raise typer.Exit(1)
 
 
-from kairos_defense import cli_recall  # noqa: E402  (phase 5 commands; imports cli lazily)
+from kairos_defense import cli_memory, cli_recall  # noqa: E402  (phase 5 and 6 commands)
 
 cli_recall.register(app)
+cli_memory.register(app)
 
 
 def _version(value: bool) -> None:
