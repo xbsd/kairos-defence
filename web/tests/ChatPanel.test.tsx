@@ -57,9 +57,10 @@ describe("Chat slide-over (§18.3)", () => {
           {
             name: "find_similar_flights",
             arguments: { incident_id: "DEMO-BRAVO-0828", window_s: 120 },
-            result: [{ incident_id: "P1-DELTA-260419" }],
+            result: { matches: [{ incident_id: "P1-DELTA-260419" }] },
           },
         ],
+        stop_reason: "end_turn",
         provider: "anthropic",
         model: "test-model",
       });

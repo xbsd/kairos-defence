@@ -101,3 +101,9 @@ export type SwarmFlight = S["SwarmFlightOut"];
 export type SwarmMatch = S["SwarmMatchOut"];
 export type SwarmCurves = S["SwarmCurves"];
 export type SwarmIncident = S["SwarmIncident"];
+
+// Phase 9: the optional chat (§18.3, D-162).
+export type ChatStatus = S["ChatStatus"];
+export type ChatMessage = S["ChatMessage"];
+export type ChatResponse = S["ChatResponse"];
+export type ChatToolCall = S["ChatToolCall"];

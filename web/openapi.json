@@ -1213,6 +1213,62 @@
      }
     }
    }
+  },
+  "/api/chat/status": {
+   "get": {
+    "summary": "Chat Status",
+    "operationId": "chat_status_api_chat_status_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ChatStatus"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/chat": {
+   "post": {
+    "summary": "Chat",
+    "operationId": "chat_api_chat_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ChatRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ChatResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
   }
  },
  "components": {
@@ -1417,6 +1473,150 @@
      "exports"
     ],
     "title": "CaseSummary"
+   },
+   "ChatMessage": {
+    "properties": {
+     "role": {
+      "type": "string",
+      "enum": [
+       "user",
+       "assistant"
+      ],
+      "title": "Role"
+     },
+     "content": {
+      "type": "string",
+      "maxLength": 8000,
+      "title": "Content"
+     }
+    },
+    "type": "object",
+    "required": [
+     "role",
+     "content"
+    ],
+    "title": "ChatMessage"
+   },
+   "ChatRequest": {
+    "properties": {
+     "messages": {
+      "items": {
+       "$ref": "#/components/schemas/ChatMessage"
+      },
+      "type": "array",
+      "maxItems": 40,
+      "minItems": 1,
+      "title": "Messages"
+     }
+    },
+    "type": "object",
+    "required": [
+     "messages"
+    ],
+    "title": "ChatRequest"
+   },
+   "ChatResponse": {
+    "properties": {
+     "reply": {
+      "type": "string",
+      "title": "Reply"
+     },
+     "tool_calls": {
+      "items": {
+       "$ref": "#/components/schemas/ChatToolCall"
+      },
+      "type": "array",
+      "title": "Tool Calls"
+     },
+     "stop_reason": {
+      "type": "string",
+      "title": "Stop Reason"
+     },
+     "provider": {
+      "type": "string",
+      "title": "Provider"
+     },
+     "model": {
+      "type": "string",
+      "title": "Model"
+     }
+    },
+    "type": "object",
+    "required": [
+     "reply",
+     "tool_calls",
+     "stop_reason",
+     "provider",
+     "model"
+    ],
+    "title": "ChatResponse"
+   },
+   "ChatStatus": {
+    "properties": {
+     "enabled": {
+      "type": "boolean",
+      "title": "Enabled"
+     },
+     "provider": {
+      "type": "string",
+      "title": "Provider"
+     },
+     "model": {
+      "type": "string",
+      "title": "Model"
+     },
+     "tools": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Tools"
+     },
+     "problem": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Problem"
+     }
+    },
+    "type": "object",
+    "required": [
+     "enabled",
+     "provider",
+     "model",
+     "tools"
+    ],
+    "title": "ChatStatus"
+   },
+   "ChatToolCall": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "arguments": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Arguments"
+     },
+     "result": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Result"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "arguments",
+     "result"
+    ],
+    "title": "ChatToolCall"
    },
    "ClockMsg": {
     "properties": {

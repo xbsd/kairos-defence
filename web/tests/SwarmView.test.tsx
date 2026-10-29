@@ -46,7 +46,7 @@ describe("Swarm view (§17.9, real §14 result)", () => {
     expect(entries[0]).toHaveTextContent(SWARM.matches[0]?.similarity.toFixed(2) ?? "?");
     expect(entries[0]).toHaveTextContent("5 drones · pace 0.75 (flown 33% faster)");
     expect(screen.getByTestId("swarm-ghost")).toHaveTextContent(
-      "Afterglow ghost: Golf · May 3, aligned by DTW (pace 0.75)",
+      "Afterglow ghost: Golf · May 3, DTW-aligned, pace 0.75",
     );
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "Swarm view: Echo · Jun 14",

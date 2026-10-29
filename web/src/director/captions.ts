@@ -14,7 +14,7 @@ export interface DirectorFacts {
   caseLabel?: string;
   caseClosedOn?: string;
   pending?: number;
-  /** Set by the Swarm view from its §14 result (the encore, D-155). */
+  /** Set by the Swarm view from its §14 result (the encore, D-161). */
   swarm?: SwarmFacts;
 }
 

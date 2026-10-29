@@ -2088,12 +2088,10 @@ Where this file and the SPEC ever disagree, this file wins.
   branch `claude/cloud-phases-9-10`, pushed after each phase (the user merges). The build used two
   forked helpers (agent and MCP backend; web) in parallel with the main session (swarm backend,
   eval, docs); the main session integrated, reviewed and committed everything.
-- Environment (not code): this container's temp folder is `/tmp`; two CLI tests
-  (`test_api_refuses_missing_web_build`, `test_replay_reset_calls_api_when_locked`) assert on
-  rich output wrapped at 120 columns, and with the short Linux temp path the message wraps inside
-  the asserted phrase (the laptop's long macOS temp paths do not). Every pytest run here, the gate
-  included, sets `TMPDIR=/tmp/kairos-defence-pytest-temporary-folder`; the tests are unchanged.
-  Follow-up for a human: make those two assertions whitespace-insensitive.
+- Environment: this container's temp folder is the short `/tmp`. Three CLI tests failed or passed
+  depending on the temp path's length, because the CLI hard-wrapped messages at 120 columns off a
+  terminal and the wrap fell inside an asserted phrase. A longer `TMPDIR` fixed two and broke the
+  third, so the cause was fixed in code instead (D-156); the tests are unchanged.
 - Environment: the container has no GPU (Chromium falls back to SwiftShader), so the phase 8
   frame-rate target cannot be re-measured here; the laptop's 59.9 fps median (phase 7 and 8, Apple
   M4 Max) stands until re-measured there. The models retrained here differ slightly from the
@@ -2189,3 +2187,114 @@ Where this file and the SPEC ever disagree, this file wins.
   planted DELTA report that the demo and its assertions depend on, and make generation depend on a
   remote model (rule 4 determinism, rule 5 offline). The chat panel is the only LLM use, and it is
   off by default.
+
+## D-156 · CLI messages are never hard-wrapped · 2026-10-29
+- Context: off a terminal the CLI console is 120 columns wide (phase 0), and rich wrapped long
+  messages at word boundaries, so a message's line breaks depended on the length of the paths in it.
+  On this machine's short temp paths, "run `npm --prefix web run build`" and "through
+  http://127.0.0.1:8000" were split across lines (two tests failed); with a longer temp folder,
+  "signed, key" was split instead (a third test failed). The laptop's long macOS paths happened to
+  pass all three.
+- Decision: the console keeps its 120-column width for tables but uses `soft_wrap=True`, so a
+  message (a path, a fix-it command, a hash) prints on one line whatever its length. No test
+  changed; the three pass with both temp folders, and every CLI test passes.
+- Why: a fix-it command split across lines is also worse for a person copying it from a log.
+
+## D-157 · MCP server over mcp 2.x `MCPServer` · 2026-10-29
+- Context: the installed `mcp` is 2.3.0, where §18.2's `FastMCP` (`mcp.server.fastmcp`) is renamed
+  `MCPServer` (`mcp.server.mcpserver`); the §18.2 import fails.
+- Decision: `agent/mcp_server.py` is a thin adapter (CLAUDE.md library rule): one small wrapper per
+  tool with an explicit signature (the server derives the input schema), each calling
+  `tools.call_tool`, so a bad id or time comes back as `{"error": …}` JSON instead of a failed call;
+  read-only tools carry `read_only_hint=True`. `build_server(ctx_factory, allow_proposals)` builds
+  the context on the first tool call, so listing tools needs no data, models or ledger. Six
+  read-only tools always; `propose_link` and `propose_evidence_export` only with
+  `--allow-proposals`. `make mcp` is silent (`@`) so stdout carries only JSON-RPC.
+  `python -m kairos_defense.agent.probe [--expect N] -- CMD…` is a small stdio client used as the
+  exit-check evidence. Tested in process and over stdio with a real client (deadline 60 s).
+- Dependencies: `mcp>=2.3,<3` (the 1.x path is not used) and `httpx>=0.28` in `[project]
+  dependencies` (the LLM adapters import it at runtime). `uv.lock` changed only in the project's
+  metadata.
+
+## D-158 · Agent tools: context, lock, meanings · 2026-10-29
+- `agent/context.py` (`ToolContext`) is a third composition root next to `api/services.py` and the
+  CLI (extends D-104): lazily built from the config for the MCP server, or reusing the API's handles
+  (store, LanceDB, matcher, recall, ledger, lock) for the chat. The tool functions
+  (`flight_tools.py`, `memory_tools.py`, registry in `tools.py`) use only port-typed attributes.
+- `call_tool` holds the context's lock: MCPServer may run sync tools on worker threads, and a DuckDB
+  connection is never shared by two threads (D-110). The ledger is opened per call (read-only for
+  reads, read-write for `propose_link`) and closed after, so the MCP server never holds
+  `data/memory.duckdb` between calls.
+- `find_similar_flights(incident_id, window_s=120, k=5)`: `window_s` is the seconds of track since
+  the incident's first radar point (the replay second), not the matcher's window W (returned as
+  `search_window_s`); at least `live.min_track_s`. `recall_reports` and `forecast_recovery` take
+  `at_s` (defaults 120 and 105, the §1.2 beats). A swarm needs `track_id` or the Swarm view.
+- `propose_link` appends exactly one `match_proposed` (actor `agent:<name>`, `source_type` agent,
+  the rationale, the matcher's evidence for that incident when it has any); refused for an unknown
+  case or incident, an existing member or an empty rationale; no dedup (each call is one proposal a
+  human approves or rejects). `propose_evidence_export` appends nothing (only `match_proposed` may
+  be appended by an agent, D-094 and the §20 test): it returns `EXPORT-PROPOSAL-<case>-<head seq>`,
+  the head hash, members, status and the human step (`kairos-defense export --case … --approve` or
+  the Evidence page).
+- While the API holds the ledger (DuckDB's lock error), `as_of_view`, `diff_case` and
+  `shift_delta` read through `GET /api/cases/{id}?as_of=`, `/diff` and `/api/delta` on the loopback
+  API (D-010); `propose_link` is refused with the cause. With nothing answering, the error names
+  both causes.
+
+## D-159 · Optional chat: read-only tools, adapters, default model · 2026-10-29
+- `POST /api/chat` runs `agent.chat.run_chat` with the six read-only tools only; a proposal the model
+  asks for comes back "not available". Client messages are reduced to user and assistant text; tool
+  results sent to the model are cut at 30,000 characters; at most 6 tool rounds. Off by default
+  (`llm.provider: none`: status `enabled: false`, POST 409, nothing calls out); a configured but
+  unusable provider (no key or model) shows `problem` and POST answers 503. The system prompt
+  carries the §18.3 rules (answer only from tool results with ids, flights not people, no
+  identity, propose never commit, "unknown" when evidence is missing).
+- Adapters over `httpx`, keys only from `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`. Anthropic: the
+  Messages API as the `claude-api` skill describes it (version header `2026-10-21`, default model
+  `claude-opus-5-5` when `llm.model` is empty, `max_tokens` 16000, no sampling parameters or forced
+  tool choice, the assistant's content replayed unchanged, all tool results of a turn in one user
+  message, refusals reported). OpenAI and Ollama: the OpenAI-compatible
+  `POST {base}/chat/completions` (`llm.base_url`), `llm.model` required. Tested only with mock
+  transports; no test calls a network.
+
+## D-160 · Swarm view (§17.9) · 2026-10-29
+- Decision (`pages/SwarmView.tsx`, `swarm/`, `state/swarmStore.ts`): `/swarm?incident=&match=`
+  (no incident: the live swarm from `/api/swarms`; the phase 8 placeholder and `PLANNED` are gone).
+  Scene left, "Earlier swarms, best first" and "Choreography descriptors" right (stacking below
+  1280 px). The scene is the query's target-relative frame: tonight's drones as flash discs, the
+  matched swarm as an afterglow ghost of rings, formation edges joining each drone to its nearest
+  neighbor (unique pairs, recomputed every frame from the real positions), a 60 s centroid trail,
+  the target ring and label, a follow camera about 490 m out (free orbit; no easing in reduce
+  motion). The ghost is the matched formation at its DTW-aligned second (the `aligned` row, linear
+  between rows) re-centered on tonight's centroid, not rotated: the §14 descriptors are
+  rotation-free and §17.9 asks for time alignment only, so at the split the two groups can appear
+  mirrored. Positions between two recorded seconds are linear (display only).
+- The playhead lives in `swarmStore`, advanced by requestAnimationFrame at 5, 10 or 20× over the
+  described seconds, read in `useFrame` and at most 10 times a second in the DOM; the page opens
+  paused at the first described second and autoplays at 20× in Director. Curves: spread, the
+  pair-distance quartile band with its median, rotation rate; the match drawn dashed on tonight's
+  seconds through `aligned`; legend, direct labels (base only), a crosshair tooltip, click to
+  seek; an sr-only table every 30 s. The flash and afterglow pair fails the palette validator's
+  lightness and chroma checks but passes CVD separation and contrast (as D-140), so the series also
+  differ by dash.
+- Screenshot review (§17.13, both sizes): seven findings fixed (a non-focusable scroll region, a
+  clipped direct label, unused chart height, a jagged full centroid path, a wrapping ghost chip,
+  formations too small, a double Play on fast clicks). The fixture `swarm.json` is the real route's
+  output trimmed to 180 s of positions (179 kB).
+
+## D-161 · The encore beat · 2026-10-29
+- Decision: Director's ninth beat `encore`, a page beat on the Swarm view (key element
+  `swarm-ghost`, the ghost's DOM chip; canvas text is not testable), opened by → from Evidence for
+  the live swarm incident; it reads only (the e2e checks the ledger head is unchanged). Caption
+  computed from the §14 result and the installations' offsets: "Same choreography, N weeks apart,
+  in another region: Golf on May 3 and Echo on Jun 14." (N = round(days / 7), spelled out to
+  twelve; "at another base" when the region is the same; no "apart" clause under a week; never
+  "tonight", which is BRAVO's night). Without a result: "Every earlier swarm, searched for the same
+  choreography." `director-1x.spec.ts` still records the phase 8 rows; the 5× spec covers the
+  encore at both sizes.
+
+## D-162 · Chat slide-over visibility · 2026-10-29
+- Decision: the command bar's Ask button and `ChatPanel` render only when `GET /api/chat/status`
+  returns `enabled: true`; any failure (no route, an error, offline) counts as disabled, so the
+  default `llm.provider: none` shows nothing. Each reply lists its tool calls; the panel states the
+  §18.3 rules. Live watch's match list for a swarm incident now points to the Swarm view.

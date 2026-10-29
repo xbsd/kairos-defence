@@ -16,7 +16,9 @@ from rich.table import Table
 
 from kairos_defense import __version__
 
-console = Console(stderr=True, width=None if sys.stderr.isatty() else 120)
+# Off a terminal, tables render 120 columns wide; messages are never hard-wrapped (soft_wrap), so a
+# path or a fix-it command stays on one line whatever its length (D-156).
+console = Console(stderr=True, width=None if sys.stderr.isatty() else 120, soft_wrap=True)
 
 app = typer.Typer(
     name="kairos-defense",

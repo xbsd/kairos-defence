@@ -2,6 +2,9 @@
 // the demo. Errors carry the server's message (FastAPI's `detail`).
 import type {
   CaseDecision,
+  ChatMessage,
+  ChatResponse,
+  ChatStatus,
   CaseSummary,
   DecisionResponse,
   DtwMsg,
@@ -25,9 +28,6 @@ import type {
   CaseDiff,
   CaseGraph,
   CaseSnapshot,
-  ChatMessage,
-  ChatReply,
-  ChatStatus,
   EvalReport,
   HistoryPath,
   ShiftDeltaDoc,
@@ -130,7 +130,7 @@ export const api = {
     getJson<SwarmResponse>(`/api/swarm/${enc(incidentId)}${qs({ match, at })}`),
   /** The optional chat (§18.3): hidden unless a provider is configured. */
   chatStatus: () => getJson<ChatStatus>("/api/chat/status"),
-  chat: (messages: ChatMessage[]) => postJson<ChatReply>("/api/chat", { messages }),
+  chat: (messages: ChatMessage[]) => postJson<ChatResponse>("/api/chat", { messages }),
   adminReset: () => postJson<{ reset: Record<string, number> }>("/api/admin/reset", {}),
   adminReseed: () => postJson<{ head_seq: number }>("/api/admin/reseed", {}),
   scene: (installationId: string) =>

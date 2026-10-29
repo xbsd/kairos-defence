@@ -1,10 +1,10 @@
-// The optional chat (SPEC §18.3, D-156): hidden unless GET /api/chat/status says a provider is
+// The optional chat (SPEC §18.3, D-162): hidden unless GET /api/chat/status says a provider is
 // configured (`llm.provider: none` is the default). Replies come from the server's tool loop over
 // the §18.1 tools; this store only keeps the conversation and never writes anything itself.
 import { createStore } from "zustand/vanilla";
 
 import { api } from "../api/client";
-import type { ChatMessage, ChatStatus, ChatToolCall } from "../api/pages";
+import type { ChatMessage, ChatStatus, ChatToolCall } from "../api/messages";
 
 export interface ChatTurn extends ChatMessage {
   tools?: ChatToolCall[];

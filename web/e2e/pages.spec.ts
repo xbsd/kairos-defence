@@ -24,6 +24,7 @@ const READY: Record<string, string> = {
   "/evidence": "evidence-export",
   "/delta": "delta-group",
   "/eval": "eval-tile",
+  "/swarm": "swarm-ghost",
 };
 
 for (const route of ROUTES) {

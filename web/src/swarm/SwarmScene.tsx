@@ -25,7 +25,7 @@ import {
 import { centroidOf, ghostAt } from "./swarmMath";
 
 const GLYPH_PX = 11;
-const CAMERA_OFFSET: [number, number, number] = [0, 430, 560]; // ≈ 700 m out, 38° down
+const CAMERA_OFFSET: [number, number, number] = [0, 300, 390]; // ≈ 490 m out, 38° down
 
 /** One formation: a glyph per drone, nearest-neighbor edges and a label at its centroid. */
 function Formation(props: { doc: SwarmResponse; ghost: boolean; label: string }) {
@@ -76,7 +76,7 @@ function Formation(props: { doc: SwarmResponse; ghost: boolean; label: string })
   );
 }
 
-/** Tonight's centroid path, revealed up to the playhead. */
+/** Tonight's centroid trail: its last 60 recorded seconds up to the playhead. */
 function Path({ doc }: { doc: SwarmResponse }) {
   const line = useMemo(() => makePath(doc), [doc]);
   useEffect(() => () => line.geometry.dispose(), [line]);

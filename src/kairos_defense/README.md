@@ -125,6 +125,8 @@ None directly. `cli.py` reads `config/` and wires `store`, `sim`, `features`, `m
   - target-relative, which is region shifted so the target centroid is at the origin (§6.2, §9.2).
 - The CLI prints user errors through `rich`, never as raw tracebacks (§21). Typer's pretty exceptions
   are off.
+  Off a terminal the console is 120 columns wide for tables and never hard-wraps a message, so
+  paths and fix-it commands stay on one line (D-156).
 
 ## Configuration
 

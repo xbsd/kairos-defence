@@ -1,4 +1,4 @@
-// The Swarm view's state (SPEC §17.9, §17.11, D-154): the §14 result and the playhead. The
+// The Swarm view's state (SPEC §17.9, §17.11, D-160): the §14 result and the playhead. The
 // playhead changes every animation frame while playing, so the 3D scene reads it inside useFrame
 // and the DOM reads it through useThrottledStore (≤ 10 Hz): never per-frame React state.
 import { createStore } from "zustand/vanilla";

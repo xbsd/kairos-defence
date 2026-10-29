@@ -65,7 +65,7 @@ export function makeEdges(n: number, tone: Tone, opacity: number): LineSegments 
   return new LineSegments(g, mat);
 }
 
-/** The centroid path of the query flight (one vertex per described second). */
+/** The centroid trail of the query flight (one vertex per described second). */
 export function makePath(doc: SwarmResponse): Line {
   const c = doc.query.curves;
   const pts: number[] = [];
@@ -80,7 +80,7 @@ export function makePath(doc: SwarmResponse): Line {
   const mat = new LineBasicMaterial({
     color: color("--flash"),
     transparent: true,
-    opacity: 0.35,
+    opacity: 0.55,
     depthWrite: false,
   });
   return new Line(g, mat);
@@ -132,7 +132,13 @@ export function queryAt(doc: SwarmResponse, s: number): (P3 | null)[] {
   return dronesAt(doc.query, s);
 }
 
-/** Reveal the centroid path up to the playhead (rows at or before `s`). */
+/** Seconds of centroid trail behind the swarm, as the live theater's phosphor trail (§17.3). */
+export const TRAIL_S = 60;
+
+/** Show the centroid's last `TRAIL_S` described seconds up to the playhead. */
 export function stepPath(line: Line, doc: SwarmResponse, s: number): void {
-  line.geometry.setDrawRange(0, rowAt(doc.query.curves.t_s, s) + 1);
+  const t = doc.query.curves.t_s;
+  const end = rowAt(t, s);
+  const start = Math.max(0, rowAt(t, s - TRAIL_S));
+  line.geometry.setDrawRange(start, Math.max(0, end - start + 1));
 }

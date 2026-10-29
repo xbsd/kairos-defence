@@ -1,4 +1,4 @@
-// The Swarm view's descriptor curves (SPEC §14, §17.9, D-154), following the dataviz method as the
+// The Swarm view's descriptor curves (SPEC §14, §17.9, D-160), following the dataviz method as the
 // Eval charts do (D-140): small multiples on one axis each, 2 px lines, a legend plus direct
 // labels for the two series, the match also dashed (the §17.1 pair fails the lightness and chroma
 // checks but passes CVD separation, ΔE 21), text in ink tokens, a crosshair tooltip, and a table
@@ -8,12 +8,14 @@ import { useMemo, useRef, useState } from "react";
 import type { SwarmResponse } from "../api/messages";
 import { tPlus } from "../lib/format";
 import { useThrottledStore } from "../lib/useThrottledStore";
-import { useWidth } from "../lib/useWidth";
+import { useSize } from "../lib/useWidth";
 import { swarmStore } from "../state/swarmStore";
 import { extent, resampleAligned } from "./swarmMath";
 
-const H = 104;
-const M = { l: 42, r: 58, t: 8, b: 6 };
+const M = { l: 42, r: 46, t: 8, b: 6 };
+const H_MIN = 96;
+const H_MAX = 180;
+const CHROME_PX = 170; // legend, three chart titles, the closing line and the gaps
 type Vals = readonly (number | null)[];
 
 function pathOf(
@@ -55,6 +57,11 @@ function bandOf(
   return top.length ? `M${top.join("L")}L${bottom.join("L")}Z` : "";
 }
 
+/** "Golf · May 3" → "Golf": a direct label names the base; the legend gives the date. */
+function short(name: string): string {
+  return name.split(" · ")[0] ?? name;
+}
+
 function lastValue(ys: Vals): number | null {
   for (let i = ys.length - 1; i >= 0; i--) {
     const v = ys[i];
@@ -69,10 +76,10 @@ function fmt(v: number | null | undefined, unit: string): string {
 }
 
 /** The playhead (≤ 10 redraws a second, §17.11). */
-function Playhead(props: { X: (t: number) => number }) {
+function Playhead(props: { X: (t: number) => number; H: number }) {
   const s = useThrottledStore(swarmStore, (st) => st.playhead, 10);
   const x = props.X(s);
-  return <line x1={x} x2={x} y1={M.t} y2={H - M.b} stroke="var(--ink-hi)" strokeWidth={1} />;
+  return <line x1={x} x2={x} y1={M.t} y2={props.H - M.b} stroke="var(--ink-hi)" strokeWidth={1} />;
 }
 
 interface ChartProps {
@@ -85,10 +92,12 @@ interface ChartProps {
   band?: { tonight: [Vals, Vals]; match: [Vals, Vals] | null };
   names: [string, string | null];
   width: number;
+  height: number;
 }
 
 function Chart(p: ChartProps) {
   const [hover, setHover] = useState<number | null>(null);
+  const H = p.height;
   const t0 = p.xs[0] ?? 0;
   const t1 = p.xs[p.xs.length - 1] ?? 1;
   const all = [
@@ -187,16 +196,16 @@ function Chart(p: ChartProps) {
         <g fontSize={11} fill="var(--ink-hi)">
           {la !== null ? (
             <text x={w - M.r + 6} y={la + 4}>
-              {p.names[0]}
+              {short(p.names[0])}
             </text>
           ) : null}
           {lb !== null && p.names[1] ? (
             <text x={w - M.r + 6} y={lb + 4}>
-              {p.names[1]}
+              {short(p.names[1])}
             </text>
           ) : null}
         </g>
-        <Playhead X={X} />
+        <Playhead X={X} H={H} />
         {h !== null && p.xs[h] !== undefined ? (
           <line
             x1={X(p.xs[h] as number)}
@@ -229,7 +238,9 @@ function Chart(p: ChartProps) {
  */
 export function DescriptorCurves(props: { doc: SwarmResponse; names: [string, string | null] }) {
   const ref = useRef<HTMLDivElement>(null);
-  const width = useWidth(ref, 420);
+  const size = useSize(ref, { width: 420, height: 0 });
+  const width = size.width;
+  const height = Math.round(Math.min(H_MAX, Math.max(H_MIN, (size.height - CHROME_PX) / 3)));
   const { doc } = props;
   const q = doc.query.curves;
   const m = doc.match?.curves ?? null;
@@ -245,7 +256,7 @@ export function DescriptorCurves(props: { doc: SwarmResponse; names: [string, st
     };
   }, [m, al]);
   return (
-    <div ref={ref} className="flex flex-col gap-2" data-testid="swarm-curves">
+    <div ref={ref} className="flex h-full flex-col gap-2" data-testid="swarm-curves">
       <ul className="flex flex-wrap gap-x-4 gap-y-1 px-1 text-12 text-ink-mid" aria-label="Legend">
         <li className="flex items-center gap-1.5">
           <svg width={22} height={8} aria-hidden="true">
@@ -279,6 +290,7 @@ export function DescriptorCurves(props: { doc: SwarmResponse; names: [string, st
         match={series.spread}
         names={props.names}
         width={width}
+        height={height}
       />
       <Chart
         id="pairs"
@@ -293,6 +305,7 @@ export function DescriptorCurves(props: { doc: SwarmResponse; names: [string, st
         }}
         names={props.names}
         width={width}
+        height={height}
       />
       <Chart
         id="rotation"
@@ -303,6 +316,7 @@ export function DescriptorCurves(props: { doc: SwarmResponse; names: [string, st
         match={series.rot}
         names={props.names}
         width={width}
+        height={height}
       />
       <p className="px-1 text-12 text-ink-mid">
         {tPlus(q.t_s[0])} to {tPlus(q.t_s[q.t_s.length - 1])} after first radar contact. Click a

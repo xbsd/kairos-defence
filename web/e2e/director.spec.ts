@@ -1,5 +1,6 @@
 // SPEC §20 phase 8 tests and §17.13: Director mode at 5×, every beat's key element, a screenshot
 // per beat at 1920 × 1080 and 1440 × 900; Director never commits by itself (rule 8); the keys.
+// Phase 9 adds the swarm encore as the ninth beat (the Swarm view).
 import { mkdirSync } from "node:fs";
 
 import { expect, test, type Page } from "@playwright/test";
@@ -125,6 +126,18 @@ for (const [w, h] of [
     await page.getByRole("button", { name: "Verify package" }).first().click();
     await expect(page.getByTestId("verify-result").first()).toHaveAttribute("data-passed", "true");
     await shot(page, 8, "evidence", w, h, false);
+
+    // 9 Encore (phase 9): the Swarm view; it reads only, so the ledger head does not move
+    const before = await headSeq(request);
+    await press(page, "ArrowRight");
+    await expect(page).toHaveURL(/\/swarm\?incident=DEMO-SWARM-ECHO-0614$/);
+    await waitBeat(page, "encore");
+    await expect(page.getByTestId("swarm-ghost")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId("director-caption")).toContainText(
+      "Same choreography, six weeks apart, in another region",
+    );
+    await shot(page, 9, "encore", w, h, false);
+    expect(await headSeq(request)).toBe(before);
   });
 }
 

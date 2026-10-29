@@ -1,6 +1,5 @@
 // Shapes of the REST routes that return plain JSON documents (no response model): the ghost
-// history, the case snapshot, graph and diff, the shift delta, the eval report (SPEC §16.4) and
-// the optional chat (§18.3, phase 9).
+// history, the case snapshot, graph and diff, the shift delta and the eval report (SPEC §16.4).
 // The Python side is the source of truth: memory/graph.py, memory/diff.py, memory/delta.py,
 // api/routes.py (history), eval/report.py. Times are ISO 8601 UTC with Z.
 
@@ -154,32 +153,4 @@ export interface EvalReport {
   demo: DemoRow[];
   targets?: EvalTarget[];
   outcomes?: EvalOutcome[];
-}
-
-/** GET /api/chat/status (§18.3): the chat slide-over shows only when `enabled`. */
-export interface ChatStatus {
-  enabled: boolean;
-  provider: string;
-  model: string;
-  tools: string[];
-}
-
-export interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-}
-
-/** One tool call the assistant made through the §18.1 tools. */
-export interface ChatToolCall {
-  name: string;
-  arguments: Record<string, unknown>;
-  result: unknown;
-}
-
-/** POST /api/chat {messages} → the reply and the tool calls behind it (409 when disabled). */
-export interface ChatReply {
-  reply: string;
-  tool_calls: ChatToolCall[];
-  provider: string;
-  model: string;
 }

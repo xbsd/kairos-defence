@@ -47,7 +47,7 @@ async function presentCase(): Promise<string | null> {
   return (cases.find((c) => c.pending > 0) ?? cases[0])?.case_id ?? null;
 }
 
-/** The swarm the encore shows: the live swarm incident, else the newest swarm (D-155). */
+/** The swarm the encore shows: the live swarm incident, else the newest swarm (D-161). */
 async function presentSwarm(): Promise<string | null> {
   const list = await api.swarms();
   return (list.find((s) => s.status === "live") ?? list[0])?.incident_id ?? null;

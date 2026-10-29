@@ -67,7 +67,7 @@ function useDefaultIncident(incident: string | null): string | null {
 }
 
 /**
- * Swarm view (SPEC §17.9, §14, D-154): the 3D swarm with formation edges, the matched past swarm
+ * Swarm view (SPEC §17.9, §14, D-160): the 3D swarm with formation edges, the matched past swarm
  * as an afterglow ghost aligned by DTW time, and the descriptor curves. Reads only: it never
  * writes to the ledger (the encore, §15.6).
  */
@@ -115,7 +115,7 @@ export function SwarmView({ incident, match }: { incident: string | null; match:
   const error = pickError ?? (got.key === key ? got.error : null);
   const offsets = offsetsOf(installations);
 
-  // the encore caption reads these (D-155)
+  // the encore caption reads these (D-161)
   useEffect(() => {
     const f = swarmFacts(doc, offsetsOf(installations));
     if (f) directorStore.getState().setFacts({ swarm: f });
@@ -159,13 +159,13 @@ export function SwarmView({ incident, match }: { incident: string | null; match:
         {doc?.match && past && top ? (
           <p
             data-testid="swarm-ghost"
-            className="absolute top-2 right-2 flex max-w-[40%] items-center gap-2 rounded-panel border border-hairline bg-glass px-3 py-2 text-13 text-ink-hi backdrop-blur-glass"
+            className="absolute top-2 right-2 flex max-w-[45%] items-center gap-2 rounded-panel border border-hairline bg-glass px-3 py-2 text-13 text-ink-hi backdrop-blur-glass"
           >
             <svg width={14} height={14} aria-hidden="true">
               <circle cx={7} cy={7} r={5} fill="none" stroke="var(--afterglow)" strokeWidth={1.5} />
             </svg>
             <span>
-              Afterglow ghost: {past}, aligned by DTW (pace {top.warp_ratio.toFixed(2)})
+              Afterglow ghost: {past}, DTW-aligned, pace {top.warp_ratio.toFixed(2)}
             </span>
           </p>
         ) : null}
@@ -205,7 +205,13 @@ export function SwarmView({ incident, match }: { incident: string | null; match:
           title="Choreography descriptors (§14)"
           className="min-h-[22rem] flex-1"
         >
-          <div className="absolute inset-0 overflow-y-auto px-2 pb-2">
+          {/* a scrolling region is keyboard-reachable and named (axe scrollable-region-focusable) */}
+          <div
+            tabIndex={0}
+            role="region"
+            aria-label="Choreography descriptor charts"
+            className="absolute inset-0 overflow-y-auto px-2 pb-2"
+          >
             {doc && tonight ? (
               <>
                 <DescriptorCurves doc={doc} names={[tonight, past]} />

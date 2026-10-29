@@ -5,7 +5,9 @@ Zustand stores, the live 3D theater, the instrument rail (Stream, Signals, Recor
 and the memory rail's match list with Approve and Reject wired to the API. From phase 8: the
 time-warp lens, afterglow ghosts and core beams, the region constellation, the forecast with its
 road highlight, the report recall overlay and its beam, the Match explainer, Case board,
-Evidence, Shift delta and Eval pages, and Director mode.
+Evidence, Shift delta and Eval pages, and Director mode. From phase 9: the Swarm view (the 3D
+swarm with formation edges, the matched past swarm as a DTW-aligned afterglow ghost, descriptor
+curves), Director's ninth beat (the swarm encore) and the optional chat slide-over.
 
 ## Responsibilities
 
@@ -93,7 +95,23 @@ Evidence, Shift delta and Eval pages, and Director mode.
   (`theater-summary`, `forecast-label`, `ghost-count`).
 - `src/panels/`: `Stream`, `Signals`, `Recorder`, `LedgerChain` (+ `LedgerRecord` dialog),
   `MatchList` (+ `ScoreRing`, an Explain link), `RegionConstellation` (+ `constellation.ts`),
-  `LensPanel`, all in the shared `Panel` frame (dimmed by Director, `data-dimmed`).
+  `LensPanel`, all in the shared `Panel` frame (dimmed by Director, `data-dimmed`). On a live
+  swarm `MatchList` links to the Swarm view (phase 9).
+- Phase 9, Swarm view (`/swarm?incident=&match=`, `pages/SwarmView.tsx`, lazy; no incident opens
+  the live swarm): `swarm/SwarmScene.tsx` (+ `swarmLayer.ts`: drones as discs, the ghost as
+  rings, nearest-neighbor edges, a 60 s centroid trail, the target ring, a follow camera),
+  `swarm/swarmMath.ts` (positions between recorded seconds, `nearestEdges`, `matchSecond` and
+  `ghostAt` from `aligned`, `swarmFacts` for the encore caption), `DescriptorCurves.tsx` (spread,
+  pair-distance quartiles, rotation rate; the match dashed on tonight's seconds; crosshair; click
+  to seek), `SwarmMatches.tsx`, `PlaybackBar.tsx` (+ `usePlayback.ts`: rAF), `SwarmTable.tsx`
+  (the text equivalent). State in `state/swarmStore.ts` (the result and the playhead: read in
+  `useFrame`, ≤ 10 Hz in the DOM). `REST`: `api.swarms()`, `api.swarm(incident, match, at)`.
+- Phase 9, Director: beat 9 `encore` (page beat, route `swarm`, key `swarm-ghost`); its caption
+  (`encoreCaption`) is computed from the swarm result's dates, bases and regions; the encore
+  reads only.
+- Phase 9, chat (`chat/ChatPanel.tsx`, `chat/chatStore.ts`): an Ask button and a slide-over,
+  present only when `GET /api/chat/status` says enabled (`llm.provider: none` hides them);
+  `POST /api/chat` returns the reply and the tool calls behind it, which the panel lists.
 
 ## Data in and out
 
@@ -134,8 +152,11 @@ computed from the same stores. The lens shows the stream's `dtw` or a chosen mat
   stores, formatting, router, command bar, Live watch layout, each panel, scene math and the
   auto-degrade policy; phase 8: lens math and ramp, ghost and forecast geometry, camera shots,
   constellation, clues and scramble, the Director engine, captions, driver and keys, the case
-  graph model, the eval view, and the lens, overlay and page components. Real payloads are in
-  `tests/fixtures/` (`dump_fixtures.py` rewrites them). `npm --prefix web run check`.
+  graph model, the eval view, and the lens, overlay and page components; phase 9:
+  `swarmMath.test.ts`, `SwarmView.test.tsx` (real `swarm.json`), `ChatPanel.test.tsx`, the encore
+  in `engine` and `captions`, the swarm route. Real payloads are in `tests/fixtures/`
+  (`dump_fixtures.py` rewrites them; `swarm.json` keeps positions for its first 180 s).
+  `npm --prefix web run check`.
 - Playwright (`e2e/`, `make e2e`): `live.spec.ts` (5× stream and recorder rise, three matches by
   T+90 and a new ledger block, approve turns the ring verified, reduce motion keeps the data, no
   request leaves the origin), `pages.spec.ts` (axe on every route, layout at 1440 × 900 and
@@ -144,7 +165,10 @@ computed from the same stores. The lens shows the stream's `dtw` or a chosen mat
   `director.spec.ts` (Director at 5× at both sizes, every beat's key element and a screenshot
   `phase08-beat-*`; never commits by itself; keys and modes), `director-1x.spec.ts` (the 1× run
   and frame rate to `director_1x.json`), `lens.spec.ts` (connectors on the DTW path; axe on Live
-  watch at T+120), `pages8.spec.ts` (each page and its screenshots `phase08-page-*`).
+  watch at T+120), `pages8.spec.ts` (each page and its screenshots `phase08-page-*`); phase 9:
+  `swarm.spec.ts` (Swarm view at both sizes: top match S1-GOLF-260503, ghost, curves, Play
+  advances the playhead, `phase09-swarm-*` screenshots, axe) and the encore step in
+  `director.spec.ts` (`phase08-beat-09-encore-*`, ledger head unchanged).
   Playwright starts its own API on :8765 with scratch ledger, live and export folders under
   `data/cache/e2e` (D-113, D-137).
   First time on a machine: `npx --prefix web playwright install chromium`.
@@ -172,3 +196,5 @@ web/openapi.json && npm --prefix web run gen:types`; `check:types` fails on stal
 - Phase 8: time-warp lens, ghosts, core beams, constellation, forecast and road highlight, recall
   overlay and beam, Match explainer, Case board, Evidence, Shift delta and Eval pages, Director
   mode, Performance mode, static grain, lazy pages (D-122 to D-147).
+- Phase 9: Swarm view, Director's swarm encore, chat slide-over (hidden by default), MatchList's
+  swarm link; the planned-page placeholder removed (D-160 to D-162).

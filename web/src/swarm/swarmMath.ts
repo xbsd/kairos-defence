@@ -1,4 +1,4 @@
-// Pure helpers for the Swarm view (SPEC §14, §17.9, D-154). Positions are the API's
+// Pure helpers for the Swarm view (SPEC §14, §17.9, D-160). Positions are the API's
 // target-relative meters [x east, y north, altitude] per drone and second; `aligned[i]` maps the
 // query's curves row i to the match's curves row (the DTW path). Nothing here invents data: the
 // only in-between values are linear between two recorded seconds while the playhead moves.
@@ -185,7 +185,7 @@ export function weeksWord(n: number): string {
   return `${w} week${n === 1 ? "" : "s"}`;
 }
 
-/** What the encore caption says (D-155), computed from the swarm result. */
+/** What the encore caption says (D-161), computed from the swarm result. */
 export interface SwarmFacts {
   queryBase: string;
   queryDay: string;

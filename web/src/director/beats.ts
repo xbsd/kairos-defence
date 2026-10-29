@@ -1,6 +1,6 @@
 // Director mode beats (SPEC §17.10, §1.2, D-122): one per §1.2 row, as data. Clock beats start
 // when the replay clock crosses `start`; page beats start only on → (D-123). Phase 9 appends the
-// swarm encore, a page beat on the Swarm view (D-155).
+// swarm encore, a page beat on the Swarm view (D-161).
 import type { CameraPreset } from "../state/uiStore";
 
 export type BeatId =
