@@ -10,3 +10,8 @@
 [2026-10-28 19:57:54]   … running 3 min. last tool: Bash for f in test_swarm_formations test_swarm test_rf test_rid test_reports test_rep
 [2026-10-28 20:00:54]   … running 6 min. last tool: Bash sed -n 1,138p src/kairos_defense/sim/generate.py | grep -v "^\s*$" | sed -n 1,14
 [2026-10-28 20:03:54]   … running 9 min. last tool: Bash tail -c 300 docs/DECISIONS.md | od -c | tail -3
+[2026-10-28 20:04:54] phase 3: backfilling documentation
+[2026-10-28 20:07:54]   … running 3 min. last tool: Bash grep -n "font\|rcParams\|family" src/kairos_defense/eval/report.py src/kairos_de
+[2026-10-28 20:10:54]   … running 6 min. last tool: Bash cat reports/eval_2026-10-29.md && grep -n "created_at=" src/kairos_defense/eval/
+[2026-10-28 20:13:54]   … running 9 min. last tool: Bash sed -n 30,45p src/kairos_defense/store/duck.py && sed -n 130,180p src/kairos_def
+[2026-10-28 20:16:55]   … running 12 min. last tool: Bash git add README.md docs/DECISIONS.md docs/PROGRESS.md docs/phases/phase-03/PLAN.m
