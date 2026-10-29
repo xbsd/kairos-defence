@@ -20,6 +20,11 @@ Run phase 10 straight after phase 9 passes.
 
 ## Rules (in addition to CLAUDE.md)
 
+For this handoff only, two CLAUDE.md and skill rules are overridden on the user's instruction
+(2026-10-29): run phases 8, 9 and 10 **in this one session** (CLAUDE.md "do not start the next phase in
+the same session"), and **push** your branch after every phase (the skill's "never push"), because the
+laptop is off and pushed commits are the only way the work survives. Never force-push.
+
 - Follow `.claude/skills/phase-auto/SKILL.md` for every step: it is the procedure the local autopilot
   used (plan, revise, build, fix), including the documentation each phase must leave in
   `docs/phases/phase-NN/` and the package READMEs.
