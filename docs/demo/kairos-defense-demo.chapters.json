@@ -9,38 +9,38 @@
  },
  {
   "name": "Recognize",
-  "at_s": 15.11
+  "at_s": 15.06
  },
  {
   "name": "Time warp",
-  "at_s": 29.59
+  "at_s": 29.57
  },
  {
   "name": "Anticipate",
-  "at_s": 40.72
+  "at_s": 40.62
  },
  {
   "name": "Recall",
-  "at_s": 49.26
+  "at_s": 49.14
  },
  {
   "name": "Remember",
-  "at_s": 56.77
+  "at_s": 56.72
  },
  {
   "name": "Prove",
-  "at_s": 73.34
+  "at_s": 73.57
  },
  {
   "name": "Swarms",
-  "at_s": 83.41
+  "at_s": 83.56
  },
  {
   "name": "Measured",
-  "at_s": 93.43
+  "at_s": 93.7
  },
  {
   "name": "end",
-  "at_s": 104.66
+  "at_s": 104.93
  }
 ]

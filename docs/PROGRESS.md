@@ -36,7 +36,7 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
   per video second here, where Chromium renders the scene at about 7 fps.
 - Found by the recordings and fixed in the app: the Pages menu opened behind the Swarm view's
   panels, and it stayed open over the page it opened.
-- Reviewed: three takes, every chapter checked frame by frame (chapter pill placement, callout
+- Reviewed: four takes, every chapter checked frame by frame (chapter pill placement, callout
   placement over the Case board graph, a stale row count, the report text resolve, the pointer
   over the export confirm, the Eval values).
 - Tests: `scaled_clock` and `api --time-scale` (2 new Python tests); Vitest unchanged.
