@@ -92,3 +92,6 @@ rep =
 [2026-10-28 22:02:45] phase 4: everything else passed; 2 target gap(s): demo live_top3_incidents: fail; demo:live_top3_incidents: status 'fail', observed 2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of night'); P1-ALPHA-260303 #2 (1.00, 'Same time of night'); P1-ALPHA-260502 #5 (0.99, 'Same time of night')
 [2026-10-28 22:05:45]   … running 3 min. last tool: Bash mkdir -p /tmp/kd4/fix3 && (make check > /tmp/kd4/fix3/check.txt 2>&1; echo "make
 [2026-10-28 22:08:45]   … running 6 min. last tool: Bash mkdir -p /tmp/kd4/fix3 && (make check > /tmp/kd4/fix3/check.txt 2>&1; echo "make
+[2026-10-28 22:09:55] phase 4: gate attempt 4
+[2026-10-28 22:11:32] phase 4: everything else passed; 2 target gap(s): demo live_top3_incidents: fail; demo:live_top3_incidents: status 'fail', observed 2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of night'); P1-ALPHA-260303 #2 (1.00, 'Same time of night'); P1-ALPHA-260502 #5 (0.99, 'Same time of night')
+[2026-10-28 22:11:32] phase 4: accepting 2 target gap(s) and continuing: demo live_top3_incidents, demo:live_top3_incidents

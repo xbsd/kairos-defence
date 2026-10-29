@@ -1,0 +1,186 @@
+# Gate for phase 4, attempt 4, 2026-10-28 22:09:55
+
+$ make check
+uv run ruff check .
+All checks passed!
+uv run ruff format --check .
+116 files already formatted
+uv run pytest -m "not slow" -q
+........................................................................ [ 16%]
+........................................................................ [ 32%]
+........................................................................ [ 48%]
+........................................................................ [ 65%]
+........................................................................ [ 81%]
+........................................................................ [ 97%]
+...........                                                              [100%]
+443 passed, 10 deselected in 16.97s
+npm --prefix web run check
+
+> kairos-defense-web@0.0.1 check
+> npm run lint && npm run typecheck && npm run test
+
+
+> kairos-defense-web@0.0.1 lint
+> eslint . --max-warnings 0 && prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!
+
+> kairos-defense-web@0.0.1 typecheck
+> tsc --noEmit -p tsconfig.json
+
+
+> kairos-defense-web@0.0.1 test
+> vitest run
+
+
+ RUN  v5.0.5 /Users/ndkx/work/kairos_defence/web
+
+
+ Test Files  2 passed (2)
+      Tests  5 passed (5)
+   Start at  22:10:15
+   Duration  796ms (environment 77%, setup 16%, tests 5%, transform 1%)
+
+[exit 0 after 21 s]
+
+$ make models
+uv run kairos-defense models
+kairos-defense models                                                 
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Item                                    ┃                    Value ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ training nights                         │ 2025-03-01 to 2026-02-28 │
+│ T grid (s)                              │     45, 60, 90, 120, 180 │
+│ training queries                        │                       62 │
+│ training pairs (same actor)             │          123,404 (1,128) │
+│ τ (median same-actor d_norm)            │                   2.2265 │
+│ d_norm p10/p50/p90 same actor           │    1.521 / 2.227 / 3.575 │
+│ d_norm p10/p50/p90 others               │    2.161 / 3.470 / 5.900 │
+│ coefficient shape_sim                   │                   +6.809 │
+│ coefficient rf_match                    │                  +18.955 │
+│ coefficient bearing_sim                 │                   +2.110 │
+│ coefficient tod_sim                     │                  +26.442 │
+│ coefficient launch_sim                  │                  +10.246 │
+│ coefficient radius_sim                  │                   +1.735 │
+│ coefficient alt_sim                     │                   +4.915 │
+│ intercept                               │                  -52.734 │
+│ training Recall@5 T=120 s (probers)     │                    1.000 │
+│ validation nights                       │ 2026-03-01 to 2026-08-31 │
+│ validation queries / pairs (same actor) │      33 / 82,500 (1,379) │
+│ validation ROC AUC                      │                    0.998 │
+│ validation log loss                     │                    0.057 │
+│ validation Recall@5 T=120 s (probers)   │                    1.000 │
+│ training hash                           │         418c5edfafd908e6 │
+│ elapsed                                 │                   34.8 s │
+└─────────────────────────────────────────┴──────────────────────────┘
+wrote /Users/ndkx/work/kairos_defence/models/fusion_v1.json and 
+/Users/ndkx/work/kairos_defence/models/dtw_calibration.json
+[exit 0 after 37 s]
+
+$ make eval || echo 'make eval exited non-zero; check_targets.py judges the targets'
+uv run kairos-defense eval
+kairos-defense eval · dtw                                                                                               
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Metric                                          ┃                                                              Value ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ prober queries (unanswerable)                   │                                                             23 (0) │
+│ copycat queries (unanswerable)                  │                                                             10 (0) │
+│ model · candidates per query                    │                                                    fusion-v1 · 500 │
+│ Recall@5 at T=120 s                             │                                                              1.000 │
+│ Recall@5 at T=120 s, Euclidean order (same run) │                                                              0.478 │
+│ DTW lift                                        │                                                              0.522 │
+│ MRR at T=120 s                                  │                                                              1.000 │
+│ time to match (top 3 by T=90 s)                 │                                                                96% │
+│ copycat-first at T=120 s                        │                                                                 0% │
+│ Recall@5 at T=120 s, copycats                   │                                                              1.000 │
+│ latency query build p50 / p95                   │                                                           4 / 4 ms │
+│ latency prefilter p50 / p95                     │                                                         27 / 30 ms │
+│ latency dtw p50 / p95                           │                                                         32 / 56 ms │
+│ latency end to end p50 / p95                    │                                                        96 / 126 ms │
+│ demo live_first_contact_local                   │                                               pass: 21:40:06, 71 m │
+│ demo live_orbit_established_s                   │                                                       pass: T+79 s │
+│ demo live_top3_incidents                        │        fail: 2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of │
+│                                                 │          night'); P1-ALPHA-260303 #2 (1.00, 'Same time of night'); │
+│                                                 │                    P1-ALPHA-260502 #5 (0.99, 'Same time of night') │
+│ demo live_rank1_report_for                      │                                               pending (phase 5): - │
+│ demo forecast_error_max_m                       │                                               pending (phase 5): - │
+│ demo swarm_top1                                 │                                               pending (phase 9): - │
+│ elapsed                                         │                                                             35.3 s │
+└─────────────────────────────────────────────────┴────────────────────────────────────────────────────────────────────┘
+wrote /Users/ndkx/work/kairos_defence/reports/eval_2026-10-29.md and 
+/Users/ndkx/work/kairos_defence/reports/eval_2026-10-29.json
+demo assertion failed: live_top3_incidents (2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of night'); 
+P1-ALPHA-260303 #2 (1.00, 'Same time of night'); P1-ALPHA-260502 #5 (0.99, 'Same time of night'))
+make: *** [eval] Error 1
+make eval exited non-zero; check_targets.py judges the targets
+[exit 0 after 37 s]
+
+$ uv run kairos-defense match --method dtw --incident DEMO-BRAVO-0828 --at 90
+query DEMO-BRAVO-0828-T1 at T+90 s · 91 s seen · window 60 s (60 s used) · target BRAVO-fuel_farm · first contact 
+2026-08-28 21:40 local · 500 candidates · 210 ms
+model fusion-v1 · τ 2.227 · ms: prefilter 33 · signature 23 · dtw 134 · features 2 · fusion 0 · explain 6 · total 203
+dtw matches for DEMO-BRAVO-0828                                                                                         
+┏━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  # ┃ track                  ┃ base    ┃ start (local)    ┃ score ┃ shape ┃ warp ┃ reasons                            ┃
+┡━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│  1 │ P1-DELTA-260419-T1     │ DELTA   │ 2026-04-19 21:35 │ 1.000 │ 0.502 │ 0.84 │ Same time of night; Same RF family │
+│    │                        │         │                  │       │       │      │ (FAM-07); Same shape, flown 19%    │
+│    │                        │         │                  │       │       │      │ faster                             │
+│  2 │ P1-ALPHA-260303-T1     │ ALPHA   │ 2026-03-03 21:52 │ 0.999 │ 0.511 │ 1.03 │ Same time of night; Same RF family │
+│    │                        │         │                  │       │       │      │ (FAM-07); Same approach bearing    │
+│    │                        │         │                  │       │       │      │ (315°)                             │
+│  3 │ P1-CHARLIE-260710-T1   │ CHARLIE │ 2026-07-10 21:30 │ 0.997 │ 0.459 │ 0.90 │ Same time of night; Same RF family │
+│    │                        │         │                  │       │       │      │ (FAM-07); Same shape, flown 12%    │
+│    │                        │         │                  │       │       │      │ faster                             │
+│  4 │ FOXTROT-251215-2125-T1 │ FOXTROT │ 2025-12-15 21:25 │ 0.994 │ 0.431 │ 1.08 │ Same time of night; Same RF family │
+│    │                        │         │                  │       │       │      │ (FAM-07); Same orbit radius (~240  │
+│    │                        │         │                  │       │       │      │ m)                                 │
+│  5 │ P1-ALPHA-260502-T1     │ ALPHA   │ 2026-05-02 22:05 │ 0.993 │ 0.418 │ 0.80 │ Same time of night; Same RF family │
+│    │                        │         │                  │       │       │      │ (FAM-07); Same shape, flown 25%    │
+│    │                        │         │                  │       │       │      │ faster                             │
+│  6 │ HOTEL-250818-2126-T1   │ HOTEL   │ 2025-08-18 21:26 │ 0.989 │ 0.435 │ 1.05 │ Same time of night; Same RF family │
+│    │                        │         │                  │       │       │      │ (FAM-07)                           │
+│  7 │ HOTEL-260220-2126-T1   │ HOTEL   │ 2026-02-20 21:27 │ 0.986 │ 0.454 │ 0.73 │ Same time of night; Same RF family │
+│    │                        │         │                  │       │       │      │ (FAM-07); Same shape, flown 37%    │
+│    │                        │         │                  │       │       │      │ faster                             │
+│  8 │ ECHO-260323-2034-T1    │ ECHO    │ 2026-03-23 20:34 │ 0.984 │ 0.461 │ 0.72 │ Same time of night; Same RF family │
+│    │                        │         │                  │       │       │      │ (FAM-07); Same shape, flown 38%    │
+│    │                        │         │                  │       │       │      │ faster                             │
+│  9 │ HOTEL-250314-2030-T1   │ HOTEL   │ 2025-03-14 20:30 │ 0.983 │ 0.474 │ 1.17 │ Same time of night; Same RF family │
+│    │                        │         │                  │       │       │      │ (FAM-07); Same shape, flown 15%    │
+│    │                        │         │                  │       │       │      │ slower                             │
+│ 10 │ ECHO-260710-2048-T1    │ ECHO    │ 2026-07-10 20:48 │ 0.983 │ 0.483 │ 0.96 │ Same time of night; Same RF family │
+│    │                        │         │                  │       │       │      │ (FAM-07)                           │
+└────┴────────────────────────┴─────────┴──────────────────┴───────┴───────┴──────┴────────────────────────────────────┘
+[exit 0 after 1 s]
+
+$ python3 scripts/check_targets.py 4
+PASS  Recall@5 at T=120 s (§19.3): 1 (target >= 0.8)
+PASS  DTW lift over the Euclidean baseline (§19.3): 0.5217 (target >= 0.1)
+PASS  Copycat-first rate (§19.3): 0 (target <= 0.05)
+PASS  Prefilter p95 ms (§10.9): 30.09 (target <= 50)
+PASS  DTW re-rank of 50 candidates p95 ms (§10.9): 56.46 (target <= 800)
+PASS  End-to-end live update p95 ms (§10.9): 125.8 (target <= 1500)
+PASS  demo live_first_contact_local: pass
+PASS  demo live_orbit_established_s: pass
+GAP   demo live_top3_incidents: fail
+
+Targets not met:
+GAP demo:live_top3_incidents: status 'fail', observed 2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of night'); P1-ALPHA-260303 #2 (1.00, 'Same time of night'); P1-ALPHA-260502 #5 (0.99, 'Same time of night')
+[exit 1 after 0 s]
+
+# Documentation check
+ok
+
+# Test count
+passed 443, minimum 443
+
+# Skip or xfail markers added this run (review them)
+none
+
+# Target gaps
+demo live_top3_incidents: fail
+demo:live_top3_incidents: status 'fail', observed 2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of night'); P1-ALPHA-260303 #2 (1.00, 'Same time of night'); P1-ALPHA-260502 #5 (0.99, 'Same time of night')
+
+# Result: GAPS ONLY

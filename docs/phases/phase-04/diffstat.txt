@@ -1,0 +1,70 @@
+ README.md                                       |   13 +-
+ config/scoring.yaml                             |    7 +-
+ docs/DECISIONS.md                               |  325 ++
+ docs/PROGRESS.md                                |   74 +-
+ docs/phases/AUTOPILOT.log                       |   77 +
+ docs/phases/INDEX.md                            |    4 +-
+ docs/phases/accepted_gaps.json                  |    3 +
+ docs/phases/phase-04/EXIT_CHECK.md              |  157 +
+ docs/phases/phase-04/PLAN.md                    |  541 +++
+ docs/phases/phase-04/PLAN_REVIEW-1.json         |   17 +
+ docs/phases/phase-04/REPORT.md                  |  379 ++
+ docs/phases/phase-04/gate-1.log                 |  186 +
+ docs/phases/phase-04/gate-2.log                 |  186 +
+ docs/phases/phase-04/gate-3.log                 |  186 +
+ docs/phases/phase-04/meta.json                  |   57 +
+ docs/phases/phase-04/transcripts/build.jsonl.gz |  Bin 0 -> 776777 bytes
+ docs/phases/phase-04/transcripts/fix-1.jsonl.gz |  Bin 0 -> 104511 bytes
+ docs/phases/phase-04/transcripts/fix-2.jsonl.gz |  Bin 0 -> 61822 bytes
+ docs/phases/phase-04/transcripts/fix-3.jsonl    |  103 +
+ docs/phases/phase-04/transcripts/plan.jsonl.gz  |  Bin 0 -> 497591 bytes
+ docs/phases/phase-04/transcripts/review-1.json  |    1 +
+ models/dtw_calibration.json                     |   23 +
+ models/fusion_v1.json                           |   47 +
+ reports/baseline.json                           |  181 +
+ reports/eval_2026-10-29.json                    | 4486 +++++++++++++----------
+ reports/eval_2026-10-29.md                      |   55 +-
+ reports/figures/eval_recall_by_t.png            |  Bin 37259 -> 25763 bytes
+ src/kairos_defense/README.md                    |   20 +-
+ src/kairos_defense/cli.py                       |  130 +-
+ src/kairos_defense/cli_tables.py                |  103 +
+ src/kairos_defense/config/README.md             |   20 +-
+ src/kairos_defense/config/scoring.py            |    9 +
+ src/kairos_defense/eval/README.md               |  149 +-
+ src/kairos_defense/eval/demo.py                 |   50 +-
+ src/kairos_defense/eval/harness.py              |  162 +-
+ src/kairos_defense/eval/metrics.py              |   20 +-
+ src/kairos_defense/eval/report.py               |  124 +-
+ src/kairos_defense/eval/report_md.py            |  111 +
+ src/kairos_defense/eval/training.py             |  239 ++
+ src/kairos_defense/features/README.md           |   29 +-
+ src/kairos_defense/features/windows.py          |   59 +-
+ src/kairos_defense/match/README.md              |  189 +-
+ src/kairos_defense/match/__init__.py            |    4 +-
+ src/kairos_defense/match/candidates.py          |  132 +
+ src/kairos_defense/match/dtw_rerank.py          |  186 +
+ src/kairos_defense/match/explain.py             |   54 +
+ src/kairos_defense/match/fusion.py              |  194 +
+ src/kairos_defense/match/live_signature.py      |   24 +
+ src/kairos_defense/match/matcher.py             |  124 +
+ src/kairos_defense/match/query.py               |   12 +-
+ src/kairos_defense/match/types.py               |   15 +-
+ src/kairos_defense/ports.py                     |    3 +
+ src/kairos_defense/store/README.md              |   23 +-
+ src/kairos_defense/store/duck.py                |   60 +-
+ tests/conftest.py                               |   40 +-
+ tests/slow/test_full_models.py                  |   84 +
+ tests/unit/test_cli.py                          |   65 +-
+ tests/unit/test_config.py                       |    4 +
+ tests/unit/test_dtw_rerank.py                   |  223 ++
+ tests/unit/test_duck_store.py                   |   48 +
+ tests/unit/test_eval_harness.py                 |   75 +-
+ tests/unit/test_eval_metrics.py                 |   14 +
+ tests/unit/test_explain.py                      |   59 +
+ tests/unit/test_fusion.py                       |  131 +
+ tests/unit/test_live_signature.py               |   77 +
+ tests/unit/test_matcher.py                      |  114 +
+ tests/unit/test_no_lookahead.py                 |   26 +
+ tests/unit/test_training.py                     |  121 +
+ tests/unit/test_windows.py                      |   46 +
+ 69 files changed, 8175 insertions(+), 2305 deletions(-)

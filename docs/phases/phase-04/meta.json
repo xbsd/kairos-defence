@@ -1,6 +1,6 @@
 {
   "phase": 4,
-  "status": "running",
+  "status": "done",
   "steps": [
     {
       "step": "plan",
@@ -46,6 +46,15 @@
       "cost_usd": 22.7667288,
       "minutes": 8.2,
       "permission_denials": 0
+    },
+    {
+      "step": "fix-3",
+      "at": "2026-10-28 22:09:55",
+      "ok": true,
+      "session_id": "2f6f6c34-cc94-4439-9105-5b6add5254c6",
+      "cost_usd": 23.811862200000004,
+      "minutes": 7.2,
+      "permission_denials": 0
     }
   ],
   "started": "2026-10-28 20:17:07",
@@ -53,5 +62,11 @@
   "plan_session": "4c90d994-d869-487b-9f95-13491aaa2dd9",
   "plan_approved": true,
   "build_session": "2f6f6c34-cc94-4439-9105-5b6add5254c6",
-  "built": true
+  "built": true,
+  "gaps": [
+    "demo live_top3_incidents: fail",
+    "demo:live_top3_incidents: status 'fail', observed 2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of night'); P1-ALPHA-260303 #2 (1.00, 'Same time of night'); P1-ALPHA-260502 #5 (0.99, 'Same time of night')"
+  ],
+  "finished": "2026-10-28 22:11:32",
+  "sha_after": "6fddf52a643ef8db98afa8bedd40681b208021fa"
 }
