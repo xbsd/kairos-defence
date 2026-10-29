@@ -57,3 +57,35 @@ def test_reason_values_come_from_the_past_flight() -> None:
                         "Same orbit radius (~180 m)"}  # fmt: skip
     north = reasons(x(bearing_sim=0.99), m, 1.0, {**CSIG, "approach_bearing_deg": 358.0})
     assert north == ["Same approach bearing (0°)"]
+
+
+def test_contribution_table_sums_to_logit() -> None:
+    import math
+
+    import numpy as np
+
+    from kairos_defense.match.explain import contribution_table
+
+    m = model(rf_match=3.0, shape_sim=4.0, alt_sim=-0.5)
+    feats = x(rf_match=1.0, shape_sim=0.9, alt_sim=0.2) | {"d_norm": 0.4, "window_s": 60.0}
+    t = contribution_table(feats, m)
+    assert [r["feature"] for r in t["rows"]][:2] == ["shape_sim", "rf_match"]
+    assert {r["feature"] for r in t["rows"]} == set(FEATS)  # model features only
+    mags = [abs(r["contribution"]) for r in t["rows"]]
+    assert mags == sorted(mags, reverse=True)
+    for r in t["rows"]:
+        assert r["contribution"] == r["coefficient"] * r["value"]
+    assert t["intercept"] == -5.0
+    assert math.isclose(t["logit"], -5.0 + sum(r["contribution"] for r in t["rows"]))
+    X = np.array([[feats[f] for f in FEATS]])
+    assert math.isclose(t["score"], float(m.predict(X)[0]), rel_tol=1e-12)
+
+
+def test_contribution_table_missing_feature_counts_zero() -> None:
+    from kairos_defense.match.explain import contribution_table
+
+    t = contribution_table({"shape_sim": 1.0}, model())
+    rows = {r["feature"]: r for r in t["rows"]}
+    assert rows["rf_match"]["value"] == 0.0 and rows["rf_match"]["contribution"] == 0.0
+    assert t["rows"][0]["feature"] == "shape_sim"  # the only non-zero, then model order
+    assert [r["feature"] for r in t["rows"][1:]] == list(FEATS[1:])

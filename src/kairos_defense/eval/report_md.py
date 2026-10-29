@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from kairos_defense.eval.targets import BY_KEY
+from kairos_defense.eval.targets import target_text as tt
+
 T_GRID_TEXT = "30, 45, 60, 90, 120, 180"
 
 
@@ -9,6 +12,11 @@ def _fmt(v, pct: bool = False) -> str:
     if v is None:
         return "-"
     return f"{v:.0%}" if pct else f"{v:.3f}"
+
+
+def _budget(stage: str) -> str:
+    """The §10.9 p95 budget of a latency stage from ``targets.py``, e.g. "1,500"."""
+    return f"{BY_KEY[f'latency_{stage}_p95_ms'].value:,.0f}"
 
 
 def _ms(v) -> str:
@@ -64,21 +72,24 @@ def markdown(s: dict, figure: str) -> str:
         "",
         "| Metric | Value | v1 target |",
         "|---|---:|---|",
-        f"| Recall@5 at T = 120 s | {_fmt(m['recall_at_5_t120'])} | ≥ 0.80 |",
+        f"| Recall@5 at T = 120 s | {_fmt(m['recall_at_5_t120'])} | {tt('recall_at_5_t120')} |",
         f"| Recall@5 at T = 120 s, Euclidean order of the same candidates | "
         f"{_fmt(m.get('recall_at_5_t120_baseline'))} | reference |",
-        f"| DTW lift | {_fmt(m.get('dtw_lift'))} | ≥ +0.10 |",
+        f"| DTW lift | {_fmt(m.get('dtw_lift'))} | {tt('dtw_lift')} |",
         f"| MRR at T = 120 s | {_fmt(m['mrr_t120'])} | report only |",
-        f"| Time to match: top 3 by T = 90 s | {_fmt(m['time_to_match_t90'], True)} | ≥ 70% |",
-        f"| Copycat-first rate at T = 120 s | {_fmt(m['copycat_first_t120'], True)} | ≤ 5% |",
+        f"| Time to match: top 3 by T = 90 s | {_fmt(m['time_to_match_t90'], True)} | "
+        f"{tt('time_to_match_t90')} |",
+        f"| Copycat-first rate at T = 120 s | {_fmt(m['copycat_first_t120'], True)} | "
+        f"{tt('copycat_first_t120')} |",
         f"| Recall@5 at T = 120 s, copycat queries | {_fmt(m['recall_at_5_t120_copycats'])} "
         "| report only |",
         f"| Report linkage (T = 120 s, top 3 matched incidents, k = 5) | "
         f"{_fmt(m.get('report_linkage'))} ({m.get('report_linkage_retrieved', 0)} of "
-        f"{m.get('report_linkage_relevant', 0)} true-clue reports) | ≥ 0.70 |",
-        f"| Forecast error at T = 90 s, median | {_m(m.get('forecast_median_t90_m'))} | ≤ 400 m |",
+        f"{m.get('report_linkage_relevant', 0)} true-clue reports) | {tt('report_linkage')} |",
+        f"| Forecast error at T = 90 s, median | {_m(m.get('forecast_median_t90_m'))} | "
+        f"{tt('forecast_median_t90_m')} |",
         f"| Forecast error at T = 90 s, P80 | {_m(m.get('forecast_p80_t90_m'))} | report only |",
-        "| Swarm top-1 | - | ≥ 0.80 (phase 9) |",
+        f"| Swarm top-1 | - | {tt('swarm_top1')} (phase 9) |",
         "",
         "## Recall by time since first contact",
         "",
@@ -103,9 +114,9 @@ def markdown(s: dict, figure: str) -> str:
               "|---|---:|---:|---:|"]  # fmt: skip
     names = {
         "query_build": ("Query build (resample, target, PAA)", "-"),
-        "prefilter": ("Prefilter (LanceDB search + grouping)", "50"),
-        "dtw": (f"DTW re-rank ({k} candidates)", "800 (for 50)"),
-        "end_to_end": ("End to end", "1,500"),
+        "prefilter": ("Prefilter (LanceDB search + grouping)", _budget("prefilter")),
+        "dtw": (f"DTW re-rank ({k} candidates)", f"{_budget('dtw')} (for 50)"),
+        "end_to_end": ("End to end", _budget("end_to_end")),
     }
     for stage, (label, budget) in names.items():
         lines.append(f"| {label} | {_ms(m.get(f'latency_{stage}_p50_ms'))} | "

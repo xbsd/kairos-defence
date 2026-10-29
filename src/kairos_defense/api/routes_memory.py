@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import queue
 import threading
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
@@ -26,6 +27,14 @@ from kairos_defense.api.schemas import (
     ReseedResponse,
     ResetResponse,
 )
+from kairos_defense.api.schemas_pages import (
+    CaseSummary,
+    DecisionRequest,
+    DecisionResponse,
+    EvidencePackage,
+    EvidenceVerifyRequest,
+    EvidenceVerifyResponse,
+)
 from kairos_defense.api.services import Services
 from kairos_defense.memory.actions import (
     ActionError,
@@ -33,6 +42,7 @@ from kairos_defense.memory.actions import (
     ProposalNotFound,
     WrongCase,
     decide_link,
+    record_decision,
 )
 from kairos_defense.memory.diff import case_diff, group
 from kairos_defense.memory.graph import case_graph
@@ -55,6 +65,17 @@ def _case_rows(svc: Services, case_id: str) -> list[dict]:
     if not any(r["event_type"] == "case_opened" and r["case_id"] == case_id for r in rows):
         raise HTTPException(404, f"no case {case_id}")
     return rows
+
+
+@router.get("/cases", response_model=list[CaseSummary])
+def cases(as_of: str | None = None, svc: Services = Svc) -> list[dict]:
+    """Every case as known at ``as_of`` (default the ledger head), oldest first (D-136)."""
+    from kairos_defense.memory.asof import case_summaries
+
+    if svc.memory.head() is None:
+        return []
+    t = parse_time(as_of, "as_of", _head_time(svc))
+    return _jsonable(case_summaries(svc.memory.events(), t))
 
 
 @router.get("/cases/{case_id}")
@@ -102,6 +123,26 @@ def links(case_id: str, body: LinkRequest, svc: Services = Svc) -> dict:
             "block": block(row)}  # fmt: skip
 
 
+@router.post("/cases/{case_id}/decisions", response_model=DecisionResponse)
+def decisions(case_id: str, body: DecisionRequest, svc: Services = Svc) -> dict:
+    """An analyst records a decision on a case (close, reopen, escalate, notify law
+    enforcement): one ``decision_recorded`` (rule 8: only this explicit action writes it).
+    422 unknown decision or analyst handle, 404 unknown case."""
+    _case_rows(svc, case_id)
+    try:
+        who = analyst(body.analyst)
+    except InvalidEvent as exc:
+        raise HTTPException(422, str(exc)) from exc
+    clock = parse_time(body.clock, "clock", _head_time(svc))
+    why = body.rationale or f"{body.decision.replace('_', ' ')} in the Command Center"
+    try:
+        seq = record_decision(svc.memory, case_id, body.decision, who, clock, why)
+    except (ActionError, InvalidEvent) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    row = svc.memory.rows_for_seqs([seq])[0]
+    return {"case_id": case_id, "decision": body.decision, "block": block(row)}
+
+
 @router.post("/cases/{case_id}/evidence", responses={200: {
     "model": EvidenceLine, "description": "NDJSON: one EvidenceLine per line",
     "content": {"application/x-ndjson": {}}}})  # fmt: skip
@@ -137,7 +178,7 @@ def evidence(case_id: str, body: EvidenceRequest, svc: Services = Svc) -> Stream
                     approve=True,
                     approved_by=who,
                     clock=clock,
-                    out_root=svc.app.paths.exports,
+                    out_root=svc.exports,
                     signer=signer_for(svc.app),
                     store=svc.store,
                     progress=lambda d: lines.put({"type": "file", **d}),
@@ -160,6 +201,58 @@ def evidence(case_id: str, body: EvidenceRequest, svc: Services = Svc) -> Stream
             yield json.dumps(item) + "\n"
 
     return StreamingResponse(gen(), media_type="application/x-ndjson")
+
+
+def _package(d: Path) -> dict:
+    """A package folder as listed: its manifest's case and export time, the manifest's sha256."""
+    from kairos_defense.memory.canonical import sha256_bytes
+
+    files = sorted(p.name for p in d.iterdir() if p.is_file())
+    raw = (d / "manifest.json").read_bytes()
+    try:
+        man = json.loads(raw)
+    except ValueError:
+        man = {}
+    return {"dir": d.name, "case_id": man.get("case_id"), "created_at": man.get("created_at"),
+            "manifest_sha256": sha256_bytes(raw), "signed": "manifest.sig" in files,
+            "files": files}  # fmt: skip
+
+
+@router.get("/evidence", response_model=list[EvidencePackage])
+def evidence_list(case: str | None = None, svc: Services = Svc) -> list[dict]:
+    """Exported packages under the exports root, newest first (optionally one case's)."""
+    root = Path(svc.exports)
+    if not root.is_dir():
+        return []
+    out = [_package(d) for d in root.iterdir() if d.is_dir() and (d / "manifest.json").exists()]
+    if case is not None:
+        out = [p for p in out if p["case_id"] == case]
+    return sorted(out, key=lambda p: (p["created_at"] or "", p["dir"]), reverse=True)
+
+
+def inside(root: Path, name: str) -> Path:
+    """``root / name`` resolved, refusing anything that leaves ``root`` (``..``, an absolute
+    path, a symlink out): 400."""
+    base = Path(root).resolve()
+    try:
+        p = (base / name).resolve()
+    except (OSError, RuntimeError) as exc:
+        raise HTTPException(400, f"bad package path {name!r}") from exc
+    if p == base or base not in p.parents:
+        raise HTTPException(400, f"{name!r} is not a package under the exports folder")
+    return p
+
+
+@router.post("/evidence/verify", response_model=EvidenceVerifyResponse)
+def evidence_verify(body: EvidenceVerifyRequest, svc: Services = Svc) -> dict:
+    """Re-run the package checks (files, signature, chain, ledger) on an exported package."""
+    from kairos_defense.memory.evidence import passed, verify_evidence
+
+    d = inside(Path(svc.exports), body.dir)
+    if not d.is_dir():
+        raise HTTPException(404, f"no package {body.dir}")
+    checks = verify_evidence(d, svc.memory)
+    return {"dir": d.name, "checks": [c.__dict__ for c in checks], "passed": passed(checks)}
 
 
 @router.get("/ledger/verify", response_model=LedgerVerify)

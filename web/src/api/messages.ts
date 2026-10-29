@@ -80,3 +80,17 @@ export function toBlock(m: LedgerMsg): LedgerBlock {
     subject_id: m.subject_id,
   };
 }
+
+// Phase 8 pages (D-135, D-136).
+export type Installation = S["Installation"];
+export type MatchResponse = S["MatchResponse"];
+export type ExplainResponse = S["ExplainResponse"];
+export type ContributionRow = S["ContributionRow"];
+export type ExplainFlight = S["ExplainFlight"];
+export type CaseSummary = S["CaseSummary"];
+export type DecisionRequest = S["DecisionRequest"];
+export type DecisionResponse = S["DecisionResponse"];
+export type CaseDecision = DecisionRequest["decision"];
+export type EvidencePackage = S["EvidencePackage"];
+export type EvidenceVerifyResponse = S["EvidenceVerifyResponse"];
+export type EvidenceCheck = S["EvidenceCheck"];

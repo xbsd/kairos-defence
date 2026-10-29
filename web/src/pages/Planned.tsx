@@ -10,7 +10,8 @@ export function Planned({ page }: { page: PlannedPage }) {
           {p.title}
         </h1>
         <p className="mt-2 text-15 text-ink-mid">
-          The {p.title.toLowerCase()} arrives in phase {p.phase}. Live watch is ready now.
+          The {p.title.toLowerCase()} arrives in phase {p.phase}, with the swarm encore. Live watch
+          and the other pages are ready now.
         </p>
       </div>
     </main>

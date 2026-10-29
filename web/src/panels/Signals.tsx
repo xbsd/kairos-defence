@@ -160,7 +160,7 @@ export function Signals() {
           <span>
             <span className="text-ink-hi">{PHASE[last.phase]}</span>
             {s.loiter !== null ? (
-              <span className="text-bone">
+              <span className="text-bone" data-testid="signals-loiter" data-t={s.loiter}>
                 {last.phase === "loiter" ? " since " : ", loiter began "}
                 {tPlus(s.loiter)}
               </span>

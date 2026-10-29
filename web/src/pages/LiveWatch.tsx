@@ -1,12 +1,19 @@
 import { Component, type ReactNode } from "react";
 
 import { CommandBar } from "../app/CommandBar";
+import { DirectorCaption } from "../director/DirectorOverlay";
+import { useThrottledStore } from "../lib/useThrottledStore";
+import { RecallBeam } from "../overlay/RecallBeam";
+import { RecallOverlay } from "../overlay/RecallOverlay";
 import { LedgerChain } from "../panels/LedgerChain";
+import { LensPanel } from "../panels/LensPanel";
 import { MatchList } from "../panels/MatchList";
+import { RegionConstellation } from "../panels/RegionConstellation";
 import { Recorder } from "../panels/Recorder";
 import { Signals } from "../panels/Signals";
 import { StreamPanel } from "../panels/Stream";
 import { Theater } from "../three/Theater";
+import { directorStore } from "../state/directorStore";
 import { useReplay } from "../state/useReplay";
 
 /** Keeps the DOM panels alive if WebGL fails (headless browsers, old GPUs). */
@@ -36,6 +43,8 @@ class TheaterBoundary extends Component<{ children: ReactNode }, { error: string
 export function LiveWatch({ incidentId }: { incidentId: string }) {
   const { scene, sceneError } = useReplay(incidentId);
   const trail = ["Live watch", scene?.name ?? incidentId];
+  // the Director caption sits at the theater's bottom center; the report stacks above it
+  const captioned = useThrottledStore(directorStore, (d) => d.active && d.page === null, 4);
   return (
     <>
       <CommandBar trail={trail} replay />
@@ -55,12 +64,17 @@ export function LiveWatch({ incidentId }: { incidentId: string }) {
               Scene: {sceneError}
             </p>
           ) : null}
+          <RecallOverlay raised={captioned} />
+          <RecallBeam />
+          <DirectorCaption placement="theater" />
         </main>
         <aside
           aria-label="Memory rail"
           className="flex min-h-[20rem] flex-col gap-2 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:min-h-0"
         >
           <MatchList />
+          <RegionConstellation />
+          <LensPanel />
         </aside>
         <section
           aria-label="Instrument rail"

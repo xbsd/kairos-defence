@@ -52,3 +52,19 @@ def reasons(
     found = [r for r in found if r[0] > 0]
     found.sort(key=lambda r: (-r[0], r[1]))
     return [text for _, _, text in found[:MAX_REASONS]]
+
+
+def contribution_table(features: dict[str, float], model: FusionModel) -> dict:
+    """The fused score taken apart (§10.7, the Match explainer): one row per model feature with
+    its value ``x``, coefficient and contribution ``coef × x``, sorted by |contribution| (largest
+    first; ties keep the model's order), plus the intercept, ``logit = intercept + Σ`` and
+    ``score = sigmoid(logit)``. Features the match carries but the model does not use
+    (``d_norm``, ``euclidean_d2``, ``window_s``) are left out; a missing feature counts 0."""
+    contrib = model.contributions(features)
+    rows = [{"feature": f, "value": float(features.get(f, 0.0)), "coefficient": float(c),
+             "contribution": float(contrib[f])}
+            for f, c in zip(model.features, model.coefficients, strict=True)]  # fmt: skip
+    order = sorted(range(len(rows)), key=lambda i: (-abs(rows[i]["contribution"]), i))
+    logit = float(model.intercept) + math.fsum(r["contribution"] for r in rows)
+    return {"rows": [rows[i] for i in order], "intercept": float(model.intercept),
+            "logit": logit, "score": 1.0 / (1.0 + math.exp(-logit))}  # fmt: skip

@@ -226,3 +226,72 @@ def rep(path, a, b):
 [2026-10-29 01:33:37]   … running 75 min. last tool: Bash until tail -1 data/cache/exit7/test_all.txt 2>/dev/null | grep -qE "passed|faile
 [2026-10-29 01:34:27] phase 7: gate attempt 1
 [2026-10-29 01:37:25] phase 7: gate passed
+[2026-10-29 01:37:25] === Phase 7: done, tagged phase-07-done, estimated cost $44.05 ===
+[2026-10-29 01:37:50]   git push origin main: ok
+[2026-10-29 01:37:51]   git push origin --tags: ok
+[2026-10-29 01:37:51] === Phase 8: start (auto mode) ===
+[2026-10-29 01:37:51] phase 8: planning
+[2026-10-29 01:40:51]   … running 3 min. last tool: Bash cat web/playwright.config.ts web/e2e/helpers.ts && sed -n 1,80p web/e2e/screens.
+[2026-10-29 01:43:51]   … running 6 min. last tool: Bash cat web/e2e/pages.spec.ts && sed -n 1,60p web/e2e/live.spec.ts && cat web/src/pa
+[2026-10-29 01:46:51]   … running 9 min. last tool: Bash sed -n 1074,1096p docs/SPEC.md && grep -n "def \|@app\|KD_" src/kairos_defense/c
+[2026-10-29 01:49:51]   … running 12 min. 
+[2026-10-29 01:52:52]   … running 15 min. last tool: Bash git status --short && wc -l docs/phases/phase-08/PLAN.md && grep -c "^- \*\*A" d
+[2026-10-29 01:53:22] phase 8: independent plan review 1
+[2026-10-29 01:55:52] phase 8: plan approved on review 1: I'm approving the Phase 8 plan: it meets all six criteria, and I found nothing that would fail the exit check or break a
+[2026-10-29 01:55:52] phase 8: building in a fresh session
+[2026-10-29 01:56:42]   session failed (exit 1); retrying in 60 s
+[2026-10-29 01:57:52]   usage/rate limit hit; waiting 30 min (retry 1/12)
+[2026-10-29 01:59:13] Autopilot run: phases 8..10, mode auto, rollback tag autopilot-start-20261029-0159, fast Python tests at start 710, push on
+[2026-10-29 01:59:13] === Phase 8: start (auto mode) ===
+[2026-10-29 01:59:13] phase 8: building in a fresh session
+[2026-10-29 01:59:23]   usage/rate limit hit; waiting 30 min (retry 1/12)
+[2026-10-29 02:29:33]   usage/rate limit hit; waiting 30 min (retry 2/12)
+[2026-10-29 02:39:17] Autopilot run: phases 8..10, mode auto, rollback tag autopilot-start-20261029-0239, fast Python tests at start 710, push on
+[2026-10-29 02:39:17] === Phase 8: start (auto mode) ===
+[2026-10-29 02:39:17] phase 8: building in a fresh session
+[2026-10-29 02:42:17]   … running 3 min. last tool: Bash cd /Users/ndkx/work/kairos_defence && grep -E "passed|failed|Test Files|Tests |r
+[2026-10-29 02:45:18]   … running 6 min. last tool: Bash sed -n 60,200p tests/unit/memory_kit.py && sed -n 1,40p tests/unit/test_memory_a
+[2026-10-29 02:48:18]   … running 9 min. last tool: Bash cd /Users/ndkx/work/kairos_defence/web && cat >> src/api/messages.ts <<'EOF'
+
+//
+[2026-10-29 02:51:18]   … running 12 min. last tool: Bash cat > src/three/forecastMath.ts <<'EOF'
+// Pure geometry for the forecast layers
+[2026-10-29 02:54:18]   … running 15 min. last tool: Bash cat > src/app/App.tsx <<'EOF'
+import { lazy, Suspense, useEffect, type ReactNode
+[2026-10-29 02:57:18]   … running 18 min. last tool: Bash cat > src/panels/constellation.ts <<'EOF'
+// Region constellation layout (SPEC §
+[2026-10-29 03:00:18]   … running 21 min. last tool: Bash python3 - <<'EOF'
+import pathlib
+p=pathlib.Path("src/three/CameraRig.tsx")
+s=p.r
+[2026-10-29 03:03:18]   … running 24 min. last tool: Bash cat > src/pages/MatchExplainer.tsx <<'EOF'
+import { useEffect, useState } from "
+[2026-10-29 03:06:19]   … running 27 min. last tool: Bash python3 - <<'EOF'
+import pathlib
+p=pathlib.Path("src/case/CaseControls.tsx"); s=
+[2026-10-29 03:09:19]   … running 30 min. last tool: Bash export PATH=/opt/homebrew/opt/node@22/bin:$PATH; npx eslint . --max-warnings 0 -
+[2026-10-29 03:12:19]   … running 33 min. last tool: Bash cat > tests/real.ts <<'EOF'
+// Real API payloads captured from the dev data (tes
+[2026-10-29 03:15:19]   … running 36 min. last tool: Bash python3 - <<'EOF'
+import pathlib
+p=pathlib.Path("tests/uiStore.test.ts"); s=p.re
+[2026-10-29 03:18:19]   … running 39 min. last tool: Bash export PATH=/opt/homebrew/opt/node@22/bin:$PATH; npx playwright test e2e/directo
+[2026-10-29 03:21:19]   … running 42 min. last tool: Read /Users/ndkx/work/kairos_defence/reports/figures/ui/phase08-beat-08-evidence-1440
+[2026-10-29 03:24:19]   … running 45 min. last tool: Bash python3 - <<'EOF'
+import pathlib
+p=pathlib.Path("e2e/helpers.ts"); s=p.read_text
+[2026-10-29 03:27:19]   … running 48 min. last tool: Bash python3 - <<'EOF'
+import pathlib
+p=pathlib.Path("src/three/ghostLayer.ts"); s=p.
+[2026-10-29 03:30:19]   … running 51 min. last tool: Bash cat > e2e/director-1x.spec.ts <<'EOF'
+// SPEC §20 phase 8 exit check: Director m
+[2026-10-29 03:33:20]   … running 54 min. last tool: Bash python3 - <<'EOF'
+import pathlib
+p=pathlib.Path("src/eval/Charts.tsx"); s=p.read
+[2026-10-29 03:36:20]   … running 57 min. last tool: Bash cd /Users/ndkx/work/kairos_defence && tail -40 docs/DECISIONS.md && grep -n "^##
+[2026-10-29 03:39:20]   … running 60 min. last tool: Bash export PATH=/opt/homebrew/opt/node@22/bin:$PATH && cp web/openapi.json /tmp/kd-p
+[2026-10-29 03:42:20]   … running 63 min. last tool: Monitor until grep -q "exit=" /tmp/kd-p8/e2e1.log; do sleep 10; done; grep -E "✘|passed|
+[2026-10-29 03:45:20]   … running 66 min. last tool: Bash cd /Users/ndkx/work/kairos_defence/web && export PATH=/opt/homebrew/opt/node@22/
+[2026-10-29 03:48:20]   … running 69 min. last tool: Bash make check > /tmp/kd-p8/check.log 2>&1; echo "check exit=$?"; grep -E "All check
+[2026-10-29 03:51:20]   … running 72 min. last tool: Bash make test-all > /tmp/kd-p8/testall.log 2>&1; echo "test-all exit=$?"; tail -2 /t
+[2026-10-29 03:54:21]   … running 75 min. last tool: Edit /Users/ndkx/work/kairos_defence/docs/phases/phase-08/REPORT.md

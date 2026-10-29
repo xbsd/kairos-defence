@@ -1,0 +1,15 @@
+[
+  {
+    "case_id": "CASE-P1-DELTA-260419",
+    "founder": "P1-DELTA-260419",
+    "base": "DELTA",
+    "status": "closed",
+    "opened_at": "2026-04-20T14:10:00.000000Z",
+    "members": ["P1-DELTA-260419"],
+    "pending": 4,
+    "contradictions": 0,
+    "claims": ["hobbyist"],
+    "last_decision": "close",
+    "exports": 0
+  }
+]

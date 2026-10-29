@@ -173,6 +173,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/cases": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Cases
+     * @description Every case as known at ``as_of`` (default the ledger head), oldest first (D-136).
+     */
+    get: operations["cases_api_cases_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/cases/{case_id}": {
     parameters: {
       query?: never;
@@ -248,6 +268,28 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/cases/{case_id}/decisions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Decisions
+     * @description An analyst records a decision on a case (close, reopen, escalate, notify law
+     *     enforcement): one ``decision_recorded`` (rule 8: only this explicit action writes it).
+     *     422 unknown decision or analyst handle, 404 unknown case.
+     */
+    post: operations["decisions_api_cases__case_id__decisions_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/cases/{case_id}/evidence": {
     parameters: {
       query?: never;
@@ -264,6 +306,46 @@ export interface paths {
      *     with the verification checks (or one ``{"type": "error"}`` line).
      */
     post: operations["evidence_api_cases__case_id__evidence_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/evidence": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Evidence List
+     * @description Exported packages under the exports root, newest first (optionally one case's).
+     */
+    get: operations["evidence_list_api_evidence_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/evidence/verify": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Evidence Verify
+     * @description Re-run the package checks (files, signature, chain, ledger) on an exported package.
+     */
+    post: operations["evidence_verify_api_evidence_verify_post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -381,6 +463,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/explain/{incident_id}/{track_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Explain */
+    get: operations["explain_api_explain__incident_id___track_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -423,6 +522,34 @@ export interface components {
       /** Centroid Y M */
       centroid_y_m: number;
     };
+    /** CaseSummary */
+    CaseSummary: {
+      /** Case Id */
+      case_id: string;
+      /** Founder */
+      founder: string;
+      /** Base */
+      base: string | null;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "open" | "closed" | "unknown";
+      /** Opened At */
+      opened_at: string;
+      /** Members */
+      members: string[];
+      /** Pending */
+      pending: number;
+      /** Contradictions */
+      contradictions: number;
+      /** Claims */
+      claims: string[];
+      /** Last Decision */
+      last_decision: string | null;
+      /** Exports */
+      exports: number;
+    };
     /** ClockMsg */
     ClockMsg: {
       /**
@@ -458,6 +585,48 @@ export interface components {
       links: string[];
       /** Linked */
       linked: boolean;
+    };
+    /** ContributionRow */
+    ContributionRow: {
+      /** Feature */
+      feature: string;
+      /** Value */
+      value: number;
+      /** Coefficient */
+      coefficient: number;
+      /** Contribution */
+      contribution: number;
+    };
+    /** DecisionRequest */
+    DecisionRequest: {
+      /**
+       * Decision
+       * @enum {string}
+       */
+      decision: "close" | "reopen" | "escalate" | "notify_law_enforcement";
+      /**
+       * Analyst
+       * @default demo
+       */
+      analyst: string;
+      /**
+       * Rationale
+       * @default
+       */
+      rationale: string;
+      /** Clock */
+      clock?: string | null;
+    };
+    /** DecisionResponse */
+    DecisionResponse: {
+      /** Case Id */
+      case_id: string;
+      /**
+       * Decision
+       * @enum {string}
+       */
+      decision: "close" | "reopen" | "escalate" | "notify_law_enforcement";
+      block: components["schemas"]["LedgerBlock"];
     };
     /** DtwCmd */
     DtwCmd: {
@@ -584,6 +753,21 @@ export interface components {
       /** N */
       n: number;
     };
+    /** EvidencePackage */
+    EvidencePackage: {
+      /** Dir */
+      dir: string;
+      /** Case Id */
+      case_id: string | null;
+      /** Created At */
+      created_at: string | null;
+      /** Manifest Sha256 */
+      manifest_sha256: string | null;
+      /** Signed */
+      signed: boolean;
+      /** Files */
+      files: string[];
+    };
     /** EvidenceRequest */
     EvidenceRequest: {
       /**
@@ -598,6 +782,79 @@ export interface components {
       analyst: string;
       /** Clock */
       clock?: string | null;
+    };
+    /** EvidenceVerifyRequest */
+    EvidenceVerifyRequest: {
+      /** Dir */
+      dir: string;
+    };
+    /** EvidenceVerifyResponse */
+    EvidenceVerifyResponse: {
+      /** Dir */
+      dir: string;
+      /** Checks */
+      checks: components["schemas"]["EvidenceCheck"][];
+      /** Passed */
+      passed: boolean;
+    };
+    /** ExplainAlignment */
+    ExplainAlignment: {
+      /** Start S */
+      start_s: number;
+      /** End S */
+      end_s: number;
+      /** Value */
+      value: number;
+    };
+    /** ExplainFlight */
+    ExplainFlight: {
+      /** Track Id */
+      track_id: string;
+      /** Incident Id */
+      incident_id: string;
+      /** Installation Id */
+      installation_id: string;
+      /** Target Asset Id */
+      target_asset_id: string;
+      /** Local Start */
+      local_start: string | null;
+      /** Columns */
+      columns: string[];
+      /** Points */
+      points: (number | null)[][];
+    };
+    /** ExplainResponse */
+    ExplainResponse: {
+      /** Incident Id */
+      incident_id: string;
+      /** At */
+      at: number;
+      /** T S */
+      t_s: number;
+      /** Model Version */
+      model_version: string;
+      /** Window S */
+      window_s: number;
+      match: components["schemas"]["MatchItem"];
+      /** Contributions */
+      contributions: components["schemas"]["ContributionRow"][];
+      /** Intercept */
+      intercept: number;
+      /** Logit */
+      logit: number;
+      /** Score */
+      score: number;
+      tonight: components["schemas"]["ExplainFlight"];
+      past: components["schemas"]["ExplainFlight"];
+      segment: components["schemas"]["ExplainSegment"];
+      alignment: components["schemas"]["ExplainAlignment"] | null;
+    };
+    /** ExplainSegment */
+    ExplainSegment: {
+      /** Start S */
+      start_s: number;
+      /** End S */
+      end_s: number;
     };
     /** FeaturesMsg */
     FeaturesMsg: {
@@ -1560,6 +1817,37 @@ export interface operations {
       };
     };
   };
+  cases_api_cases_get: {
+    parameters: {
+      query?: {
+        as_of?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CaseSummary"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   case_api_cases__case_id__get: {
     parameters: {
       query?: {
@@ -1701,6 +1989,41 @@ export interface operations {
       };
     };
   };
+  decisions_api_cases__case_id__decisions_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        case_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DecisionRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DecisionResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   evidence_api_cases__case_id__evidence_post: {
     parameters: {
       query?: never;
@@ -1727,6 +2050,70 @@ export interface operations {
             | components["schemas"]["EvidenceDoneLine"]
             | components["schemas"]["EvidenceErrorLine"];
           "application/x-ndjson": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  evidence_list_api_evidence_get: {
+    parameters: {
+      query?: {
+        case?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EvidencePackage"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  evidence_verify_api_evidence_verify_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EvidenceVerifyRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EvidenceVerifyResponse"];
         };
       };
       /** @description Validation Error */
@@ -1893,6 +2280,40 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ReseedResponse"];
+        };
+      };
+    };
+  };
+  explain_api_explain__incident_id___track_id__get: {
+    parameters: {
+      query: {
+        at: number;
+      };
+      header?: never;
+      path: {
+        incident_id: string;
+        track_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ExplainResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };

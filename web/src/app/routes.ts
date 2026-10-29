@@ -1,30 +1,74 @@
-// A small history-API router (D-112): no dependency, a few routes.
+// A small history-API router (D-112, D-141): no dependency, a few routes with query parameters.
 import { useSyncExternalStore } from "react";
 
 export type Route =
   | { name: "home" }
   | { name: "live"; incidentId: string }
+  | { name: "explainer"; incident: string | null; at: number | null; track: string | null }
+  | { name: "cases" }
+  | { name: "case"; caseId: string; focus: string | null }
+  | { name: "evidence"; caseId: string | null }
+  | { name: "delta"; since: string | null }
+  | { name: "eval" }
   | { name: "planned"; page: PlannedPage }
   | { name: "notfound"; path: string };
 
-export type PlannedPage = "explainer" | "cases" | "swarm" | "evidence" | "delta" | "eval";
+export type PlannedPage = "swarm";
 
 export const PLANNED: Record<PlannedPage, { title: string; phase: number }> = {
-  explainer: { title: "Match explainer", phase: 8 },
-  cases: { title: "Case board", phase: 8 },
   swarm: { title: "Swarm view", phase: 9 },
-  evidence: { title: "Evidence", phase: 8 },
-  delta: { title: "Shift delta", phase: 8 },
-  eval: { title: "Eval", phase: 8 },
 };
 
-export function matchRoute(path: string): Route {
+/** The Pages menu, in §17.2 order. */
+export const PAGES: { path: string; title: string }[] = [
+  { path: "/explainer", title: "Match explainer" },
+  { path: "/cases", title: "Case board" },
+  { path: "/swarm", title: "Swarm view" },
+  { path: "/evidence", title: "Evidence" },
+  { path: "/delta", title: "Shift delta" },
+  { path: "/eval", title: "Eval" },
+];
+
+const ID = /^[A-Za-z0-9._-]+$/;
+
+function param(q: URLSearchParams, key: string): string | null {
+  const v = q.get(key);
+  return v && v.length <= 200 ? v : null;
+}
+
+export function matchRoute(path: string, search = ""): Route {
   const p = path.replace(/\/+$/, "") || "/";
+  const q = new URLSearchParams(search);
   if (p === "/") return { name: "home" };
   const live = /^\/live\/([A-Za-z0-9-]+)$/.exec(p);
   if (live?.[1]) return { name: "live", incidentId: live[1] };
-  const page = p.slice(1);
-  if (page in PLANNED) return { name: "planned", page: page as PlannedPage };
+  const kase = /^\/cases\/([A-Za-z0-9._-]+)$/.exec(p);
+  if (kase?.[1]) return { name: "case", caseId: kase[1], focus: param(q, "focus") };
+  switch (p) {
+    case "/explainer": {
+      const at = Number(q.get("at"));
+      const incident = param(q, "incident");
+      const track = param(q, "track");
+      return {
+        name: "explainer",
+        incident: incident && ID.test(incident) ? incident : null,
+        at: q.get("at") !== null && Number.isFinite(at) && at >= 0 ? at : null,
+        track: track && ID.test(track) ? track : null,
+      };
+    }
+    case "/cases":
+      return { name: "cases" };
+    case "/evidence": {
+      const c = param(q, "case");
+      return { name: "evidence", caseId: c && ID.test(c) ? c : null };
+    }
+    case "/delta":
+      return { name: "delta", since: param(q, "since") };
+    case "/eval":
+      return { name: "eval" };
+    case "/swarm":
+      return { name: "planned", page: "swarm" };
+  }
   return { name: "notfound", path: p };
 }
 
@@ -49,6 +93,37 @@ export function usePath(): string {
   return useSyncExternalStore(subscribe, () => window.location.pathname);
 }
 
+/** Path and query string (one string, so the snapshot is stable between changes). */
+export function useLocation(): string {
+  return useSyncExternalStore(subscribe, () => window.location.pathname + window.location.search);
+}
+
 export function useRoute(): Route {
-  return matchRoute(usePath());
+  const loc = useLocation();
+  const i = loc.indexOf("?");
+  return i < 0 ? matchRoute(loc) : matchRoute(loc.slice(0, i), loc.slice(i));
+}
+
+/** The breadcrumb title of a route. */
+export function routeTitle(r: Route): string {
+  switch (r.name) {
+    case "home":
+    case "live":
+      return "Live watch";
+    case "explainer":
+      return "Match explainer";
+    case "cases":
+    case "case":
+      return "Case board";
+    case "evidence":
+      return "Evidence";
+    case "delta":
+      return "Shift delta";
+    case "eval":
+      return "Eval";
+    case "planned":
+      return PLANNED[r.page].title;
+    case "notfound":
+      return "Not found";
+  }
 }

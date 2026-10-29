@@ -36,6 +36,9 @@ All times are naive UTC `datetime`s. Ledger rows are dicts with the 17 §15.1 co
   - `Head(seq, hash, recorded_at)`, `LedgerError`, `InvalidEvent`.
 - `asof`:
   - `snapshot(rows, case_id, t) -> CaseSnapshot` (`ports.py`);
+  - `case_summaries(rows, t) -> list[dict]`: one line per case known at `t` (founder, base,
+    status, opened_at, members, pending, contradictions, claims, last decision, exports), for
+    `GET /api/cases` (D-136);
   - `members_at(rows, case_id, t)`, `touching_rows(rows, case_id, members)`;
   - `contradictions(claims)`, `case_status(decisions, exists)`, `is_decided(rows)`;
   - `valid_at(rows, case_id, t_valid, known) -> dict`: valid time, separate from transaction time.
@@ -155,3 +158,5 @@ Event fields by type (D-094):
 - Phase 7: `views.incident_statuses` (the match list's memory status, D-116), `graph.case_graph`
   (Case board nodes and edges, D-108), `export_evidence(progress=…)` (the API's streamed hashing,
   D-108); the reseed core moved to `store.ledger_duck.reseed_ledger` (D-104).
+- Phase 8: `asof.case_summaries` (the Case board's list, D-136); decisions from the Case board go
+  through the existing `actions.record_decision`. `tests/unit/test_memory_cases.py`.

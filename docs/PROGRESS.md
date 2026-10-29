@@ -10,7 +10,7 @@
 | 5 | Report recall and analog forecast | done (2026-10-28, autopilot gate passed) | `make index`: 956 reports with FTS, 82 `report_clues`; `make eval`: report linkage 1.000 (65/65), forecast median 340 m / P80 495 m at T = 90 s; demo DELTA report rank 1 and forecast 139 m at T+105 pass; `forecast --at 105` exit 0 (2,164 m northwest, County Rd 12 in the zone); `check_targets.py 5` 12 PASS, 1 WARN (accepted top 3); 497 fast, 509 in all | 2026-10-28 |
 | 6 | Case memory (Kairos-lite) | done (2026-10-29, autopilot gate passed) | `memory reseed && memory verify && pytest -k memory` exit 0 in 7.8 s: 4,681 rows seeded in 0.14 s, chain intact, 92 passed; DELTA at 10:00 local hobbyist, closed, no links; `memory demo --approve` known then 1 member → known now 3 (real top 3: DELTA, ALPHA-0303, CHARLIE; D-081); evidence verify PASS, then FAIL after one edited byte; 586 fast, 601 in all | 2026-10-28 |
 | 7 | Streaming API and Command Center foundation | done (2026-10-29, autopilot gate passed) | `make demo` serves API, stream and web app offline (T+90 match cached; all stream types by T+50 at 5×; D-010 resets through the API); `make e2e` 19/19 with axe clean on 7 routes; 8 screenshots reviewed, 9 fixes; median 59.9 fps (P5 59.9) at 1920 × 1080 with bloom, ANGLE Metal on an Apple M4 Max, macOS 26.5.2; 710 fast, 726 in all; Vitest 73 | 2026-10-29 |
-| 8 | Command Center: the memorable moments | not started | | |
+| 8 | Command Center: the memorable moments | not started | Director at 1× through every §1.2 row: T+0 21:40:06, T+15, T+45, loiter marker T+87 (T+80 row), T+90, T+105, T+120 21:42:06, then Case board and Evidence on →; median 59.9 fps (P5 59.9) on every Live watch beat at 1920 × 1080 with bloom, ANGLE Metal, Apple M4 Max, macOS 26.5.2; 18 beat + 12 page screenshots at both sizes reviewed, 17 fixes (D-146); `make e2e` 29/29 with axe clean on 9 routes and on Live watch at T+120; `make eval` + `check_targets.py 8` exit 0 (accepted `live_top3_incidents` WARN, D-081); 731 fast, 747 in all; Vitest 153 | 2026-10-29 |
 | 9 | Swarms, agent, MCP, hardening and runbook | not started | | |
 | 10 | User guide, one-pager and rollback guide (docs/phases/PHASE_10.md) | not started | | |
 
@@ -25,6 +25,74 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Open issues: …
 - Next: …
 -->
+
+### 2026-10-29 · Phase 8 (autopilot build)
+- Built: the Command Center's memorable moments (SPEC §17.3, §17.7–§17.13).
+  - Backend:
+    - `GET /api/explain/{incident}/{track}` (`api/routes_explain.py`,
+      `match/explain.contribution_table`, D-135);
+    - `GET /api/cases` (`memory/asof.case_summaries`), `POST /api/cases/{id}/decisions`,
+      `GET /api/evidence`, `POST /api/evidence/verify` with a path guard
+      (`api/schemas_pages.py`, D-136);
+    - `api --exports` for e2e scratch exports (D-137);
+    - `eval/targets.py`, written into the eval JSON as `targets` and kept equal to
+      `scripts/check_targets.py` by a test (D-139).
+  - Web:
+    - the time-warp lens with the 1.2 s connector morph onto the DTW path, the cost matrix and its
+      drawn-on path (D-126, D-127);
+    - afterglow ghosts, core beams, the region constellation (D-128 to D-130);
+    - the forecast path, pulsing zone, computed label and County Rd 12's in-zone dots
+      (D-132, D-133);
+    - computed memory and forecast camera shots (D-134);
+    - the report recall overlay with clue spans, glyph resolve, zone note and its beam to the road
+      (D-131);
+    - the Match explainer, Case board (as-of scrubber, d3-force graph, diff, approvals, decisions),
+      Evidence, Shift delta and Eval pages, all lazy (D-135, D-138, D-140, D-141);
+    - Director mode (eight beats, computed captions, keys D, Space, →, ←, R, M, F, ?, progress
+      rail, panel dimming, progressive reveal; never commits) (D-122 to D-125, D-142, D-143);
+    - Performance mode and static grain (D-144).
+- Exit check (`docs/phases/phase-08/EXIT_CHECK.md`), dev laptop:
+  - Director at 1× (`director_1x.json`): every §1.2 row landed at its replay second. T+0 21:40:06,
+    T+15, T+45, T+90 (lens Warped at T+91), T+105, T+120 21:42:06. The T+80 row is the loiter
+    marker at T+87; the eval's orbit check is T+79. → opened the Case board and Evidence. The
+    encore is phase 9.
+  - Frame rate: median 59.9 fps (P5 59.9) overall and on each Live watch beat. Recall P5 59.5.
+    1920 × 1080, bloom on, ANGLE Metal on an Apple M4 Max (16 cores, 128 GB), macOS 26.5.2.
+  - `make e2e`: 29 passed in 8.3 min. This includes Director at 5× at both sizes with each beat's
+    key element, "never commits by itself", the keys and modes, the lens connectors on the DTW
+    path, the five pages, and axe clean on 9 routes and on Live watch at T+120.
+  - `make eval` then `check_targets.py 8`: exit 0. The phase 4 and 5 metrics PASS. Every demo row
+    except `swarm_top1` passes, apart from the accepted `live_top3_incidents` (WARN, D-081). The
+    eval JSON has 10 targets.
+  - `make demo` (background, stopped): health ok; `/api/cases`, `/api/explain/…` (score 0.9996,
+    logit 7.89, 7 rows) and the eval `targets` answer; every page route returns 200; port 8000
+    free afterwards.
+  - Contract regenerated byte-identical. `memory verify`: chain intact at 4,681 rows.
+  - `make check`: 731 fast (710 at the start). `make test-all`: 747 passed. Vitest 153 (73 at
+    the start).
+- UI review (§17.13): 18 beat screenshots and 12 page screenshots, at 1920 × 1080 and
+  1440 × 900, in three rounds. 17 findings were fixed:
+  - grain too strong;
+  - Space taken by a focused button;
+  - three match entries not fitting at 1440 × 900;
+  - lens controls wrapping and the matrix cut off;
+  - the overlay covering the zone (the forecast shot shifted);
+  - ghost labels overprinting;
+  - a cramped case graph;
+  - duplicate proposals with no way to tell them apart;
+  - the page caption over the controls;
+  - the self-match arc with no label;
+  - ghosts going dark after a top-3 change (spec cache);
+  - the zone label colliding with a ghost label;
+  - constellation labels colliding;
+  - a faint beam drawn under the overlay;
+  - the explainer's faint tonight path;
+  - Eval chart labels clipped and colliding;
+  - the Stream list not keyboard-reachable (axe `scrollable-region-focusable`).
+
+  Left as is: at 1440 × 900 the third match entry's buttons sit just below the fold of its
+  scrolling list. Details are in D-146 and EXIT_CHECK.md.
+- Decisions D-122 to D-147. No skip or xfail marker was added.
 
 ### 2026-10-29 · Phase 7 (autopilot build)
 - Built: the streaming API and the Command Center foundation (SPEC §16, §17.1–§17.6, §17.11–§17.13).

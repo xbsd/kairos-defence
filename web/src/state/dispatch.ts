@@ -27,7 +27,7 @@ export function dispatch(m: StreamMessage, now: number = performance.now()): voi
     case "forecast":
     case "recall":
     case "dtw":
-      matchStore.getState().apply(m);
+      matchStore.getState().apply(m, now);
       return;
     case "ledger":
       caseStore.getState().addBlocks([toBlock(m)], true, now);

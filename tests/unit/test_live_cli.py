@@ -116,3 +116,29 @@ def test_call_api_refuses_non_loopback() -> None:
     with pytest.raises(typer.BadParameter):
         cli_memory.call_api("http://example.com", "/api/admin/reset")
     assert cli_memory.call_api("http://127.0.0.1:9", "/api/admin/reset", 0.5) is None
+
+
+def test_api_exports_option_reaches_services_and_reload_env(toy, monkeypatch) -> None:
+    import os
+
+    import uvicorn
+
+    import kairos_defense.api.app as app_mod
+
+    seen: dict = {}
+
+    def fake_create(cfg=None, **kw):
+        seen.update(kw)
+        return object()
+
+    monkeypatch.setattr(app_mod, "create_app", fake_create)
+    monkeypatch.setattr(uvicorn, "run", lambda *a, **k: seen.__setitem__("run", (a, k)))
+    for k in ("KD_CONFIG", "KD_STATIC", "KD_MEMORY", "KD_LIVE_DB", "KD_EXPORTS"):
+        monkeypatch.setenv(k, "")  # the CLI writes them; monkeypatch restores them afterwards
+    r = _run("api", "--exports", "data/cache/e2e/exports", "--port", "8799")
+    assert r.exit_code == 0, r.output
+    assert seen["exports_path"] == "data/cache/e2e/exports"
+    r = _run("api", "--reload", "--exports", "scratch/exports")
+    assert r.exit_code == 0, r.output
+    assert os.environ["KD_EXPORTS"] == "scratch/exports"
+    assert seen["run"][0][0] == "kairos_defense.api.app:factory"

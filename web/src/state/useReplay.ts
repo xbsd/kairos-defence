@@ -9,6 +9,7 @@ import { setStream } from "./controls";
 import { dispatch } from "./dispatch";
 import { matchStore } from "./matchStore";
 import { replayStore } from "./replayStore";
+import { sceneStore } from "./sceneStore";
 
 /** Re-check the chain whenever the head moves (debounced: a batch of 3 proposals is one check). */
 function watchVerify(): () => void {
@@ -66,7 +67,11 @@ export function useReplay(incidentId: string): { scene: Scene | null; sceneError
     let alive = true;
     api
       .scene(installation)
-      .then((s) => alive && setScene(s))
+      .then((s) => {
+        if (!alive) return;
+        setScene(s);
+        sceneStore.getState().setScene(s);
+      })
       .catch((e: unknown) => alive && setSceneError(String(e instanceof Error ? e.message : e)));
     return () => {
       alive = false;

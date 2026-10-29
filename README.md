@@ -14,8 +14,9 @@ bitemporal, tamper-evident case memory, built on DuckDB and LanceDB. **Synthetic
 | 4 | DTW matcher and fusion model | done with one accepted gap (live top 3, [GAPS](docs/phases/phase-04/GAPS.md)) | [report](docs/phases/phase-04/REPORT.md) |
 | 5 | Report recall and analog forecast | done | [report](docs/phases/phase-05/REPORT.md), [exit check](docs/phases/phase-05/EXIT_CHECK.md) |
 | 6 | Case memory (Kairos-lite) | done | [report](docs/phases/phase-06/REPORT.md), [exit check](docs/phases/phase-06/EXIT_CHECK.md) |
-| 7 | Streaming API and Command Center foundation | built; awaiting the autopilot gate | [report](docs/phases/phase-07/REPORT.md), [exit check](docs/phases/phase-07/EXIT_CHECK.md) |
-| 8 to 10 | Memorable moments through the user guide | not started | `docs/SPEC.md` §20, `docs/phases/PHASE_10.md` |
+| 7 | Streaming API and Command Center foundation | done | [report](docs/phases/phase-07/REPORT.md), [exit check](docs/phases/phase-07/EXIT_CHECK.md) |
+| 8 | Command Center: the memorable moments | built; awaiting the autopilot gate | [report](docs/phases/phase-08/REPORT.md), [exit check](docs/phases/phase-08/EXIT_CHECK.md) |
+| 9 to 10 | Swarms, agent and MCP through the user guide | not started | `docs/SPEC.md` §20, `docs/phases/PHASE_10.md` |
 
 Works today: `make check`, `make data` (seeded synthetic world, flights, swarms, sensors, paperwork
 and truth), `make index` (tracks, windows, and the report index with full-text search), `make
@@ -36,7 +37,15 @@ bearings, the drone and its phosphor trail, data packets into the Kairos core), 
 Signals, Recorder and Ledger chain instruments, and the match list with Approve and Reject that
 write to the ledger. `make dev` runs the API and Vite with hot reload; `make e2e` runs Playwright
 (screenshots and a frame-rate probe in `reports/figures/ui/`, axe checks). `uv run kairos-defense
-replay --reset` and `memory reseed` work while the demo runs (through the API). Everything runs
+replay --reset` and `memory reseed` work while the demo runs (through the API). From phase 8 the
+demo's memorable moments run too: press D on Live watch for Director mode (one beat per §1.2 row
+with computed captions and camera shots; Space, →, ←, R, M, F, ?): the time-warp lens morphs its
+connectors from "Same time" onto the real DTW path, the matched past flights rise as amber
+afterglow ghosts in tonight's frame, the forecast draws its dotted exit path and pulsing recovery
+zone with County Rd 12 lit inside it, and the DELTA report resolves at the lower left with a beam
+to that road; → opens the Case board (Known then: hobbyist, no links; Known now: the proposals and
+the diff; approve with a click) and Evidence (export with a confirm, per-file hashing, the checks,
+Verify package). The Match explainer, Shift delta and Eval pages are in the Pages menu. Everything runs
 offline; `kairos-defense fetch-models` is the only command that downloads (an optional embedding
 model). Each
 phase's plan, report and exit-check evidence is in `docs/phases/phase-NN/`, and the per-session log

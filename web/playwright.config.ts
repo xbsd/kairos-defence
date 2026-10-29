@@ -1,6 +1,7 @@
-// End-to-end tests (SPEC §17.13, D-113). Playwright starts its own API on :8765 with scratch
-// ledger and live files under data/cache/e2e, so it never touches data/memory.duckdb and never
-// collides with `make demo` on :8000. One worker: the specs share that server and its ledger.
+// End-to-end tests (SPEC §17.13, D-113, D-137). Playwright starts its own API on :8765 with
+// scratch ledger, live and export folders under data/cache/e2e, so it never touches
+// data/memory.duckdb or exports/ and never collides with `make demo` on :8000. One worker: the
+// specs share that server and its ledger.
 import { defineConfig, devices } from "@playwright/test";
 
 export const PORT = 8765;
@@ -37,7 +38,8 @@ export default defineConfig({
   webServer: {
     command:
       `uv run kairos-defense api --static web/dist --port ${PORT} ` +
-      "--memory data/cache/e2e/memory.duckdb --live-db data/cache/e2e/live.duckdb --reseed",
+      "--memory data/cache/e2e/memory.duckdb --live-db data/cache/e2e/live.duckdb " +
+      "--exports data/cache/e2e/exports --reseed",
     cwd: "..",
     url: `${BASE}/api/health`,
     timeout: 240_000,

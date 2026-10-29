@@ -1,0 +1,63 @@
+{
+  "case_id": "CASE-P1-DELTA-260419",
+  "as_of": "2026-04-20T15:00:00.000000Z",
+  "exists": true,
+  "status": "closed",
+  "nodes": [
+    {
+      "id": "CASE-P1-DELTA-260419",
+      "kind": "case",
+      "status": "closed",
+      "seq": 3568,
+      "recorded_at": "2026-04-20T14:10:00.000000Z"
+    },
+    {
+      "id": "P1-DELTA-260419",
+      "kind": "incident",
+      "base": "DELTA",
+      "member": true,
+      "contradiction": false,
+      "seq": 3559,
+      "recorded_at": "2026-04-20T02:51:40.000000Z"
+    },
+    {
+      "id": "R-P1-DELTA-260419-1",
+      "kind": "report",
+      "source": "security_forces",
+      "grade": "B2",
+      "seq": 3564,
+      "recorded_at": "2026-04-20T03:40:00.000000Z"
+    },
+    {
+      "id": "A-3569",
+      "kind": "assessment",
+      "label": "hobbyist",
+      "contradiction": false,
+      "seq": 3569,
+      "recorded_at": "2026-04-20T14:10:00.000000Z"
+    }
+  ],
+  "edges": [
+    {
+      "source": "P1-DELTA-260419",
+      "target": "CASE-P1-DELTA-260419",
+      "kind": "member_of",
+      "seq": 3568,
+      "recorded_at": "2026-04-20T14:10:00.000000Z"
+    },
+    {
+      "source": "R-P1-DELTA-260419-1",
+      "target": "P1-DELTA-260419",
+      "kind": "report_of",
+      "seq": 3564,
+      "recorded_at": "2026-04-20T03:40:00.000000Z"
+    },
+    {
+      "source": "A-3569",
+      "target": "P1-DELTA-260419",
+      "kind": "assessed",
+      "seq": 3569,
+      "recorded_at": "2026-04-20T14:10:00.000000Z"
+    }
+  ]
+}

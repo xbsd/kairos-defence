@@ -25,9 +25,12 @@ export function stepPerf(s: PerfState, frameMs: number, nowS: number): PerfState
   return { level: s.level, ema, slowSince: s.slowSince };
 }
 
-export type PerfLabel = "full" | "no-bloom" | "half-packets" | "reduced";
+export type PerfLabel = "full" | "no-bloom" | "half-packets" | "reduced" | "performance";
 
-export function perfLabel(level: 0 | 1 | 2, reduce: boolean): PerfLabel {
+/** The theater's `data-perf`: reduce motion wins, then the presenter's Performance mode (no
+ * bloom, grain or beams, half the packets), then the auto-degrade level. */
+export function perfLabel(level: 0 | 1 | 2, reduce: boolean, perfMode = false): PerfLabel {
   if (reduce) return "reduced";
+  if (perfMode) return "performance";
   return level === 0 ? "full" : level === 1 ? "no-bloom" : "half-packets";
 }

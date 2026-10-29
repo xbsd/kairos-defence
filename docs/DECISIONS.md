@@ -1827,3 +1827,252 @@ Where this file and the SPEC ever disagree, this file wins.
   rows (they wrapped at 1440 px) and "1 rows" became "1 row"; the Ledger chain badge says "Chain
   verified" with the row count in the footer (it was truncated); panel titles never wrap; the
   Signals meta reads "Loiter since T+01:27".
+
+## D-122 · Director beats: one per §1.2 row, the encore in phase 9 · 2026-10-29
+- Context: §17.10 lists nine beats; §20 phase 9 owns "the Director encore beat".
+- Decision (`web/src/director/beats.ts`): eight beats as data: detection (T+0), recording (T+15),
+  recognition (T+45), time warp (T+90), forecast (T+105), recall (T+120), known then and now
+  (Case board), evidence. Each has a camera shot, the panels it keeps lit, the layers it reveals
+  and the test id of its key element. §1.2's T+80 row (orbit established) has no beat of its own:
+  it is observed during recognition (the Signals loiter marker; the 1× run records when). Phase 9
+  appends the encore entry.
+
+## D-123 · How beats advance; Director never commits · 2026-10-29
+- Decision (`director/engine.ts`, `actions.ts`, `useDirector.ts`): the current beat is derived:
+  a page beat once the presenter moved there, else the last clock beat whose start is at or
+  before the replay clock. → on a clock beat seeks to the next beat's time (results are cached per
+  second, D-013); → from recall opens `/cases/<case>`, then `/evidence?case=<case>`; ← walks
+  back, from the Case board to Live watch at T+120 (a pending seek applied when the new stream is
+  open). After a Director seek the driver waits until the clock lands near the target before it
+  activates anything (a stale clock never logs a wrong beat). The Director only seeks, plays,
+  sets the camera and the lens: it never approves, rejects, decides or exports (rule 8). An e2e
+  test checks that a Director run with no clicks appends only `incident_recorded`,
+  `model_registered` and `match_proposed`.
+
+## D-124 · Progressive reveal in Director · 2026-10-29
+- Decision: in Director, layers appear cumulatively: ghosts, core beams, the lens and the
+  constellation's arcs from the time-warp beat; the forecast and the road highlight from the
+  forecast beat; the recall overlay and its beam from the recall beat. Without Director every
+  layer shows as soon as its data exists. Hiding computed data until its beat changes no number.
+  Panels a beat does not feature dim to 45% opacity (`data-dimmed`).
+
+## D-125 · Captions are computed · 2026-10-29
+- Decision (`director/captions.ts`, `context.ts`): one pure function per beat from store state
+  to one sentence; every value comes from the stream, the scene, the installations or what the
+  Case board and Evidence pages publish (`directorStore.facts`: the case's base, its known-then
+  label and close date, the pending count). A missing value drops its clause; a test checks that
+  no caption contains "undefined", "NaN", "null" or braces. The forecast caption measures from
+  tonight's target-asset centroid (the phase 5 CLI's 2,164 m northwest at T+105) and adds "in
+  Bravo's radar shadow" only when the zone center is inside the scene's shadow polygon. The
+  detection caption names the fence side from the first radar point's bearing (`compass8`, the
+  same rule as Python's `sim/lexicon.compass8`).
+
+## D-126 · Lens connectors and morph · 2026-10-29
+- Decision (`lens/lensMath.ts`, `LensCurves.tsx`): connectors are the DTW path subsampled evenly
+  to at most 48 pairs (first and last kept). Each keeps its query index i; "Same time" puts its
+  candidate end at i (shown only for i < `overlap`, what the Euclidean distance compares),
+  "Warped" at its path partner j; a mode change moves only that end over 1.2 s with an
+  ease-in-out, written by requestAnimationFrame (a 240 ms cross-fade in reduce motion). One x
+  scale for both series (`L = max(n, m)` samples), so a faster flight visibly overhangs. The pace
+  readout is the payload's `warp_text` capitalized, or "Same pace (within 10%)". The cost matrix
+  is drawn one canvas pixel per cell (scaled up, pixelated), NaN cells (outside the band) clear,
+  an OKLab ramp from `--scope` to `--afterglow` on the square root of the normalized accumulated
+  cost (min to the 95th percentile), and the path drawn on over 1 s with a flash head.
+
+## D-127 · Which match the lens shows · 2026-10-29
+- Decision: by default the stream's `dtw` (the top match on distance to target). The match and
+  channel selectors send `{"type":"dtw"}`; the store keeps every payload by match and channel and
+  re-asks on each new rerun. In the time-warp beat, Director picks the top-3 match whose
+  `warp_ratio` is farthest from 1 in log terms (T+90: DELTA, 0.84, "flown 19% faster") and shows
+  "Same time" for 1.5 s before the morph to "Warped".
+- Deviation from §1.2, recorded: §1.2 says "ALPHA 2026-03-03 (flown ~18% slower)". The 60 s
+  window at T+90 computes ALPHA-260303 at 1.03 (no pace text) and DELTA at 0.84. The UI shows the
+  computed ratio, never the scenario's wording (rule 10). The live top 3 at T+90 stays DELTA,
+  ALPHA-260303, CHARLIE-260710 (the accepted gap, D-081).
+
+## D-128 · Ghost mapping · 2026-10-29
+- Decision (`three/ghostMath.ts`, `ghostLayer.ts`, `Ghosts.tsx`): `GET /api/history/{track}?
+  frame=target` points placed at tonight's target-asset centroid plus the relative vector
+  (translation only; the P1 approaches agree within 5°, and the forecast keeps its own §13
+  rotation). No ghosts while tonight's target is the fence pseudo-target. Ghosts are the current
+  top 3, re-mapped when the target changes; each is a 2 px `Line2` whose per-segment colors carry
+  the dissolve (a fixed hash per segment, 1.2 s, ghosts 150 ms apart; a plain fade in reduce
+  motion) and the hover brightness. Labels sit at each recovery point, stacked 16 px apart so
+  they never overprint. Mapped specs are cached by target, track and fetched path, so a ghost is
+  rebuilt only when it really changes (the screenshot review found ghosts going dark after a
+  top-3 change: every 4 Hz re-render had rebuilt the line after its dissolve had finished).
+
+## D-129 · Core beams · 2026-10-29
+- Decision (`three/beams.ts`, `CoreBeams.tsx`): on each `match` message three afterglow beams
+  leave the core along an arc for 1.2 s, a bright head with a short tail, toward each top-3
+  ghost's point at `window_offset_s + window_s` (where that flight was at the matched moment),
+  else toward tonight's target. Off in reduce motion and Performance mode (§17.11 particles).
+
+## D-130 · Region constellation · 2026-10-29
+- Decision (`panels/constellation.ts`, `RegionConstellation.tsx`): the live region's
+  installation origins scaled into the panel, north up, east-west stretched at most 2.5 times
+  (the panel is short; the map is stylized). On a new top-3 set, arcs draw from each matched base
+  to the live base with a travelling light (Web Animations, 1.2 s, 120 ms apart; plain arcs in
+  reduce motion). A base matching itself loops. Each base's label carries the dates of the
+  flights matched from it ("Delta, Apr 19"). Matches from another region gather at an "Other
+  regions" node. Panel height 150 px at 1536 px wide and up, 116 px below.
+
+## D-131 · Report recall overlay · 2026-10-29
+- Decision (`overlay/clues.ts`, `scramble.ts`, `RecallOverlay.tsx`, `RecallBeam.tsx`): the
+  report shown is the rank-1 report of the first recall match whose rank-1 report has a linked
+  clue, else the first match's rank-1 report (T+120: `R-P1-DELTA-260419-1`). Clue spans are cut
+  from `text[start:end]` (vehicles afterglow, roads bone). The zone note is the server's linked
+  note for a road in `zone_roads` (§12.4). The text resolves over 600 ms by deterministic glyph
+  substitution (spaces never scramble, so the layout holds); a 240 ms fade in reduce motion. The
+  overlay sits at the theater's lower left (raised above the Director caption) and can be
+  collapsed. The bone beam joins the zone road's span to the road's in-zone midpoint, drawn
+  above the overlay every frame from the span's rectangle and the projected point.
+
+## D-132 · Road highlight and projection · 2026-10-29
+- Decision (`three/forecastMath.ts`, `forecastLayer.ts`, `Forecast.tsx`, `Projector.tsx`): each
+  zone road's polyline is clipped to the zone circle client-side; its in-zone parts are drawn as
+  bone dashes with slowly moving dots, in `Forecast.tsx` (the plan's separate `RoadHighlight.tsx`
+  was folded in: one component owns the forecast's shapes). The longest part's midpoint is
+  projected to the screen in `useFrame` and written by mutation into `overlayStore` (no React
+  state); off when behind the camera or outside the theater.
+
+## D-133 · Forecast motion · 2026-10-29
+- Decision: the exit path's flowing dash, the road's dots and the zone's 1.6 s pulse advance in
+  playback time only (they freeze when the replay pauses) and are static in reduce motion. The
+  zone label is computed: "Predicted recovery zone, 2.2 km northwest, from 3 matches", placed
+  east of the zone and reading away from it (clear of the ghost labels and the overlay).
+
+## D-134 · Computed camera shots · 2026-10-29
+- Decision (`three/camera.ts`, `CameraRig.tsx`): `frameBox(points, fov, aspect)` frames a
+  bounding sphere from the south. "Memory" frames every ghost (sampled) and the target; a new
+  "Forecast" preset frames the target, the zone's edge and the exit path, then shifts so the
+  content sits right of center and a little high (the recall overlay at the lower left never
+  covers the zone or its road). Both re-aim once per change of their data (the forecast only when
+  the zone moves by about 100 m), never every frame. 1.2 s damped, instant in reduce motion.
+
+## D-135 · Match explainer route · 2026-10-29
+- Decision: `GET /api/explain/{incident}/{track}?at=` (`api/routes_explain.py`) returns the
+  decorated match; `match/explain.contribution_table` (per model feature: value, coefficient,
+  coef × value, sorted by |contribution|; the intercept, the logit and sigmoid(logit) = the
+  score); tonight's target-relative path to the rerun second only (rule 3); the past flight's
+  whole path, the matcher's anchored window and `explain_alignment` (§10.4 step 6). 404 as
+  `/api/dtw`. The page binds incident, second and match to the URL; with no second it opens at
+  T+90 (the demo's time-warp moment).
+
+## D-136 · Case list, decisions, evidence list and verify routes · 2026-10-29
+- Decision: `GET /api/cases` (`memory/asof.case_summaries`, as of the head or `as_of`);
+  `POST /api/cases/{id}/decisions` (close, reopen, escalate, notify_law_enforcement through
+  `memory.actions.record_decision`, `analyst:<handle>`; 422 for another value or a bad handle,
+  404 for an unknown case); `GET /api/evidence` (packages under the exports root, from each
+  `manifest.json`, newest first); `POST /api/evidence/verify` with a folder name, resolved and
+  refused with 400 unless it stays inside the exports root (`..`, absolute paths, symlinks out).
+  Response models live in `api/schemas_pages.py`. `case_summaries` takes no offsets (the plan
+  listed them): the UI formats local times from `/api/installations`.
+
+## D-137 · e2e exports go to scratch · 2026-10-29
+- Decision: `kairos-defense api --exports PATH` (and `KD_EXPORTS` under `--reload`) points the
+  evidence exports elsewhere; Playwright's server uses `data/cache/e2e/exports`, and the reseed
+  helper empties it, so package counts are deterministic and e2e never writes into `exports/`.
+
+## D-138 · Case board mechanics · 2026-10-29
+- Decision (`pages/CaseBoard.tsx`, `case/`): the scrubber runs from the case's first event to
+  the ledger head with a tick at each diff item's `recorded_at` (`diff?t1=2025-01-01`). Known then
+  is the `case_opened` time (09:10 local on 2026-04-20, D-011); Known now is the head. Each scrub
+  refetches the graph and the diff since Known then (debounced 150 ms), so every state is the
+  server's own as-of. The d3-force layout is computed once over the head's graph plus anything
+  only the scrubbed moment has, from seeded ring positions with a fixed random source and 300
+  synchronous ticks: a node keeps its place while you scrub, and nodes new to a moment fade in
+  over 600 ms when they mount. Incidents are colored by base from four tokens; approved members
+  ring green, contradictions red. Approve and Reject per pending proposal (each shows its rank
+  and rerun second: one incident can be proposed by several reruns, and approving it settles them
+  all); decisions need a confirm dialog. A hidden list is the graph's text equivalent.
+
+## D-139 · Eval targets live in Python · 2026-10-29
+- Decision: `eval/targets.py` holds the §19.3 and §10.9 targets (key, operator, value, label,
+  section, phase, format, report-only for latency per D-060, pending for `swarm_top1`).
+  `eval/report.py` writes them into the eval JSON as `targets`; `report_md.py` renders its target
+  column and latency budgets from them (the Markdown is unchanged). A test loads
+  `scripts/check_targets.py` (read, never edited) and asserts the same keys, operators, values,
+  phases and report-only set; its message says to update `targets.py`, never the script. No
+  metric definition, query set or protocol changed.
+
+## D-140 · Eval page · 2026-10-29
+- Decision (`pages/Eval.tsx`, `eval/`): tiles show value against target with a status word and
+  an icon (meets, below, reported not gating, pending); recall against seconds of flight (Recall@5
+  and top 3 for probers); DTW against Euclidean (the two numbers the eval wrote and the lift); the
+  forecast error histogram (100 m bins of prober `forecast_error_m` at T = 90 s) with the median,
+  P80 and target as lines and a key above; the demo rows as written, the accepted
+  `live_top3_incidents` gap included. Nothing is recomputed beyond binning. A report without
+  `targets` says "rerun make eval". Charts follow the dataviz method: one axis, thin marks, a
+  legend and direct labels for two series, text in ink tokens, a `<title>` tooltip on every
+  mark, a table view. The validator on the token pair (`--afterglow`, `--ink-mid` on `--scope`)
+  fails its lightness band and chroma floor (the §17.1 tokens are bright on scope glass) and
+  passes CVD separation (ΔE 17.4) and contrast, so the two series also differ by dash and marker.
+
+## D-141 · Routes and code splitting · 2026-10-29
+- Decision (`app/routes.ts`, `App.tsx`): new routes `/explainer?incident=&at=&track=`, `/cases`,
+  `/cases/:caseId?focus=`, `/evidence?case=`, `/delta?since=`, `/eval`; `/swarm` stays a phase 9
+  placeholder. Every page is `React.lazy`, Live watch included, so only Live watch loads the
+  `vendor-3d` chunk. Each match entry has an "Explain" link at the current rerun second.
+
+## D-142 · Director across pages; keys · 2026-10-29
+- Decision: `directorStore` lives outside React; `useDirector` (reading the stores at most 10
+  times a second), the progress rail and the page caption are mounted by `App`, the theater
+  caption by Live watch, so Director survives navigation. D toggles it from any page (Live watch
+  for the open or first live incident, T+0, the selected speed) and drops keyboard focus so Space
+  is the presenter's. Space plays and pauses on Live watch; → and ← act only in Director; R
+  resets; F toggles full screen; M and ? as before. Keys are ignored while typing; Space is left
+  to a focused button or link. Pages pad their bottom while a page beat's caption shows.
+
+## D-143 · R reset · 2026-10-29
+- Decision: R calls `POST /api/admin/reset` and `POST /api/admin/reseed` (D-010), clears this
+  session's decisions, reloads the ledger tail and seeks to T+0; in Director it returns to beat 1
+  (and to Live watch from a page beat).
+
+## D-144 · Performance mode and grain · 2026-10-29
+- Decision: a command-bar toggle "Performance mode" (`uiStore.perfMode`) turns off bloom,
+  vignette, grain and the core beams and halves packets; auto-degrade (D-120) still applies; the
+  theater's `data-perf` reads "performance". §17.10 assigns it no key. Film grain is a custom
+  static effect: a hash of the pixel coordinate, no time uniform (D-012), amplitude ±0.3%
+  (the review found 3% visibly speckled). Off in reduce motion and Performance mode.
+
+## D-145 · Frame-rate criterion and the 1× record · 2026-10-29
+- Decision: `e2e/director-1x.spec.ts` runs Director at 1× at 1920 × 1080 with bloom on through
+  the six Live watch beats, presses → only on the page beats, and writes
+  `reports/figures/ui/director_1x.json`: per beat its activation replay second and local time,
+  wall seconds and when its key element was visible; the loiter marker's second for §1.2's T+80
+  row; the median and P5 frame rate overall and per beat; the renderer, CPU and OS. It asserts a
+  median of at least 50 fps on a hardware renderer; on software WebGL it records the number and
+  annotates that the GPU was not used. Memory rail budget at 1440 × 900 (decided before the
+  review): matches 1.6 parts, lens 1 part, constellation 116 px; the compact lens splits what is
+  left after its controls 62/38 between curves and matrix.
+
+## D-146 · Phase 8 screenshot review: findings and fixes · 2026-10-29
+- Round 1 (all beats at 1440 × 900): grain too strong (now ±0.3%); Space did not pause because a
+  clicked speed button kept focus (D blurs; e2e keys blur first); three match entries did not fit
+  (the incident id moved to the tooltip and screen-reader text, chips and buttons tightened); lens
+  controls wrapped and the matrix was cut (short channel names, narrower selects, a measured
+  height budget); the recall overlay covered the zone and road (forecast shot shifted, D-134);
+  ghost labels overprinted (stacked); the case graph was cramped and its labels overlapped
+  (longer links, stronger repulsion, 58 px collide radius); duplicate proposals were
+  indistinguishable (rank and rerun second shown); the page caption covered the last controls
+  (bottom padding); the self-match arc had no date.
+- Round 2 (both sizes): ghosts went dark after a top-3 change (spec cache, D-128); the zone label
+  collided with a ghost label (moved east of the zone); constellation names and dates collided
+  (one label per base); the recall beam was faint and under the overlay (above it, 1.6 px).
+- Pages: the explainer drew tonight's path at 45% opacity (full now); the Eval recall chart
+  clipped its direct label and the histogram's rule labels collided (wider margin, a key above).
+- An axe run on Live watch at T+120 (every layer showing) found the Stream's scrolling list was
+  not keyboard-reachable (`scrollable-region-focusable`): it is now a focusable, named region that
+  pauses scrolling while focused, as it does under the pointer.
+
+## D-147 · Lint-driven structure in the web code · 2026-10-29
+- Context: the React compiler lint rules (react-hooks 7) refuse mutating hook-dependency values
+  in render callbacks, reading refs during render, impure calls in render and synchronous
+  setState in effects; react-refresh wants component files to export only components.
+- Decision: per-frame three.js mutation lives in module functions called from `useFrame`
+  (`stepGhost`, `stepBeams`, `stepForecast`); non-component helpers moved to `.ts` modules
+  (`ghostLayer.ts`, `beams.ts`, `director/context.ts`, `case/time.ts`); pages keep fetched results
+  keyed by the URL they belong to instead of resetting state in effects. A `sceneStore` (not in
+  the plan) shares the scene and the installations with the theater, the constellation and the
+  captions.

@@ -35,6 +35,8 @@ def api_cmd(
     live_db: str | None = typer.Option(None, "--live-db",
                                        help="live_* tables file (default: paths.live)."),
     reseed: bool = typer.Option(False, "--reseed", help="Reseed the ledger before serving."),
+    exports: str | None = typer.Option(None, "--exports",
+                                       help="Evidence export folder (default: paths.exports)."),
     config: str = typer.Option("config", help=CONFIG_HELP),
 ) -> None:  # fmt: skip
     """Serve the FastAPI backend: REST (§16.4), the replay WebSocket (§16.3) and the web app."""
@@ -59,12 +61,20 @@ def api_cmd(
         raise typer.Exit(1)
     if reload:
         os.environ.update({"KD_CONFIG": config, "KD_STATIC": static or "",
-                           "KD_MEMORY": memory or "", "KD_LIVE_DB": live_db or ""})  # fmt: skip
+                           "KD_MEMORY": memory or "", "KD_LIVE_DB": live_db or "",
+                           "KD_EXPORTS": exports or ""})  # fmt: skip
         src = str(Path(__file__).parent)
         uvicorn.run("kairos_defense.api.app:factory", factory=True, host=host, port=port,
                     reload=True, reload_dirs=[src], log_level="info")  # fmt: skip
         return
-    app = create_app(cfg, static_dir=static, memory_path=memory, live_path=live_db, reseed=reseed)
+    app = create_app(
+        cfg,
+        static_dir=static,
+        memory_path=memory,
+        live_path=live_db,
+        reseed=reseed,
+        exports_path=exports,
+    )
     cli.console.print(f"Kairos Defense API on http://{host}:{port}"
                       + (f" serving {static}" if static else ""))  # fmt: skip
     uvicorn.run(app, host=host, port=port, log_level="info", ws_ping_interval=20)

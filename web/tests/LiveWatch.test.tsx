@@ -19,8 +19,23 @@ describe("LiveWatch", () => {
     expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent(
       "Live watch/DEMO-BRAVO-0828",
     );
-    for (const id of ["stream", "signals", "recorder", "ledgerchain", "matchlist"]) {
+    for (const id of [
+      "stream",
+      "signals",
+      "recorder",
+      "ledgerchain",
+      "matchlist",
+      "constellation",
+      "lens",
+    ]) {
       expect(screen.getByTestId(`panel-${id}`)).toBeInTheDocument();
     }
+    // the memory rail holds matches, the region constellation and the lens, in that order (§17.2)
+    const rail = screen.getByRole("complementary", { name: "Memory rail" });
+    expect([...rail.querySelectorAll("h2")].map((h) => h.textContent)).toEqual([
+      "Matches",
+      "Region constellation",
+      "Time-warp lens",
+    ]);
   });
 });

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 
 import { api } from "../api/client";
+import { Link } from "../app/Link";
 import type { MatchItem } from "../api/messages";
 import { baseName, localDate, ms, tPlus } from "../lib/format";
 import { useThrottledStore } from "../lib/useThrottledStore";
@@ -43,6 +44,7 @@ async function decide(caseId: string | null, m: MatchItem, d: "approve" | "rejec
 
 function Entry(props: {
   m: MatchItem;
+  at: number;
   index: number;
   caseId: string | null;
   decision: Decision | null;
@@ -75,49 +77,54 @@ function Entry(props: {
       ref={ref}
       data-testid="match-entry"
       data-incident={m.incident_id}
-      className="flex gap-3 border-b border-hairline px-3 py-3 last:border-b-0"
+      data-track={m.track_id}
+      onMouseEnter={() => matchStore.getState().setHovered(m.track_id)}
+      onMouseLeave={() => matchStore.getState().setHovered(null)}
+      onFocus={() => matchStore.getState().setHovered(m.track_id)}
+      onBlur={() => matchStore.getState().setHovered(null)}
+      className="flex gap-3 border-b border-hairline px-3 py-2 last:border-b-0"
     >
       <ScoreRing score={m.score} state={decision ?? "pending"} reduce={reduce} />
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
-          <h3 className="truncate text-15 font-bold text-ink-hi">{name}</h3>
+          <h3 className="truncate text-15 font-bold text-ink-hi" title={m.incident_id}>
+            {name}
+            <span className="sr-only"> ({m.incident_id})</span>
+          </h3>
           <span data-testid="match-score" className="font-mono text-15 text-afterglow">
             {m.score.toFixed(2)}
           </span>
         </div>
-        <p className="truncate text-12 text-ink-mid" title={m.incident_id}>
-          {m.incident_id}
-        </p>
-        <ul aria-label="Reasons" className="mt-1.5 flex flex-wrap gap-1">
+        <ul aria-label="Reasons" className="mt-1 flex flex-wrap gap-1">
           {m.reasons.map((r) => (
             <li
               key={r}
               data-testid="reason-chip"
-              className="rounded-chip border border-hairline px-2 py-0.5 text-12 text-ink-hi"
+              className="rounded-chip border border-hairline px-1.5 py-px text-12 text-ink-hi"
             >
               {r}
             </li>
           ))}
           {showPace ? (
-            <li className="rounded-chip border border-hairline px-2 py-0.5 text-12 text-ink-hi">
+            <li className="rounded-chip border border-hairline px-1.5 py-px text-12 text-ink-hi">
               {pace}
             </li>
           ) : null}
         </ul>
         <p
           data-testid="memory-status"
-          className={`mt-1.5 text-13 ${m.memory_status.startsWith("Closed") ? "text-afterglow" : "text-ink-mid"}`}
+          className={`mt-1 truncate text-13 ${m.memory_status.startsWith("Closed") ? "text-afterglow" : "text-ink-mid"}`}
         >
           {m.memory_status}
         </p>
-        <div className="mt-2 flex items-center gap-2">
+        <div className="mt-1.5 flex items-center gap-2">
           <button
             type="button"
             aria-label={`Approve link: ${name}`}
             title={title}
             disabled={disabled}
             onClick={() => void decide(props.caseId, m, "approve")}
-            className="rounded-button border border-hairline px-3 py-1 text-13 text-ink-hi transition-colors duration-(--dur-micro) ease-(--ease-out) hover:border-verified disabled:cursor-not-allowed disabled:text-ink-mid disabled:hover:border-hairline"
+            className="rounded-button border border-hairline px-2.5 py-0.5 text-13 text-ink-hi transition-colors duration-(--dur-micro) ease-(--ease-out) hover:border-verified disabled:cursor-not-allowed disabled:text-ink-mid disabled:hover:border-hairline"
           >
             Approve link
           </button>
@@ -127,10 +134,17 @@ function Entry(props: {
             title={title}
             disabled={disabled}
             onClick={() => void decide(props.caseId, m, "reject")}
-            className="rounded-button border border-hairline px-3 py-1 text-13 text-ink-mid transition-colors duration-(--dur-micro) ease-(--ease-out) hover:border-alert hover:text-ink-hi disabled:cursor-not-allowed disabled:hover:border-hairline disabled:hover:text-ink-mid"
+            className="rounded-button border border-hairline px-2.5 py-0.5 text-13 text-ink-mid transition-colors duration-(--dur-micro) ease-(--ease-out) hover:border-alert hover:text-ink-hi disabled:cursor-not-allowed disabled:hover:border-hairline disabled:hover:text-ink-mid"
           >
             Reject
           </button>
+          <Link
+            to={`/explainer?incident=${encodeURIComponent(m.query_incident_id)}&at=${props.at}&track=${encodeURIComponent(m.track_id)}`}
+            className="ml-auto rounded-button px-1.5 py-0.5 text-13 text-ink-mid underline-offset-2 hover:text-ink-hi hover:underline"
+          >
+            <span aria-hidden="true">Explain</span>
+            <span className="sr-only">Explain the match {name}</span>
+          </Link>
           {decision ? (
             <span
               data-testid="match-decision"
@@ -170,7 +184,7 @@ export function MatchList() {
     <Panel
       id="matchlist"
       title="Matches"
-      className="flex-1"
+      className="min-h-[10rem] flex-[1.6_1_0]"
       meta={m ? `At ${tPlus(m.t_s)}` : undefined}
     >
       <div className="absolute inset-0 flex flex-col overflow-y-auto">
@@ -186,6 +200,7 @@ export function MatchList() {
                   // a new top-3 set remounts (and animates) its entries; a rerun does not
                   key={`${s.entrance}:${x.incident_id}`}
                   m={x}
+                  at={m.t_s}
                   index={i}
                   caseId={m.case_id}
                   decision={decisionOf(s.state, x.proposal_seq, x.decision ?? null)}

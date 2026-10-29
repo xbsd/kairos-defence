@@ -1,13 +1,25 @@
 import type { ReactNode } from "react";
 
+import { localHM } from "../director/captions";
+import { toggleDirector } from "../director/actions";
 import { tPlus } from "../lib/format";
 import { useThrottledStore } from "../lib/useThrottledStore";
 import { controls } from "../state/controls";
+import { directorStore } from "../state/directorStore";
 import { replayStore } from "../state/replayStore";
 import { reduceMotion, uiStore } from "../state/uiStore";
 import { Link } from "./Link";
-import { PLANNED, usePath } from "./routes";
+import { PAGES, usePath } from "./routes";
 import { replayStatus } from "./status";
+
+/** "21:41:36" local at the installation, from the replay clock (UTC), or null. */
+function localTime(ts: string | null, offset: number | null): string | null {
+  if (!ts || offset === null) return null;
+  const t = Date.parse(ts);
+  const hm = localHM(ts, offset);
+  if (!hm || !Number.isFinite(t)) return null;
+  return `${hm}:${String(new Date(t + offset * 3600_000).getUTCSeconds()).padStart(2, "0")}`;
+}
 
 export interface CommandBarProps {
   /** Breadcrumb after the product name, e.g. ["Live watch", "Installation Bravo"]. */
@@ -48,8 +60,10 @@ export function CommandBar({ trail, replay = false }: CommandBarProps) {
     playing: s.clock?.playing,
     status: s.status,
     hello: s.hello !== null,
+    local: localTime(s.clock?.ts ?? null, s.hello?.utc_offset_hours ?? null),
   }));
-  const ui = useThrottledStore(uiStore, (s) => ({ reduce: reduceMotion(s) }));
+  const ui = useThrottledStore(uiStore, (s) => ({ reduce: reduceMotion(s), perf: s.perfMode }));
+  const director = useThrottledStore(directorStore, (s) => s.active);
   const path = usePath();
   const status = replay ? replayStatus(r.status, r.hello, r.playing) : "No replay loaded";
   const idle = !replay || !r.hello || r.status !== "open";
@@ -80,6 +94,8 @@ export function CommandBar({ trail, replay = false }: CommandBarProps) {
         aria-label={clock ? `Replay time ${clock}` : "Replay time: none"}
         className="font-mono text-15 text-ink-hi"
         data-testid="replay-clock"
+        data-local-time={replay && r.local ? r.local : undefined}
+        title={replay && r.local ? `${r.local} local` : undefined}
       >
         {clock ?? "T+--:--"}
       </span>
@@ -135,18 +151,30 @@ export function CommandBar({ trail, replay = false }: CommandBarProps) {
         aria-pressed={ui.reduce}
         onClick={() => uiStore.getState().toggleReduce()}
         title="Reduce motion (M)"
-        className={`rounded-button border px-3 py-1 text-13 transition-colors duration-(--dur-micro) ease-(--ease-out) ${
+        className={`rounded-button border px-3 py-1 text-13 whitespace-nowrap transition-colors duration-(--dur-micro) ease-(--ease-out) ${
           ui.reduce ? "border-flash text-flash" : "border-hairline text-ink-mid hover:text-ink-hi"
         }`}
       >
         Reduce motion
       </button>
 
+      <button
+        type="button"
+        aria-pressed={ui.perf}
+        onClick={() => uiStore.getState().togglePerfMode()}
+        title="Performance mode: no bloom, grain or core beams; half the data packets"
+        className={`rounded-button border px-3 py-1 text-13 whitespace-nowrap transition-colors duration-(--dur-micro) ease-(--ease-out) ${
+          ui.perf ? "border-flash text-flash" : "border-hairline text-ink-mid hover:text-ink-hi"
+        }`}
+      >
+        Performance mode
+      </button>
+
       <details className="relative">
         <summary className="cursor-pointer list-none rounded-button border border-hairline px-3 py-1 text-13 text-ink-mid hover:text-ink-hi">
           Pages
         </summary>
-        <ul className="absolute right-0 z-20 mt-1 w-56 rounded-panel border border-hairline bg-scope p-1 text-13">
+        <ul className="absolute right-0 z-40 mt-1 w-56 rounded-panel border border-hairline bg-scope p-1 text-13">
           <li>
             <Link
               to="/"
@@ -156,11 +184,11 @@ export function CommandBar({ trail, replay = false }: CommandBarProps) {
               Live watch
             </Link>
           </li>
-          {Object.entries(PLANNED).map(([page, p]) => (
-            <li key={page}>
+          {PAGES.map((p) => (
+            <li key={p.path}>
               <Link
-                to={`/${page}`}
-                current={path === `/${page}`}
+                to={p.path}
+                current={path === p.path || path.startsWith(`${p.path}/`)}
                 className="block rounded-button px-3 py-2 text-ink-mid hover:bg-hairline hover:text-ink-hi"
               >
                 {p.title}
@@ -172,10 +200,12 @@ export function CommandBar({ trail, replay = false }: CommandBarProps) {
 
       <button
         type="button"
-        disabled
-        title="Director mode arrives in phase 8"
-        aria-label="Director (arrives in phase 8)"
-        className="cursor-not-allowed rounded-button border border-hairline px-3 py-1 text-13 text-ink-mid"
+        aria-pressed={director}
+        onClick={() => void toggleDirector()}
+        title="Director mode (D): the demo, beat by beat, from T+0"
+        className={`rounded-button border px-3 py-1 text-13 transition-colors duration-(--dur-micro) ease-(--ease-out) ${
+          director ? "border-flash text-flash" : "border-hairline text-ink-mid hover:text-ink-hi"
+        }`}
       >
         Director
       </button>

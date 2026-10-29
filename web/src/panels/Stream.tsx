@@ -109,9 +109,15 @@ export function StreamPanel() {
       }
     >
       <div
+        // a scrolling list must be reachable by keyboard (§17.12; axe scrollable-region-focusable)
+        tabIndex={0}
+        role="region"
+        aria-label="Stream rows, newest first"
         className="absolute inset-0 overflow-auto px-1 pb-1"
         onMouseEnter={() => setFrozen(s.rows)}
         onMouseLeave={() => setFrozen(null)}
+        onFocus={() => setFrozen(s.rows)}
+        onBlur={() => setFrozen(null)}
       >
         {rows.length === 0 ? (
           <p className="px-2 py-1 text-13 text-ink-mid">No detections yet.</p>

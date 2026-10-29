@@ -3,17 +3,28 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-import { INCIDENT, openLive, reseed } from "./helpers";
+import { CASE, INCIDENT, openLive, reseed } from "./helpers";
 
 const ROUTES = [
   `/live/${INCIDENT}`,
   "/explainer",
+  `/explainer?incident=${INCIDENT}&at=90&track=P1-DELTA-260419-T1`,
   "/cases",
+  `/cases/${CASE}`,
   "/swarm",
   "/evidence",
   "/delta",
   "/eval",
 ];
+
+/** What each page shows once loaded (axe runs on the page as the user sees it). */
+const READY: Record<string, string> = {
+  "/explainer": "contribution-bar",
+  "/cases": "case-list",
+  "/evidence": "evidence-export",
+  "/delta": "delta-group",
+  "/eval": "eval-tile",
+};
 
 for (const route of ROUTES) {
   test(`axe and the command bar on ${route}`, async ({ page, request }) => {
@@ -22,6 +33,9 @@ for (const route of ROUTES) {
       await openLive(page);
     } else {
       await page.goto(route);
+      const path = route.split("?")[0] ?? route;
+      const ready = path.startsWith("/cases/") ? "case-graph" : READY[path];
+      if (ready) await expect(page.getByTestId(ready).first()).toBeVisible({ timeout: 30_000 });
     }
     await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText(
       "Kairos Defense",

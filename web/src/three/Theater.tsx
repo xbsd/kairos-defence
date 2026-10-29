@@ -2,24 +2,37 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { memo, useMemo, useRef } from "react";
 
 import type { Scene } from "../api/messages";
+import { revealOf } from "../director/engine";
 import { useThrottledStore } from "../lib/useThrottledStore";
+import { useThrottledStores } from "../lib/useThrottledStores";
+import { directorStore } from "../state/directorStore";
+import { ghostStore } from "../state/ghostStore";
+import { matchStore } from "../state/matchStore";
 import { replayStore } from "../state/replayStore";
+import { sceneStore } from "../state/sceneStore";
+import type { StoreApi } from "zustand/vanilla";
 import { reduceMotion, uiStore, type CameraPreset } from "../state/uiStore";
 import { token } from "../theme/colors";
 import { OVERVIEW } from "./camera";
 import { CameraRig } from "./CameraRig";
 import { Core } from "./Core";
+import { CoreBeams } from "./CoreBeams";
 import { Drone } from "./Drone";
 import { Effects } from "./Effects";
+import { Forecast } from "./Forecast";
+import { zoneLabel, zoneRoads } from "./forecastLayer";
+import { currentGhosts } from "./ghostLayer";
+import { Ghosts } from "./Ghosts";
 import { Ground } from "./Ground";
 import { Installation } from "./Installation";
 import { Packets } from "./Packets";
 import { PERF_START, perfLabel, stepPerf } from "./perf";
+import { Projector } from "./Projector";
 import { Radar } from "./Radar";
 import { Rf } from "./Rf";
 import { Roads } from "./Roads";
 import type { Origin } from "./sceneMath";
-import { theaterSummary } from "./summary";
+import { memorySummary, theaterSummary } from "./summary";
 
 /** One Drone per live track (the set changes rarely: checked once a second). */
 function Drones({ origin }: { origin: Origin }) {
@@ -54,6 +67,10 @@ const SceneContent = memo(function SceneContent({ scene }: { scene: Scene }) {
       ))}
       <Drones origin={origin} />
       <Packets scene={scene} origin={origin} />
+      <Ghosts scene={scene} origin={origin} />
+      <CoreBeams scene={scene} origin={origin} />
+      <Forecast scene={scene} origin={origin} />
+      <Projector scene={scene} origin={origin} />
       <CameraRig scene={scene} origin={origin} />
     </>
   );
@@ -63,6 +80,8 @@ const PRESETS: [CameraPreset, string][] = [
   ["overview", "Overview"],
   ["follow", "Follow"],
   ["target", "Target"],
+  ["memory", "Memory"],
+  ["forecast", "Forecast"],
 ];
 
 function CameraButtons() {
@@ -90,12 +109,47 @@ function CameraButtons() {
   );
 }
 
+const MEMORY_STORES = [
+  matchStore,
+  ghostStore,
+  sceneStore,
+  directorStore,
+] as unknown as StoreApi<unknown>[];
+
 function Summary() {
   const text = useThrottledStore(replayStore, (s) => theaterSummary(s), 1);
+  const mem = useThrottledStores(
+    MEMORY_STORES,
+    () => {
+      const scene = sceneStore.getState().scene;
+      const d = directorStore.getState();
+      const r = revealOf(d.active, d.beat);
+      const f = matchStore.getState().forecast;
+      const label = r.forecast ? zoneLabel(f, scene) : null;
+      return {
+        ghosts: r.ghosts ? currentGhosts(scene).ghosts.map((g) => ({ label: g.label })) : [],
+        label,
+        roads: r.forecast ? zoneRoads(f, scene).map((z) => z.name) : [],
+      };
+    },
+    1,
+  );
   return (
-    <p className="sr-only" aria-live="polite" data-testid="theater-summary">
-      {text}
-    </p>
+    <>
+      <p className="sr-only" aria-live="polite" data-testid="theater-summary">
+        {text} {memorySummary(mem.ghosts, mem.label, mem.roads)}
+      </p>
+      {mem.label ? (
+        <p className="sr-only" data-testid="forecast-label">
+          {mem.label}
+        </p>
+      ) : null}
+      {mem.ghosts.length ? (
+        <p className="sr-only" data-testid="ghost-count" data-n={mem.ghosts.length}>
+          {mem.ghosts.length} ghosts
+        </p>
+      ) : null}
+    </>
   );
 }
 
@@ -104,7 +158,11 @@ function Summary() {
  * live tracks, data packets and the Kairos core, all driven by stream events and the replay clock.
  */
 export function Theater({ scene }: { scene: Scene | null }) {
-  const perf = useThrottledStore(uiStore, (s) => perfLabel(s.perfLevel, reduceMotion(s)), 4);
+  const perf = useThrottledStore(
+    uiStore,
+    (s) => perfLabel(s.perfLevel, reduceMotion(s), s.perfMode),
+    4,
+  );
   const background = token("--scope");
   return (
     <div data-testid="theater" data-perf={perf} className="relative h-full w-full bg-scope">

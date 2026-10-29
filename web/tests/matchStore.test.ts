@@ -1,7 +1,15 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { decisionOf, matchStore, top3Key } from "../src/state/matchStore";
+import {
+  decisionOf,
+  dtwKey,
+  farthestWarp,
+  lensDtw,
+  matchStore,
+  top3Key,
+} from "../src/state/matchStore";
 import { match } from "./fixtures";
+import { T090 } from "./real";
 
 const s = () => matchStore.getState();
 
@@ -60,5 +68,37 @@ describe("matchStore", () => {
     expect(s().forecast?.roads).toEqual(["County Rd 12"]);
     s().clear();
     expect(s().forecast).toBeNull();
+  });
+
+  it("keeps every lens payload by match and channel; the stream's top one is the default", () => {
+    s().apply(T090.match, 1234);
+    expect(s().matchWall).toBe(1234);
+    s().apply(T090.dtw);
+    expect(s().dtw?.match_track_id).toBe("P1-DELTA-260419-T1");
+    const other = { ...T090.dtw, match_track_id: "P1-ALPHA-260303-T1" };
+    s().apply(other);
+    expect(s().dtw?.match_track_id).toBe("P1-DELTA-260419-T1"); // a requested lens is not the top
+    expect(s().dtwBy[dtwKey("P1-ALPHA-260303-T1", "dist_target_m")]).toBe(other);
+    expect(lensDtw(s())?.match_track_id).toBe("P1-DELTA-260419-T1");
+    s().setLensSel({ track: "P1-ALPHA-260303-T1", channel: "dist_target_m" });
+    expect(lensDtw(s())).toBe(other);
+    s().setLensSel({ track: "P1-CHARLIE-260710-T1", channel: "speed_ms" });
+    expect(lensDtw(s())?.match_track_id).toBe("P1-DELTA-260419-T1"); // not arrived yet
+    s().clear();
+    expect(s().dtwBy).toEqual({});
+  });
+
+  it("tracks the hovered match and the lens mode", () => {
+    s().setHovered("P1-DELTA-260419-T1");
+    expect(s().hovered).toBe("P1-DELTA-260419-T1");
+    s().setLensMode("same");
+    expect(s().lensMode).toBe("same");
+    s().setHovered(null);
+    s().setLensMode("warped");
+  });
+
+  it("finds the match whose pace differs most (T+90: Delta, 0.84)", () => {
+    expect(farthestWarp(T090.match)?.incident_id).toBe("P1-DELTA-260419");
+    expect(farthestWarp(null)).toBeNull();
   });
 });

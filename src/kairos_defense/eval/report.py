@@ -29,6 +29,7 @@ from kairos_defense.eval.metrics import (
     times_to_match,
 )
 from kairos_defense.eval.report_md import markdown
+from kairos_defense.eval.targets import targets_json
 
 TOLERANCE = 0.05  # §19.4: fail when a metric worsens by more than 5% relative
 # Latency is timing noise at the 5% level, so it regresses only when more than 50% plus 2 ms worse
@@ -136,6 +137,7 @@ def summarize(run: EvalRun) -> dict:
         "per_actor": _actor_table(p + c),
         "pending": PENDING if run.reports_indexed else {**PENDING, "report_linkage": "no index"},
         "demo": [asdict(r) for r in run.demo],
+        "targets": targets_json(),
     }
 
 

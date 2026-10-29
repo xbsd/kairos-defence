@@ -33,7 +33,8 @@ class ServiceError(RuntimeError):
 
 class Services:
     def __init__(self, cfg, *, memory_path: Path | str | None = None,
-                 live_path: Path | str | None = None, reseed: bool = False) -> None:  # fmt: skip
+                 live_path: Path | str | None = None, reseed: bool = False,
+                 exports_path: Path | str | None = None) -> None:  # fmt: skip
         import duckdb
 
         from kairos_defense.store.duck import DuckTrackStore
@@ -55,6 +56,7 @@ class Services:
         self.lance = LanceVectorStore(self.app.paths.lancedb)
         self.matcher, self.recall, self.model = self._matching()
         self.cache = FileResultCache(Path(self.app.paths.cache) / "live")
+        self.exports = Path(exports_path or self.app.paths.exports)  # e2e: a scratch folder
         self.live_path = Path(live_path or self.app.paths.live)
         try:
             self.sink = DuckLiveSink(self.live_path, self.app)

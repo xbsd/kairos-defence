@@ -47,7 +47,8 @@ truth (training lives in `kairos_defense.eval.training`).
     passes the shape distance's `dtw.normalize` and scales, D-087);
     `warp_ratio(live, seg, weights, speed_col=0)`
     (NaN outside `WARP_RANGE` 0.5–2.0); `warp_text(k) -> "flown X% slower" | "... faster" | None`;
-  - `explain_alignment(live_dist, full_dist) -> (first row, last row, value)` (for phase 8).
+  - `explain_alignment(live_dist, full_dist) -> (first row, last row, value)` (used by
+    `GET /api/explain`, phase 8).
 - `live_signature.query_signature(store, q) -> dict`: the §9.4 fields from what was known at T.
 - `fusion`: `rf_match(a, b)`; `context_frame(qsig, csigs) -> DataFrame` (columns `CONTEXT`:
   `rf_match`, `bearing_sim`, `tod_sim`, `launch_sim`, `radius_sim`, `alt_sim`);
@@ -56,6 +57,9 @@ truth (training lives in `kairos_defense.eval.training`).
   expected_features)`); `DtwCalibration` (`save`, `load`); `ModelError`; `MODEL_FILE`
   (`fusion_v1.json`), `CALIBRATION_FILE` (`dtw_calibration.json`).
 - `explain.reasons(features, model, warp_ratio, csig) -> list[str]` (at most three).
+- `explain.contribution_table(features, model) -> dict` (§10.7, the Match explainer, D-135):
+  `rows` (feature, value, coefficient, contribution = coefficient × value) for the model's
+  features only, by |contribution|; `intercept`, `logit` = intercept + Σ, `score` = sigmoid(logit).
 - `candidates.CandidateBuilder(store, vstore, scoring)`: `build(q) -> Candidates` (rows in
   prefilter order with `d_norm` and the context features, the query signature, the candidates'
   signatures, timings), `raw_channels(ids)`, `segment(track_id, offset_s, window_s)`.
@@ -172,3 +176,4 @@ D-079; retrain with `make models` after changing it); `fusion.features` (the mod
 - Phase 4 gate fix 1: `dtw.normalize` (`fixed` adopted on the training split, D-079).
 - Phase 5: `MatchResult.signature` and `signatures`; `warp_path` takes the scaling mode (D-087).
 - Phase 7: `lens.py`, the time-warp lens payload of the `dtw` message (D-117).
+- Phase 8: `explain.contribution_table` for the Match explainer (D-135).

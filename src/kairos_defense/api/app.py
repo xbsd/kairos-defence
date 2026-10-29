@@ -11,14 +11,15 @@ from pathlib import Path
 from fastapi import FastAPI
 
 from kairos_defense import __version__
-from kairos_defense.api import routes, routes_memory, stream
+from kairos_defense.api import routes, routes_explain, routes_memory, stream
 
 log = logging.getLogger(__name__)
 
 
 def create_app(cfg=None, *, static_dir: Path | str | None = None,
                memory_path: Path | str | None = None, live_path: Path | str | None = None,
-               reseed: bool = False) -> FastAPI:  # fmt: skip
+               reseed: bool = False,
+               exports_path: Path | str | None = None) -> FastAPI:  # fmt: skip
     """The app. ``cfg=None`` builds a schema-only app (``--dump-openapi``): no lifespan, no
     services. Services are built on startup and closed on shutdown."""
 
@@ -27,7 +28,7 @@ def create_app(cfg=None, *, static_dir: Path | str | None = None,
         from kairos_defense.api.services import Services
 
         app.state.services = Services(cfg, memory_path=memory_path, live_path=live_path,
-                                      reseed=reseed)  # fmt: skip
+                                      reseed=reseed, exports_path=exports_path)  # fmt: skip
         log.info("API ready: %s", app.state.services.health())
         try:
             yield
@@ -40,6 +41,7 @@ def create_app(cfg=None, *, static_dir: Path | str | None = None,
                   lifespan=lifespan if cfg is not None else None)  # fmt: skip
     app.include_router(routes.router)
     app.include_router(routes_memory.router)
+    app.include_router(routes_explain.router)
     app.include_router(stream.router)
     if static_dir is not None:
         from kairos_defense.api.static import mount_web
@@ -56,4 +58,5 @@ def factory() -> FastAPI:
     return create_app(load_config(env.get("KD_CONFIG", "config")),
                       static_dir=env.get("KD_STATIC") or None,
                       memory_path=env.get("KD_MEMORY") or None,
-                      live_path=env.get("KD_LIVE_DB") or None)  # fmt: skip
+                      live_path=env.get("KD_LIVE_DB") or None,
+                      exports_path=env.get("KD_EXPORTS") or None)  # fmt: skip

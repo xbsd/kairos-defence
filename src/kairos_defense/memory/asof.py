@@ -162,3 +162,29 @@ def valid_at(rows: Sequence[Mapping], case_id: str, t_valid: datetime,
     return {"case_id": case_id, "valid_at": t_valid, "known_at": known, "members": members,
             "claims": [claim_view(r) for r in facts if r["event_type"] == "assessment_asserted"],
             "rows": [dict(r) for r in facts]}  # fmt: skip
+
+
+def case_summaries(rows: Sequence[Mapping], t: datetime) -> list[dict]:
+    """One line per case known at ``t`` (the Case board's list): ``case_id``, ``founder``,
+    ``base`` (the founder's installation), ``status``, ``opened_at``, ``members``,
+    ``pending`` (undecided proposals), ``contradictions``, ``claims`` (active labels),
+    ``last_decision`` and ``exports``. Ordered by ``opened_at``, then ``case_id``."""
+    known = known_at(rows, t)
+    bases = {r["subject_id"]: obj(r).get("base") for r in known
+             if r["event_type"] == "incident_recorded"}  # fmt: skip
+    out = []
+    for r in known:
+        if r["event_type"] != "case_opened":
+            continue
+        s = snapshot(known, r["case_id"], t)
+        if not s.exists:  # opened, then retracted
+            continue
+        last = s.decisions[-1] if s.decisions else None
+        out.append({"case_id": s.case_id, "founder": s.founder,
+                    "base": bases.get(s.founder) or obj(r).get("base"), "status": s.status,
+                    "opened_at": r["recorded_at"], "members": list(s.members),
+                    "pending": len(s.pending), "contradictions": len(s.contradictions),
+                    "claims": sorted({str(c["value"]) for c in s.claims if c["value"]}),
+                    "last_decision": last["decision"] if last else None,
+                    "exports": len(s.exports)})  # fmt: skip
+    return sorted(out, key=lambda c: (c["opened_at"], c["case_id"]))

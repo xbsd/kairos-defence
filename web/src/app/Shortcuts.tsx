@@ -18,7 +18,7 @@ export function ShortcutsDialog() {
       ref={ref}
       aria-labelledby="shortcuts-title"
       onClose={() => uiStore.getState().setShortcuts(false)}
-      className="m-auto w-96 rounded-panel border border-hairline bg-scope p-4 text-ink-hi backdrop:bg-scope/70"
+      className="m-auto w-[30rem] rounded-panel border border-hairline bg-scope p-4 text-ink-hi backdrop:bg-scope/70"
     >
       <h2 id="shortcuts-title" className="text-15 font-bold">
         Keyboard shortcuts
@@ -34,7 +34,8 @@ export function ShortcutsDialog() {
         ))}
       </dl>
       <p className="mt-3 text-13 text-ink-mid">
-        Director mode keys (Space, arrows, R, F) arrive with Director mode in phase 8.
+        Keys do nothing while you type in a field. Director never approves, rejects or exports:
+        those need your click.
       </p>
       <form method="dialog" className="mt-4 text-right">
         <button className="rounded-button border border-hairline px-3 py-1 text-13 hover:border-flash">

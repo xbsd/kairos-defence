@@ -67,6 +67,10 @@ allowed to read ground truth (CLAUDE.md rule 2).
   `pending (...)`.
 - `report`: `summarize(run)`, `write_reports(run, dir)`, `regressions(metrics, baseline)`,
   `gate(summary, baseline_path)`, `GATED`, `PENDING`, `BUDGET_MS`. `report_md.markdown(s, fig)`.
+- `targets` (D-139): `Target` (key, op, value, label, spec, phase, fmt, report_only, pending;
+  `met(v)`, `text()`), `TARGETS` (§19.3 and §10.9, the same numbers as
+  `scripts/check_targets.py`), `BY_KEY`, `target_text(key)`, `targets_json()` (written into the
+  eval JSON as `targets`; the Eval page reads them).
 
 ## Data in and out
 
@@ -168,3 +172,6 @@ allowed to read ground truth (CLAUDE.md rule 2).
 - Phase 5: `downstream.py`, `forecast_choice.py`; `clue_truth` and the recovery columns; report
   linkage and forecast error keys, the "Forecast and recall" section, two demo assertions
   (D-088, D-090).
+- Phase 8: `targets.py`; the eval JSON gains `targets`; the Markdown's target column and latency
+  budgets come from it (unchanged text). `tests/unit/test_eval_targets.py` keeps it equal to
+  `scripts/check_targets.py` (D-139). No metric, query set or protocol changed.

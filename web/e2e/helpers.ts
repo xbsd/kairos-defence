@@ -1,10 +1,16 @@
+import { rmSync } from "node:fs";
+
 import { expect, type APIRequestContext, type Locator, type Page } from "@playwright/test";
 
 export const INCIDENT = "DEMO-BRAVO-0828";
+export const CASE = "CASE-P1-DELTA-260419";
 export const FIGURES = "../reports/figures/ui";
+/** The e2e server's scratch export folder (playwright.config.ts, D-137). */
+export const EXPORTS = "../data/cache/e2e/exports";
 
-/** A clean ledger (seed head) and empty live tables on the e2e server. */
+/** A clean ledger (seed head), empty live tables and no exported packages on the e2e server. */
 export async function reseed(request: APIRequestContext): Promise<number> {
+  rmSync(EXPORTS, { recursive: true, force: true });
   const r = await request.post("/api/admin/reseed");
   expect(r.ok()).toBeTruthy();
   expect((await request.post("/api/admin/reset")).ok()).toBeTruthy();
@@ -56,4 +62,60 @@ export async function numberIn(l: Locator): Promise<number> {
 export async function headSeq(request: APIRequestContext): Promise<number> {
   const v = (await (await request.get("/api/ledger/verify")).json()) as { head_seq: number };
   return v.head_seq;
+}
+
+/** The Director rail's current beat id. */
+export async function beatId(page: Page): Promise<string | null> {
+  const el = page.getByTestId("director-beat");
+  return (await el.count()) ? el.getAttribute("data-beat") : null;
+}
+
+export async function waitBeat(page: Page, id: string, timeoutMs = 90_000): Promise<void> {
+  await expect(page.locator(`[data-testid="director-beat"][data-beat="${id}"]`)).toHaveCount(1, {
+    timeout: timeoutMs,
+  });
+  await expect(page.getByTestId("director-caption")).not.toHaveText("", { timeout: 10_000 });
+}
+
+/** Start Director from Live watch at a speed: set the speed, then press D. */
+export async function startDirector(page: Page, v: 1 | 2 | 5): Promise<void> {
+  await speed(page, v);
+  await press(page, "d");
+  await waitBeat(page, "detection");
+}
+
+/** Approve every pending proposal on the Case board, one click at a time (a human's clicks). */
+export async function approveAllPending(page: Page): Promise<number> {
+  let n = 0;
+  for (let guard = 0; guard < 12; guard++) {
+    const b = page.getByRole("button", { name: /^Approve link: / }).first();
+    if (!(await b.count())) break;
+    const before = await page.getByTestId("pending-proposal").count();
+    await b.click();
+    // approving an incident also settles its proposals from earlier reruns (it is now a member)
+    await expect
+      .poll(() => page.getByTestId("pending-proposal").count(), { timeout: 15_000 })
+      .toBeLessThan(before);
+    n += 1;
+  }
+  return n;
+}
+
+/** Ledger rows after `seq` (event types), from the tail. */
+export async function ledgerSince(request: APIRequestContext, seq: number): Promise<string[]> {
+  const head = await headSeq(request);
+  if (head <= seq) return [];
+  const tail = (await (
+    await request.get(`/api/ledger/tail?n=${Math.min(200, head - seq)}`)
+  ).json()) as {
+    seq: number;
+    event_type: string;
+  }[];
+  return tail.filter((b) => b.seq > seq).map((b) => b.event_type);
+}
+
+/** A presenter's key press: nothing keeps focus (a clicked button would take Space for itself). */
+export async function press(page: Page, key: string): Promise<void> {
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur?.());
+  await page.keyboard.press(key);
 }

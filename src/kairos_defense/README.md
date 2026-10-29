@@ -48,7 +48,8 @@ The top-level package: the CLI entry point and the four core modules every other
     - `verify-evidence DIR [--ledger P] [--pubkey PEM]`: PASS/FAIL/SKIP table, exit 1 on a FAIL.
   - From phase 7 (D-111):
     - `api [--host 127.0.0.1] [--port 8000] [--static DIR] [--reload] [--dump-openapi PATH]
-      [--memory P] [--live-db P] [--reseed]`: the FastAPI backend (`kairos_defense.api`);
+      [--memory P] [--live-db P] [--exports P] [--reseed]`: the FastAPI backend
+      (`kairos_defense.api`); `--exports` points evidence exports elsewhere (e2e scratch, D-137);
       `--dump-openapi` writes the schema and exits; `--static` must hold a built `index.html`;
     - `replay [--incident ID] [--precompute] [--force] [--reset] [--api URL]`: list the live
       incidents and their cache state, fill the result cache (D-013), or empty the `live_*`
@@ -166,3 +167,4 @@ Phase 5 added `paths.cache` (the FastEmbed cache, `app.yaml`) and `forecast.anch
   `events`; the typed `CaseSnapshot`.
 - Phase 7: `api` and `replay` became real (`cli_live.py`); `memory reseed` falls back to the
   running API; ports `IngestStat`, `LiveSink`, `ResultCache`.
+- Phase 8: `api --exports` (and `KD_EXPORTS` under `--reload`).

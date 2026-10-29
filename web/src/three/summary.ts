@@ -25,3 +25,26 @@ export function theaterSummary(s: ReplayState, now?: number): string {
     })
     .join(" ");
 }
+
+/**
+ * The memory and forecast layers in words (§17.12): which ghosts are drawn and where the zone
+ * is, the same values the 3D labels show.
+ */
+export function memorySummary(
+  ghosts: { label: string }[],
+  forecastLabel: string | null,
+  roads: string[],
+): string {
+  const parts: string[] = [];
+  if (ghosts.length)
+    parts.push(
+      `${ghosts.length} afterglow ghost${ghosts.length === 1 ? "" : "s"} of matched past flights: ${ghosts
+        .map((g) => g.label)
+        .join("; ")}.`,
+    );
+  if (forecastLabel) {
+    const r = roads.length ? ` ${roads.join(" and ")} crosses it.` : "";
+    parts.push(`${forecastLabel}.${r}`);
+  }
+  return parts.join(" ");
+}

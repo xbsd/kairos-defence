@@ -41,7 +41,9 @@ describe("CommandBar", () => {
     for (const name of ["Play", "Pause", "Restart", "Speed 5 times"]) {
       expect(screen.getByRole("button", { name })).toBeDisabled();
     }
-    expect(screen.getByRole("button", { name: "Director (arrives in phase 8)" })).toBeDisabled();
+    const director = screen.getByRole("button", { name: "Director" });
+    expect(director).toBeEnabled();
+    expect(director).toHaveAttribute("aria-pressed", "false");
   });
 
   it("follows the stream: clock, Live, speed, and sends commands", async () => {
@@ -81,6 +83,45 @@ describe("CommandBar", () => {
     fireEvent.click(screen.getByRole("button", { name: "Restart" }));
     expect(sent).toEqual(["pause", "speed 2", "seek 0"]);
     setStream(null);
+  });
+
+  it("shows the replay's local time for the 1x record", async () => {
+    render(<CommandBar trail={["Live watch"]} replay />);
+    act(() => {
+      const s = replayStore.getState();
+      s.setStatus("open");
+      s.apply(HELLO);
+      s.apply({
+        type: "clock",
+        t_s: 62,
+        ts: "2026-08-29T02:41:08.000Z",
+        speed: 1,
+        playing: true,
+        seeked: false,
+      });
+    });
+    await tick();
+    // HELLO is BRAVO at UTC-5: 02:41:08Z is 21:41:08 local
+    expect(screen.getByTestId("replay-clock")).toHaveAttribute("data-local-time", "21:41:08");
+  });
+
+  it("toggles Performance mode and shows Director as pressed while on", async () => {
+    const { directorStore } = await import("../src/state/directorStore");
+    render(<CommandBar trail={["Live watch"]} />);
+    const perf = screen.getByRole("button", { name: "Performance mode" });
+    expect(perf).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(perf);
+    await tick();
+    expect(perf).toHaveAttribute("aria-pressed", "true");
+    expect(uiStore.getState().perfMode).toBe(true);
+    act(() => directorStore.setState({ active: true }));
+    await tick();
+    expect(screen.getByRole("button", { name: "Director" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    act(() => directorStore.setState({ active: false }));
+    uiStore.setState({ perfMode: false });
   });
 
   it("toggles reduce motion", async () => {

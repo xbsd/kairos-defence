@@ -1,15 +1,32 @@
 // Typed REST client (SPEC §16.4). Same origin: Vite proxies /api in dev, FastAPI serves both in
 // the demo. Errors carry the server's message (FastAPI's `detail`).
 import type {
+  CaseDecision,
+  CaseSummary,
+  DecisionResponse,
+  DtwMsg,
   EvidenceLine,
+  EvidencePackage,
+  EvidenceVerifyResponse,
+  ExplainResponse,
   Health,
   IncidentSummary,
+  Installation,
   LedgerBlock,
   LedgerRecord,
   LedgerVerify,
   LinkResponse,
+  MatchResponse,
   Scene,
 } from "./messages";
+import type {
+  CaseDiff,
+  CaseGraph,
+  CaseSnapshot,
+  EvalReport,
+  HistoryPath,
+  ShiftDeltaDoc,
+} from "./pages";
 
 /** The analyst handle the Command Center approves as (D-112), as `memory demo` does. */
 export const ANALYST = "demo";
@@ -59,8 +76,50 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   return (await r.json()) as T;
 }
 
+const enc = encodeURIComponent;
+
+/** `?a=1&b=x` from the defined entries only. */
+function qs(params: Record<string, string | number | null | undefined>): string {
+  const parts = Object.entries(params)
+    .filter(([, v]) => v !== null && v !== undefined && v !== "")
+    .map(([k, v]) => `${enc(k)}=${enc(String(v))}`);
+  return parts.length ? `?${parts.join("&")}` : "";
+}
+
 export const api = {
   health: () => getJson<Health>("/api/health"),
+  installations: () => getJson<Installation[]>("/api/installations"),
+  /** A past flight's 1 Hz path in its target-relative frame (ghost trails, §17.3). */
+  history: (trackId: string) => getJson<HistoryPath>(`/api/history/${enc(trackId)}?frame=target`),
+  dtw: (incidentId: string, trackId: string, at: number, channel?: string) =>
+    getJson<DtwMsg>(`/api/dtw/${enc(incidentId)}/${enc(trackId)}${qs({ at, channel })}`),
+  match: (incidentId: string, at: number) =>
+    getJson<MatchResponse>(`/api/match/${enc(incidentId)}${qs({ at })}`),
+  explain: (incidentId: string, trackId: string, at: number) =>
+    getJson<ExplainResponse>(`/api/explain/${enc(incidentId)}/${enc(trackId)}${qs({ at })}`),
+  cases: (asOf?: string) => getJson<CaseSummary[]>(`/api/cases${qs({ as_of: asOf })}`),
+  caseSnapshot: (caseId: string, asOf?: string) =>
+    getJson<CaseSnapshot>(`/api/cases/${enc(caseId)}${qs({ as_of: asOf })}`),
+  caseGraph: (caseId: string, asOf?: string) =>
+    getJson<CaseGraph>(`/api/cases/${enc(caseId)}/graph${qs({ as_of: asOf })}`),
+  caseDiff: (caseId: string, t1: string, t2?: string) =>
+    getJson<CaseDiff>(`/api/cases/${enc(caseId)}/diff${qs({ t1, t2 })}`),
+  /** A decision on a case (rule 8: only an explicit, confirmed click sends this). */
+  recordDecision: (caseId: string, decision: CaseDecision, clock?: string) =>
+    postJson<DecisionResponse>(`/api/cases/${enc(caseId)}/decisions`, {
+      decision,
+      analyst: ANALYST,
+      ...(clock ? { clock } : {}),
+    }),
+  evidenceList: (caseId?: string) =>
+    getJson<EvidencePackage[]>(`/api/evidence${qs({ case: caseId })}`),
+  verifyEvidence: (dir: string) =>
+    postJson<EvidenceVerifyResponse>("/api/evidence/verify", { dir }),
+  delta: (since: string, until?: string) =>
+    getJson<ShiftDeltaDoc>(`/api/delta${qs({ since, until })}`),
+  evalLatest: () => getJson<EvalReport>("/api/eval/latest"),
+  adminReset: () => postJson<{ reset: Record<string, number> }>("/api/admin/reset", {}),
+  adminReseed: () => postJson<{ head_seq: number }>("/api/admin/reseed", {}),
   scene: (installationId: string) =>
     getJson<Scene>(`/api/installations/${encodeURIComponent(installationId)}/scene`),
   liveIncidents: () => getJson<IncidentSummary[]>("/api/incidents?status=live"),

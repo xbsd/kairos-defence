@@ -1,0 +1,173 @@
+{
+  "case_id": "CASE-P1-DELTA-260419",
+  "t1": "2026-04-20T15:00:00.000000Z",
+  "t2": "2026-08-29T02:41:51.000000Z",
+  "items": [
+    {
+      "group": "facts",
+      "seq": 4683,
+      "event_type": "model_registered",
+      "recorded_at": "2026-08-29T02:41:36.000000Z",
+      "subject_id": null,
+      "case_id": null,
+      "supersedes_seq": null,
+      "source_id": null,
+      "summary": "model fusion-v1 registered (c5e17f03ed25\u2026)"
+    },
+    {
+      "group": "proposals",
+      "seq": 4684,
+      "event_type": "match_proposed",
+      "recorded_at": "2026-08-29T02:41:36.000000Z",
+      "subject_id": "P1-DELTA-260419",
+      "case_id": "CASE-P1-DELTA-260419",
+      "supersedes_seq": null,
+      "source_id": "fusion-v1",
+      "summary": "P1-DELTA-260419 proposed for CASE-P1-DELTA-260419 from DEMO-BRAVO-0828 (rank 1, score 1.000)"
+    },
+    {
+      "group": "proposals",
+      "seq": 4685,
+      "event_type": "match_proposed",
+      "recorded_at": "2026-08-29T02:41:36.000000Z",
+      "subject_id": "P1-ALPHA-260303",
+      "case_id": "CASE-P1-DELTA-260419",
+      "supersedes_seq": null,
+      "source_id": "fusion-v1",
+      "summary": "P1-ALPHA-260303 proposed for CASE-P1-DELTA-260419 from DEMO-BRAVO-0828 (rank 2, score 0.999)"
+    },
+    {
+      "group": "proposals",
+      "seq": 4686,
+      "event_type": "match_proposed",
+      "recorded_at": "2026-08-29T02:41:36.000000Z",
+      "subject_id": "P1-CHARLIE-260710",
+      "case_id": "CASE-P1-DELTA-260419",
+      "supersedes_seq": null,
+      "source_id": "fusion-v1",
+      "summary": "P1-CHARLIE-260710 proposed for CASE-P1-DELTA-260419 from DEMO-BRAVO-0828 (rank 3, score 0.997)"
+    },
+    {
+      "group": "proposals",
+      "seq": 4687,
+      "event_type": "match_proposed",
+      "recorded_at": "2026-08-29T02:41:51.000000Z",
+      "subject_id": "P1-BRAVO-251114",
+      "case_id": "CASE-P1-DELTA-260419",
+      "supersedes_seq": null,
+      "source_id": "fusion-v1",
+      "summary": "P1-BRAVO-251114 proposed for CASE-P1-DELTA-260419 from DEMO-BRAVO-0828 (rank 1, score 1.000)"
+    },
+    {
+      "group": "proposals",
+      "seq": 4688,
+      "event_type": "match_proposed",
+      "recorded_at": "2026-08-29T02:41:51.000000Z",
+      "subject_id": "P1-DELTA-260419",
+      "case_id": "CASE-P1-DELTA-260419",
+      "supersedes_seq": null,
+      "source_id": "fusion-v1",
+      "summary": "P1-DELTA-260419 proposed for CASE-P1-DELTA-260419 from DEMO-BRAVO-0828 (rank 2, score 1.000)"
+    },
+    {
+      "group": "proposals",
+      "seq": 4689,
+      "event_type": "match_proposed",
+      "recorded_at": "2026-08-29T02:41:51.000000Z",
+      "subject_id": "P1-ALPHA-260303",
+      "case_id": "CASE-P1-DELTA-260419",
+      "supersedes_seq": null,
+      "source_id": "fusion-v1",
+      "summary": "P1-ALPHA-260303 proposed for CASE-P1-DELTA-260419 from DEMO-BRAVO-0828 (rank 3, score 1.000)"
+    }
+  ],
+  "groups": {
+    "members_added": [],
+    "proposals": [
+      {
+        "group": "proposals",
+        "seq": 4684,
+        "event_type": "match_proposed",
+        "recorded_at": "2026-08-29T02:41:36.000000Z",
+        "subject_id": "P1-DELTA-260419",
+        "case_id": "CASE-P1-DELTA-260419",
+        "supersedes_seq": null,
+        "source_id": "fusion-v1",
+        "summary": "P1-DELTA-260419 proposed for CASE-P1-DELTA-260419 from DEMO-BRAVO-0828 (rank 1, score 1.000)"
+      },
+      {
+        "group": "proposals",
+        "seq": 4685,
+        "event_type": "match_proposed",
+        "recorded_at": "2026-08-29T02:41:36.000000Z",
+        "subject_id": "P1-ALPHA-260303",
+        "case_id": "CASE-P1-DELTA-260419",
+        "supersedes_seq": null,
+        "source_id": "fusion-v1",
+        "summary": "P1-ALPHA-260303 proposed for CASE-P1-DELTA-260419 from DEMO-BRAVO-0828 (rank 2, score 0.999)"
+      },
+      {
+        "group": "proposals",
+        "seq": 4686,
+        "event_type": "match_proposed",
+        "recorded_at": "2026-08-29T02:41:36.000000Z",
+        "subject_id": "P1-CHARLIE-260710",
+        "case_id": "CASE-P1-DELTA-260419",
+        "supersedes_seq": null,
+        "source_id": "fusion-v1",
+        "summary": "P1-CHARLIE-260710 proposed for CASE-P1-DELTA-260419 from DEMO-BRAVO-0828 (rank 3, score 0.997)"
+      },
+      {
+        "group": "proposals",
+        "seq": 4687,
+        "event_type": "match_proposed",
+        "recorded_at": "2026-08-29T02:41:51.000000Z",
+        "subject_id": "P1-BRAVO-251114",
+        "case_id": "CASE-P1-DELTA-260419",
+        "supersedes_seq": null,
+        "source_id": "fusion-v1",
+        "summary": "P1-BRAVO-251114 proposed for CASE-P1-DELTA-260419 from DEMO-BRAVO-0828 (rank 1, score 1.000)"
+      },
+      {
+        "group": "proposals",
+        "seq": 4688,
+        "event_type": "match_proposed",
+        "recorded_at": "2026-08-29T02:41:51.000000Z",
+        "subject_id": "P1-DELTA-260419",
+        "case_id": "CASE-P1-DELTA-260419",
+        "supersedes_seq": null,
+        "source_id": "fusion-v1",
+        "summary": "P1-DELTA-260419 proposed for CASE-P1-DELTA-260419 from DEMO-BRAVO-0828 (rank 2, score 1.000)"
+      },
+      {
+        "group": "proposals",
+        "seq": 4689,
+        "event_type": "match_proposed",
+        "recorded_at": "2026-08-29T02:41:51.000000Z",
+        "subject_id": "P1-ALPHA-260303",
+        "case_id": "CASE-P1-DELTA-260419",
+        "supersedes_seq": null,
+        "source_id": "fusion-v1",
+        "summary": "P1-ALPHA-260303 proposed for CASE-P1-DELTA-260419 from DEMO-BRAVO-0828 (rank 3, score 1.000)"
+      }
+    ],
+    "claims_added": [],
+    "claims_retracted": [],
+    "contradictions": [],
+    "decisions": [],
+    "exports": [],
+    "facts": [
+      {
+        "group": "facts",
+        "seq": 4683,
+        "event_type": "model_registered",
+        "recorded_at": "2026-08-29T02:41:36.000000Z",
+        "subject_id": null,
+        "case_id": null,
+        "supersedes_seq": null,
+        "source_id": null,
+        "summary": "model fusion-v1 registered (c5e17f03ed25\u2026)"
+      }
+    ]
+  }
+}
