@@ -13,7 +13,7 @@ NPM := npm --prefix web
 SEED ?= 42
 
 .DEFAULT_GOAL := help
-.PHONY: help check test-all data index models eval api web dev demo e2e mcp clean
+.PHONY: help check test-all data index models eval api web dev demo demo-video e2e mcp clean
 
 help: ## List targets
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-10s %s\n", $$1, $$2}'
@@ -52,6 +52,13 @@ demo: ## Build the web app and serve everything from FastAPI on :8000 (offline)
 	$(NPM) run build
 	$(KD) replay --precompute
 	$(KD) api --static web/dist
+
+demo-video: ## Record the narrated 2-minute demo video to docs/demo/ (DEMO_SLOW=1 on a GPU machine)
+	$(NPM) run build
+	$(KD) replay --precompute
+	mkdir -p data/cache/demo
+	cd web && npx playwright test -c demo/playwright.config.ts
+	cd web && node demo/encode.mjs
 
 e2e: ## Playwright end-to-end tests, UI screenshots and accessibility checks
 	$(NPM) run build

@@ -119,9 +119,8 @@ async function story(
       kicker: "Recorded",
       title: "A memory that can't be rewritten",
       body:
-        `${v(await text(page, '[data-testid="recorder-total"]'))} rows written so far. Every ` +
-        "case event is appended to a <b>hash-chained ledger</b>: each block carries the hash of " +
-        "the one before.",
+        "Each row is written the moment it lands, and every case event is appended to a " +
+        "<b>hash-chained ledger</b>: each block carries the hash of the one before.",
       tone: "flash",
       width: 400,
     },
@@ -234,12 +233,14 @@ async function story(
   await n.hold(0.8);
   const knownThen = page.getByRole("button", { name: "Known then" });
   await n.click(knownThen);
+  const asOf = (await text(page, '[data-testid="scrub-time"]')).replace(/^As of\s*/i, "");
   await n.callout("then", page.getByTestId("scrubber"), {
-    side: "bottom",
+    side: "at",
+    at: { x: 100, y: 268 },
     kicker: "Bitemporal memory",
     title: "Back to the morning DELTA closed it",
     body:
-      `As of ${v(await text(page, '[data-testid="scrub-time"]'))}: one flight, assessed ` +
+      `As of ${v(asOf)}: one flight, assessed ` +
       "<b>hobbyist</b>, case closed, no links. Every fact keeps two times: when it was true, " +
       "and when the memory learned it.",
     tone: "afterglow",

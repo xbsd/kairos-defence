@@ -187,9 +187,24 @@ export function installOverlay(): void {
           fill="var(--ink-hi)" stroke="var(--scope)" stroke-width="1.4" stroke-linejoin="round"/>
       </svg>
     </div>`;
-  const mount = () => document.body.appendChild(host);
+  // a manual popover lives in the top layer, above the app; raise() moves it above a modal
+  // dialog that opened later (the evidence export's confirm), so the pointer stays visible
+  host.setAttribute("popover", "manual");
+  host.style.cssText =
+    "position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;" +
+    "padding:0;border:0;background:transparent;overflow:visible;pointer-events:none";
+  const mount = () => {
+    document.body.appendChild(host);
+    host.showPopover();
+  };
   if (document.body) mount();
   else document.addEventListener("DOMContentLoaded", mount, { once: true });
+  const raise = () => {
+    if (!host.isConnected || !document.querySelector("dialog:modal")) return false;
+    host.hidePopover();
+    host.showPopover();
+    return true;
+  };
 
   const $ = <T extends Element>(sel: string) => shadow.querySelector(sel) as T;
   const layer = $<HTMLDivElement>(".layer");
@@ -394,10 +409,15 @@ export function installOverlay(): void {
       for (const id of [...callouts.keys()]) remove(id);
     },
     cursorTo(x, y, ms) {
-      cursor.classList.add("on");
-      cursor.style.transitionDuration = `${ms}ms, 400ms`;
-      // the arrow's tip sits at (3, 2) of its 24-unit box, drawn at 30 px
-      cursor.style.transform = `translate(${x - 3.75}px, ${y - 2.5}px)`;
+      const move = () => {
+        cursor.classList.add("on");
+        cursor.style.transitionDuration = `${ms}ms, 400ms`;
+        // the arrow's tip sits at (3, 2) of its 24-unit box, drawn at 30 px
+        cursor.style.transform = `translate(${x - 3.75}px, ${y - 2.5}px)`;
+      };
+      // after a raise the pointer restarts from where it was, a frame later
+      if (raise()) nextFrame(move);
+      else move();
       cx = x;
       cy = y;
     },

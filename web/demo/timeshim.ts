@@ -13,15 +13,26 @@ export function installTimeShim(k: number): void {
 
   const realNow = performance.now.bind(performance);
   const base = realNow();
-  const slow = (t: number) => base + (t - base) / k;
-  performance.now = () => slow(realNow());
+  performance.now = () => base + (realNow() - base) / k;
 
   const realDateNow = Date.now.bind(Date);
   const dateBase = realDateNow();
   Date.now = () => dateBase + (realDateNow() - dateBase) / k;
 
+  // Frame timestamps come from the slowed performance.now, once per frame: the browser's own
+  // rAF timestamp follows the document timeline, which the recorder also slows over CDP, and
+  // code that mixes the two clocks (the report's resolve) would stall at its first frame.
   const realRaf = window.requestAnimationFrame.bind(window);
-  window.requestAnimationFrame = (cb: FrameRequestCallback) => realRaf((ts) => cb(slow(ts)));
+  let frameReal = -1;
+  let frameSlow = 0;
+  window.requestAnimationFrame = (cb: FrameRequestCallback) =>
+    realRaf((ts) => {
+      if (ts !== frameReal) {
+        frameReal = ts;
+        frameSlow = performance.now();
+      }
+      cb(frameSlow);
+    });
 
   const realTimeout = window.setTimeout.bind(window);
   window.setTimeout = ((fn: TimerHandler, ms?: number, ...args: unknown[]) =>

@@ -2366,3 +2366,27 @@ Where this file and the SPEC ever disagree, this file wins.
   two commands that recreate and push them from any clone. No tag is moved or rewritten.
 - Consequences: until someone runs those commands, the remote lists tags up to `phase-08-done`;
   both commits are on `claude/cloud-phases-9-10`.
+
+## D-168 · The narrated demo video: slow-motion capture and an honest overlay · 2026-10-29
+- Context: the user asked for a 1.5 to 2 minute screen-recorded demo with automated selections and
+  overlays that explain how it works. In the cloud container Chromium renders the Live watch
+  scene at about 7 frames per second (SwiftShader, no GPU), far too choppy to record in real time.
+- Decision: `make demo-video` records the real app in slow motion and plays it back at its real
+  pace. The API runs replays with `--time-scale 1/K` (`live.replay.scaled_clock`; default 1, real
+  time); the recorder slows the page by the same K (`web/demo/timeshim.ts`: performance.now,
+  Date.now, requestAnimationFrame and timers; CSS and Web Animations through CDP
+  `Animation.setPlaybackRate`) and captures every painted frame over the CDP screencast with its
+  wall time (`web/demo/kit.ts`); `web/demo/encode.mjs` divides those times by K and encodes a
+  constant 30 fps H.264 file, `docs/demo/kairos-defense-demo.mp4`, with its chapter times. K is 5
+  here (`DEMO_SLOW`); on a machine with a GPU `DEMO_SLOW=1` records in real time.
+- The story is Director mode at 5× (`web/demo/record.spec.ts`): the recorder pauses on each beat
+  while a narration layer (`web/demo/overlay.ts`, a shadow root outside the app, no pointer
+  events) shows a chapter pill in the command bar's free space, rings the element that matters
+  and explains the mechanism in a card, and moves a visible pointer to every element it clicks
+  (Known then, Known now, each Approve, Export and its confirm, Verify, the Pages menu). The
+  overlay draws words and shapes only: every number or name in a card is read from the app's
+  screen at that moment (rule 10), the app's own Director captions stay, and the recorder runs
+  against its own scratch ledger, live tables and exports (`data/cache/demo`, port 8766).
+- Found by the recording and fixed: the command bar's Pages menu opened behind the Swarm view's
+  panels (the header's blur makes it a stacking context painted below later panels), so it could
+  not be clicked there. The header is now `relative z-30`.
