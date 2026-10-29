@@ -6,3 +6,7 @@
 [2026-10-28 19:46:53]   … running 3 min. last tool: Bash git log --format='%h %s' -- src/kairos_defense/sim src/kairos_defense/store/ddl.
 [2026-10-28 19:49:53]   … running 6 min. last tool: Bash uv run python --version; uv --version; ls -la reports/figures/pattern_*.png | aw
 [2026-10-28 19:52:53]   … running 9 min. last tool: Bash tail -5 docs/DECISIONS.md; echo ---; sed -n 1,12p docs/DECISIONS.md
+[2026-10-28 19:54:53] phase 2: backfilling documentation
+[2026-10-28 19:57:54]   … running 3 min. last tool: Bash for f in test_swarm_formations test_swarm test_rf test_rid test_reports test_rep
+[2026-10-28 20:00:54]   … running 6 min. last tool: Bash sed -n 1,138p src/kairos_defense/sim/generate.py | grep -v "^\s*$" | sed -n 1,14
+[2026-10-28 20:03:54]   … running 9 min. last tool: Bash tail -c 300 docs/DECISIONS.md | od -c | tail -3
