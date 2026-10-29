@@ -146,3 +146,26 @@ def recall_table(mr, local: Callable) -> Table:
                   local(r.event_ts_ms, mr.installation_id), f"{r.score:.4f}",
                   marked_text(r.text, r.clues))  # fmt: skip
     return t
+
+
+def replay_table(rows) -> Table:
+    """``kairos-defense replay``: one row per live incident (``(incident, loop, cache state,
+    precompute summary or None)``)."""
+    t = Table(title="kairos-defense replay: live incidents", title_justify="left")
+    for c, j in (("Incident", "left"), ("Base", "left"), ("Duration", "right"),
+                 ("Detections", "right"), ("Reruns", "right"), ("Cached", "right"),
+                 ("Precompute", "left")):  # fmt: skip
+        t.add_column(c, justify=j)
+    for inc, loop, state, s in rows:
+        reruns = f"{len(loop.schedule)}"
+        if not loop.single or inc.is_swarm:
+            reruns, cached, pre = "-", "-", "detections only: swarm matching is phase 9"
+        else:
+            cached = f"{state['results']}/{len(loop.schedule)}" + (" fresh" if state["fresh"]
+                                                                  else " stale")  # fmt: skip
+            pre = ("" if s is None else f"{s.computed} computed, {s.cached} cached, "
+                   f"{s.features} feature s, {s.elapsed_s:.1f} s")  # fmt: skip
+        n = len(inc.messages)
+        t.add_row(inc.incident_id, inc.installation_id, f"{inc.duration_s:,.0f} s", f"{n:,}",
+                  reruns, cached, pre)  # fmt: skip
+    return t

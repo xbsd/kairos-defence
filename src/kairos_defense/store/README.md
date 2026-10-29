@@ -14,6 +14,8 @@ truth-isolation guard every app connection goes through.
   D-014).
 - Implement `CaseMemory` over DuckDB: the §15.1 ledger in `data/memory.duckdb`, one writer, rows
   only ever inserted (`ledger_duck.py`, D-092, D-093).
+- Implement `LiveSink` over DuckDB (`live_duck.py`: the `live_*` scratch tables in
+  `data/live.duckdb`, D-103) and `ResultCache` over JSON files (`live_cache.py`, D-104).
 - Business logic imports the ports, never these modules directly (rule 6). Only index builds and
   composition roots such as `cli.py` construct the adapters (D-053).
 
@@ -29,6 +31,17 @@ truth-isolation guard every app connection goes through.
 - `ddl.RAW_DDL`, `ddl.TRUTH_DDL` and `ddl.DERIVED_DDL` (`dict[name, CREATE TABLE]`),
   `ddl.DERIVED_COLUMNS`, and `ddl.columns(ddl) -> list[str]`. `ddl.LEDGER_DDL`,
   `ddl.LEDGER_ASOF_MACRO` (verbatim §15.1) and `ddl.LEDGER_COLUMNS`.
+- `ddl.LIVE_DDL`, `ddl.LIVE_SOURCES`, `ddl.LIVE_COLUMNS`: `live_points`, `live_rf`, `live_rid`
+  with the columns of `track_points`, `rf_detections`, `remote_id` (§16.2, D-103).
+- `live_duck.DuckLiveSink(path, app)` (the `LiveSink` port): `append(table, rows) -> IngestStat`
+  (one insert, timed; `statement` like `INSERT INTO live_points … 3 rows`), `count(table)`,
+  `reset() -> {table: rows removed}` (only the `live_*` tables). `live_duck.statement(table, n)`.
+- `live_cache.FileResultCache(root)` (the `ResultCache` port): `get(incident, name)`, `put(incident,
+  name, doc)` (atomic, strict JSON), `clear(incident)`; names like `manifest`, `features`, `t0045`.
+- `ledger_duck.reseed_ledger(path, app, store, scenario) -> SeedSummary` (seed a temp file, verify,
+  close, drop stale WAL files, `os.replace`; raises `LedgerLocked` when another process holds the
+  file) and `ledger_duck.check_unlocked(path, app)`: shared by `memory reseed` and
+  `POST /api/admin/reseed` (D-010, D-104).
 - `ledger_duck.DuckCaseMemory(path, app, *, read_only=False)` (the `CaseMemory` port, §15):
   context manager. Creates the table and macro if missing; refuses a different schema ("run
   `memory reseed`"); `read_only=True` on a missing file raises `LedgerError` ("run `memory
@@ -166,3 +179,6 @@ truth-isolation guard every app connection goes through.
   (D-085, D-089).
 - Phase 6: the §15.1 ledger DDL and macro; `ledger_duck.py` (`DuckCaseMemory`); `guard.refuse_truth`
   (D-092, D-093, D-102).
+- Phase 7: `LIVE_DDL`; `live_duck.py` (`DuckLiveSink`), `live_cache.py` (`FileResultCache`);
+  `reseed_ledger` and `check_unlocked` moved here from the CLI (D-103, D-104). DuckDB 2.0: fetch a
+  result fully (`fetchall`) before `register()`.

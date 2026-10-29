@@ -16,8 +16,8 @@ COMMANDS = [
 runner = CliRunner()
 
 
-BUILT = ["gen", "index", "models", "match", "eval", "recall", "forecast", "fetch-models",
-         "memory", "export", "verify-evidence"]  # fmt: skip
+BUILT = ["gen", "index", "models", "match", "eval", "recall", "forecast", "replay", "memory",
+         "export", "verify-evidence", "fetch-models", "api"]  # fmt: skip
 
 
 def test_help_lists_every_command() -> None:
@@ -215,3 +215,21 @@ def test_fetch_models_without_fastembed_exits_1(cfg, tmp_path, monkeypatch) -> N
     assert res.exit_code == 1, res.output
     assert "uv sync --extra fastembed" in res.output
     assert not (tmp_path / "cache").exists()  # nothing downloaded or created
+
+
+def test_api_dump_openapi_writes_schema(tmp_path) -> None:
+    out = tmp_path / "openapi.json"
+    res = runner.invoke(app, ["api", "--dump-openapi", str(out)], terminal_width=200)
+    assert res.exit_code == 0, res.output
+    import json
+
+    doc = json.loads(out.read_text())
+    assert "/api/match/{incident_id}" in doc["paths"] and "MatchMsg" in doc["components"]["schemas"]
+
+
+def test_api_refuses_missing_web_build(toy_models, tmp_path, monkeypatch) -> None:
+    import kairos_defense.cli as cli
+
+    monkeypatch.setattr(cli, "_load_config", lambda _c: toy_models)
+    res = runner.invoke(app, ["api", "--static", str(tmp_path)], terminal_width=200)
+    assert res.exit_code == 1 and "npm --prefix web run build" in res.output

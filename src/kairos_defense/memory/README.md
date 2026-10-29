@@ -54,6 +54,16 @@ All times are naive UTC `datetime`s. Ledger rows are dicts with the 17 §15.1 co
 - `evidence_html`: `render_html(doc, png)`, `static_map_png(store, members) -> bytes | None`.
 - `views`: compact row views (`claim_view`, `proposal_view`, …), `describe(row)`, `item(row, group)`.
 
+- Phase 7 additions:
+  - `views.incident_statuses(rows, at, offsets) -> {incident: status}`: "Closed as hobbyist on
+    Apr 20" for a member of a closed case, "Open case, n linked" for an open one; others default
+    to `views.UNATTRIBUTED` ("Open, unattributed"), D-116.
+  - `graph.case_graph(rows, case_id, t) -> dict`: case, incident (with base, membership and
+    contradiction flags), report and assessment nodes; `member_of`, `proposed`, `report_of`,
+    `assessed` edges, each with its `seq` and `recorded_at` (JSON-safe).
+  - `evidence.export_evidence(…, progress=None)`: `progress(d)` after each file is written and
+    hashed, `d = {name, bytes, sha256, i, n}` (five files when signed).
+
 ## Data in and out
 
 - `data/memory.duckdb` (`paths.memory`): table `ledger` and macro `ledger_asof(t)`, verbatim §15.1.
@@ -142,3 +152,6 @@ Event fields by type (D-094):
 
 - Phase 6: the package (canonical JSON, ledger rules, snapshots, diffs, seed, actions, evidence,
   delta), D-092 to D-102.
+- Phase 7: `views.incident_statuses` (the match list's memory status, D-116), `graph.case_graph`
+  (Case board nodes and edges, D-108), `export_evidence(progress=…)` (the API's streamed hashing,
+  D-108); the reseed core moved to `store.ledger_duck.reseed_ledger` (D-104).

@@ -1610,3 +1610,220 @@ Where this file and the SPEC ever disagree, this file wins.
 - Decision: `store/guard.py` gains `refuse_truth(path, app)` (raises `TruthAccessError`), which
   `connect_app_db` now calls too; the adapter calls it before `ATTACH` and on open. The scan is
   unchanged. Test: `test_copy_from_refuses_truth`.
+
+## D-103 · Live scratch tables in their own file · 2026-10-29
+- Context: §16.2 records each replay tick into `live_points` and `live_rf`; DuckDB allows one
+  writing process per file (D-010), and the CLI must keep reading the main database while
+  `make demo` runs.
+- Decision: new key `paths.live: data/live.duckdb` (the distinct-files validator now covers four
+  files). Tables `live_points`, `live_rf` and `live_rid` (Remote ID detections are detections too)
+  with exactly the §7.1 columns of `track_points`, `rf_detections` and `remote_id`. The API opens
+  `data/kairos_defense.duckdb` read-only. Each WebSocket session keeps a high-water mark: a tick
+  writes the detections in (mark, clock]; a seek forward writes the skipped ones in one batch; a
+  seek back writes nothing. `replay --reset` and `POST /api/admin/reset` empty only `live_*`.
+
+## D-104 · Live ports and adapters · 2026-10-29
+- Decision: `ports.py` gains `IngestStat`, `LiveSink` (`append`, `count`, `reset`) and
+  `ResultCache` (`get`, `put`, `clear` of named JSON documents). Adapters:
+  `store/live_duck.py` (`DuckLiveSink`, through `connect_app_db`) and `store/live_cache.py`
+  (`FileResultCache`, atomic writes under `data/cache/live/<incident>/`, strict JSON). The reseed
+  core moved from `cli_memory.reseed_cmd` to `store/ledger_duck.reseed_ledger` (plus
+  `check_unlocked`), shared by the CLI and `POST /api/admin/reseed`; behavior unchanged. Only
+  `api/services.py` and the CLI construct adapters (rule 6).
+- Found while building: DuckDB 2.0 refuses `register()` while a previous result is not fully
+  fetched (`fetchone()` leaves it open), so the sink uses `fetchall()` throughout.
+
+## D-105 · The live loop, its schedule and its cache · 2026-10-29
+- Decision: reruns at `min_track_s, min_track_s + rerun_every_s, …` (45, 50, …, 515 for BRAVO:
+  95). Between reruns the latest rerun at or before the second is current (REST reports the second
+  it used). A result holds `t_s`, `model_version`, the top 10 matches (§10.8 fields plus `rank`,
+  `local_start` and ISO `start_ts` with `Z`), `forecast`, `recall` (top 3 distinct incidents),
+  `dtw` (the top match's lens on `dist_target_m`), `target_asset_id` and `elapsed_ms` measured
+  when computed; a cache hit adds `cached: true` and keeps the original `elapsed_ms` (rule 10).
+  Features at every whole second come from `query_at(points ≤ s)`. `replay --precompute` fills
+  `t0045.json` … and `features.json`; the manifest fingerprint is the SHA-256 of the model and
+  calibration file bytes, the scoring and embeddings config, the incident's point count and last
+  time, the `track_signatures`, `track_features`, `reports` and `report_clues` counts and
+  `CACHE_FORMAT`. A loop that finds another fingerprint clears the cache and starts a fresh
+  manifest. The swarm incident streams detections only (`matching: false`; swarm matching is
+  phase 9).
+- Deviation from the plan: the fingerprint counts `track_features` instead of LanceDB
+  `flight_windows` (the vector port has no count; the windows are built from those rows).
+
+## D-106 · Which case receives live proposals · 2026-10-29
+- Decision (left open by D-097): the case, as known at the replay clock, whose founder or member is
+  the best-ranked top-3 incident that belongs to any case (ties: earliest opened). For BRAVO that
+  is `CASE-P1-DELTA-260419`. Before the first proposal the session records tonight's incident
+  (`incident_recorded`, actor `system`, valid from its start) and registers the model
+  (`model_registered`, SHA-256 of `models/fusion_v1.json`); both dedupe, and the check reads the
+  ledger rows, so it holds after a reseed. Proposals go through `propose_matches` (§15.6 dedup),
+  actor `matcher@<version>`, clock = start + t_s. No case means no proposal and `case_id: null`.
+
+## D-107 · Stream protocol details · 2026-10-29
+- Decision, beyond the §16.3 fields (all present): `hello` adds `region_id`, `tracks`, `is_swarm`,
+  `matching`, `min_track_s`, `rerun_every_s`, `utc_offset_hours` and `playing: false` (the server
+  starts paused at T+0). `clock` adds `seeked`; after a seek or reset the server sends `clock` with
+  `seeked: true`, then the detections and features of the last 120 s and the current result. `point`
+  adds `incident_id`; `rf` adds `band`; `rid` adds `t_s` and the drone position; `features` adds
+  `track_id`, `target_asset_id`, `heading_deg`; `match` adds `cached`, `case_id`, `query_track`,
+  `target_asset_id` and per match `rank`, `local_start`, `proposal_seq`, `decision`,
+  `memory_status`; `dtw` adds `shape`, `overlap`, `warp_text`; `recall` reports add ISO `event_ts`.
+  Speed is 1, 2 or 5; anything else is a recoverable `error`. `dtw` and `recall` are sent only when
+  their content hash changes; a `dtw` request is always answered. Every ledger append anywhere is
+  broadcast as `ledger`.
+- Deviation from the plan: play and pause answer with a plain `clock` (no `seeked`, no catch-up),
+  because the position does not change.
+
+## D-108 · REST details · 2026-10-29
+- Decision: extra routes `GET /api/health`, `GET /api/ledger/tail?n=12`, `GET /api/ledger/{seq}`.
+  Times need `Z` or an offset (naive is a 422, as in the CLI); `as_of`, `t2`, `until` and the link
+  `clock` default to the ledger head. Errors: unknown proposal, case or incident 404; wrong case or
+  already decided 409; evidence without `approve: true` 400 (nothing written). The evidence POST
+  streams NDJSON: one `file` line per file as it is written and hashed (`export_evidence` gained a
+  `progress` callback; five files), then `done` with the verification checks. `GET
+  /api/cases/{id}/graph` returns case, incident, report and assessment nodes and `member_of`,
+  `proposed`, `report_of` and `assessed` edges (`memory/graph.py`). No authentication (§2); the
+  server binds 127.0.0.1 by default.
+
+## D-109 · Coordinates for the theater · 2026-10-29
+- Decision: the API sends region-frame meters (the database convention); the scene adds the
+  installation origin and the web maps `x = x_m − ox`, `z = −(y_m − oy)`, `y = alt_m`. Roads are
+  clipped and parks kept within 6 km of the origin. The radar shadow is the world config's terrain
+  mask sector, out to the radar's range, minus the fence buffered by `beyond_fence_m`
+  (configuration, not truth). Asset heights by kind are web presentation constants.
+
+## D-110 · Concurrency in the API · 2026-10-29
+- Decision: one re-entrant lock guards the read-only main store, LanceDB, the matcher and recall;
+  the ledger (`DuckCaseMemory`) and the live sink keep their own locks; when two are held the store
+  lock is taken first. Sessions run `handle` and `step` in Starlette's thread pool; REST handlers
+  are sync. No DuckDB connection is used by two threads at once.
+- Deviation from the plan: locks instead of two single-thread executors (same guarantee, less
+  plumbing). A reseed takes the store lock, then the memory lock, closes the ledger, rebuilds and
+  reopens it; the wrapper (`PublishingMemory`) swaps its adapter under the same lock.
+
+## D-111 · CLI shapes for `api` and `replay` · 2026-10-29
+- Decision: `kairos-defense api [--host 127.0.0.1] [--port 8000] [--static DIR] [--reload]
+  [--dump-openapi PATH] [--memory PATH] [--live-db PATH] [--reseed]`; `--reload` runs uvicorn with
+  `api.app:factory` and passes options through `KD_*` variables. `kairos-defense replay
+  [--incident] [--precompute] [--force] [--reset] [--api URL]` lists live incidents (duration,
+  detections, reruns, cache state) without a flag. `replay --reset` and `memory reseed` try the
+  file first; when DuckDB reports it locked they `POST` to the loopback API (stdlib `urllib`,
+  loopback hosts only) and say so; both exit 1 if nothing answers. The new commands live in
+  `cli_live.py`.
+- Not in the plan: the API seeds an empty or missing ledger at startup (logged), so a fresh
+  checkout serves without a separate `memory seed`.
+
+## D-112 · Web foundation · 2026-10-29
+- Decision: an in-house history-API router (`app/routes.ts`, `app/Link.tsx`); routes `/`
+  (redirects to the first live single-track incident), `/live/:incidentId`, and `/explainer`,
+  `/cases`, `/swarm`, `/evidence`, `/delta`, `/eval`, which say in one sentence which phase builds
+  them. FastAPI serves `index.html` for any other non-`/api`, non-`/ws`, extension-less path.
+  Vanilla Zustand stores (`replayStore`, `matchStore`, `caseStore`, `uiStore`) are written outside
+  React by `state/dispatch.ts`; buffers are mutated in place with a `version` counter; the theater
+  reads `getState()` in `useFrame`; DOM panels use `useThrottledStore` (≤ 10 Hz). The analyst
+  handle is `demo`. The memory rail holds only the match list in phase 7. Bloom and vignette only;
+  film grain waits for phase 8. ESLint bans `setInterval`; the stream's reconnect uses
+  `setTimeout`. Canvas and 3D colors are read from `tokens.css` at runtime (`theme/colors.ts`), so
+  the tokens stay the only vocabulary.
+
+## D-113 · Test and evidence plumbing · 2026-10-29
+- Decision: Playwright's `webServer` starts `kairos-defense api --static web/dist --port 8765
+  --memory data/cache/e2e/memory.duckdb --live-db data/cache/e2e/live.duckdb --reseed` from the repo
+  root (timeout 240 s, never reused), so e2e never touches `data/memory.duckdb` or `make demo`'s
+  port. One worker, not fully parallel: the specs share that server and ledger, and each spec
+  that writes calls `POST /api/admin/reseed` first. `make e2e` = build, `replay --precompute`,
+  `npm run e2e`. Screenshots and `perf.json` go to `reports/figures/ui/` (git-ignored: they change
+  every run); test artifacts go to the already ignored `web/test-results/`. The frame rate is
+  sampled with requestAnimationFrame for 10 s of 1× playback in Playwright's Chromium (launched
+  with `--ignore-gpu-blocklist --use-angle=metal --enable-unsafe-swiftshader`), with the WebGL
+  renderer string; phase 7 records it and asserts nothing. `web/openapi.json` is committed;
+  `test_openapi_json_is_current` and `npm run check:types` keep it and `types.gen.ts` current.
+- Screenshot moments (the plan review's suggestion): first contact, T+45, T+90 and after an
+  approval, at 1920 × 1080 and 1440 × 900, stand in for §17.13's Director beats, which arrive with
+  Director mode in phase 8; the phase 8 reviewer should restore the per-beat set.
+
+## D-114 · Web dependency pins · 2026-10-29
+- Decision: three `~0.186.1`, @react-three/fiber `~9.8.2`, drei `~10.7.9`,
+  @react-three/postprocessing `~3.2.2`, postprocessing `~6.39.5`, motion `~14.7.1`, d3 `^7.9.0`,
+  zustand `^5.0.16`; dev: @playwright/test `1.64.1`, @axe-core/playwright `^4.14.0`,
+  openapi-typescript `^7.13.0`, @types/three `~0.186.0`, @types/d3 `^7.4.3`. React stays 19.3.1
+  (D-019). Vite puts three, R3F, drei and postprocessing in a `vendor-3d` chunk.
+- Found while installing: openapi-typescript 7.13 (the latest) declares a TypeScript `^5` peer and
+  the project pins `~6.0.3` (D-019). `package.json` `overrides` points it at the project's
+  TypeScript; its output typechecks under 6.0 and `check:types` would catch a change.
+
+## D-115 · Flight phase for the `features` message · 2026-10-29
+- Decision: `loiter` when at least 7 of the last 10 seconds pass `signatures.loiter_mask` and the
+  chosen target is an asset; once a loiter run of 10 s has happened, `egress` when `dist_target_m`
+  is above 600 m and rose over the last 5 s, otherwise still `loiter`; `approach` before. On the
+  real live track: approach to T+86, loiter from T+87, egress from T+475.
+- Deviation from the plan: two conditions added. (a) The asset condition: a partial track's target
+  is the fence until the drone settles over an asset (D-081), and the fence pseudo-target is
+  within 600 m of every inbound drone, so the plain rule called T+45 a loiter. (b) No flicker back
+  to approach mid-orbit: radar noise makes single orbit seconds fail the mask.
+
+## D-116 · Memory status per match · 2026-10-29
+- Decision: `memory.views.incident_statuses(rows, at, offsets)`: a member of a closed case reads
+  "Closed as <label> on <Mon D>" (label: the case's active assessment of that incident, else the
+  close rationale; date: the close decision, local to the case's base); a member of an open case
+  "Open case, <n> linked" (approved links); anything else "Open, unattributed".
+
+## D-117 · Lens payload · 2026-10-29
+- Decision (`match/lens.py`): query = tonight's last `rows_used` seconds of the channel; candidate =
+  the matched track's anchored segment (`CandidateBuilder.segment`, the rows the shape distance
+  used), raw units; NaN gaps interpolated; series above 128 averaged down (PAA). Band `max(|n − m|
+  + 1, ceil(band_fraction × max(n, m)))`. `cost` = `dtw.warping_paths(a, b, window=w)` without the
+  padding row and column (accumulated cost; `cost[n−1, m−1]` is the DTW distance), float32 LE
+  row-major base64 with `shape`; `path` = `dtw.best_path`; `euclid_distance` over the first
+  `min(n, m)` samples (`overlap`). dtaidistance's pure-Python `warping_paths` is used (about 5 ms
+  at 128 × 128): `dtw_rerank` records a C bug near the band edge, and on these 1-D inputs both
+  agree.
+
+## D-118 · Replay clock semantics · 2026-10-29
+- Decision: the clock is per session and server-side: `t_s` advances by `speed × wall seconds`
+  while playing, from an injectable monotonic source (tests drive it without waiting); `seek`
+  clamps to [0, duration]; `reset` = seek 0 and pause; the replay pauses itself at the end; a
+  detection is sent once its `t_s ≤ clock`. The web interpolates between 10 Hz clocks for drawing,
+  at most one tick ahead.
+
+## D-119 · `make dev` keeps its recipe · 2026-10-29
+- Context: §16.6 says `make dev` starts both servers with `concurrently`.
+- Decision: keep the existing `trap 'kill 0' INT TERM EXIT; api --reload & npm run dev & wait`
+  recipe: same effect, one less dependency. Vite proxies `/api` and `/ws` to :8000.
+
+## D-120 · Live theater rendering choices · 2026-10-29
+- Decision (`web/src/three/`): only detections within 1.5 replay seconds of the clock spawn radar
+  flashes, packets and RF rings, so a seek's 120 s catch-up does not set off a burst. Packet
+  flights (0.9 s + 0.6 s) and RF rings (0 → 300 m over 1.2 s) run in wall time from arrival;
+  bearing lines (4 s) and the 60 s trail fade in replay time, so they freeze when paused. The
+  drone glyph sits at its latest real radar point (a 0.1 s ease, a snap in reduce motion); heading
+  from the latest feature row. The sweep's bearing is the last detection's bearing + 360° × rate ×
+  replay seconds since it (busy at 5×, hidden in reduce motion; the flashes stay). Asset heights:
+  hq 20, fuel farm 12, housing 9, munitions 8, flight line 6 m. The core sits 2.4 km south-east at
+  120 m and turns only per `ingest`. Auto-degrade uses a ~10-frame smoothed frame time (2 s above
+  25 ms drops bloom, 2 s more halves packets, never back up within a session). "No Remote ID" is
+  shown when no `rid` message arrived in the last 10 replay seconds (Remote ID is not tied to a
+  track, so a multi-drone incident tags every drone).
+- Found in the screenshot review (§17.13) and fixed: (a) labels were cut by the grid and the
+  asset boxes at 1440 × 900, because troika derives its fill and outline materials from a base
+  material by prototype and `material-depthTest={false}` reached only one of them: labels now use
+  a shared base material with depth testing off; (b) drei's `Grid` writes depth, which turned the
+  fence and ground lines into dashes far from the camera: its material no longer writes depth;
+  (c) asset labels moved under their footprints and the "No Remote ID" tag above the drone (they
+  overlapped while the drone orbited the fuel farm); (d) the overview shot moved about 25% closer
+  (the base was small).
+
+## D-121 · Panel choices · 2026-10-29
+- Decision (`web/src/panels/`): panel motion uses `element.animate()` behind a guard (skipped in
+  reduce motion and in jsdom). The Stream folds kind and sensor into one badge ("Radar 1", full id
+  in the tooltip and screen-reader text). The Signals loiter marker appears only when the switch
+  into loiter is inside the 120 s window. The phosphor fade erases the left part of each lane with
+  a gradient, so canvas colors still come from the tokens. Match entries are keyed on the entrance
+  counter and the incident, so a new top-3 set remounts and staggers in while reruns update in
+  place. Approve and Reject are disabled, with a reason, without a proposal seq, while busy, or
+  once decided. Ledger blocks' accessible name starts with their visible text (axe
+  `label-content-name-mismatch`).
+- Found in the screenshot review and fixed: the Recorder's three stats became label and value
+  rows (they wrapped at 1440 px) and "1 rows" became "1 row"; the Ledger chain badge says "Chain
+  verified" with the row count in the footer (it was truncated); panel titles never wrap; the
+  Signals meta reads "Loiter since T+01:27".

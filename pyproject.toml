@@ -32,7 +32,11 @@ fastembed = ["fastembed>=0.4"]
 kairos-defense = "kairos_defense.cli:app"
 
 [dependency-groups]
-dev = ["pytest>=8.3", "ruff>=0.8"]
+dev = [
+    "httpx>=0.28",
+    "pytest>=8.3",
+    "ruff>=0.8",
+]
 
 [build-system]
 requires = ["hatchling>=1.25"]

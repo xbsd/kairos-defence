@@ -9,12 +9,24 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     proxy: {
-      "/api": { target: "http://127.0.0.1:8000", ws: true },
+      "/api": { target: "http://127.0.0.1:8000" },
+      "/ws": { target: "ws://127.0.0.1:8000", ws: true },
     },
   },
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (/node_modules\/(three|@react-three|postprocessing|troika|three-stdlib)/.test(id))
+            return "vendor-3d";
+          if (/node_modules\/(react|react-dom|scheduler|zustand)\//.test(id)) return "vendor";
+          return undefined;
+        },
+      },
+    },
   },
   test: {
     environment: "jsdom",

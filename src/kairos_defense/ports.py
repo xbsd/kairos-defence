@@ -101,5 +101,38 @@ class CaseMemory(Protocol):
     def verify_chain(self) -> int | None: ...  # first broken seq; None if intact (D-014)
 
 
+@dataclass(frozen=True)
+class IngestStat:
+    """One real write batch into a ``live_*`` scratch table (SPEC §16.2): the §16.3 ``ingest``
+    message's fields. ``write_ms`` is the measured insert time."""
+
+    table: str
+    rows: int
+    total_rows: int
+    write_ms: float
+    statement: str  # e.g. "INSERT INTO live_points … 3 rows"
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+class LiveSink(Protocol):
+    """Where a replay records the detections it makes visible (``live_points``, ``live_rf``,
+    ``live_rid``; D-103, D-104)."""
+
+    def append(self, table: str, rows: Sequence[dict]) -> IngestStat: ...  # one batch
+    def count(self, table: str) -> int: ...
+    def reset(self) -> dict[str, int]: ...  # empties every live_* table; rows removed per table
+
+
+class ResultCache(Protocol):
+    """Precomputed live-loop results per incident (D-013, D-105): JSON documents by name
+    (``manifest``, ``features``, ``t0045`` …)."""
+
+    def get(self, incident_id: str, name: str) -> dict | None: ...
+    def put(self, incident_id: str, name: str, doc: dict) -> None: ...
+    def clear(self, incident_id: str) -> int: ...  # documents removed
+
+
 class LLM(Protocol):
     def chat(self, messages: list[dict], tools: list[dict] | None = None) -> dict: ...

@@ -101,7 +101,8 @@ def _del(path: str) -> Callable[[Any], None]:
 
 BAD = [
     ("app", _set("paths.extra_db", "data/x.duckdb"), "extra"),
-    ("app", _set("paths.truth", "data/kairos_defense.duckdb"), "three different files"),
+    ("app", _set("paths.truth", "data/kairos_defense.duckdb"), "four different files"),
+    ("app", _set("paths.live", "data/memory.duckdb"), "four different files"),
     ("app", _set("replay.default_speed", 3.0), "default_speed"),
     ("app", _set("llm.provider", "acme"), "provider"),
     ("world", _set("calendar.end_local", "2025-01-01"), "before end_local"),

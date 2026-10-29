@@ -6,6 +6,7 @@ Every view keeps the row's ``seq`` (its evidence reference) and its transaction 
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
+from datetime import datetime, timedelta
 
 
 def obj(row: Mapping) -> dict:
@@ -101,3 +102,39 @@ def dedupe(xs: Iterable[str | None]) -> list[str]:
         if x is not None and x not in out:
             out.append(x)
     return out
+
+
+def incident_statuses(rows: list[Mapping], at: datetime,
+                      offsets: Mapping[str, int]) -> dict[str, str]:  # fmt: skip
+    """§17.8 memory status per incident as known at ``at`` (D-116), for every incident in a case;
+    callers default the rest to ``"Open, unattributed"``. ``offsets``: installation → UTC offset
+    (hours), for the local date of a close.
+
+    - In a closed case: "Closed as <label> on <Mon D>" (label: the case's active assessment of
+      the incident, else the close rationale; date: the close decision, local to the case's base).
+    - In an open case: "Open case, <n> linked" (n: approved links).
+    """
+    from kairos_defense.memory.asof import snapshot
+    from kairos_defense.memory.ledger import known_at
+
+    known = known_at(rows, at)
+    out: dict[str, str] = {}
+    for f in (r for r in known if r["event_type"] == "case_opened"):
+        snap = snapshot(known, f["case_id"], at)
+        if not snap.exists:
+            continue
+        base = obj(f).get("base")
+        for inc in snap.members:
+            if snap.status == "closed":
+                closes = [d for d in snap.decisions if d["decision"] == "close"]
+                last = closes[-1]
+                label = next((c["value"] for c in reversed(snap.claims)
+                              if c["subject_id"] == inc and c["value"]), None)  # fmt: skip
+                when = last["recorded_at"] + timedelta(hours=offsets.get(base, 0))
+                out[inc] = f"Closed as {label or last['rationale']} on {when:%b} {when.day}"
+            else:
+                out.setdefault(inc, f"Open case, {len(snap.links)} linked")
+    return out
+
+
+UNATTRIBUTED = "Open, unattributed"

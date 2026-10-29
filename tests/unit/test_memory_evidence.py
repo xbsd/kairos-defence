@@ -201,3 +201,17 @@ def test_export_folder_name_and_collision_suffix(mem, tmp_path) -> None:
     b = _export(mem, tmp_path)
     assert b.path.name == f"{a.path.name}-2"
     assert package_dir(tmp_path / "exports", CASE, NOW).name == f"{a.path.name}-3"
+
+
+def test_progress_callback_reports_every_file_with_its_hash(mem, tmp_path) -> None:
+    seen: list[dict] = []
+    res = export_evidence(mem, CASE, approve=True, approved_by="analyst:test", clock=NOW,
+                          out_root=tmp_path / "exports", signer=KEY,
+                          progress=seen.append)  # fmt: skip
+    assert [s["name"] for s in seen] == ["case.json", "case.html", "pubkey.pem",
+                                         "manifest.json", "manifest.sig"]  # fmt: skip
+    assert [s["i"] for s in seen] == [1, 2, 3, 4, 5] and {s["n"] for s in seen} == {5}
+    for s in seen:
+        data = (res.path / s["name"]).read_bytes()
+        assert s["sha256"] == sha256_bytes(data) and s["bytes"] == len(data)
+    assert seen[3]["sha256"] == res.manifest_sha256

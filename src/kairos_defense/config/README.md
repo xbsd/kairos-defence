@@ -81,6 +81,12 @@ Phase 5 additions:
   the analog's own kind). Ships `match_kind`, chosen by the pre-registered training-split rule
   (D-090).
 
+Phase 7 addition:
+
+- `app.yaml` `paths.live` (`data/live.duckdb`): the `live_*` scratch tables replays record into
+  (§16.2, D-103). Required; must differ from `duckdb`, `truth` and `memory`. `replay --reset`
+  empties it.
+
 ## Tests
 
 - `tests/unit/test_config.py`, 42 tests: the shipped files load; decision values survive (D-003,
@@ -107,3 +113,5 @@ Phase 5 additions:
   500 tracks (D-068). Changing either vector key needs `make index`.
 - Phase 4 gate fix 1: `dtw.normalize` (D-079).
 - Phase 5: `paths.cache` (D-084) and `forecast.anchor` (D-090).
+- Phase 7: `paths.live` (`data/live.duckdb`, the `live_*` scratch tables, D-103); the
+  distinct-files check covers `duckdb`, `truth`, `memory` and `live`.

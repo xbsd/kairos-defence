@@ -23,7 +23,7 @@ import base64
 import itertools
 import json
 import os
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -153,8 +153,11 @@ def _json_bytes(doc: Mapping) -> bytes:
 
 def export_evidence(memory: CaseMemory, case_id: str, *, approve: bool, approved_by: str,
                     clock: datetime, out_root: Path | str, signer: Signer | None,
-                    store: TrackStore | None = None) -> ExportResult:  # fmt: skip
-    """Write the package for ``case_id`` as known at ``clock`` and append ``evidence_exported``."""
+                    store: TrackStore | None = None,
+                    progress: Callable[[dict], None] | None = None) -> ExportResult:  # fmt: skip
+    """Write the package for ``case_id`` as known at ``clock`` and append ``evidence_exported``.
+    ``progress`` (the API's streamed export, D-108) is called after each file is written and
+    hashed with ``{"name", "bytes", "sha256", "i", "n"}``."""
     if not approve:
         raise ApprovalRequired("an evidence export needs explicit approval (rule 8): pass "
                                "--approve or confirm in the UI")  # fmt: skip
@@ -166,20 +169,29 @@ def export_evidence(memory: CaseMemory, case_id: str, *, approve: bool, approved
     files = {"case.json": _json_bytes(doc), "case.html": render_html(doc, png).encode()}
     if signer is not None:
         files["pubkey.pem"] = signer.public_pem()
-    for name, data in files.items():
+    n = len(files) + 1 + (signer is not None)
+    done = itertools.count(1)
+
+    def wrote(name: str, data: bytes) -> str:
         (folder / name).write_bytes(data)
+        digest = sha256_bytes(data)
+        if progress is not None:
+            progress({"name": name, "bytes": len(data), "sha256": digest, "i": next(done),
+                      "n": n})  # fmt: skip
+        return digest
+
+    hashes = {name: wrote(name, data) for name, data in files.items()}
     manifest = {
         "format": FORMAT,
         "case_id": case_id,
         "created_at": doc["created_at"],
         "algorithm": "sha256",
-        "files": {n: sha256_bytes(d) for n, d in files.items()},
+        "files": hashes,
     }
     mbytes = _json_bytes(manifest)
-    (folder / MANIFEST).write_bytes(mbytes)
+    msha = wrote(MANIFEST, mbytes)
     if signer is not None:
-        (folder / SIGNATURE).write_bytes(base64.b64encode(signer.sign(mbytes)) + b"\n")
-    msha = sha256_bytes(mbytes)
+        wrote(SIGNATURE, base64.b64encode(signer.sign(mbytes)) + b"\n")
     seq = memory.append({
         "event_type": "evidence_exported", "actor": "system", "recorded_at": clock,
         "case_id": case_id, "subject_id": doc["snapshot"]["founder"],

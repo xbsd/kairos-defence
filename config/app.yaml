@@ -2,6 +2,7 @@ paths:
   duckdb: data/kairos_defense.duckdb
   truth: data/truth.duckdb          # eval only (CLAUDE.md rule 2)
   memory: data/memory.duckdb
+  live: data/live.duckdb            # live_* scratch tables of replays (D-103)
   lancedb: data/lancedb
   models: models
   reports: reports

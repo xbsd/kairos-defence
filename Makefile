@@ -53,9 +53,10 @@ demo: ## Build the web app and serve everything from FastAPI on :8000 (offline)
 	$(KD) replay --precompute
 	$(KD) api --static web/dist
 
-e2e: ## Playwright end-to-end tests, screenshots and accessibility checks (phase 7)
-	@if grep -q '"e2e"' web/package.json; then $(NPM) run e2e; \
-	else echo "e2e is not built yet: phase 7 adds Playwright."; fi
+e2e: ## Playwright end-to-end tests, UI screenshots and accessibility checks
+	$(NPM) run build
+	$(KD) replay --precompute
+	$(NPM) run e2e
 
 mcp: ## MCP server over stdio
 	$(KD) mcp

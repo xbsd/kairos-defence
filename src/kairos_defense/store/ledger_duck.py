@@ -226,3 +226,43 @@ class DuckCaseMemory:
 
 def _superseded_in(batch: dict[int, dict], seq: int) -> bool:
     return any(r["supersedes_seq"] == seq for r in batch.values())
+
+
+def _remove(*paths: Path) -> None:
+    for p in paths:
+        if p.exists():
+            p.unlink()
+
+
+def check_unlocked(path: Path | str, app: AppConfig) -> None:
+    """Raise ``LedgerLocked`` if another process holds ``path`` (DuckDB's file lock)."""
+    p = Path(path)
+    if p.exists():
+        _open(p, app, read_only=False).close()
+
+
+def reseed_ledger(path: Path | str, app: AppConfig, store, scenario):
+    """Rebuild the ledger at ``path`` from seed (D-010): seed a temporary file next to it, verify
+    the chain, close it, remove stale WAL files, then ``os.replace``. Returns the ``SeedSummary``.
+    Raises ``LedgerLocked`` when another process holds ``path`` (the caller closes its own
+    connection first), ``LedgerError`` when the new chain does not verify (``path`` unchanged).
+    Used by ``memory reseed`` and ``POST /api/admin/reseed``."""
+    import os
+
+    from kairos_defense.memory.seed import seed
+
+    p = Path(path)
+    check_unlocked(p, app)
+    tmp = p.with_name(p.name + ".reseed.tmp")
+    _remove(tmp, Path(f"{tmp}.wal"))
+    with DuckCaseMemory(tmp, app) as mem:
+        summary = seed(mem, store, scenario)
+        broken = mem.verify_chain()
+    if broken is not None:
+        _remove(tmp)
+        raise LedgerError(f"reseed failed: the new chain is broken at seq {broken}; {p} is "
+                          "unchanged")  # fmt: skip
+    _remove(Path(f"{p}.wal"))
+    os.replace(tmp, p)
+    log.info("reseeded %s (%d rows)", p, summary.rows)
+    return summary

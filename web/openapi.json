@@ -1,0 +1,3594 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "Kairos Defense API",
+  "description": "Synthetic data only. REST (SPEC \u00a716.4) and the replay stream /ws/replay/{incident_id} (\u00a716.3).",
+  "version": "0.0.1"
+ },
+ "paths": {
+  "/api/health": {
+   "get": {
+    "summary": "Health",
+    "operationId": "health_api_health_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Health"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/installations": {
+   "get": {
+    "summary": "Installations",
+    "operationId": "installations_api_installations_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/Installation"
+         },
+         "type": "array",
+         "title": "Response Installations Api Installations Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/installations/{installation_id}/scene": {
+   "get": {
+    "summary": "Scene",
+    "operationId": "scene_api_installations__installation_id__scene_get",
+    "parameters": [
+     {
+      "name": "installation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Installation Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Scene"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/incidents": {
+   "get": {
+    "summary": "Incidents",
+    "operationId": "incidents_api_incidents_get",
+    "parameters": [
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "pattern": "^(live|history)$",
+       "default": "live",
+       "title": "Status"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 5000,
+       "minimum": 1,
+       "default": 500,
+       "title": "Limit"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/IncidentSummary"
+         },
+         "title": "Response Incidents Api Incidents Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/match/{incident_id}": {
+   "get": {
+    "summary": "Match",
+    "description": "Matches at a replay second: the latest rerun at or before ``at`` (D-105).",
+    "operationId": "match_api_match__incident_id__get",
+    "parameters": [
+     {
+      "name": "incident_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Incident Id"
+      }
+     },
+     {
+      "name": "at",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "number",
+       "minimum": 0,
+       "title": "At"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MatchResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/dtw/{incident_id}/{match_track_id}": {
+   "get": {
+    "summary": "Dtw",
+    "description": "The lens payload: the same shape as the stream's ``dtw`` message (``DtwMsg``).",
+    "operationId": "dtw_api_dtw__incident_id___match_track_id__get",
+    "parameters": [
+     {
+      "name": "incident_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Incident Id"
+      }
+     },
+     {
+      "name": "match_track_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Match Track Id"
+      }
+     },
+     {
+      "name": "at",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "number",
+       "minimum": 0,
+       "title": "At"
+      }
+     },
+     {
+      "name": "channel",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "dist_target_m",
+       "title": "Channel"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DtwMsg"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/history/{track_id}": {
+   "get": {
+    "summary": "History",
+    "description": "A past track's 1 Hz path (ghost trails, phase 8): target-relative or region meters. Live\ntracks are refused (rule 3: tonight is not history).",
+    "operationId": "history_api_history__track_id__get",
+    "parameters": [
+     {
+      "name": "track_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Track Id"
+      }
+     },
+     {
+      "name": "frame",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "pattern": "^(target|region)$",
+       "default": "target",
+       "title": "Frame"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": true,
+         "title": "Response History Api History  Track Id  Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/eval/latest": {
+   "get": {
+    "summary": "Eval Latest",
+    "description": "The newest ``reports/eval_<date>.json`` written by the evaluation harness.",
+    "operationId": "eval_latest_api_eval_latest_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "type": "object",
+         "title": "Response Eval Latest Api Eval Latest Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/schema/stream": {
+   "get": {
+    "summary": "Schema Stream",
+    "description": "One ``StreamMessage``: exists so OpenAPI (and the generated types) include every type.",
+    "operationId": "schema_stream_api_schema_stream_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/StreamSchema"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/cases/{case_id}": {
+   "get": {
+    "summary": "Case",
+    "description": "The case as known at ``as_of`` (transaction time, \u00a715.4; default the ledger head).",
+    "operationId": "case_api_cases__case_id__get",
+    "parameters": [
+     {
+      "name": "case_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Case Id"
+      }
+     },
+     {
+      "name": "as_of",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "As Of"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": true,
+         "title": "Response Case Api Cases  Case Id  Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/cases/{case_id}/diff": {
+   "get": {
+    "summary": "Diff",
+    "operationId": "diff_api_cases__case_id__diff_get",
+    "parameters": [
+     {
+      "name": "case_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Case Id"
+      }
+     },
+     {
+      "name": "t1",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "T1"
+      }
+     },
+     {
+      "name": "t2",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "T2"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": true,
+         "title": "Response Diff Api Cases  Case Id  Diff Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/cases/{case_id}/graph": {
+   "get": {
+    "summary": "Graph",
+    "operationId": "graph_api_cases__case_id__graph_get",
+    "parameters": [
+     {
+      "name": "case_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Case Id"
+      }
+     },
+     {
+      "name": "as_of",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "As Of"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": true,
+         "title": "Response Graph Api Cases  Case Id  Graph Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/cases/{case_id}/links": {
+   "post": {
+    "summary": "Links",
+    "description": "An analyst approves or rejects one proposal (rule 8): ``link_approved`` or\n``link_rejected``. 404 unknown proposal, 409 wrong case or already decided.",
+    "operationId": "links_api_cases__case_id__links_post",
+    "parameters": [
+     {
+      "name": "case_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Case Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LinkRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LinkResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/cases/{case_id}/evidence": {
+   "post": {
+    "summary": "Evidence",
+    "description": "Export an evidence package (``approve: true`` required, rule 8) and stream the real\nhashing progress as NDJSON: one ``EvidenceFileLine`` per file, then ``EvidenceDoneLine``\nwith the verification checks (or one ``{\"type\": \"error\"}`` line).",
+    "operationId": "evidence_api_cases__case_id__evidence_post",
+    "parameters": [
+     {
+      "name": "case_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Case Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EvidenceRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "NDJSON: one EvidenceLine per line",
+      "content": {
+       "application/json": {
+        "schema": {
+         "oneOf": [
+          {
+           "$ref": "#/components/schemas/EvidenceFileLine"
+          },
+          {
+           "$ref": "#/components/schemas/EvidenceDoneLine"
+          },
+          {
+           "$ref": "#/components/schemas/EvidenceErrorLine"
+          }
+         ],
+         "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+           "file": "#/components/schemas/EvidenceFileLine",
+           "done": "#/components/schemas/EvidenceDoneLine",
+           "error": "#/components/schemas/EvidenceErrorLine"
+          }
+         },
+         "title": "Response 200 Evidence Api Cases  Case Id  Evidence Post"
+        }
+       },
+       "application/x-ndjson": {}
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/ledger/verify": {
+   "get": {
+    "summary": "Ledger Verify",
+    "operationId": "ledger_verify_api_ledger_verify_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LedgerVerify"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/ledger/tail": {
+   "get": {
+    "summary": "Ledger Tail",
+    "operationId": "ledger_tail_api_ledger_tail_get",
+    "parameters": [
+     {
+      "name": "n",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 200,
+       "minimum": 1,
+       "default": 12,
+       "title": "N"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/LedgerBlock"
+         },
+         "title": "Response Ledger Tail Api Ledger Tail Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/ledger/{seq}": {
+   "get": {
+    "summary": "Ledger Record",
+    "operationId": "ledger_record_api_ledger__seq__get",
+    "parameters": [
+     {
+      "name": "seq",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Seq"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LedgerRecord"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/delta": {
+   "get": {
+    "summary": "Delta",
+    "description": "The shift delta (\u00a715.8): what the memory learned in ``(since, until]``.",
+    "operationId": "delta_api_delta_get",
+    "parameters": [
+     {
+      "name": "since",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Since"
+      }
+     },
+     {
+      "name": "until",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Until"
+      }
+     },
+     {
+      "name": "installation",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Installation"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": true,
+         "title": "Response Delta Api Delta Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/admin/reset": {
+   "post": {
+    "summary": "Admin Reset",
+    "description": "Empty the ``live_*`` scratch tables (never the ledger), D-010.",
+    "operationId": "admin_reset_api_admin_reset_post",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResetResponse"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/admin/reseed": {
+   "post": {
+    "summary": "Admin Reseed",
+    "description": "Rebuild the ledger from seed (D-010); clients refetch ``/api/ledger/tail`` after it.",
+    "operationId": "admin_reseed_api_admin_reseed_post",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ReseedResponse"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "Analog": {
+    "properties": {
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "track_id": {
+      "type": "string",
+      "title": "Track Id"
+     },
+     "score": {
+      "type": "number",
+      "title": "Score"
+     },
+     "target_kind": {
+      "type": "string",
+      "title": "Target Kind"
+     },
+     "recovery_rel_m": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array",
+      "title": "Recovery Rel M"
+     },
+     "rotation_deg": {
+      "type": "number",
+      "title": "Rotation Deg"
+     },
+     "anchor_asset_id": {
+      "type": "string",
+      "title": "Anchor Asset Id"
+     },
+     "aligned_t_s": {
+      "type": "integer",
+      "title": "Aligned T S"
+     },
+     "recovery_x_m": {
+      "type": "number",
+      "title": "Recovery X M"
+     },
+     "recovery_y_m": {
+      "type": "number",
+      "title": "Recovery Y M"
+     },
+     "remainder_points": {
+      "type": "integer",
+      "title": "Remainder Points"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "incident_id",
+     "track_id",
+     "score",
+     "target_kind",
+     "recovery_rel_m",
+     "rotation_deg",
+     "anchor_asset_id",
+     "aligned_t_s",
+     "recovery_x_m",
+     "recovery_y_m",
+     "remainder_points"
+    ],
+    "title": "Analog"
+   },
+   "Asset": {
+    "properties": {
+     "asset_id": {
+      "type": "string",
+      "title": "Asset Id"
+     },
+     "kind": {
+      "type": "string",
+      "title": "Kind"
+     },
+     "polygon": {
+      "items": {
+       "prefixItems": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "number"
+        }
+       ],
+       "type": "array",
+       "maxItems": 2,
+       "minItems": 2
+      },
+      "type": "array",
+      "title": "Polygon"
+     },
+     "centroid_x_m": {
+      "type": "number",
+      "title": "Centroid X M"
+     },
+     "centroid_y_m": {
+      "type": "number",
+      "title": "Centroid Y M"
+     }
+    },
+    "type": "object",
+    "required": [
+     "asset_id",
+     "kind",
+     "polygon",
+     "centroid_x_m",
+     "centroid_y_m"
+    ],
+    "title": "Asset"
+   },
+   "ClockMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "clock",
+      "title": "Type"
+     },
+     "t_s": {
+      "type": "number",
+      "title": "T S"
+     },
+     "ts": {
+      "type": "string",
+      "title": "Ts"
+     },
+     "speed": {
+      "type": "number",
+      "title": "Speed"
+     },
+     "playing": {
+      "type": "boolean",
+      "title": "Playing"
+     },
+     "seeked": {
+      "type": "boolean",
+      "title": "Seeked"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "t_s",
+     "ts",
+     "speed",
+     "playing",
+     "seeked"
+    ],
+    "title": "ClockMsg"
+   },
+   "Clue": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "enum": [
+       "vehicle",
+       "road"
+      ],
+      "title": "Type"
+     },
+     "value": {
+      "type": "string",
+      "title": "Value"
+     },
+     "start": {
+      "type": "integer",
+      "title": "Start"
+     },
+     "end": {
+      "type": "integer",
+      "title": "End"
+     },
+     "links": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Links"
+     },
+     "linked": {
+      "type": "boolean",
+      "title": "Linked"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "value",
+     "start",
+     "end",
+     "links",
+     "linked"
+    ],
+    "title": "Clue"
+   },
+   "DtwCmd": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "dtw",
+      "title": "Type"
+     },
+     "match_track_id": {
+      "type": "string",
+      "title": "Match Track Id"
+     },
+     "channel": {
+      "type": "string",
+      "title": "Channel",
+      "default": "dist_target_m"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "match_track_id"
+    ],
+    "title": "DtwCmd"
+   },
+   "DtwMsg": {
+    "properties": {
+     "match_track_id": {
+      "type": "string",
+      "title": "Match Track Id"
+     },
+     "channel": {
+      "type": "string",
+      "title": "Channel"
+     },
+     "query": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array",
+      "title": "Query"
+     },
+     "candidate": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array",
+      "title": "Candidate"
+     },
+     "path": {
+      "items": {
+       "prefixItems": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "integer"
+        }
+       ],
+       "type": "array",
+       "maxItems": 2,
+       "minItems": 2
+      },
+      "type": "array",
+      "title": "Path"
+     },
+     "cost": {
+      "type": "string",
+      "title": "Cost"
+     },
+     "shape": {
+      "prefixItems": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "integer"
+       }
+      ],
+      "type": "array",
+      "maxItems": 2,
+      "minItems": 2,
+      "title": "Shape"
+     },
+     "band": {
+      "type": "integer",
+      "title": "Band"
+     },
+     "dtw_distance": {
+      "type": "number",
+      "title": "Dtw Distance"
+     },
+     "euclid_distance": {
+      "type": "number",
+      "title": "Euclid Distance"
+     },
+     "overlap": {
+      "type": "integer",
+      "title": "Overlap"
+     },
+     "warp_ratio": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Warp Ratio"
+     },
+     "warp_text": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Warp Text"
+     },
+     "type": {
+      "type": "string",
+      "const": "dtw",
+      "title": "Type"
+     },
+     "t_s": {
+      "type": "number",
+      "title": "T S"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "match_track_id",
+     "channel",
+     "query",
+     "candidate",
+     "path",
+     "cost",
+     "shape",
+     "band",
+     "dtw_distance",
+     "euclid_distance",
+     "overlap",
+     "warp_ratio",
+     "warp_text",
+     "type",
+     "t_s"
+    ],
+    "title": "DtwMsg"
+   },
+   "ErrorMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "error",
+      "title": "Type"
+     },
+     "message": {
+      "type": "string",
+      "title": "Message"
+     },
+     "recoverable": {
+      "type": "boolean",
+      "title": "Recoverable"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "message",
+     "recoverable"
+    ],
+    "title": "ErrorMsg"
+   },
+   "EvidenceCheck": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "status": {
+      "type": "string",
+      "enum": [
+       "PASS",
+       "FAIL",
+       "SKIP"
+      ],
+      "title": "Status"
+     },
+     "detail": {
+      "type": "string",
+      "title": "Detail"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "status",
+     "detail"
+    ],
+    "title": "EvidenceCheck"
+   },
+   "EvidenceDoneLine": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "done",
+      "title": "Type"
+     },
+     "dir": {
+      "type": "string",
+      "title": "Dir"
+     },
+     "manifest_sha256": {
+      "type": "string",
+      "title": "Manifest Sha256"
+     },
+     "seq": {
+      "type": "integer",
+      "title": "Seq"
+     },
+     "head_seq": {
+      "type": "integer",
+      "title": "Head Seq"
+     },
+     "signed": {
+      "type": "boolean",
+      "title": "Signed"
+     },
+     "checks": {
+      "items": {
+       "$ref": "#/components/schemas/EvidenceCheck"
+      },
+      "type": "array",
+      "title": "Checks"
+     },
+     "passed": {
+      "type": "boolean",
+      "title": "Passed"
+     }
+    },
+    "type": "object",
+    "required": [
+     "type",
+     "dir",
+     "manifest_sha256",
+     "seq",
+     "head_seq",
+     "signed",
+     "checks",
+     "passed"
+    ],
+    "title": "EvidenceDoneLine"
+   },
+   "EvidenceErrorLine": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "error",
+      "title": "Type"
+     },
+     "message": {
+      "type": "string",
+      "title": "Message"
+     }
+    },
+    "type": "object",
+    "required": [
+     "type",
+     "message"
+    ],
+    "title": "EvidenceErrorLine"
+   },
+   "EvidenceFileLine": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "file",
+      "title": "Type"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "bytes": {
+      "type": "integer",
+      "title": "Bytes"
+     },
+     "sha256": {
+      "type": "string",
+      "title": "Sha256"
+     },
+     "i": {
+      "type": "integer",
+      "title": "I"
+     },
+     "n": {
+      "type": "integer",
+      "title": "N"
+     }
+    },
+    "type": "object",
+    "required": [
+     "type",
+     "name",
+     "bytes",
+     "sha256",
+     "i",
+     "n"
+    ],
+    "title": "EvidenceFileLine"
+   },
+   "EvidenceRequest": {
+    "properties": {
+     "approve": {
+      "type": "boolean",
+      "title": "Approve",
+      "default": false
+     },
+     "analyst": {
+      "type": "string",
+      "title": "Analyst",
+      "default": "demo"
+     },
+     "clock": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Clock"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "title": "EvidenceRequest"
+   },
+   "FeaturesMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "features",
+      "title": "Type"
+     },
+     "t_s": {
+      "type": "number",
+      "title": "T S"
+     },
+     "track_id": {
+      "type": "string",
+      "title": "Track Id"
+     },
+     "target_asset_id": {
+      "type": "string",
+      "title": "Target Asset Id"
+     },
+     "speed_ms": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Speed Ms"
+     },
+     "alt_m": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Alt M"
+     },
+     "turn_rate_dps": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Turn Rate Dps"
+     },
+     "dist_target_m": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Dist Target M"
+     },
+     "vspeed_ms": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Vspeed Ms"
+     },
+     "heading_deg": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Heading Deg"
+     },
+     "phase": {
+      "type": "string",
+      "enum": [
+       "approach",
+       "loiter",
+       "egress"
+      ],
+      "title": "Phase"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "t_s",
+     "track_id",
+     "target_asset_id",
+     "speed_ms",
+     "alt_m",
+     "turn_rate_dps",
+     "dist_target_m",
+     "vspeed_ms",
+     "heading_deg",
+     "phase"
+    ],
+    "title": "FeaturesMsg"
+   },
+   "ForecastMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "forecast",
+      "title": "Type"
+     },
+     "t_s": {
+      "type": "number",
+      "title": "T S"
+     },
+     "at_s": {
+      "type": "integer",
+      "title": "At S"
+     },
+     "target_asset_id": {
+      "type": "string",
+      "title": "Target Asset Id"
+     },
+     "anchor": {
+      "type": "string",
+      "title": "Anchor"
+     },
+     "center_x_m": {
+      "type": "number",
+      "title": "Center X M"
+     },
+     "center_y_m": {
+      "type": "number",
+      "title": "Center Y M"
+     },
+     "radius_m": {
+      "type": "number",
+      "title": "Radius M"
+     },
+     "path": {
+      "items": {
+       "prefixItems": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "number"
+        }
+       ],
+       "type": "array",
+       "maxItems": 2,
+       "minItems": 2
+      },
+      "type": "array",
+      "title": "Path"
+     },
+     "roads": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Roads"
+     },
+     "analogs": {
+      "items": {
+       "$ref": "#/components/schemas/Analog"
+      },
+      "type": "array",
+      "title": "Analogs"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "t_s",
+     "at_s",
+     "target_asset_id",
+     "anchor",
+     "center_x_m",
+     "center_y_m",
+     "radius_m",
+     "path",
+     "roads",
+     "analogs"
+    ],
+    "title": "ForecastMsg"
+   },
+   "HTTPValidationError": {
+    "properties": {
+     "detail": {
+      "items": {
+       "$ref": "#/components/schemas/ValidationError"
+      },
+      "type": "array",
+      "title": "Detail"
+     }
+    },
+    "type": "object",
+    "title": "HTTPValidationError"
+   },
+   "Health": {
+    "properties": {
+     "status": {
+      "type": "string",
+      "enum": [
+       "ok",
+       "degraded"
+      ],
+      "title": "Status"
+     },
+     "version": {
+      "type": "string",
+      "title": "Version"
+     },
+     "live_incidents": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Live Incidents"
+     },
+     "matching": {
+      "type": "boolean",
+      "title": "Matching"
+     },
+     "problems": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Problems"
+     },
+     "ledger_rows": {
+      "type": "integer",
+      "title": "Ledger Rows"
+     },
+     "ledger_head_seq": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Ledger Head Seq"
+     }
+    },
+    "type": "object",
+    "required": [
+     "status",
+     "version",
+     "live_incidents",
+     "matching",
+     "problems",
+     "ledger_rows",
+     "ledger_head_seq"
+    ],
+    "title": "Health"
+   },
+   "HelloMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "hello",
+      "title": "Type"
+     },
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "region_id": {
+      "type": "string",
+      "title": "Region Id"
+     },
+     "start_ts": {
+      "type": "string",
+      "title": "Start Ts"
+     },
+     "duration_s": {
+      "type": "number",
+      "title": "Duration S"
+     },
+     "speed": {
+      "type": "number",
+      "title": "Speed"
+     },
+     "playing": {
+      "type": "boolean",
+      "title": "Playing"
+     },
+     "tracks": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Tracks"
+     },
+     "is_swarm": {
+      "type": "boolean",
+      "title": "Is Swarm"
+     },
+     "matching": {
+      "type": "boolean",
+      "title": "Matching"
+     },
+     "min_track_s": {
+      "type": "number",
+      "title": "Min Track S"
+     },
+     "rerun_every_s": {
+      "type": "number",
+      "title": "Rerun Every S"
+     },
+     "utc_offset_hours": {
+      "type": "integer",
+      "title": "Utc Offset Hours"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "incident_id",
+     "installation_id",
+     "region_id",
+     "start_ts",
+     "duration_s",
+     "speed",
+     "playing",
+     "tracks",
+     "is_swarm",
+     "matching",
+     "min_track_s",
+     "rerun_every_s",
+     "utc_offset_hours"
+    ],
+    "title": "HelloMsg"
+   },
+   "IncidentSummary": {
+    "properties": {
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "region_id": {
+      "type": "string",
+      "title": "Region Id"
+     },
+     "start_ts": {
+      "type": "string",
+      "title": "Start Ts"
+     },
+     "end_ts": {
+      "type": "string",
+      "title": "End Ts"
+     },
+     "duration_s": {
+      "type": "number",
+      "title": "Duration S"
+     },
+     "n_tracks": {
+      "type": "integer",
+      "title": "N Tracks"
+     },
+     "is_swarm": {
+      "type": "boolean",
+      "title": "Is Swarm"
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     }
+    },
+    "type": "object",
+    "required": [
+     "incident_id",
+     "installation_id",
+     "region_id",
+     "start_ts",
+     "end_ts",
+     "duration_s",
+     "n_tracks",
+     "is_swarm",
+     "status"
+    ],
+    "title": "IncidentSummary"
+   },
+   "IngestMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "ingest",
+      "title": "Type"
+     },
+     "table": {
+      "type": "string",
+      "enum": [
+       "live_points",
+       "live_rf",
+       "live_rid"
+      ],
+      "title": "Table"
+     },
+     "rows": {
+      "type": "integer",
+      "title": "Rows"
+     },
+     "total_rows": {
+      "type": "integer",
+      "title": "Total Rows"
+     },
+     "write_ms": {
+      "type": "number",
+      "title": "Write Ms"
+     },
+     "statement": {
+      "type": "string",
+      "title": "Statement"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "table",
+     "rows",
+     "total_rows",
+     "write_ms",
+     "statement"
+    ],
+    "title": "IngestMsg"
+   },
+   "Installation": {
+    "properties": {
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "region_id": {
+      "type": "string",
+      "title": "Region Id"
+     },
+     "utc_offset_hours": {
+      "type": "integer",
+      "title": "Utc Offset Hours"
+     },
+     "origin_x_m": {
+      "type": "number",
+      "title": "Origin X M"
+     },
+     "origin_y_m": {
+      "type": "number",
+      "title": "Origin Y M"
+     },
+     "rotation_deg": {
+      "type": "number",
+      "title": "Rotation Deg"
+     }
+    },
+    "type": "object",
+    "required": [
+     "installation_id",
+     "name",
+     "region_id",
+     "utc_offset_hours",
+     "origin_x_m",
+     "origin_y_m",
+     "rotation_deg"
+    ],
+    "title": "Installation"
+   },
+   "LedgerBlock": {
+    "properties": {
+     "seq": {
+      "type": "integer",
+      "title": "Seq"
+     },
+     "event_type": {
+      "type": "string",
+      "title": "Event Type"
+     },
+     "actor": {
+      "type": "string",
+      "title": "Actor"
+     },
+     "recorded_at": {
+      "type": "string",
+      "title": "Recorded At"
+     },
+     "hash": {
+      "type": "string",
+      "title": "Hash"
+     },
+     "prev_hash": {
+      "type": "string",
+      "title": "Prev Hash"
+     },
+     "case_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Case Id"
+     },
+     "subject_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Subject Id"
+     }
+    },
+    "type": "object",
+    "required": [
+     "seq",
+     "event_type",
+     "actor",
+     "recorded_at",
+     "hash",
+     "prev_hash",
+     "case_id",
+     "subject_id"
+    ],
+    "title": "LedgerBlock"
+   },
+   "LedgerMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "ledger",
+      "title": "Type"
+     },
+     "seq": {
+      "type": "integer",
+      "title": "Seq"
+     },
+     "event_type": {
+      "type": "string",
+      "title": "Event Type"
+     },
+     "actor": {
+      "type": "string",
+      "title": "Actor"
+     },
+     "recorded_at": {
+      "type": "string",
+      "title": "Recorded At"
+     },
+     "hash": {
+      "type": "string",
+      "title": "Hash"
+     },
+     "prev_hash": {
+      "type": "string",
+      "title": "Prev Hash"
+     },
+     "case_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Case Id"
+     },
+     "subject_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Subject Id"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "seq",
+     "event_type",
+     "actor",
+     "recorded_at",
+     "hash",
+     "prev_hash",
+     "case_id",
+     "subject_id"
+    ],
+    "title": "LedgerMsg"
+   },
+   "LedgerRecord": {
+    "properties": {
+     "seq": {
+      "type": "integer",
+      "title": "Seq"
+     },
+     "event_type": {
+      "type": "string",
+      "title": "Event Type"
+     },
+     "actor": {
+      "type": "string",
+      "title": "Actor"
+     },
+     "recorded_at": {
+      "type": "string",
+      "title": "Recorded At"
+     },
+     "hash": {
+      "type": "string",
+      "title": "Hash"
+     },
+     "prev_hash": {
+      "type": "string",
+      "title": "Prev Hash"
+     },
+     "case_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Case Id"
+     },
+     "subject_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Subject Id"
+     },
+     "predicate": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Predicate"
+     },
+     "object_json": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Object Json"
+     },
+     "valid_from": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Valid From"
+     },
+     "valid_to": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Valid To"
+     },
+     "source_type": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source Type"
+     },
+     "source_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source Id"
+     },
+     "source_grade": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source Grade"
+     },
+     "confidence": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Confidence"
+     },
+     "supersedes_seq": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Supersedes Seq"
+     }
+    },
+    "type": "object",
+    "required": [
+     "seq",
+     "event_type",
+     "actor",
+     "recorded_at",
+     "hash",
+     "prev_hash",
+     "case_id",
+     "subject_id",
+     "predicate",
+     "object_json",
+     "valid_from",
+     "valid_to",
+     "source_type",
+     "source_id",
+     "source_grade",
+     "confidence",
+     "supersedes_seq"
+    ],
+    "title": "LedgerRecord"
+   },
+   "LedgerVerify": {
+    "properties": {
+     "intact": {
+      "type": "boolean",
+      "title": "Intact"
+     },
+     "first_broken_seq": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "First Broken Seq"
+     },
+     "rows": {
+      "type": "integer",
+      "title": "Rows"
+     },
+     "head_seq": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Head Seq"
+     },
+     "head_hash": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Head Hash"
+     }
+    },
+    "type": "object",
+    "required": [
+     "intact",
+     "first_broken_seq",
+     "rows",
+     "head_seq",
+     "head_hash"
+    ],
+    "title": "LedgerVerify"
+   },
+   "LinkRequest": {
+    "properties": {
+     "proposal_seq": {
+      "type": "integer",
+      "title": "Proposal Seq"
+     },
+     "decision": {
+      "type": "string",
+      "enum": [
+       "approve",
+       "reject"
+      ],
+      "title": "Decision"
+     },
+     "analyst": {
+      "type": "string",
+      "title": "Analyst",
+      "default": "demo"
+     },
+     "clock": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Clock"
+     },
+     "rationale": {
+      "type": "string",
+      "title": "Rationale",
+      "default": ""
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "proposal_seq",
+     "decision"
+    ],
+    "title": "LinkRequest"
+   },
+   "LinkResponse": {
+    "properties": {
+     "case_id": {
+      "type": "string",
+      "title": "Case Id"
+     },
+     "proposal_seq": {
+      "type": "integer",
+      "title": "Proposal Seq"
+     },
+     "decision": {
+      "type": "string",
+      "enum": [
+       "approve",
+       "reject"
+      ],
+      "title": "Decision"
+     },
+     "block": {
+      "$ref": "#/components/schemas/LedgerBlock"
+     }
+    },
+    "type": "object",
+    "required": [
+     "case_id",
+     "proposal_seq",
+     "decision",
+     "block"
+    ],
+    "title": "LinkResponse"
+   },
+   "MatchItem": {
+    "properties": {
+     "query_incident_id": {
+      "type": "string",
+      "title": "Query Incident Id"
+     },
+     "track_id": {
+      "type": "string",
+      "title": "Track Id"
+     },
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "start_ts": {
+      "type": "string",
+      "title": "Start Ts"
+     },
+     "score": {
+      "type": "number",
+      "title": "Score"
+     },
+     "shape_sim": {
+      "type": "number",
+      "title": "Shape Sim"
+     },
+     "features": {
+      "additionalProperties": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "object",
+      "title": "Features"
+     },
+     "reasons": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Reasons"
+     },
+     "warp_ratio": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Warp Ratio"
+     },
+     "window_offset_s": {
+      "type": "integer",
+      "title": "Window Offset S"
+     },
+     "model_version": {
+      "type": "string",
+      "title": "Model Version"
+     },
+     "rank": {
+      "type": "integer",
+      "title": "Rank"
+     },
+     "local_start": {
+      "type": "string",
+      "title": "Local Start"
+     },
+     "proposal_seq": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Proposal Seq"
+     },
+     "decision": {
+      "anyOf": [
+       {
+        "type": "string",
+        "enum": [
+         "approved",
+         "rejected"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Decision"
+     },
+     "memory_status": {
+      "type": "string",
+      "title": "Memory Status"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "query_incident_id",
+     "track_id",
+     "incident_id",
+     "installation_id",
+     "start_ts",
+     "score",
+     "shape_sim",
+     "features",
+     "reasons",
+     "warp_ratio",
+     "window_offset_s",
+     "model_version",
+     "rank",
+     "local_start",
+     "proposal_seq",
+     "decision",
+     "memory_status"
+    ],
+    "title": "MatchItem",
+    "description": "\u00a710.8 fields, plus the rank, the local start and what the memory says (D-107, D-116)."
+   },
+   "MatchMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "match",
+      "title": "Type"
+     },
+     "t_s": {
+      "type": "number",
+      "title": "T S"
+     },
+     "model_version": {
+      "type": "string",
+      "title": "Model Version"
+     },
+     "elapsed_ms": {
+      "type": "number",
+      "title": "Elapsed Ms"
+     },
+     "cached": {
+      "type": "boolean",
+      "title": "Cached"
+     },
+     "case_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Case Id"
+     },
+     "query_track": {
+      "type": "string",
+      "title": "Query Track"
+     },
+     "target_asset_id": {
+      "type": "string",
+      "title": "Target Asset Id"
+     },
+     "matches": {
+      "items": {
+       "$ref": "#/components/schemas/MatchItem"
+      },
+      "type": "array",
+      "title": "Matches"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "t_s",
+     "model_version",
+     "elapsed_ms",
+     "cached",
+     "case_id",
+     "query_track",
+     "target_asset_id",
+     "matches"
+    ],
+    "title": "MatchMsg"
+   },
+   "MatchResponse": {
+    "properties": {
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "at": {
+      "type": "number",
+      "title": "At"
+     },
+     "t_s": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "T S"
+     },
+     "waiting_for_s": {
+      "type": "number",
+      "title": "Waiting For S"
+     },
+     "model_version": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Model Version"
+     },
+     "elapsed_ms": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Elapsed Ms"
+     },
+     "cached": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Cached"
+     },
+     "case_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Case Id"
+     },
+     "matches": {
+      "items": {
+       "$ref": "#/components/schemas/MatchItem"
+      },
+      "type": "array",
+      "title": "Matches"
+     }
+    },
+    "type": "object",
+    "required": [
+     "incident_id",
+     "at",
+     "t_s",
+     "waiting_for_s",
+     "model_version",
+     "elapsed_ms",
+     "cached",
+     "case_id",
+     "matches"
+    ],
+    "title": "MatchResponse"
+   },
+   "Park": {
+    "properties": {
+     "park_id": {
+      "type": "string",
+      "title": "Park Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "center_x_m": {
+      "type": "number",
+      "title": "Center X M"
+     },
+     "center_y_m": {
+      "type": "number",
+      "title": "Center Y M"
+     },
+     "radius_m": {
+      "type": "number",
+      "title": "Radius M"
+     }
+    },
+    "type": "object",
+    "required": [
+     "park_id",
+     "name",
+     "center_x_m",
+     "center_y_m",
+     "radius_m"
+    ],
+    "title": "Park"
+   },
+   "PauseCmd": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "pause",
+      "title": "Type"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type"
+    ],
+    "title": "PauseCmd"
+   },
+   "PlayCmd": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "play",
+      "title": "Type"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type"
+    ],
+    "title": "PlayCmd"
+   },
+   "PointMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "point",
+      "title": "Type"
+     },
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "track_id": {
+      "type": "string",
+      "title": "Track Id"
+     },
+     "sensor_id": {
+      "type": "string",
+      "title": "Sensor Id"
+     },
+     "t_s": {
+      "type": "number",
+      "title": "T S"
+     },
+     "x_m": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "X M"
+     },
+     "y_m": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Y M"
+     },
+     "alt_m": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Alt M"
+     },
+     "quality": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Quality"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "incident_id",
+     "track_id",
+     "sensor_id",
+     "t_s",
+     "x_m",
+     "y_m",
+     "alt_m",
+     "quality"
+    ],
+    "title": "PointMsg"
+   },
+   "RecallMatch": {
+    "properties": {
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "track_id": {
+      "type": "string",
+      "title": "Track Id"
+     },
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "match_rank": {
+      "type": "integer",
+      "title": "Match Rank"
+     },
+     "match_score": {
+      "type": "number",
+      "title": "Match Score"
+     },
+     "where": {
+      "type": "string",
+      "title": "Where"
+     },
+     "reports": {
+      "items": {
+       "$ref": "#/components/schemas/RecalledReport"
+      },
+      "type": "array",
+      "title": "Reports"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "incident_id",
+     "track_id",
+     "installation_id",
+     "match_rank",
+     "match_score",
+     "where",
+     "reports"
+    ],
+    "title": "RecallMatch"
+   },
+   "RecallMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "recall",
+      "title": "Type"
+     },
+     "t_s": {
+      "type": "number",
+      "title": "T S"
+     },
+     "query_text": {
+      "type": "string",
+      "title": "Query Text"
+     },
+     "zone_roads": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Zone Roads"
+     },
+     "matches": {
+      "items": {
+       "$ref": "#/components/schemas/RecallMatch"
+      },
+      "type": "array",
+      "title": "Matches"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "t_s",
+     "query_text",
+     "zone_roads",
+     "matches"
+    ],
+    "title": "RecallMsg"
+   },
+   "RecalledReport": {
+    "properties": {
+     "rank": {
+      "type": "integer",
+      "title": "Rank"
+     },
+     "report_id": {
+      "type": "string",
+      "title": "Report Id"
+     },
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "source": {
+      "type": "string",
+      "title": "Source"
+     },
+     "source_grade": {
+      "type": "string",
+      "title": "Source Grade"
+     },
+     "event_ts_ms": {
+      "type": "integer",
+      "title": "Event Ts Ms"
+     },
+     "report_ts_ms": {
+      "type": "integer",
+      "title": "Report Ts Ms"
+     },
+     "event_ts": {
+      "type": "string",
+      "title": "Event Ts"
+     },
+     "x_m": {
+      "type": "number",
+      "title": "X M"
+     },
+     "y_m": {
+      "type": "number",
+      "title": "Y M"
+     },
+     "text": {
+      "type": "string",
+      "title": "Text"
+     },
+     "score": {
+      "type": "number",
+      "title": "Score"
+     },
+     "clues": {
+      "items": {
+       "$ref": "#/components/schemas/Clue"
+      },
+      "type": "array",
+      "title": "Clues"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "rank",
+     "report_id",
+     "incident_id",
+     "source",
+     "source_grade",
+     "event_ts_ms",
+     "report_ts_ms",
+     "event_ts",
+     "x_m",
+     "y_m",
+     "text",
+     "score",
+     "clues"
+    ],
+    "title": "RecalledReport"
+   },
+   "ReseedResponse": {
+    "properties": {
+     "rows": {
+      "type": "integer",
+      "title": "Rows"
+     },
+     "head_seq": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Head Seq"
+     },
+     "head_hash": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Head Hash"
+     },
+     "counts": {
+      "additionalProperties": {
+       "type": "integer"
+      },
+      "type": "object",
+      "title": "Counts"
+     }
+    },
+    "type": "object",
+    "required": [
+     "rows",
+     "head_seq",
+     "head_hash",
+     "counts"
+    ],
+    "title": "ReseedResponse"
+   },
+   "ResetResponse": {
+    "properties": {
+     "reset": {
+      "additionalProperties": {
+       "type": "integer"
+      },
+      "type": "object",
+      "title": "Reset"
+     }
+    },
+    "type": "object",
+    "required": [
+     "reset"
+    ],
+    "title": "ResetResponse"
+   },
+   "RfMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "rf",
+      "title": "Type"
+     },
+     "sensor_id": {
+      "type": "string",
+      "title": "Sensor Id"
+     },
+     "t_s": {
+      "type": "number",
+      "title": "T S"
+     },
+     "band": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Band"
+     },
+     "bearing_deg": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Bearing Deg"
+     },
+     "protocol_family": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Protocol Family"
+     },
+     "snr_db": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Snr Db"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "sensor_id",
+     "t_s",
+     "band",
+     "bearing_deg",
+     "protocol_family",
+     "snr_db"
+    ],
+    "title": "RfMsg"
+   },
+   "RidMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "rid",
+      "title": "Type"
+     },
+     "serial": {
+      "type": "string",
+      "title": "Serial"
+     },
+     "t_s": {
+      "type": "number",
+      "title": "T S"
+     },
+     "drone_x_m": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Drone X M"
+     },
+     "drone_y_m": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Drone Y M"
+     },
+     "op_x_m": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Op X M"
+     },
+     "op_y_m": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Op Y M"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "serial",
+     "t_s",
+     "drone_x_m",
+     "drone_y_m",
+     "op_x_m",
+     "op_y_m"
+    ],
+    "title": "RidMsg"
+   },
+   "Road": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "lines": {
+      "items": {
+       "items": {
+        "prefixItems": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "number"
+         }
+        ],
+        "type": "array",
+        "maxItems": 2,
+        "minItems": 2
+       },
+       "type": "array"
+      },
+      "type": "array",
+      "title": "Lines"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "lines"
+    ],
+    "title": "Road"
+   },
+   "Scene": {
+    "properties": {
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "region_id": {
+      "type": "string",
+      "title": "Region Id"
+     },
+     "utc_offset_hours": {
+      "type": "integer",
+      "title": "Utc Offset Hours"
+     },
+     "origin_x_m": {
+      "type": "number",
+      "title": "Origin X M"
+     },
+     "origin_y_m": {
+      "type": "number",
+      "title": "Origin Y M"
+     },
+     "rotation_deg": {
+      "type": "number",
+      "title": "Rotation Deg"
+     },
+     "radius_m": {
+      "type": "number",
+      "title": "Radius M"
+     },
+     "fence": {
+      "items": {
+       "prefixItems": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "number"
+        }
+       ],
+       "type": "array",
+       "maxItems": 2,
+       "minItems": 2
+      },
+      "type": "array",
+      "title": "Fence"
+     },
+     "assets": {
+      "items": {
+       "$ref": "#/components/schemas/Asset"
+      },
+      "type": "array",
+      "title": "Assets"
+     },
+     "roads": {
+      "items": {
+       "$ref": "#/components/schemas/Road"
+      },
+      "type": "array",
+      "title": "Roads"
+     },
+     "parks": {
+      "items": {
+       "$ref": "#/components/schemas/Park"
+      },
+      "type": "array",
+      "title": "Parks"
+     },
+     "sensors": {
+      "items": {
+       "$ref": "#/components/schemas/Sensor"
+      },
+      "type": "array",
+      "title": "Sensors"
+     },
+     "radar_shadow": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Shadow"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "installation_id",
+     "name",
+     "region_id",
+     "utc_offset_hours",
+     "origin_x_m",
+     "origin_y_m",
+     "rotation_deg",
+     "radius_m",
+     "fence",
+     "assets",
+     "roads",
+     "parks",
+     "sensors",
+     "radar_shadow"
+    ],
+    "title": "Scene",
+    "description": "Everything the 3D theater draws for one installation, region-frame meters (D-109)."
+   },
+   "SeekCmd": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "seek",
+      "title": "Type"
+     },
+     "t_s": {
+      "type": "number",
+      "title": "T S"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "t_s"
+    ],
+    "title": "SeekCmd"
+   },
+   "Sensor": {
+    "properties": {
+     "sensor_id": {
+      "type": "string",
+      "title": "Sensor Id"
+     },
+     "kind": {
+      "type": "string",
+      "title": "Kind"
+     },
+     "x_m": {
+      "type": "number",
+      "title": "X M"
+     },
+     "y_m": {
+      "type": "number",
+      "title": "Y M"
+     },
+     "range_m": {
+      "type": "number",
+      "title": "Range M"
+     },
+     "rate_hz": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Rate Hz"
+     }
+    },
+    "type": "object",
+    "required": [
+     "sensor_id",
+     "kind",
+     "x_m",
+     "y_m",
+     "range_m",
+     "rate_hz"
+    ],
+    "title": "Sensor"
+   },
+   "Shadow": {
+    "properties": {
+     "label": {
+      "type": "string",
+      "title": "Label"
+     },
+     "bearing_deg": {
+      "prefixItems": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "number"
+       }
+      ],
+      "type": "array",
+      "maxItems": 2,
+      "minItems": 2,
+      "title": "Bearing Deg"
+     },
+     "beyond_fence_m": {
+      "type": "number",
+      "title": "Beyond Fence M"
+     },
+     "below_alt_m": {
+      "type": "number",
+      "title": "Below Alt M"
+     },
+     "polygons": {
+      "items": {
+       "items": {
+        "prefixItems": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "number"
+         }
+        ],
+        "type": "array",
+        "maxItems": 2,
+        "minItems": 2
+       },
+       "type": "array"
+      },
+      "type": "array",
+      "title": "Polygons"
+     }
+    },
+    "type": "object",
+    "required": [
+     "label",
+     "bearing_deg",
+     "beyond_fence_m",
+     "below_alt_m",
+     "polygons"
+    ],
+    "title": "Shadow"
+   },
+   "SpeedCmd": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "speed",
+      "title": "Type"
+     },
+     "value": {
+      "type": "integer",
+      "enum": [
+       1,
+       2,
+       5
+      ],
+      "title": "Value"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "value"
+    ],
+    "title": "SpeedCmd"
+   },
+   "StreamSchema": {
+    "properties": {
+     "message": {
+      "oneOf": [
+       {
+        "$ref": "#/components/schemas/HelloMsg"
+       },
+       {
+        "$ref": "#/components/schemas/ClockMsg"
+       },
+       {
+        "$ref": "#/components/schemas/PointMsg"
+       },
+       {
+        "$ref": "#/components/schemas/RfMsg"
+       },
+       {
+        "$ref": "#/components/schemas/RidMsg"
+       },
+       {
+        "$ref": "#/components/schemas/FeaturesMsg"
+       },
+       {
+        "$ref": "#/components/schemas/IngestMsg"
+       },
+       {
+        "$ref": "#/components/schemas/MatchMsg"
+       },
+       {
+        "$ref": "#/components/schemas/DtwMsg"
+       },
+       {
+        "$ref": "#/components/schemas/ForecastMsg"
+       },
+       {
+        "$ref": "#/components/schemas/RecallMsg"
+       },
+       {
+        "$ref": "#/components/schemas/LedgerMsg"
+       },
+       {
+        "$ref": "#/components/schemas/ErrorMsg"
+       }
+      ],
+      "title": "Message",
+      "discriminator": {
+       "propertyName": "type",
+       "mapping": {
+        "clock": "#/components/schemas/ClockMsg",
+        "dtw": "#/components/schemas/DtwMsg",
+        "error": "#/components/schemas/ErrorMsg",
+        "features": "#/components/schemas/FeaturesMsg",
+        "forecast": "#/components/schemas/ForecastMsg",
+        "hello": "#/components/schemas/HelloMsg",
+        "ingest": "#/components/schemas/IngestMsg",
+        "ledger": "#/components/schemas/LedgerMsg",
+        "match": "#/components/schemas/MatchMsg",
+        "point": "#/components/schemas/PointMsg",
+        "recall": "#/components/schemas/RecallMsg",
+        "rf": "#/components/schemas/RfMsg",
+        "rid": "#/components/schemas/RidMsg"
+       }
+      }
+     },
+     "client": {
+      "anyOf": [
+       {
+        "oneOf": [
+         {
+          "$ref": "#/components/schemas/PlayCmd"
+         },
+         {
+          "$ref": "#/components/schemas/PauseCmd"
+         },
+         {
+          "$ref": "#/components/schemas/SeekCmd"
+         },
+         {
+          "$ref": "#/components/schemas/SpeedCmd"
+         },
+         {
+          "$ref": "#/components/schemas/DtwCmd"
+         }
+        ],
+        "discriminator": {
+         "propertyName": "type",
+         "mapping": {
+          "dtw": "#/components/schemas/DtwCmd",
+          "pause": "#/components/schemas/PauseCmd",
+          "play": "#/components/schemas/PlayCmd",
+          "seek": "#/components/schemas/SeekCmd",
+          "speed": "#/components/schemas/SpeedCmd"
+         }
+        }
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Client"
+     }
+    },
+    "type": "object",
+    "required": [
+     "message"
+    ],
+    "title": "StreamSchema",
+    "description": "``GET /api/schema/stream``: one message, so OpenAPI includes every stream type."
+   },
+   "ValidationError": {
+    "properties": {
+     "loc": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "integer"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Location"
+     },
+     "msg": {
+      "type": "string",
+      "title": "Message"
+     },
+     "type": {
+      "type": "string",
+      "title": "Error Type"
+     },
+     "input": {
+      "title": "Input"
+     },
+     "ctx": {
+      "type": "object",
+      "title": "Context"
+     }
+    },
+    "type": "object",
+    "required": [
+     "loc",
+     "msg",
+     "type"
+    ],
+    "title": "ValidationError"
+   }
+  }
+ }
+}

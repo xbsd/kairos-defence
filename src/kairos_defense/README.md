@@ -9,7 +9,8 @@ The top-level package: the CLI entry point and the four core modules every other
   Commands not built yet are stubs that name their phase (D-022). `cli_recall.py` holds the
   phase 5 commands (`forecast`, `recall`, `fetch-models`), registered on the same app (D-091).
   `cli_memory.py` and `cli_memory_demo.py` hold the phase 6 commands (`memory …`, `export`,
-  `verify-evidence`), with their tables in `cli_memory_view.py` (D-100).
+  `verify-evidence`), with their tables in `cli_memory_view.py` (D-100). `cli_live.py` holds the
+  phase 7 commands (`api`, `replay`, D-111).
 - `ports.py`: the §4.1 Protocols business logic depends on, instead of DuckDB or LanceDB (rule 6).
 - `rng.py`: per-component random streams derived from the global seed (rule 4, §8.9).
 - `geo.py`: geometry in local ENU meters. Bearings are clockwise from north in [0, 360) (D-007).
@@ -45,7 +46,16 @@ The top-level package: the CLI entry point and the four core modules every other
     - `export --case ID --approve [--analyst h] [--at TS] [--ledger P] [--out DIR]`: the signed
       evidence package; without `--approve` it exits 1 and writes nothing (rule 8);
     - `verify-evidence DIR [--ledger P] [--pubkey PEM]`: PASS/FAIL/SKIP table, exit 1 on a FAIL.
-  - Stubs in `STUBS`: `replay`, `api` and `mcp`.
+  - From phase 7 (D-111):
+    - `api [--host 127.0.0.1] [--port 8000] [--static DIR] [--reload] [--dump-openapi PATH]
+      [--memory P] [--live-db P] [--reseed]`: the FastAPI backend (`kairos_defense.api`);
+      `--dump-openapi` writes the schema and exits; `--static` must hold a built `index.html`;
+    - `replay [--incident ID] [--precompute] [--force] [--reset] [--api URL]`: list the live
+      incidents and their cache state, fill the result cache (D-013), or empty the `live_*`
+      tables (through `POST /api/admin/reset` when the API holds the file, D-010);
+    - `memory reseed [--api URL]` reseeds through `POST /api/admin/reseed` when the API holds the
+      ledger.
+  - Stub in `STUBS`: `mcp` (phase 9).
   - `--version`.
 - `ports`:
   - `TrackStore`: `track_points`, `features`, `features_many`, `sensor_context_until`,
@@ -59,6 +69,9 @@ The top-level package: the CLI entry point and the four core modules every other
     `events(after=None, until=None) -> list[dict]` (D-093), `as_of`, `diff`, and
     `verify_chain() -> int | None` (D-014).
   - `LLM`: `chat`.
+  - Phase 7 (D-104): `IngestStat` (`table`, `rows`, `total_rows`, `write_ms`, `statement`;
+    `to_dict()`), `LiveSink` (`append(table, rows) -> IngestStat`, `count`, `reset`) and
+    `ResultCache` (`get(incident, name)`, `put`, `clear`).
   - `CaseSnapshot`, a dataclass (phase 6, D-093): `case_id`, `as_of`, `exists`, `status`
     (`unknown`, `open`, `closed`), `founder`, `members`, `links`, `pending`, `claims`,
     `contradictions`, `decisions`, `exports`, `reports`, `events`, `head_seq`, `head_hash`, and
@@ -69,9 +82,10 @@ The top-level package: the CLI entry point and the four core modules every other
 - `cli_recall`: `forecast_cmd`, `recall_cmd`, `fetch_models_cmd`, `describe_center(fc, q)` and
   `register(app)`. Shared helpers are looked up on `kairos_defense.cli` at call time.
 - `cli_memory`: `memory_app` (`seed`, `reseed`, `verify`, `show`, `delta`), `parse_time(s)`,
-  `register(app)`; `cli_memory_demo`: `demo_cmd`, `export_cmd`, `verify_evidence_cmd`;
+  `call_api(base, path)` (loopback POST, None when nothing answers), `register(app)`; `cli_memory_demo`: `demo_cmd`, `export_cmd`, `verify_evidence_cmd`;
   `cli_memory_view`: `snapshot_table`, `side_by_side`, `items_table`, `seed_table`,
   `checks_table`, `when(t, offset)`.
+- `cli_live`: `api_cmd`, `replay_cmd`, `register(app)`; `cli_tables.replay_table`.
 - `rng.stable_int(name) -> int`: the first 8 bytes of SHA-256, little-endian.
 - `rng.rng_for(seed, *names) -> numpy.random.Generator`: an independent stream per component, e.g.
   `rng_for(42, "P2", "flight", "7")`.
@@ -89,7 +103,7 @@ The top-level package: the CLI entry point and the four core modules every other
 ## Data in and out
 
 None directly. `cli.py` reads `config/` and wires `store`, `sim`, `features`, `match`, `recall`,
-`forecast`, `memory` and `eval`.
+`forecast`, `memory`, `live`, `api` and `eval`.
 
 ## How it works
 
@@ -111,7 +125,7 @@ Phase 5 added `paths.cache` (the FastEmbed cache, `app.yaml`) and `forecast.anch
 
 ## Tests
 
-- `tests/unit/test_cli.py`: help lists every command; each of the three stubs exits 0 and names
+- `tests/unit/test_cli.py`: help lists every command; the remaining stub (`mcp`) exits 0 and names
   its phase; `--version`; the real commands' error and happy paths (`match` with both methods,
   `models` on the P1 nights, missing data, index and models). Phase 5:
   `test_forecast_cli_runs_on_the_p1_nights`, `test_recall_cli_runs_on_the_p1_nights`,
@@ -121,6 +135,9 @@ Phase 5 added `paths.cache` (the FastEmbed cache, `app.yaml`) and `forecast.anch
   gives the same head, verify intact and broken at the tampered seq, show DELTA at 10:00 local,
   naive times refused, the demo leaves the real ledger untouched and `--approve` links the top 3,
   export needs `--approve`, export then verify then edit, delta, missing ledger or data.
+- Phase 7: `tests/unit/test_cli.py` (`api --dump-openapi`, `api --static` without a build) and
+  `tests/unit/test_live_cli.py` (`replay` list, `--precompute` then fresh, `--reset`, both D-010
+  fallbacks, loopback-only `call_api`).
 - `tests/unit/test_rng.py`: pinned values and stream independence.
 - `tests/unit/test_geo.py`: cardinals, wrap edges, clockwise rotation, rectangles, frame round trips.
 - Run: `uv run pytest tests/unit -q -k "cli or rng or geo"`.
@@ -147,3 +164,5 @@ Phase 5 added `paths.cache` (the FastEmbed cache, `app.yaml`) and `forecast.anch
 - Phase 6: `memory seed|reseed|verify|show|delta|demo`, `export` and `verify-evidence` became real
   (`cli_memory.py`, `cli_memory_demo.py`, `cli_memory_view.py`); `CaseMemory.append_many` and
   `events`; the typed `CaseSnapshot`.
+- Phase 7: `api` and `replay` became real (`cli_live.py`); `memory reseed` falls back to the
+  running API; ports `IngestStat`, `LiveSink`, `ResultCache`.

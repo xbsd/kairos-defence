@@ -114,11 +114,12 @@ P1_NIGHTS = (date(2025, 11, 14), date(2026, 3, 3), date(2026, 4, 19), date(2026,
 
 
 def tmp_config(cfg, folder: Path):
-    """``cfg`` with every data path under ``folder`` (app, truth, memory, LanceDB, models,
+    """``cfg`` with every data path under ``folder`` (app, truth, memory, live, LanceDB, models,
     exports, cache) and the signing key there too."""
     paths = cfg.app.paths.model_copy(
         update={"duckdb": str(folder / "kd.duckdb"), "truth": str(folder / "gt.duckdb"),
-                "memory": str(folder / "mem.duckdb"), "lancedb": str(folder / "lancedb"),
+                "memory": str(folder / "mem.duckdb"), "live": str(folder / "live.duckdb"),
+                "lancedb": str(folder / "lancedb"),
                 "reports": str(folder / "reports"), "models": str(folder / "models"),
                 "exports": str(folder / "exports"), "cache": str(folder / "cache")}
     )  # fmt: skip
@@ -130,7 +131,8 @@ def tmp_config(cfg, folder: Path):
 def with_paths(cfg, folder: Path, *names: str):
     """``cfg`` with the named ``paths`` (and ``key`` for the signing key) moved under ``folder``,
     keeping the others (for example the data and models of ``p1_index``)."""
-    moved = {"memory": "mem.duckdb", "exports": "exports", "cache": "cache", "reports": "reports"}
+    moved = {"memory": "mem.duckdb", "exports": "exports", "cache": "cache", "reports": "reports",
+             "live": "live.duckdb"}  # fmt: skip
     paths = cfg.app.paths.model_copy(update={n: str(folder / moved[n]) for n in names
                                              if n in moved})  # fmt: skip
     signing = cfg.app.signing
@@ -229,3 +231,77 @@ def ledger_copy(seeded_p1, tmp_path):
     with DuckCaseMemory(tmp_path / "copy.duckdb", seeded_p1.cfg.app) as mem:
         mem.copy_from(seeded_p1.path)
         yield mem
+
+
+@dataclass
+class LiveKit:
+    cfg: object  # toy_models config
+    store: object  # DuckTrackStore (read-only)
+    lance: object
+    matcher: object
+    recall: object
+    incident: object  # LiveIncident DEMO-BRAVO-0828
+    lock: object
+
+
+@pytest.fixture(scope="module")
+def live_kit(toy_models):
+    """The P1 nights' live incident with the hand-set models: what a live loop needs. Module
+    scope: its read-only connection must close before other modules write the P1 file."""
+    import threading
+
+    from kairos_defense.live.replay import load_incident
+    from kairos_defense.match.matcher import DtwMatcher
+    from kairos_defense.recall.embed import make_embedder
+    from kairos_defense.recall.search import ReportRecall
+    from kairos_defense.store.duck import DuckTrackStore
+    from kairos_defense.store.lance import LanceReportIndex, LanceVectorStore
+
+    c = toy_models
+    store = DuckTrackStore(c.app.paths.duckdb, c.app)
+    lance = LanceVectorStore(c.app.paths.lancedb)
+    matcher = DtwMatcher(store, lance, c.scoring, c.app.paths.models)
+    recall = ReportRecall(store, LanceReportIndex(c.app.paths.lancedb), lance,
+                          make_embedder(c.app), c.scoring)  # fmt: skip
+    yield LiveKit(c, store, lance, matcher, recall, load_incident(store, "DEMO-BRAVO-0828"),
+                  threading.RLock())  # fmt: skip
+    store.close()
+
+
+def make_loop(kit: LiveKit, cache=None, fingerprint=None, incident=None):
+    from kairos_defense.live.loop import LiveLoop
+
+    return LiveLoop(incident or kit.incident, kit.store, kit.cfg.scoring, matcher=kit.matcher,
+                    recall=kit.recall, cache=cache, lock=kit.lock,
+                    fingerprint=fingerprint)  # fmt: skip
+
+
+@pytest.fixture(scope="module")
+def live_loop(live_kit):
+    """One shared loop (its in-memory results are reused across tests: read, never mutate)."""
+    return make_loop(live_kit)
+
+
+def api_config(base_cfg, seeded_path: Path, folder: Path):
+    """``base_cfg`` with the ledger (a copy of ``seeded_path``), live tables, cache, exports and
+    signing key under ``folder``."""
+    import shutil
+
+    c = with_paths(base_cfg, folder, "memory", "live", "cache", "exports", "key", "reports")
+    folder.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(seeded_path, c.app.paths.memory)
+    return c
+
+
+@pytest.fixture(scope="module")
+def api(toy_models, seeded_p1, tmp_path_factory):
+    """A TestClient on ``create_app`` over the P1 nights, the hand-set models and a copy of the
+    seeded ledger (module-scoped: tests that need a clean ledger POST /api/admin/reseed)."""
+    from fastapi.testclient import TestClient
+
+    from kairos_defense.api.app import create_app
+
+    c = api_config(toy_models, seeded_p1.path, tmp_path_factory.mktemp("api"))
+    with TestClient(create_app(c)) as client:
+        client.cfg = c
+        yield client

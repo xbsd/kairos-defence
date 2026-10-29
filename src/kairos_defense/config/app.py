@@ -14,6 +14,7 @@ class PathsConfig(StrictModel):
     duckdb: Path
     truth: Path
     memory: Path
+    live: Path  # live_* scratch tables written by replays (D-103)
     lancedb: Path
     models: Path
     reports: Path
@@ -22,8 +23,8 @@ class PathsConfig(StrictModel):
 
     @model_validator(mode="after")
     def _distinct_dbs(self) -> PathsConfig:
-        if len({self.duckdb, self.truth, self.memory}) != 3:
-            raise ValueError("duckdb, truth and memory must be three different files")
+        if len({self.duckdb, self.truth, self.memory, self.live}) != 4:
+            raise ValueError("duckdb, truth, memory and live must be four different files")
         return self
 
 

@@ -168,3 +168,59 @@ g = Path("src/kairos_defense/st
 [2026-10-28 23:58:11]   … running 30 min. last tool: Bash tail -8 data/cache/exit6/10_test_all.txt
 [2026-10-29 00:00:11] phase 6: gate attempt 1
 [2026-10-29 00:00:48] phase 6: gate passed
+[2026-10-29 00:00:48] === Phase 6: done, tagged phase-06-done, estimated cost $16.80 ===
+[2026-10-29 00:00:51]   git push origin main: ok
+[2026-10-29 00:00:52]   git push origin --tags: ok
+[2026-10-29 00:00:52] === Phase 7: start (auto mode) ===
+[2026-10-29 00:00:52] phase 7: planning
+[2026-10-29 00:03:52]   … running 3 min. 
+[2026-10-29 00:06:52]   … running 6 min. last tool: Bash sed -n 1,80p pyproject.toml; uv run python -c "import fastapi, uvicorn, httpx; p
+[2026-10-29 00:09:53]   … running 9 min. 
+[2026-10-29 00:12:53]   … running 12 min. last tool: Bash grep -n "^def \|^class " src/kairos_defense/memory/asof.py src/kairos_defense/me
+[2026-10-29 00:15:33] phase 7: independent plan review 1
+[2026-10-29 00:18:33]   … running 3 min. 
+[2026-10-29 00:18:33] phase 7: plan approved on review 1: The plan covers every phase 7 task checkbox: api/ (all 17 REST routes from §16.4, the WebSocket stream, live_* recording
+[2026-10-29 00:18:33] phase 7: building in a fresh session
+[2026-10-29 00:21:33]   … running 3 min. last tool: Bash sed -n 1,60p src/kairos_defense/memory/seed.py && sed -n 140,166p src/kairos_def
+[2026-10-29 00:24:33]   … running 6 min. last tool: Bash uv run python - <<'EOF'
+from kairos_defense.config import load_config
+from kairo
+[2026-10-29 00:27:34]   … running 9 min. last tool: Bash uv run ruff check src/kairos_defense/live src/kairos_defense/match/lens.py --out
+[2026-10-29 00:30:34]   … running 12 min. last tool: Bash cat > src/kairos_defense/live/broadcast.py <<'EOF'
+"""Ledger fan-out (SPEC §16.2
+[2026-10-29 00:33:34]   … running 15 min. last tool: Bash sed -i '' 's/\.fetchone()\[0\])/.fetchall()[0][0])/g' src/kairos_defense/store/l
+[2026-10-29 00:36:34]   … running 18 min. last tool: Bash python3 - <<'EOF'
+from pathlib import Path
+p = Path("tests/unit/test_live_sessio
+[2026-10-29 00:39:34]   … running 21 min. last tool: Bash python3 - <<'EOF'
+from pathlib import Path
+p = Path("src/kairos_defense/api/serv
+[2026-10-29 00:42:34]   … running 24 min. last tool: Bash uv run pytest tests/unit/test_api_ws.py -q -k seek_44 2>&1 | grep -E "^E " | hea
+[2026-10-29 00:45:35]   … running 27 min. last tool: Bash grep -n "def test_reports_rebuild_is_deterministic" -A 25 tests/unit/test_recall
+[2026-10-29 00:48:35]   … running 30 min. last tool: Bash export PATH=/opt/homebrew/opt/node@22/bin:$PATH && npm install --save-exact=fals
+[2026-10-29 00:51:35]   … running 33 min. last tool: Bash cat > src/state/replayStore.ts <<'EOF'
+// The replay's high-frequency state (SPE
+[2026-10-29 00:54:35]   … running 36 min. last tool: Bash cat > tests/fixtures.ts <<'EOF'
+// Typed stream messages for tests (shapes from 
+[2026-10-29 00:57:35]   … running 39 min. last tool: Bash cd /Users/ndkx/work/kairos_defence && sed -n 45,60p src/kairos_defense/match/exp
+[2026-10-29 01:00:35]   … running 42 min. last tool: Bash cat > src/three/geom.ts <<'EOF'
+// Small geometry builders shared by the theater
+[2026-10-29 01:03:35]   … running 45 min. last tool: Write /Users/ndkx/work/kairos_defence/web/README.md
+[2026-10-29 01:06:36]   … running 48 min. last tool: Bash cd /Users/ndkx/work/kairos_defence && cp /tmp/kd_theater_smoke.mjs web/kd_theate
+[2026-10-29 01:09:36]   … running 51 min. last tool: Bash python3 - <<'EOF'
+from pathlib import Path
+def rep(f, a, b):
+    p = Path(f); s 
+[2026-10-29 01:12:36]   … running 54 min. last tool: Bash python3 - <<'EOF'
+from pathlib import Path
+p = Path("src/three/Radar.tsx"); s = 
+[2026-10-29 01:15:36]   … running 57 min. last tool: Bash cd /Users/ndkx/work/kairos_defence && time make e2e > data/cache/exit7/e2e_1.log
+[2026-10-29 01:18:36]   … running 60 min. last tool: Bash sed -n 419,460p data/cache/exit7/e2e_1.log; grep -n "shortcuts dialog" -A25 data
+[2026-10-29 01:21:36]   … running 63 min. last tool: Read /Users/ndkx/work/kairos_defence/reports/figures/ui/phase07-first-contact-1440x90
+[2026-10-29 01:24:36]   … running 66 min. last tool: Bash python3 - <<'EOF'
+from pathlib import Path
+def rep(path, a, b):
+    p = Path(pat
+[2026-10-29 01:27:37]   … running 69 min. last tool: Read /Users/ndkx/work/kairos_defence/reports/figures/ui/phase07-t045-1920x1080.png
+[2026-10-29 01:30:37]   … running 72 min. last tool: Bash grep -E "dist/|built in|computed|Running 19" data/cache/exit7/e2e_2.log | head -
+[2026-10-29 01:33:37]   … running 75 min. last tool: Bash until tail -1 data/cache/exit7/test_all.txt 2>/dev/null | grep -qE "passed|faile

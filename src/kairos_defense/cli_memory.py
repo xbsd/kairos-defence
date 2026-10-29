@@ -10,7 +10,6 @@ Nothing here reads truth.
 from __future__ import annotations
 
 import json
-import os
 from datetime import datetime
 from pathlib import Path
 
@@ -20,6 +19,7 @@ from kairos_defense.memory.canonical import utc_naive
 
 CONFIG_HELP = "Folder with the five YAML files."
 LEDGER_HELP = "Ledger file (default: paths.memory)."
+API_DEFAULT = "http://127.0.0.1:8000"
 
 memory_app = typer.Typer(help="Case memory (Kairos-lite): seed, reseed, verify, show, delta, "
                          "and the known-then / known-now demo.", no_args_is_help=True)  # fmt: skip
@@ -43,6 +43,25 @@ def parse_time(s: str) -> datetime:
                           "e.g. 2026-04-20T10:00-05:00 or 2026-04-20T15:00Z")  # fmt: skip
         raise typer.Exit(1)
     return utc_naive(t)
+
+
+def call_api(base: str, path: str, timeout_s: float = 30.0) -> dict | None:
+    """``POST {base}{path}`` on a loopback API (D-010); the JSON reply, or None when nothing
+    answers. Only 127.0.0.1 and localhost are allowed (offline, rule 5)."""
+    import urllib.error
+    import urllib.parse
+    import urllib.request
+
+    host = urllib.parse.urlparse(base).hostname
+    if host not in ("127.0.0.1", "localhost", "::1"):
+        raise typer.BadParameter(f"--api must be a loopback URL, not {base!r}")
+    req = urllib.request.Request(base.rstrip("/") + path, data=b"{}", method="POST",
+                                 headers={"Content-Type": "application/json"})  # fmt: skip
+    try:
+        with urllib.request.urlopen(req, timeout=timeout_s) as resp:
+            return json.loads(resp.read().decode() or "{}")
+    except (urllib.error.URLError, OSError, ValueError):
+        return None
 
 
 def _offsets(cfg) -> dict[str, int]:
@@ -107,37 +126,42 @@ def _remove(*paths: Path) -> None:
 
 
 @memory_app.command("reseed")
-def reseed_cmd(config: str = typer.Option("config", help=CONFIG_HELP)) -> None:
+def reseed_cmd(
+    api: str = typer.Option(API_DEFAULT, help="Running API to reset through when the ledger is "
+                            "in use (D-010)."),
+    config: str = typer.Option("config", help=CONFIG_HELP),
+) -> None:  # fmt: skip
     """Rebuild the ledger from scratch (reset between demo runs, D-010): seed a temporary file,
-    verify it, then replace the ledger."""
-    import duckdb
-
+    verify it, then replace the ledger. While the API holds the file, reseed through it."""
     from kairos_defense.cli_memory_view import seed_table
-    from kairos_defense.store.guard import connect_app_db
+    from kairos_defense.memory.ledger import LedgerError
+    from kairos_defense.memory.seed import SeedError
+    from kairos_defense.store.duck import DuckTrackStore
+    from kairos_defense.store.ledger_duck import LedgerLocked, check_unlocked, reseed_ledger
 
     cli = _base()
     cfg = cli._load_config(config)
     path = Path(cfg.app.paths.memory)
-    if path.exists():
-        try:
-            connect_app_db(path, cfg.app).close()
-        except duckdb.IOException as exc:
-            cli.console.print(f"[red]ledger in use:[/red] {path} is held by another process. "
-                              "Stop `make demo` (or the API) and rerun, or reset through the "
-                              f"running API (D-010). {exc}")  # fmt: skip
+    try:
+        check_unlocked(path, cfg.app)
+    except LedgerLocked as exc:
+        doc = call_api(api, "/api/admin/reseed")
+        if doc is None:
+            cli.console.print(f"[red]ledger in use:[/red] {path} is held by another process and "
+                              f"no API answers at {api}. Stop `make demo` (or the API) and rerun, "
+                              f"or reset through the running API (D-010). {exc}")  # fmt: skip
             raise typer.Exit(1) from exc
-    tmp = path.with_name(path.name + ".reseed.tmp")
-    _remove(tmp, Path(f"{tmp}.wal"))
-    s, mem = _seed_into(cfg, tmp)
-    broken = mem.verify_chain()
-    mem.close()
-    if broken is not None:
-        _remove(tmp)
-        cli.console.print(f"[red]reseed failed:[/red] the new chain is broken at seq {broken}; "
-                          f"{path} is unchanged")  # fmt: skip
-        raise typer.Exit(1)
-    _remove(Path(f"{path}.wal"))
-    os.replace(tmp, path)
+        cli.console.print(f"{path} is held by the running API: reseeded through {api} "
+                          f"(POST /api/admin/reseed, D-010): {doc.get('rows', 0):,} rows, "
+                          f"head seq {doc.get('head_seq')} hash {doc.get('head_hash')} "
+                          "(verified)")  # fmt: skip
+        return
+    cli._need_data(cfg)
+    try:
+        with DuckTrackStore(cfg.app.paths.duckdb, cfg.app) as store:
+            s = reseed_ledger(path, cfg.app, store, cfg.scenario)
+    except (LedgerError, SeedError) as exc:
+        cli._fail(exc)
     cli.console.print(seed_table(s, f"kairos-defense memory reseed → {path} (verified)"))
 
 

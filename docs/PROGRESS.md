@@ -9,7 +9,7 @@
 | 4 | DTW matcher and fusion model | done with gaps (2026-10-28, see docs/phases/phase-04/GAPS.md) | `make index`, `make models` (62 queries, 123,404 pairs, τ 1.645, 44 s), `make eval`: Recall@5 1.000, DTW lift +0.522, copycat-first 0%, time to match 96%, p95 prefilter 30 / DTW (500) 81 / end to end 149 ms; first contact and orbit pass; live top 3 misses by one place (DELTA 1, ALPHA-0303 2, CHARLIE 3, ALPHA-0502 4; soft gap, D-078); `eval --baseline` written; `check_targets.py 4` 8 PASS, 1 GAP; 431 fast, 441 in all | 2026-10-28 |
 | 5 | Report recall and analog forecast | done (2026-10-28, autopilot gate passed) | `make index`: 956 reports with FTS, 82 `report_clues`; `make eval`: report linkage 1.000 (65/65), forecast median 340 m / P80 495 m at T = 90 s; demo DELTA report rank 1 and forecast 139 m at T+105 pass; `forecast --at 105` exit 0 (2,164 m northwest, County Rd 12 in the zone); `check_targets.py 5` 12 PASS, 1 WARN (accepted top 3); 497 fast, 509 in all | 2026-10-28 |
 | 6 | Case memory (Kairos-lite) | done (2026-10-29, autopilot gate passed) | `memory reseed && memory verify && pytest -k memory` exit 0 in 7.8 s: 4,681 rows seeded in 0.14 s, chain intact, 92 passed; DELTA at 10:00 local hobbyist, closed, no links; `memory demo --approve` known then 1 member → known now 3 (real top 3: DELTA, ALPHA-0303, CHARLIE; D-081); evidence verify PASS, then FAIL after one edited byte; 586 fast, 601 in all | 2026-10-28 |
-| 7 | Streaming API and Command Center foundation | not started | | |
+| 7 | Streaming API and Command Center foundation | not started | `make demo` serves API, stream and web app offline (T+90 match cached; all stream types by T+50 at 5×; D-010 resets through the API); `make e2e` 19/19 with axe clean on 7 routes; 8 screenshots reviewed, 9 fixes; median 59.9 fps (P5 59.9) at 1920 × 1080 with bloom, ANGLE Metal on an Apple M4 Max, macOS 26.5.2; 710 fast, 726 in all; Vitest 73 | 2026-10-29 |
 | 8 | Command Center: the memorable moments | not started | | |
 | 9 | Swarms, agent, MCP, hardening and runbook | not started | | |
 | 10 | User guide, one-pager and rollback guide (docs/phases/PHASE_10.md) | not started | | |
@@ -25,6 +25,55 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Open issues: …
 - Next: …
 -->
+
+### 2026-10-29 · Phase 7 (autopilot build)
+- Built: the streaming API and the Command Center foundation (SPEC §16, §17.1–§17.6, §17.11–§17.13).
+  - `kairos_defense.live`: replay engine and clock (D-118), the live loop with reruns every 5 s
+    from T+45, result cache with a fingerprint and `replay --precompute` (D-105), flight phase
+    (D-115), per-client sessions with recording into `live_*` (D-103), proposals into the case
+    of the best-ranked member (D-106), ledger fan-out, the theater scene (D-109).
+  - `kairos_defense.api`: schemas with the 13-type `StreamMessage` union, every §16.4 route plus
+    health and ledger tail/record, the WebSocket, static hosting, `api --dump-openapi` (D-107,
+    D-108, D-110, D-112). Ports `LiveSink`, `ResultCache`; adapters `DuckLiveSink`,
+    `FileResultCache`; `reseed_ledger` shared by the CLI and the admin endpoint (D-104).
+    `match/lens.py` (D-117); memory status, case graph, evidence progress (D-116, D-108).
+  - CLI `api` and `replay`; `replay --reset` and `memory reseed` go through the API while it runs
+    (D-010, D-111).
+  - `web/`: generated types (`gen:types`, `check:types`), stream client with reconnect, REST
+    client, Zustand stores, router, wired command bar, shortcuts dialog, Live watch layout; the 3D
+    theater (D-120); Stream, Signals, Recorder, Ledger chain, Match list with Approve and Reject
+    (D-121); Playwright e2e with screenshots, axe and a frame-rate probe (D-113, D-114).
+- Exit check (`docs/phases/phase-07/EXIT_CHECK.md`), dev laptop:
+  - `make demo` (background, stopped): health ok; `/` and `/live/…` serve the app; T+90 match
+    from the cache (DELTA, ALPHA-260303, CHARLIE-260710, D-081); a WebSocket at 5× from T+40 got
+    every type except `rid` (P1 broadcasts none) within 6 s; `replay --reset` and
+    `memory reseed` went through the API; port 8000 free; ledger at seed head `a361b4bf…`.
+  - `make dev`: Vite proxies `/api/health` and the WebSocket; both stopped, ports free.
+  - `make e2e`: 19 passed in 2.0 min (axe: no serious or critical violation on 7 routes).
+  - Frame rate (Playwright Chromium 156, 10 s of 1× playback, 1920 × 1080, bloom on): median
+    59.9 fps, P5 59.9 fps, renderer ANGLE Metal, Apple M4 Max (16 cores, 128 GB), macOS 26.5.2.
+  - Contract: regenerated `web/openapi.json` and `types.gen.ts` byte-identical.
+  - `make check` 710 passed (586 at the start); `make test-all` 726 passed; Vitest 73.
+- UI review (§17.13; 8 screenshots, first contact, T+45, T+90, approved × 1920 × 1080 and
+  1440 × 900):
+  - labels cut by grid lines: fixed with a depth-test-free base material;
+  - dashed fence and ground lines: the grid no longer writes depth;
+  - the "No Remote ID" tag over the "Fuel farm" label: asset labels below their footprints, the
+    tag above the drone;
+  - the base small in the overview: camera about 25% closer;
+  - Signals "Loiter since loiter at": now "Loiter since T+01:27";
+  - Recorder stats wrapping and "1 rows": label and value rows, singular;
+  - Ledger chain title wrapping and badge truncated: titles never wrap, badge "Chain verified";
+  - Stream tight at 1440 px: wider column;
+  - axe `label-content-name-mismatch` on ledger blocks: the visible text starts the name.
+  The second set shows no overlaps and numbers legible at 13–15 px mono.
+- Deviations: D-105 (fingerprint counts), D-107 (play and pause without catch-up), D-110 (locks),
+  D-111 (startup seeding), D-114 (openapi-typescript override), D-115 (phase rule), D-119
+  (`make dev` recipe), D-113 (screenshot moments instead of Director beats).
+- Open issues: the D-081 top-3 gap shows in the UI as computed; scores read 1.00; the `vendor-3d`
+  chunk is 1.18 MB; `make dev`'s `trap 'kill 0'` also stops a script that started it.
+- Next: phase 8 (the memorable moments: time-warp lens, ghosts, forecast, recall overlay, Case
+  board, Evidence, Director mode).
 
 ### 2026-10-28 · Phase 6 (autopilot build)
 - Built: case memory, Kairos-lite (SPEC §15).

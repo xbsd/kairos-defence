@@ -124,3 +124,13 @@ LEDGER_COLUMNS: list[str] = [
     "valid_from", "valid_to", "source_type", "source_id", "source_grade", "confidence", "actor",
     "supersedes_seq", "prev_hash", "hash",
 ]  # fmt: skip
+
+# §16.2 live scratch tables (data/live.duckdb, D-103): the same columns as their sources. A replay
+# appends the detections it makes visible; `replay --reset` empties them (never the ledger).
+LIVE_SOURCES: dict[str, str] = {"live_points": "track_points", "live_rf": "rf_detections",
+                                "live_rid": "remote_id"}  # fmt: skip
+LIVE_DDL: dict[str, str] = {
+    live: RAW_DDL[src].replace(f"CREATE TABLE {src} (", f"CREATE TABLE IF NOT EXISTS {live} (")
+    for live, src in LIVE_SOURCES.items()
+}
+LIVE_COLUMNS: dict[str, list[str]] = {t: RAW_COLUMNS[s] for t, s in LIVE_SOURCES.items()}

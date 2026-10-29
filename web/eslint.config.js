@@ -5,7 +5,9 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "node_modules"] },
+  {
+    ignores: ["dist", "node_modules", "src/api/types.gen.ts", "playwright-report", "test-results"],
+  },
   {
     files: ["**/*.{ts,tsx,js}"],
     extends: [js.configs.recommended, ...tseslint.configs.strict],
@@ -27,6 +29,11 @@ export default tseslint.config(
           // §21: colors come only from theme tokens (web/src/theme/tokens.css)
           selector: "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
           message: "Use a color token from theme/tokens.css, not a hex literal.",
+        },
+        {
+          // §17.11: no interval animation; motion comes from rAF, useFrame or Motion
+          selector: "CallExpression[callee.name='setInterval']",
+          message: "No setInterval (SPEC §17.11): use requestAnimationFrame or useFrame.",
         },
       ],
     },

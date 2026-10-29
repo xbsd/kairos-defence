@@ -70,6 +70,13 @@ truth (training lives in `kairos_defense.eval.training`).
   `EXPLAIN_TOP = 20`.
 - `types.Match` (frozen, §10.8) and `Match.to_dict()` (JSON-safe: NaN becomes None).
 
+- `lens.lens_payload(query, candidate, *, channel, band_fraction, warp_ratio, match_track_id)`
+  (phase 7, D-117): one channel, raw units, `(n,)` and `(m,)`; PAA to ≤ 128 points; band
+  `max(|n − m| + 1, ceil(band_fraction × max(n, m)))`; returns `query`, `candidate`, `path`
+  (`dtw.best_path`), `cost` (the accumulated `warping_paths` matrix without padding, float32 LE
+  base64) with `shape`, `band`, `dtw_distance`, `euclid_distance` (first `overlap` samples),
+  `warp_ratio`, `warp_text`. `lens.paa`, `lens.band`, `lens.encode_f32`, `lens.decode_f32`.
+
 ## Data in and out
 
 - In: raw `track_points`, `rf_detections`, `remote_id` and site geometry through `TrackStore`
@@ -164,3 +171,4 @@ D-079; retrain with `make models` after changing it); `fusion.features` (the mod
   vectors; `match --method dtw` is the default (D-068 to D-076, D-078).
 - Phase 4 gate fix 1: `dtw.normalize` (`fixed` adopted on the training split, D-079).
 - Phase 5: `MatchResult.signature` and `signatures`; `warp_path` takes the scaling mode (D-087).
+- Phase 7: `lens.py`, the time-warp lens payload of the `dtw` message (D-117).
