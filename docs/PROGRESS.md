@@ -12,7 +12,7 @@
 | 7 | Streaming API and Command Center foundation | done (2026-10-29, autopilot gate passed) | `make demo` serves API, stream and web app offline (T+90 match cached; all stream types by T+50 at 5×; D-010 resets through the API); `make e2e` 19/19 with axe clean on 7 routes; 8 screenshots reviewed, 9 fixes; median 59.9 fps (P5 59.9) at 1920 × 1080 with bloom, ANGLE Metal on an Apple M4 Max, macOS 26.5.2; 710 fast, 726 in all; Vitest 73 | 2026-10-29 |
 | 8 | Command Center: the memorable moments | done (2026-10-29, autopilot gate passed) | Director at 1× through every §1.2 row: T+0 21:40:06, T+15, T+45, loiter marker T+87 (T+80 row), T+90, T+105, T+120 21:42:06, then Case board and Evidence on →; median 59.9 fps (P5 59.9) on every Live watch beat at 1920 × 1080 with bloom, ANGLE Metal, Apple M4 Max, macOS 26.5.2; 18 beat + 12 page screenshots at both sizes reviewed, 17 fixes (D-146); `make e2e` 29/29 with axe clean on 9 routes and on Live watch at T+120; `make eval` + `check_targets.py 8` exit 0 (accepted `live_top3_incidents` WARN, D-081); 731 fast, 747 in all; Vitest 153 | 2026-10-29 |
 | 9 | Swarms, agent, MCP, hardening and runbook | done (2026-10-29, gate passed in a single cloud session) | `make clean && make data index models eval` (7 min): 8 swarms indexed, swarm top-1 1.000 (4/4), every §19 target met (accepted `live_top3_incidents` WARN), `check_targets.py 9` exit 0; `make demo` serves the Swarm view and `/api/swarm` (S1-GOLF-260503 first); `make e2e` 31 passed; encore beat at 5× both sizes; `make mcp` lists 6 tools (8 with `--allow-proposals`); `docs/DEMO.md` complete; 795 fast, 18 slow; Vitest 168 | 2026-10-29 |
-| 10 | User guide, one-pager and rollback guide (docs/phases/PHASE_10.md) | not started | | |
+| 10 | User guide, one-pager and rollback guide (docs/phases/PHASE_10.md) | in progress (awaiting the gate) | `make check` (801 fast, Vitest 169) && `npm --prefix web run build` && `make e2e` (34 passed, the 3 guide tests writing 20 screenshots to `docs/guide/img/`) && `check_docs.py` ("Documentation complete": guide 6,098 words and 20 images, one-pager 508 words); every image reviewed against §17, five presentation fixes (D-166) | 2026-10-29 |
 
 Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 
@@ -25,6 +25,33 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Open issues: …
 - Next: …
 -->
+
+### 2026-10-29 · Phase 10 (single cloud session)
+- Built (docs/phases/PHASE_10.md): `docs/USER_GUIDE.md` (twelve sections, about 6,100 words
+  outside code blocks, 20 screenshots, real command-line output), `web/e2e/guide.spec.ts` (the
+  screenshots from the running app on every `make e2e`, each after the element that proves its
+  state, D-163), `docs/ONE_PAGER.md` (about 510 words, hero image), `docs/ROLLBACK.md` (history,
+  tags `phase-04-done` to `phase-10-done`, inspect, branch and `git revert` rollbacks,
+  regeneration, the phase table, the two tags the cloud remote refused, D-167), the root README
+  rewritten around the documents (D-165), `tests/unit/test_docs.py` (links, images and anchors
+  resolve; every CLI command in the guide; real, distinct screenshots written by the guide spec,
+  D-164); package READMEs brought current (`sim`, `live`, `web`, the root package).
+- Exit check (`docs/phases/phase-10/EXIT_CHECK.md`), one chain from 10:49:10 UTC in the cloud
+  container: `make check` 801 fast Python tests (795 at the start) and Vitest 169 (168);
+  `npm --prefix web run build` 11 s; `make e2e` 34 passed in 16.3 min (31 plus the 3 guide tests; axe clean); `check_docs.py` "Documentation complete" (guide 6,098 words, 20 images; one-pager 508 words);
+  every PNG in `docs/guide/img/` written by that run (10:59:59 to 11:03:41 UTC).
+- Screenshot review (§17.13): all 20 images reviewed at both sizes used; the first run found five
+  presentation defects, fixed in the web app (D-166): overprinting ghost labels (now stacked on a
+  shared anchor), the radar shadow label running into them at 1440 × 900, the compact lens
+  overflowing the rail (the header is now measured), the "No Remote ID" tag on the orbit ring, and
+  a T+120 shot that repeated T+90 (now the Forecast camera); and one spec wait on a zero-width SVG
+  line. The second run's images show none of them.
+- Tests: 6 new Python tests (`test_docs.py`), 1 new Vitest (label stacking), 3 new Playwright tests
+  (`guide.spec.ts`). No skip or xfail marker was added.
+- Open issues: the accepted `live_top3_incidents` gap (phase 4 GAPS.md); `phase-09-done` and
+  `phase-10-done` exist only in the session's clone until recreated (D-167); at 1440 × 900 the lens
+  caption may need a scroll when the pace readout wraps.
+- Decisions D-163 to D-167.
 
 ### 2026-10-29 · Phase 9 (single cloud session)
 - Built (one Claude Code cloud session, D-148; two forked helpers built the agent backend and the

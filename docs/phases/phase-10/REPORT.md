@@ -55,11 +55,22 @@ guide adds two at 1440 × 900 (Live watch and Eval), the size whose layout diffe
 - New: `tests/unit/test_docs.py` (6 tests: links and anchors in each of the four documents, CLI
   coverage, screenshots), `web/tests/ghostMath.test.ts` gained the label-stacking test, and
   `web/e2e/guide.spec.ts` (3 Playwright tests, part of `make e2e`).
-- Counts at the exit check: see the table below and `EXIT_CHECK.md`.
+- At the exit check: 801 fast Python tests (795 at the start of the phase), Vitest 169 (168), e2e
+  34 (31); slow tests unchanged (18). No skip or xfail marker was added.
 
 ## Exit check
 
-EXIT_TABLE
+| Criterion (PHASE_10.md) | Result | Evidence |
+|---|---|---|
+| `make check` | pass | ruff clean; 801 fast Python tests (795 at the start); web lint, typecheck, types current, Vitest 169 |
+| `npm --prefix web run build` | pass | 11 s |
+| `make e2e` | pass | 34 passed in 16.3 min, the 3 guide tests included; axe clean on every route |
+| `python3 scripts/check_docs.py` | pass | "Documentation complete." (guide 6,098 words, 20 images; one-pager 508 words) |
+| Screenshots from this run's `make e2e` | pass | all 20 PNGs written 10:59:59 to 11:03:41 UTC, after the chain began at 10:49:10 |
+| Every image reviewed against §17 | pass | first run: five defects and one spec wait fixed (D-166); final images reviewed again |
+
+Full output: [EXIT_CHECK.md](EXIT_CHECK.md). The gate (`scripts/cloud_gate.py gate 10`) reruns the
+four commands.
 
 ## Metrics
 

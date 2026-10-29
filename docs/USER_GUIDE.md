@@ -432,6 +432,56 @@ The `memory` subcommands:
 
 ### Examples (real output, trimmed)
 
+Every example below is this build's output in the cloud container that built it, trimmed to the
+interesting rows (`│` marks a table row; long rows are cut and their padding shortened).
+
+Build the data, the indexes, the models and the evaluation (`make data index models eval` runs
+these four with the seed from `config/world.yaml`):
+
+```text
+$ uv run kairos-defense gen --seed 42
+│ incidents              │    1,878 │            ≈1,900 │
+│ swarm incidents        │        9 │                   │
+│ live first contact     │ 21:40:06 │ 21:39:30-21:40:30 │
+│ live orbit established │   T+79 s │        T+65-100 s │
+│ elapsed                │   26.0 s │                   │
+$ uv run kairos-defense index
+│ history tracks indexed             │                              1,898 │
+│ flight_windows 60 s                │                             57,462 │
+│ swarm incidents indexed (detected) │   8 (8); swarm_features rows 4,636 │
+wrote track_features, track_signatures and report_clues to /home/user/kairos-defence/data/kairos_defense.duckdb, flight_windows and reports to /home/user/kairos-defence/data/lancedb
+$ uv run kairos-defense models
+│ training queries                        │                       62 │
+│ training pairs (same actor)             │          123,404 (1,128) │
+│ τ (median same-actor d_norm)            │                   2.2265 │
+│ coefficient shape_sim                   │                   +6.756 │
+│ coefficient tod_sim                     │                  +26.799 │
+│ intercept                               │                  -52.713 │
+│ validation ROC AUC                      │                    0.998 │
+│ validation Recall@5 T=120 s (probers)   │                    1.000 │
+│ training hash                           │         22a4da9f93943ca8 │
+wrote /home/user/kairos-defence/models/fusion_v1.json and /home/user/kairos-defence/models/dtw_calibration.json
+$ uv run kairos-defense eval
+│ Recall@5 at T=120 s                       │                     1.000 │
+│ DTW lift                                  │                     0.522 │
+│ time to match (top 3 by T=90 s)           │                       96% │
+│ report linkage (T=120 s, top 3, k=5)      │          1.000 (65 of 65) │
+│ forecast error T=90 s median / P80        │               341 / 495 m │
+│ swarm top-1, whole flight (4 answerable)  │                     1.000 │
+│ demo live_top3_incidents                  │  fail: 2/3 in top 3; …    │
+demo assertion failed: live_top3_incidents (2/3 in top 3; …)
+```
+
+The last line and exit code 1 are the accepted gap (section 10). Serve the app (what `make demo`
+runs, here on the port and scratch files the end-to-end tests use):
+
+```text
+$ uv run kairos-defense api --static web/dist --port 8765 --memory data/cache/e2e/memory.duckdb --live-db data/cache/e2e/live.duckdb --exports data/cache/e2e/exports --reseed
+Kairos Defense API on http://127.0.0.1:8765 serving web/dist
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8765 (Press CTRL+C to quit)
+```
+
 Match the live incident at T+90 (`match` prints the ranked past flights with their reasons):
 
 ```text
@@ -473,7 +523,43 @@ kairos-defense swarm · DEMO-SWARM-ECHO-0614 · 5 drones · 812 s described · d
  2 │ JULIET-260511-0024 │ JULIET │ 2026-05-11 07:25 │      3 │      0.426 │    1.345 │ 0.63
 ```
 
-The case memory: verify the chain, then show the DELTA case as known on the morning DELTA closed it:
+The case memory: seed an empty ledger (here a scratch one, through a copy of `config/` whose
+`paths.memory` points at it; the scratch folder's long path is shortened to `/tmp/scratch`), or
+rebuild the real one from seed:
+
+```text
+$ uv run kairos-defense memory seed --config /tmp/scratch/cfg-seed
+kairos-defense memory seed → /tmp/scratch/seed-memory.duckdb
+│ incident_recorded           │                    1,866 │
+│ report_recorded             │                      949 │
+│ assessment_asserted         │                    1,864 │
+│ rows                        │                    4,681 │
+│ cutoff (live first contact) │     2026-08-29 02:40:06Z │
+│ head                        │ seq 4,681 a361b4bfe3b24… │
+$ uv run kairos-defense memory reseed
+kairos-defense memory reseed → /home/user/kairos-defence/data/memory.duckdb (verified)
+│ rows                        │                    4,681 │
+│ head                        │ seq 4,681 a361b4bfe3b24… │
+│ elapsed                     │                   0.99 s │
+```
+
+Known then and known now side by side, on a scratch copy (the real ledger is untouched; the two
+tables are reflowed to fit):
+
+```text
+$ uv run kairos-defense memory demo
+query DEMO-BRAVO-0828-T1 at T+90 s · model fusion-v1 · real top 3: P1-DELTA-260419 1.000, P1-ALPHA-260303 0.999, P1-CHARLIE-260710 0.997
+CASE-P1-DELTA-260419: known then and known now
+│ item              │ known then 2026-04-20 09:10 local │ known now 2026-08-28 21:41 local    │
+│ status            │ closed                            │ closed                              │
+│ links             │ none                              │ none                                │
+│ pending proposals │ none                              │ P1-ALPHA-260303 (rank 2, score 0.999, seq 4685) │
+│                   │                                   │ P1-CHARLIE-260710 (rank 3, score 0.997, seq 4686) │
+│ assessments       │ hobbyist (DELTA BDOC, seq 3569)   │ hobbyist (DELTA BDOC, seq 3569)     │
+3 proposals pending (rerun with --approve to link them); scratch ledger /home/user/kairos-defence/data/cache/memory_demo.duckdb (4,686 rows, chain intact); /home/user/kairos-defence/data/memory.duckdb is unchanged
+```
+
+Verify the chain, then show the DELTA case as known on the morning DELTA closed it:
 
 ```text
 $ uv run kairos-defense memory verify
