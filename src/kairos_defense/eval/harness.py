@@ -1,7 +1,8 @@
 """Evaluation harness (SPEC §19.1-§19.2).
 
 Query sets: prober and copycat tracks of history incidents on nights 2026-03-01 to 2026-08-31
-(local, months 13-18, D-055); swarm incidents of the same nights are listed for phase 9. Each query
+(local, months 13-18, D-055); the swarm incidents of the same nights are matched by
+``eval.swarm`` (phase 9, §14). Each query
 is run as if live at T in ``T_GRID`` seconds after its first radar point, against history that
 started before it (the matcher's own no-look-ahead filter). T below ``live.min_track_s`` does not
 run (a miss). A query with no earlier same-actor track cannot be answered: it is counted and left
@@ -29,11 +30,13 @@ import pandas as pd
 from kairos_defense.config import Config
 from kairos_defense.eval.downstream import Downstream
 from kairos_defense.eval.metrics import Outcome
+from kairos_defense.eval.swarm import incident_starts, incident_teams, swarm_cases, swarm_outcomes
 from kairos_defense.match.baseline import MODEL_VERSION as EUCLIDEAN_VERSION
 from kairos_defense.match.baseline import rank_candidates
 from kairos_defense.match.matcher import DtwMatcher, MatchResult
 from kairos_defense.match.prefilter import prefilter
 from kairos_defense.match.query import Query, load_query
+from kairos_defense.match.swarm import SwarmMatcher
 from kairos_defense.ports import ReportIndex, TrackStore, VectorStore
 
 T_GRID = (30, 45, 60, 90, 120, 180)
@@ -201,6 +204,8 @@ class EvalRun:
     model_version: str = ""
     candidate_tracks: int = 0
     reports_indexed: bool = False  # report linkage was measured (a report index was given)
+    swarm_cases: list = field(default_factory=list)  # eval.swarm.SwarmCase (phase 9)
+    swarm_outcomes: list = field(default_factory=list)  # eval.swarm.SwarmOutcome
 
 
 def evaluate(
@@ -233,7 +238,11 @@ def evaluate(
     run.model_version = version
     run.candidate_tracks = cfg.scoring.prefilter.candidate_tracks
     run.reports_indexed = reports is not None
+    swarm = SwarmMatcher(store, vstore, cfg.scoring)
+    teams = incident_teams(truth)
+    run.swarm_cases = swarm_cases(sets.swarm_incidents, incident_starts(store), teams)
+    run.swarm_outcomes = swarm_outcomes(run.swarm_cases, swarm, teams, T_GRID)
     run.demo = demo_rows(cfg, store, truth, ranker, assert_top3=method != "euclidean",
-                         downstream=down)  # fmt: skip
+                         downstream=down, swarm=swarm)  # fmt: skip
     run.elapsed_s = time.perf_counter() - t0
     return run

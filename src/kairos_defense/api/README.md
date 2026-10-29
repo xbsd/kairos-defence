@@ -10,10 +10,13 @@ origin.
   cache and the broadcasting ledger (D-104, D-110).
 - Serve every §16.4 route plus `/api/health`, `/api/ledger/tail` and `/api/ledger/{seq}`
   (`routes.py`, `routes_memory.py`, D-108), and the phase 8 page routes: the Match explainer
-  (`routes_explain.py`, D-135), the case list, decisions, the evidence list and verify (D-136).
+  (`routes_explain.py`, D-135), the case list, decisions, the evidence list and verify (D-136);
+  phase 9: the Swarm view (`routes_swarm.py`, D-152) and the optional chat (`routes_chat.py`,
+  §18.3).
 - Stream `/ws/replay/{incident_id}` (`stream.py`, §16.3, D-107).
 - Define the message and REST models (`schemas.py`, §16.5): `StreamMessage`, `ClientMessage`;
-  the page models in `schemas_pages.py`.
+  the page models in `schemas_pages.py`, the Swarm view's in `schemas_swarm.py`, the chat's in
+  `schemas_chat.py`.
 - Serve `web/dist` with a client-route fallback (`static.py`, D-112).
 
 ## Public API
@@ -49,6 +52,13 @@ origin.
     (`DecisionRequest`: close, reopen, escalate, notify_law_enforcement; 422 otherwise),
     `POST /api/evidence/verify` (`{"dir": name}`, 400 outside the exports root),
     `POST /api/admin/reset`, `POST /api/admin/reseed`.
+  - Phase 9: `GET /api/swarms` (`SwarmIncident` list: every swarm incident, newest first) and
+    `GET /api/swarm/{incident}?at=&match=` (`SwarmResponse`: detection, the query's descriptor
+    `curves` and target-relative `positions` per observed second, ranked `matches`, the selected
+    `match`'s whole flight, `aligned` and the DTW `path`; 404 unknown, 422 not a swarm or a match
+    not among the results, 503 without the swarm index; cached per (incident, at, match); writes
+    nothing). `GET /api/chat/status` (enabled, provider, model, tools) and `POST /api/chat`
+    (messages → reply and the tool calls made; 409 while `llm.provider` is `none`, §18.3).
   - `WS /ws/replay/{incident}`.
 
 ## Data in and out
@@ -80,7 +90,10 @@ union is exactly §16.3; `web/openapi.json` is current). Fixture `api` in `tests
 every outgoing message against `StreamMessage`. Phase 8: `test_api_explain.py` (contributions
 reproduce the score, no look-ahead, window and alignment, 404s), `test_api_cases.py` (case list,
 the known-then graph, decisions), `test_api_evidence.py` (list, verify passes then fails after
-one byte, path traversal refused).
+one byte, path traversal refused). Phase 9: `test_api_swarm.py` (the demo swarm's top match,
+alignment and position lengths, `at`, another match, errors, the cache, no ledger write) on the
+`swarm_index` fixture; `test_api_chat.py` (disabled by default, a fake LLM's reply and tool
+calls).
 
 ## Gotchas
 
@@ -97,3 +110,5 @@ one byte, path traversal refused).
 - Phase 7: package created.
 - Phase 8: `routes_explain.py`, `schemas_pages.py`; `/api/cases`, decisions, evidence list and
   verify; `--exports` / `exports_path` (D-135 to D-137).
+- Phase 9: `routes_swarm.py`, `schemas_swarm.py` (D-152); `routes_chat.py`, `schemas_chat.py`
+  (§18.3); `Services.swarm_matcher` and `swarm_cache`.

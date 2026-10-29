@@ -94,3 +94,10 @@ export type CaseDecision = DecisionRequest["decision"];
 export type EvidencePackage = S["EvidencePackage"];
 export type EvidenceVerifyResponse = S["EvidenceVerifyResponse"];
 export type EvidenceCheck = S["EvidenceCheck"];
+
+// Phase 9: the Swarm view (§14, §17.9, D-153).
+export type SwarmResponse = S["SwarmResponse"];
+export type SwarmFlight = S["SwarmFlightOut"];
+export type SwarmMatch = S["SwarmMatchOut"];
+export type SwarmCurves = S["SwarmCurves"];
+export type SwarmIncident = S["SwarmIncident"];

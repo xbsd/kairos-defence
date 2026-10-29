@@ -61,7 +61,15 @@ allowed to read ground truth (CLAUDE.md rule 2).
 - `forecast_choice`: `compare_anchors(cfg, store, vstore, truth, first, last, models_dir=None,
   at_s=90) -> dict`, `verdict(stats)`, `main(argv=None, split=None)` (`uv run python -m
   kairos_defense.eval.forecast_choice`, writes `reports/forecast_choice.json`).
-- `demo.demo_rows(cfg, store, truth, ranker, assert_top3=True, downstream=None)`,
+- `swarm` (phase 9, §19.1–§19.3, D-151): `SwarmCase` (`incident_id`, `team`, `start_ts`,
+  `n_earlier`; `answerable`), `SwarmOutcome` (`at_s` None for the whole observed flight, `top1`,
+  `top1_team`, `true_rank`, `candidates`, `total_ms`; `correct`), `incident_teams(truth)`,
+  `incident_starts(store)`, `swarm_cases(query_ids, starts, teams)`, `run_swarm_case`,
+  `swarm_outcomes(cases, matcher, teams, grid)`, `top1_share(outcomes, at_s)`,
+  `swarm_metrics(cases, outcomes, grid)` (`swarm_top1`, `swarm_top1_by_t`, `swarm_queries`,
+  `swarm_unanswerable`, `latency_swarm_p50_ms`, `latency_swarm_p95_ms`) and
+  `swarm_demo(cfg, matcher)` (the `swarm_top1` demo row).
+- `demo.demo_rows(cfg, store, truth, ranker, assert_top3=True, downstream=None, swarm=None)`,
   `demo.top3_row(cfg, matches, assert_top3)`, `demo.rank1_report_row(cfg, recall, asserting)`,
   `demo.forecast_row(cfg, fc, error_m, asserting)`. Statuses: `pass`, `fail`, `info (...)`,
   `pending (...)`.
@@ -89,13 +97,24 @@ allowed to read ground truth (CLAUDE.md rule 2).
   `forecast_median_t90_m` (with `forecast_p80_t90_m`, `forecast_queries_t90`,
   `forecast_missing_t90` and the same at T = 120 s), and the report-only
   `latency_forecast_p50/p95_ms`, `latency_recall_p50/p95_ms`; demo rows `live_rank1_report_for`
-  and `forecast_error_max_m`.
+  and `forecast_error_max_m`. Phase 9 keys: `swarm_top1` (with `swarm_queries`,
+  `swarm_unanswerable`, report-only `latency_swarm_p50/p95_ms`), `time_to_match_t90` (phase 4's
+  key, checked from phase 9); the JSON also gains `swarm_by_t` and `swarm` (every swarm outcome)
+  and the demo row `swarm_top1`.
 
 ## How it works
 
 - Query sets: prober and copycat tracks of history incidents on the nights 2026-03-01 to
-  2026-08-31, local time (D-055). Swarm incidents are listed for phase 9. Each answerable query
-  runs at every T in `T_GRID`; below `min_track_s` it counts as a miss.
+  2026-08-31, local time (D-055). Each answerable query runs at every T in `T_GRID`; below
+  `min_track_s` it counts as a miss.
+- **Swarms** (phase 9, D-151): the history swarm incidents of the same nights, each labelled with
+  its team from truth. A query with no earlier history swarm of its team is unanswerable (D-009).
+  `swarm_top1` = share of answerable queries whose top-1 match (`match.swarm.SwarmMatcher`) is
+  the same team, each seen over its whole observed flight (§19.3 gives swarms no T; the encore
+  shows the whole flight); `swarm_top1_by_t` gives the same share at each T of `T_GRID` (report
+  only). At seed 42 there are 5 queries, 1 unanswerable (S1-GOLF-260503, the team's first), so the
+  0.80 target needs all 4. The demo row runs the live `DEMO-SWARM-ECHO-0614` the same way; on a
+  partial dataset without its night it is `pending (no data)`.
 - **DTW lift is measured on one run** (D-076): the matcher returns both the fused order and the
   prefilter order of the same 500 candidates (the §10.2 baseline), so `dtw_lift` = Recall@5 fused
   − Recall@5 Euclidean on the same index and queries.
@@ -116,14 +135,15 @@ allowed to read ground truth (CLAUDE.md rule 2).
 - Regression gate: accuracy fails when more than 5% worse than `baseline.json`; latency only above
   1.5 × baseline + 2 ms (D-060); any failed demo assertion fails. `dtw_lift` and
   `latency_dtw_p95_ms` are gated from phase 4; `report_linkage` and `forecast_median_t90_m` from
-  phase 5 (a key missing from an older baseline is skipped).
+  phase 5; `swarm_top1` from phase 9 (a key missing from an older baseline is skipped).
 
 ## Configuration
 
 - `app.paths.truth`, `reports`, `duckdb`, `lancedb`, `models`.
 - `scoring.live.min_track_s`, `scoring.prefilter`, `scoring.windows`, `scoring.dtw`,
   `scoring.fusion.features` (through the matcher and training).
-- `scenario.expectations` and `scenario.live_incident` (demo rows).
+- `scenario.expectations` and `scenario.live_incident` (demo rows); `scenario.swarm_events` (the
+  live swarm for the `swarm_top1` row); `scoring.swarm` (through the swarm matcher).
 - Through `forecast` and `recall`: `scoring.forecast` (`top_k`, `min_radius_m`, `radius_factor`,
   `anchor`), `scoring.recall` (`hours_window`, `radius_m`, `k`) and `app.embeddings`.
 
@@ -134,6 +154,12 @@ allowed to read ground truth (CLAUDE.md rule 2).
 - `tests/unit/test_eval_harness.py`: query sets, protocol, outputs, the gate, the DTW summary keys,
   the demo assertions and the CLI sequence; phase 5: `test_phase5_summary_keys`,
   `test_demo_recall_and_forecast_rows`, `test_downstream_labels_use_filed_true_clue_reports`.
+- `tests/unit/test_eval_swarm.py` (phase 9): team labels from swarm rows only, the first event of
+  a team is unanswerable, `swarm_metrics` on hand-made outcomes, the demo row's pass, fail and
+  pending (no data) cases.
+- `tests/unit/test_eval_targets.py`: also checks that no target is pending any more (phase 9).
+- `tests/slow/test_full_index.py::test_full_swarm_matching` (phase 9): full data, 8 swarms
+  indexed and detected, `swarm_top1` ≥ 0.80 and the demo row.
 - `tests/unit/test_forecast_choice.py`: the D-090 rule and a run on the P1 nights.
 - `tests/unit/test_training.py`: pairs respect time and the split, τ known answer, determinism,
   artifacts (P1 nights with a `TrainSplit`).
@@ -175,3 +201,6 @@ allowed to read ground truth (CLAUDE.md rule 2).
 - Phase 8: `targets.py`; the eval JSON gains `targets`; the Markdown's target column and latency
   budgets come from it (unchanged text). `tests/unit/test_eval_targets.py` keeps it equal to
   `scripts/check_targets.py` (D-139). No metric, query set or protocol changed.
+- Phase 9: `swarm.py`: the swarm query set, team labels (truth, here only), answerability,
+  `swarm_top1` over each query's whole observed flight and `swarm_top1_by_t` (report only); the
+  `swarm_top1` demo row; `swarm_top1` joins `GATED`; no target is pending any more (D-151).

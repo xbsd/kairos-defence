@@ -1,4 +1,5 @@
-// A small history-API router (D-112, D-141): no dependency, a few routes with query parameters.
+// A small history-API router (D-112, D-141, D-154): no dependency, a few routes with query
+// parameters.
 import { useSyncExternalStore } from "react";
 
 export type Route =
@@ -10,14 +11,8 @@ export type Route =
   | { name: "evidence"; caseId: string | null }
   | { name: "delta"; since: string | null }
   | { name: "eval" }
-  | { name: "planned"; page: PlannedPage }
+  | { name: "swarm"; incident: string | null; match: string | null }
   | { name: "notfound"; path: string };
-
-export type PlannedPage = "swarm";
-
-export const PLANNED: Record<PlannedPage, { title: string; phase: number }> = {
-  swarm: { title: "Swarm view", phase: 9 },
-};
 
 /** The Pages menu, in §17.2 order. */
 export const PAGES: { path: string; title: string }[] = [
@@ -66,8 +61,15 @@ export function matchRoute(path: string, search = ""): Route {
       return { name: "delta", since: param(q, "since") };
     case "/eval":
       return { name: "eval" };
-    case "/swarm":
-      return { name: "planned", page: "swarm" };
+    case "/swarm": {
+      const incident = param(q, "incident");
+      const match = param(q, "match");
+      return {
+        name: "swarm",
+        incident: incident && ID.test(incident) ? incident : null,
+        match: match && ID.test(match) ? match : null,
+      };
+    }
   }
   return { name: "notfound", path: p };
 }
@@ -121,8 +123,8 @@ export function routeTitle(r: Route): string {
       return "Shift delta";
     case "eval":
       return "Eval";
-    case "planned":
-      return PLANNED[r.page].title;
+    case "swarm":
+      return "Swarm view";
     case "notfound":
       return "Not found";
   }

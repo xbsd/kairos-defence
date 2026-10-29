@@ -7,7 +7,10 @@ Run from the repository root after `make data index models eval`:
 
 The app runs in-process on a scratch ledger, live file and export folder under
 `data/cache/fixtures`, so `data/memory.duckdb` and `exports/` are never touched. The eval fixture
-(`eval.json`) is trimmed from the newest `reports/eval_<date>.json`.
+(`eval.json`) is trimmed from the newest `reports/eval_<date>.json`. Phase 9 adds the Swarm view's
+`swarms.json` and `swarm.json` (the live demo swarm's §14 result over its whole flight); to keep
+the file small, `swarm.json` keeps each flight's positions for its first `SWARM_POSITIONS_S`
+seconds only and rounds the descriptor curves to one decimal.
 """
 
 from __future__ import annotations
@@ -25,6 +28,8 @@ from kairos_defense.config import load_config
 log = logging.getLogger(__name__)
 INC = "DEMO-BRAVO-0828"
 CASE = "CASE-P1-DELTA-260419"
+SWARM = "DEMO-SWARM-ECHO-0614"
+SWARM_POSITIONS_S = 180
 
 
 def _write(out: Path, name: str, doc: object) -> None:
@@ -42,6 +47,21 @@ def _results_at(ws, t: int) -> dict:
         if m["type"] in ("match", "forecast", "dtw", "recall", "features") and m["t_s"] == t:
             got[m["type"]] = m
     return got
+
+
+def _trim_flight(f: dict | None) -> dict | None:
+    if f is None:
+        return None
+    keep = [i for i, t in enumerate(f["t_s"]) if t <= SWARM_POSITIONS_S]
+    curves = {k: [v if v is None or isinstance(v, int) else round(v, 1) for v in col]
+              for k, col in f["curves"].items()}  # fmt: skip
+    return {**f, "curves": curves, "t_s": [f["t_s"][i] for i in keep],
+            "positions": [[d[i] for i in keep] for d in f["positions"]]}  # fmt: skip
+
+
+def trim_swarm(doc: dict) -> dict:
+    """``swarm.json`` without most positions (see the module docstring)."""
+    return {**doc, "query": _trim_flight(doc["query"]), "match": _trim_flight(doc["match"])}
 
 
 def main(out: Path) -> None:
@@ -72,6 +92,8 @@ def main(out: Path) -> None:
         _write(out, "delta.json", c.get("/api/delta?since=2026-08-27T00:00:00Z").json())
         hist = c.get("/api/history/P1-DELTA-260419-T1?frame=target").json()
         _write(out, "history_delta.json", hist)
+        _write(out, "swarms.json", c.get("/api/swarms").json())
+        _write(out, "swarm.json", trim_swarm(c.get(f"/api/swarm/{SWARM}").json()))
     reports = sorted(Path("reports").glob("eval_*.json"))
     if reports:
         e = json.loads(reports[-1].read_text())

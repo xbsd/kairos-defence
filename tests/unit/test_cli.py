@@ -3,7 +3,6 @@ from __future__ import annotations
 import re
 from datetime import date
 
-import pytest
 from typer.testing import CliRunner
 
 from kairos_defense.cli import STUBS, app
@@ -17,7 +16,7 @@ runner = CliRunner()
 
 
 BUILT = ["gen", "index", "models", "match", "eval", "recall", "forecast", "replay", "memory",
-         "export", "verify-evidence", "fetch-models", "api"]  # fmt: skip
+         "export", "verify-evidence", "fetch-models", "api", "mcp"]  # fmt: skip
 
 
 def test_help_lists_every_command() -> None:
@@ -40,11 +39,12 @@ def test_gen_reports_config_errors(tmp_path) -> None:
     assert "config error" in res.output
 
 
-@pytest.mark.parametrize("name", list(STUBS))
-def test_stub_names_its_phase(name: str) -> None:
-    res = runner.invoke(app, [name, "--incident", "DEMO-BRAVO-0828", "--at", "90"])
+def test_mcp_is_a_real_command_and_no_stub_is_left() -> None:
+    """Phase 9 built the last stub (``mcp``): it is the MCP server, read-only by default."""
+    assert STUBS == {}
+    res = runner.invoke(app, ["mcp", "--help"], terminal_width=200)
     assert res.exit_code == 0, res.output
-    assert f"phase {STUBS[name][0]} implements it" in res.output
+    assert "--allow-proposals" in res.output and "implements it" not in res.output
 
 
 def test_version() -> None:

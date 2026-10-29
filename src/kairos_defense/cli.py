@@ -27,9 +27,7 @@ app = typer.Typer(
 )
 
 # name -> (phase that implements it, one-line help)
-STUBS: dict[str, tuple[str, str]] = {
-    "mcp": ("9", "Run the MCP server over stdio."),
-}
+STUBS: dict[str, tuple[str, str]] = {}
 
 _PASS_THROUGH = {"allow_extra_args": True, "ignore_unknown_options": True}
 
@@ -183,6 +181,8 @@ def index(config: str = typer.Option("config", help="Folder with the five YAML f
     table.add_row("loiter direction", ", ".join(f"{k} {v:,}" for k, v in s.loiter_dirs.items()))
     table.add_row("RF family unknown", f"{s.rf_unknown:,}")
     table.add_row("Remote ID present", f"{s.rid_present:,}")
+    table.add_row("swarm incidents indexed (detected)", f"{s.swarm_incidents:,} "
+                  f"({s.swarm_detected:,}); swarm_features rows {s.swarm_seconds:,}")  # fmt: skip
     if s.failed:
         table.add_row("[red]failed[/red]", ", ".join(s.failed))
     table.add_row("reports indexed (live skipped)", f"{r.reports:,} ({r.live_reports_skipped:,})")
@@ -311,6 +311,7 @@ def eval_(
     from kairos_defense.match.candidates import IndexStale
     from kairos_defense.match.dtw_rerank import DtwUnavailable
     from kairos_defense.match.fusion import ModelError
+    from kairos_defense.match.swarm import SwarmIndexMissing
     from kairos_defense.store.duck import DuckTrackStore
 
     if method not in METHODS:
@@ -324,7 +325,7 @@ def eval_(
         with DuckTrackStore(cfg.app.paths.duckdb, cfg.app) as store:
             reports = _need_reports_index(cfg, store, lance)
             run = evaluate(cfg, store, lance, truth, method, reports=reports)
-    except (ModelError, IndexStale, DtwUnavailable) as exc:
+    except (ModelError, IndexStale, DtwUnavailable, SwarmIndexMissing) as exc:
         _fail(exc)
     md, js, s = write_reports(run, cfg.app.paths.reports)
     console.print(eval_table(s, method))
@@ -343,11 +344,13 @@ def eval_(
         raise typer.Exit(1)
 
 
-from kairos_defense import cli_live, cli_memory, cli_recall  # noqa: E402  (phases 5 to 7)
+from kairos_defense import cli_agent, cli_live, cli_memory, cli_recall, cli_swarm  # noqa: E402
 
 cli_recall.register(app)
 cli_memory.register(app)
 cli_live.register(app)
+cli_swarm.register(app)
+cli_agent.register(app)
 
 
 def _version(value: bool) -> None:

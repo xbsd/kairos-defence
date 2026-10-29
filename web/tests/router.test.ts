@@ -12,7 +12,7 @@ describe("router", () => {
     });
     expect(matchRoute("/cases/")).toEqual({ name: "cases" });
     expect(matchRoute("/eval")).toEqual({ name: "eval" });
-    expect(matchRoute("/swarm")).toEqual({ name: "planned", page: "swarm" }); // phase 9
+    expect(matchRoute("/swarm")).toEqual({ name: "swarm", incident: null, match: null }); // phase 9
     expect(matchRoute("/nope")).toEqual({ name: "notfound", path: "/nope" });
     expect(matchRoute("/live/<script>")).toEqual({ name: "notfound", path: "/live/<script>" });
   });
@@ -47,6 +47,19 @@ describe("router", () => {
     });
     expect(routeTitle(matchRoute("/cases/X"))).toBe("Case board");
     expect(routeTitle(matchRoute("/swarm"))).toBe("Swarm view");
+  });
+
+  it("reads the Swarm view's incident and match (phase 9)", () => {
+    expect(matchRoute("/swarm", "?incident=DEMO-SWARM-ECHO-0614&match=S1-GOLF-260503")).toEqual({
+      name: "swarm",
+      incident: "DEMO-SWARM-ECHO-0614",
+      match: "S1-GOLF-260503",
+    });
+    expect(matchRoute("/swarm/", "?incident=<x>&match=a b")).toEqual({
+      name: "swarm",
+      incident: null,
+      match: null,
+    });
   });
 
   it("navigates and follows popstate", () => {

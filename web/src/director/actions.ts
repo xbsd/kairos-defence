@@ -47,6 +47,12 @@ async function presentCase(): Promise<string | null> {
   return (cases.find((c) => c.pending > 0) ?? cases[0])?.case_id ?? null;
 }
 
+/** The swarm the encore shows: the live swarm incident, else the newest swarm (D-155). */
+async function presentSwarm(): Promise<string | null> {
+  const list = await api.swarms();
+  return (list.find((s) => s.status === "live") ?? list[0])?.incident_id ?? null;
+}
+
 async function apply(step: Step): Promise<void> {
   const d = directorStore.getState();
   switch (step.kind) {
@@ -54,6 +60,14 @@ async function apply(step: Step): Promise<void> {
       controls.seek(step.t);
       return;
     case "page": {
+      if (BEATS[step.index]?.route === "swarm") {
+        // the encore reads only: it never writes to the ledger (§15.6)
+        const swarm = await presentSwarm();
+        if (!swarm) return;
+        directorStore.getState().setPage(step.index);
+        navigate(`/swarm?incident=${encodeURIComponent(swarm)}`);
+        return;
+      }
       const caseId = await presentCase();
       if (!caseId) return;
       directorStore.getState().setCase(caseId);

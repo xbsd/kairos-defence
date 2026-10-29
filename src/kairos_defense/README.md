@@ -56,7 +56,13 @@ The top-level package: the CLI entry point and the four core modules every other
       tables (through `POST /api/admin/reset` when the API holds the file, D-010);
     - `memory reseed [--api URL]` reseeds through `POST /api/admin/reseed` when the API holds the
       ledger.
-  - Stub in `STUBS`: `mcp` (phase 9).
+  - From phase 9:
+    - `swarm --incident ID [--at S] [--k 5]`: the earlier swarms ranked by choreography (§14,
+      `cli_swarm.py`, D-152); exit 1 for an unknown incident, one that is not a swarm, or a
+      missing swarm index;
+    - `mcp [--allow-proposals] [--config]`: the MCP server over stdio (`cli_agent.py`, §18.2):
+      the six read-only agent tools, plus the two proposal tools with `--allow-proposals`.
+  - No stub is left in `STUBS` (every §20 command is real).
   - `--version`.
 - `ports`:
   - `TrackStore`: `track_points`, `features`, `features_many`, `sensor_context_until`,
@@ -87,6 +93,8 @@ The top-level package: the CLI entry point and the four core modules every other
   `cli_memory_view`: `snapshot_table`, `side_by_side`, `items_table`, `seed_table`,
   `checks_table`, `when(t, offset)`.
 - `cli_live`: `api_cmd`, `replay_cmd`, `register(app)`; `cli_tables.replay_table`.
+- `cli_swarm` (phase 9): `swarm_cmd`, `swarm_table(result)`, `register(app)`; `cli_agent`
+  (phase 9): the `mcp` command, `register(app)`.
 - `rng.stable_int(name) -> int`: the first 8 bytes of SHA-256, little-endian.
 - `rng.rng_for(seed, *names) -> numpy.random.Generator`: an independent stream per component, e.g.
   `rng_for(42, "P2", "flight", "7")`.
@@ -126,8 +134,8 @@ Phase 5 added `paths.cache` (the FastEmbed cache, `app.yaml`) and `forecast.anch
 
 ## Tests
 
-- `tests/unit/test_cli.py`: help lists every command; the remaining stub (`mcp`) exits 0 and names
-  its phase; `--version`; the real commands' error and happy paths (`match` with both methods,
+- `tests/unit/test_cli.py`: help lists every command; `mcp --help` names `--allow-proposals`
+  (phase 9; until phase 8 it was a stub); `--version`; the real commands' error and happy paths (`match` with both methods,
   `models` on the P1 nights, missing data, index and models). Phase 5:
   `test_forecast_cli_runs_on_the_p1_nights`, `test_recall_cli_runs_on_the_p1_nights`,
   `test_recall_needs_reports_index` (also `eval`), `test_forecast_unknown_incident_exits_1`,
@@ -168,3 +176,5 @@ Phase 5 added `paths.cache` (the FastEmbed cache, `app.yaml`) and `forecast.anch
 - Phase 7: `api` and `replay` became real (`cli_live.py`); `memory reseed` falls back to the
   running API; ports `IngestStat`, `LiveSink`, `ResultCache`.
 - Phase 8: `api --exports` (and `KD_EXPORTS` under `--reload`).
+- Phase 9: `swarm` (`cli_swarm.py`) and `mcp` (`cli_agent.py`) became real; `index` prints the
+  swarm counts; `eval` prints swarm top-1 and its latency.

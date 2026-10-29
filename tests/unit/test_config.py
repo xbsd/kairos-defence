@@ -135,6 +135,8 @@ BAD = [
     ("scoring", _set("dtw.tau", "manual"), "tau"),
     ("scoring", _set("dtw.normalize", "window"), "normalize"),
     ("scoring", _set("forecast.anchor", "nearest"), "anchor"),
+    ("scoring", _set("swarm.pace_range", [1.4, 0.7]), "pace_range"),
+    ("scoring", _set("swarm.pace_range", [0.0, 1.4]), "pace_range"),
     ("app", _del("paths.cache"), "cache"),
 ]
 

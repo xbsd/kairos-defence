@@ -1,6 +1,6 @@
 // Director mode beats (SPEC §17.10, §1.2, D-122): one per §1.2 row, as data. Clock beats start
-// when the replay clock crosses `start`; page beats start only on → (D-123). The swarm encore is
-// phase 9: it appends one entry here.
+// when the replay clock crosses `start`; page beats start only on → (D-123). Phase 9 appends the
+// swarm encore, a page beat on the Swarm view (D-155).
 import type { CameraPreset } from "../state/uiStore";
 
 export type BeatId =
@@ -11,7 +11,8 @@ export type BeatId =
   | "forecast"
   | "recall"
   | "known"
-  | "evidence";
+  | "evidence"
+  | "encore";
 
 /** Panels a beat keeps lit; the others dim (§17.10). */
 export type PanelId =
@@ -33,7 +34,7 @@ export interface Beat {
   kind: "clock" | "page";
   /** Replay seconds (clock beats). */
   start: number | null;
-  route: "live" | "case" | "evidence";
+  route: "live" | "case" | "evidence" | "swarm";
   camera: CameraPreset | null;
   focus: PanelId[];
   reveal: Reveal;
@@ -142,6 +143,18 @@ export const BEATS: readonly Beat[] = [
     focus: [],
     reveal: ALL,
     key: "evidence-export",
+  },
+  {
+    id: "encore",
+    title: "Swarm encore",
+    row: "Encore: Swarm View",
+    kind: "page",
+    start: null,
+    route: "swarm",
+    camera: null,
+    focus: [],
+    reveal: ALL,
+    key: "swarm-ghost",
   },
 ];
 

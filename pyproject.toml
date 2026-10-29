@@ -21,8 +21,9 @@ dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
     "matplotlib>=3.9",
-    "mcp>=1.2",
+    "mcp>=2.3,<3",
     "cryptography>=43",
+    "httpx>=0.28",
 ]
 
 [project.optional-dependencies]

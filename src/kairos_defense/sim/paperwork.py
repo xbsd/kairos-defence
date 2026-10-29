@@ -5,8 +5,9 @@ with planted reports gets no generated ones (D-011). Streams are named by the in
 flight or swarm event key), never by the incident id, so a reassigned id changes no text draws:
 ``rng_for(seed, "paperwork", key, "reports")`` and ``(…, "assessment")``.
 
-``reports_llm_paraphrase: true`` needs the LLM adapter that phase 9 builds, so generation stops
-with a clear error until then (D-043).
+``reports_llm_paraphrase: true`` is refused with a clear error (D-043, D-155): phase 9 built the
+LLM adapter for the optional chat only; paraphrased report text would move the clue spans, change
+the planted DELTA report and make generation depend on a remote model.
 """
 
 from __future__ import annotations
@@ -43,7 +44,9 @@ class Paperwork:
 def paperwork(cfg: Config, world: World, incidents: list[Incident], seed: int) -> Paperwork:
     if cfg.app.reports_llm_paraphrase:
         raise RuntimeError(
-            "reports_llm_paraphrase needs the LLM adapter built in phase 9; set it to false (D-043)"
+            "reports_llm_paraphrase is not supported: the LLM adapter built in phase 9 serves the "
+            "optional chat only, and paraphrased reports would break the clue spans and seeded "
+            "determinism; set it to false (D-043, D-155)"
         )
     planted = {f.incident_id: f for f in cfg.scenario.p1_flights}
     facts, reports, assessments = [], [], []

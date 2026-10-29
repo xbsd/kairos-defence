@@ -480,6 +480,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/swarms": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Swarms */
+    get: operations["swarms_api_swarms_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/swarm/{incident_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Swarm */
+    get: operations["swarm_api_swarm__incident_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1547,6 +1581,130 @@ export interface components {
           )
         | null;
     };
+    /** SwarmCurves */
+    SwarmCurves: {
+      /** T S */
+      t_s: number[];
+      /** N Drones */
+      n_drones: number[];
+      /** Spread M */
+      spread_m: (number | null)[];
+      /** Pd Q25 M */
+      pd_q25_m: (number | null)[];
+      /** Pd Q50 M */
+      pd_q50_m: (number | null)[];
+      /** Pd Q75 M */
+      pd_q75_m: (number | null)[];
+      /** Rot Rate Dps */
+      rot_rate_dps: (number | null)[];
+      /** Centroid Speed Ms */
+      centroid_speed_ms: (number | null)[];
+      /** Axis Angle Deg */
+      axis_angle_deg: (number | null)[];
+      /** Centroid X Rel M */
+      centroid_x_rel_m: (number | null)[];
+      /** Centroid Y Rel M */
+      centroid_y_rel_m: (number | null)[];
+    };
+    /** SwarmFlightOut */
+    SwarmFlightOut: {
+      /** Incident Id */
+      incident_id: string;
+      /** Installation Id */
+      installation_id: string;
+      /** Region Id */
+      region_id: string;
+      /** Start Ts */
+      start_ts: string;
+      /** N Drones */
+      n_drones: number;
+      /** Track Ids */
+      track_ids: string[];
+      /** Is Swarm */
+      is_swarm: boolean;
+      /** Together S */
+      together_s: number;
+      target: components["schemas"]["SwarmTarget"];
+      curves: components["schemas"]["SwarmCurves"];
+      /** T S */
+      t_s: number[];
+      /** Positions */
+      positions: (number | null)[][][];
+    };
+    /** SwarmIncident */
+    SwarmIncident: {
+      /** Incident Id */
+      incident_id: string;
+      /** Installation Id */
+      installation_id: string;
+      /** Region Id */
+      region_id: string;
+      /** Start Ts */
+      start_ts: string;
+      /** N Tracks */
+      n_tracks: number;
+      /** Status */
+      status: string;
+    };
+    /** SwarmMatchOut */
+    SwarmMatchOut: {
+      /** Rank */
+      rank: number;
+      /** Incident Id */
+      incident_id: string;
+      /** Installation Id */
+      installation_id: string;
+      /** Region Id */
+      region_id: string;
+      /** Start Ts */
+      start_ts: string;
+      /** N Drones */
+      n_drones: number;
+      /** Duration S */
+      duration_s: number;
+      /** Distance */
+      distance: number;
+      /** Similarity */
+      similarity: number;
+      /** Warp Ratio */
+      warp_ratio: number;
+      /** Matched S */
+      matched_s: number;
+    };
+    /** SwarmResponse */
+    SwarmResponse: {
+      /** Incident Id */
+      incident_id: string;
+      /** At S */
+      at_s: number | null;
+      /** Observed S */
+      observed_s: number;
+      /** Model Version */
+      model_version: string;
+      query: components["schemas"]["SwarmFlightOut"];
+      /** Matches */
+      matches: components["schemas"]["SwarmMatchOut"][];
+      match: components["schemas"]["SwarmFlightOut"] | null;
+      /** Match Rank */
+      match_rank: number | null;
+      /** Aligned */
+      aligned: number[];
+      /** Path */
+      path: number[][];
+      /** Elapsed Ms */
+      elapsed_ms: number;
+    };
+    /** SwarmTarget */
+    SwarmTarget: {
+      /** Asset Id */
+      asset_id: string;
+      /** Kind */
+      kind: string;
+      /** X M */
+      x_m: number;
+      /** Y M */
+      y_m: number;
+    };
     /** ValidationError */
     ValidationError: {
       /** Location */
@@ -2305,6 +2463,60 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ExplainResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  swarms_api_swarms_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SwarmIncident"][];
+        };
+      };
+    };
+  };
+  swarm_api_swarm__incident_id__get: {
+    parameters: {
+      query?: {
+        at?: number | null;
+        match?: string | null;
+      };
+      header?: never;
+      path: {
+        incident_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SwarmResponse"];
         };
       };
       /** @description Validation Error */

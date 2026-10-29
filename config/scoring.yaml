@@ -37,3 +37,4 @@ swarm:
   min_drones: 3
   max_spacing_m: 300
   min_duration_s: 60
+  pace_range: [0.7, 1.4]            # prefix paces tried by the §14 swarm DTW: ±40% (D-149)

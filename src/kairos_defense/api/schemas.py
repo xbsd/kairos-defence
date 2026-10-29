@@ -33,7 +33,7 @@ class HelloMsg(Strict):
     playing: bool
     tracks: list[str]
     is_swarm: bool
-    matching: bool  # false: no single-track matching for this incident (swarms, phase 9)
+    matching: bool  # false: no single-track matching (swarms: GET /api/swarm/{id}, phase 9)
     min_track_s: float
     rerun_every_s: float
     utc_offset_hours: int

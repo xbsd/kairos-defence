@@ -29,6 +29,7 @@ from kairos_defense.eval.metrics import (
     times_to_match,
 )
 from kairos_defense.eval.report_md import markdown
+from kairos_defense.eval.swarm import swarm_metrics
 from kairos_defense.eval.targets import targets_json
 
 TOLERANCE = 0.05  # §19.4: fail when a metric worsens by more than 5% relative
@@ -40,9 +41,9 @@ GATED = {  # metric -> +1 higher is better, -1 lower is better
     "recall_at_5_t120": 1, "mrr_t120": 1, "time_to_match_t90": 1, "copycat_first_t120": -1,
     "recall_at_5_t120_copycats": 1, "dtw_lift": 1, "latency_prefilter_p95_ms": -1,
     "latency_dtw_p95_ms": -1, "latency_end_to_end_p95_ms": -1,
-    "report_linkage": 1, "forecast_median_t90_m": -1,
+    "report_linkage": 1, "forecast_median_t90_m": -1, "swarm_top1": 1,
 }  # fmt: skip
-PENDING = {"swarm_top1": "phase 9"}
+PENDING: dict[str, str] = {}  # every §19.3 metric is measured from phase 9
 LATENCY_STAGES = (("query_build", "query_ms"), ("prefilter", "prefilter_ms"), ("dtw", "dtw_ms"),
                   ("end_to_end", "total_ms"))  # fmt: skip
 # §10.9 p95 budgets. The DTW budget is for 50 candidates; phase 4 re-ranks 500 (D-068, D-076).
@@ -106,6 +107,9 @@ def summarize(run: EvalRun) -> dict:
         metrics[f"latency_{stage}_p50_ms"] = p50
         metrics[f"latency_{stage}_p95_ms"] = p95
     metrics.update(downstream_metrics(p))
+    sw = swarm_metrics(run.swarm_cases, run.swarm_outcomes, T_GRID)
+    swarm_by_t = sw.pop("swarm_top1_by_t")
+    metrics.update(sw)
     sets = run.sets
     counts = {
         "prober_queries": len(sets.probers),
@@ -113,6 +117,7 @@ def summarize(run: EvalRun) -> dict:
         "copycat_queries": len(sets.copycats),
         "copycat_unanswerable": sum(not q.answerable for q in sets.copycats),
         "swarm_incidents": len(sets.swarm_incidents),
+        "swarm_unanswerable": sum(not c.answerable for c in run.swarm_cases),
         "searches": len(ran),
     }
     by_t = {
@@ -135,6 +140,8 @@ def summarize(run: EvalRun) -> dict:
         "counts": counts,
         "recall_by_t": by_t,
         "per_actor": _actor_table(p + c),
+        "swarm_by_t": swarm_by_t,
+        "swarm": [{**asdict(o), "correct": o.correct} for o in run.swarm_outcomes],
         "pending": PENDING if run.reports_indexed else {**PENDING, "report_linkage": "no index"},
         "demo": [asdict(r) for r in run.demo],
         "targets": targets_json(),

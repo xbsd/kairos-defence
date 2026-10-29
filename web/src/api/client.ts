@@ -18,11 +18,16 @@ import type {
   LinkResponse,
   MatchResponse,
   Scene,
+  SwarmIncident,
+  SwarmResponse,
 } from "./messages";
 import type {
   CaseDiff,
   CaseGraph,
   CaseSnapshot,
+  ChatMessage,
+  ChatReply,
+  ChatStatus,
   EvalReport,
   HistoryPath,
   ShiftDeltaDoc,
@@ -118,6 +123,14 @@ export const api = {
   delta: (since: string, until?: string) =>
     getJson<ShiftDeltaDoc>(`/api/delta${qs({ since, until })}`),
   evalLatest: () => getJson<EvalReport>("/api/eval/latest"),
+  /** Every swarm incident, newest first (§14). */
+  swarms: () => getJson<SwarmIncident[]>("/api/swarms"),
+  /** The §14 match of one swarm incident: whole observed flight unless `at`; `match` selects. */
+  swarm: (incidentId: string, match?: string | null, at?: number | null) =>
+    getJson<SwarmResponse>(`/api/swarm/${enc(incidentId)}${qs({ match, at })}`),
+  /** The optional chat (§18.3): hidden unless a provider is configured. */
+  chatStatus: () => getJson<ChatStatus>("/api/chat/status"),
+  chat: (messages: ChatMessage[]) => postJson<ChatReply>("/api/chat", { messages }),
   adminReset: () => postJson<{ reset: Record<string, number> }>("/api/admin/reset", {}),
   adminReseed: () => postJson<{ head_seq: number }>("/api/admin/reseed", {}),
   scene: (installationId: string) =>

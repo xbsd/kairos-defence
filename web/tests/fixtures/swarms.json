@@ -1,0 +1,74 @@
+[
+  {
+    "incident_id": "HOTEL-260829-0036",
+    "installation_id": "HOTEL",
+    "region_id": "PLAINS",
+    "start_ts": "2026-08-29T06:36:48.000Z",
+    "n_tracks": 5,
+    "status": "history"
+  },
+  {
+    "incident_id": "ECHO-260806-2049",
+    "installation_id": "ECHO",
+    "region_id": "PLAINS",
+    "start_ts": "2026-08-07T02:49:01.000Z",
+    "n_tracks": 5,
+    "status": "history"
+  },
+  {
+    "incident_id": "DEMO-SWARM-ECHO-0614",
+    "installation_id": "ECHO",
+    "region_id": "PLAINS",
+    "start_ts": "2026-06-15T03:50:02.000Z",
+    "n_tracks": 5,
+    "status": "live"
+  },
+  {
+    "incident_id": "JULIET-260511-0024",
+    "installation_id": "JULIET",
+    "region_id": "DESERT",
+    "start_ts": "2026-05-11T07:24:59.000Z",
+    "n_tracks": 3,
+    "status": "history"
+  },
+  {
+    "incident_id": "S1-GOLF-260503",
+    "installation_id": "GOLF",
+    "region_id": "DESERT",
+    "start_ts": "2026-05-04T05:10:02.000Z",
+    "n_tracks": 5,
+    "status": "history"
+  },
+  {
+    "incident_id": "JULIET-260316-2209",
+    "installation_id": "JULIET",
+    "region_id": "DESERT",
+    "start_ts": "2026-03-17T05:09:40.000Z",
+    "n_tracks": 3,
+    "status": "history"
+  },
+  {
+    "incident_id": "JULIET-260123-2157",
+    "installation_id": "JULIET",
+    "region_id": "DESERT",
+    "start_ts": "2026-01-24T04:57:41.000Z",
+    "n_tracks": 3,
+    "status": "history"
+  },
+  {
+    "incident_id": "KILO-250603-0041",
+    "installation_id": "KILO",
+    "region_id": "DESERT",
+    "start_ts": "2025-06-03T07:41:08.000Z",
+    "n_tracks": 3,
+    "status": "history"
+  },
+  {
+    "incident_id": "JULIET-250325-2314",
+    "installation_id": "JULIET",
+    "region_id": "DESERT",
+    "start_ts": "2025-03-26T06:14:34.000Z",
+    "n_tracks": 3,
+    "status": "history"
+  }
+]

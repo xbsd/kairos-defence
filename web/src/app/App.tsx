@@ -1,10 +1,12 @@
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
 
 import { api } from "../api/client";
+import { ChatPanel } from "../chat/ChatPanel";
+import { loadChatStatus } from "../chat/chatStore";
 import { DirectorCaption, DirectorRail } from "../director/DirectorOverlay";
 import { useDirector } from "../director/useDirector";
 import { Home } from "../pages/Home";
-import { NotFound, Planned } from "../pages/Planned";
+import { NotFound } from "../pages/Planned";
 import { sceneStore } from "../state/sceneStore";
 import { prefersReducedMotion } from "../theme/motion";
 import { uiStore } from "../state/uiStore";
@@ -25,6 +27,7 @@ const ShiftDelta = lazy(() =>
   import("../pages/ShiftDelta").then((m) => ({ default: m.ShiftDelta })),
 );
 const Eval = lazy(() => import("../pages/Eval").then((m) => ({ default: m.Eval })));
+const SwarmView = lazy(() => import("../pages/SwarmView").then((m) => ({ default: m.SwarmView })));
 
 function useOsReducedMotion(): void {
   useEffect(() => {
@@ -47,6 +50,13 @@ function useInstallations(): void {
   }, []);
 }
 
+/** Chat (§18.3) shows only when the server says a provider is configured: ask once. */
+function useChatStatus(): void {
+  useEffect(() => {
+    void loadChatStatus();
+  }, []);
+}
+
 function Loading() {
   return (
     <main aria-label="Loading" className="grid flex-1 place-items-center p-8">
@@ -58,6 +68,7 @@ function Loading() {
 function trail(r: Route): string[] {
   if (r.name === "case") return ["Case board", r.caseId];
   if (r.name === "evidence" && r.caseId) return ["Evidence", r.caseId];
+  if (r.name === "swarm" && r.incident) return ["Swarm view", r.incident];
   return [routeTitle(r)];
 }
 
@@ -77,8 +88,8 @@ function Page({ route }: { route: Route }): ReactNode {
       return <ShiftDelta since={route.since} />;
     case "eval":
       return <Eval />;
-    case "planned":
-      return <Planned page={route.page} />;
+    case "swarm":
+      return <SwarmView incident={route.incident} match={route.match} />;
     case "notfound":
       return <NotFound path={route.path} />;
     case "live":
@@ -92,6 +103,7 @@ export function App() {
   useShortcuts();
   useOsReducedMotion();
   useInstallations();
+  useChatStatus();
   useDirector();
   return (
     <div className="flex h-full min-h-0 flex-col bg-scope">
@@ -109,6 +121,7 @@ export function App() {
       )}
       <DirectorCaption placement="page" />
       <DirectorRail />
+      <ChatPanel />
       <ShortcutsDialog />
     </div>
   );

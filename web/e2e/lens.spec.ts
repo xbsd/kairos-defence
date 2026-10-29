@@ -3,7 +3,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-import { INCIDENT, openLive, pause, play, reseed, waitForClock } from "./helpers";
+import { clockSeconds, INCIDENT, openLive, pause, play, reseed, waitForClock } from "./helpers";
 
 test("lens connectors follow the DTW path", async ({ page, request }) => {
   test.setTimeout(120_000);
@@ -12,10 +12,13 @@ test("lens connectors follow the DTW path", async ({ page, request }) => {
   await play(page, 5);
   await waitForClock(page, 91);
   await pause(page);
+  // At 5x a slow machine can pass T+91 before the pause lands: compare with the payload of the
+  // second the lens actually shows (the latest rerun at or before the paused clock).
+  const at = await clockSeconds(page);
   const panel = page.getByTestId("panel-lens");
   await expect(panel.getByTestId("lens-curves")).toBeVisible();
   const track = await panel.getByRole("combobox", { name: "Match" }).inputValue();
-  const d = (await (await request.get(`/api/dtw/${INCIDENT}/${track}?at=90`)).json()) as {
+  const d = (await (await request.get(`/api/dtw/${INCIDENT}/${track}?at=${at}`)).json()) as {
     path: [number, number][];
     overlap: number;
     dtw_distance: number;

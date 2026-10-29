@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { AskButton } from "../chat/ChatPanel";
 import { localHM } from "../director/captions";
 import { toggleDirector } from "../director/actions";
 import { tPlus } from "../lib/format";
@@ -197,6 +198,8 @@ export function CommandBar({ trail, replay = false }: CommandBarProps) {
           ))}
         </ul>
       </details>
+
+      <AskButton />
 
       <button
         type="button"

@@ -2076,3 +2076,116 @@ Where this file and the SPEC ever disagree, this file wins.
   keyed by the URL they belong to instead of resetting state in effects. A `sceneStore` (not in
   the plan) shares the scene and the installations with the theater, the constellation and the
   captions.
+
+## D-148 · Phases 9 and 10 run in one cloud session · 2026-10-29
+- Context: the laptop autopilot stopped at phase 9 planning; the build moved to one Claude Code on
+  the web session (`docs/CLOUD_HANDOFF.md`). The handoff's step 2 (`claude -p` works → run
+  `scripts/autopilot.py`) succeeded here, but the nested `claude -p` reported this session's own
+  session id, and the user's instruction for this session was to finish phases 9 and 10 in this
+  same session with `scripts/cloud_gate.py` as the only judge.
+- Decision: step 3 of the handoff. Plan, independent review (a subagent with `review_prompt()`,
+  read-only), build, exit check, then `cloud_gate.py gate|accept|close` per phase. Work happens on
+  branch `claude/cloud-phases-9-10`, pushed after each phase (the user merges). The build used two
+  forked helpers (agent and MCP backend; web) in parallel with the main session (swarm backend,
+  eval, docs); the main session integrated, reviewed and committed everything.
+- Environment (not code): this container's temp folder is `/tmp`; two CLI tests
+  (`test_api_refuses_missing_web_build`, `test_replay_reset_calls_api_when_locked`) assert on
+  rich output wrapped at 120 columns, and with the short Linux temp path the message wraps inside
+  the asserted phrase (the laptop's long macOS temp paths do not). Every pytest run here, the gate
+  included, sets `TMPDIR=/tmp/kairos-defence-pytest-temporary-folder`; the tests are unchanged.
+  Follow-up for a human: make those two assertions whitespace-insensitive.
+- Environment: the container has no GPU (Chromium falls back to SwiftShader), so the phase 8
+  frame-rate target cannot be re-measured here; the laptop's 59.9 fps median (phase 7 and 8, Apple
+  M4 Max) stands until re-measured there. The models retrained here differ slightly from the
+  laptop's (training hash differs, coefficients within about 2%: cross-platform floating point);
+  every §19 number is unchanged at the reported precision.
+
+## D-149 · Swarm descriptors, detection and tables (§14) · 2026-10-29
+- Decision: `features/swarm_features.py`. Each drone track is resampled with §9.1 `resample` and
+  placed on the incident's common 1 Hz grid; a second counts when at least `swarm.min_drones`
+  drones have a position. Per second, independent of drone order: the target-relative centroid
+  (the target is `choose_target` on the centroid path), its speed (central difference), the RMS
+  spread, the linear quartiles of the pairwise distances, the PCA principal axis as a bearing
+  unwrapped with period 180°, and its rate of turn (5 s centered mean, clipped to ±20 °/s because
+  a near-round formation has an ill-defined axis that would otherwise spike the series).
+  Detection runs on observable radar positions: the longest run of seconds with at least
+  `min_drones` drones all within `max_spacing_m` of each other must last `min_duration_s`.
+- Tables: DuckDB `swarm_features` with exactly the §7.2 columns; LanceDB `swarm_windows` with the
+  §7.5 columns plus `region_id`, `duration_s`, `together_s` and `is_swarm` (additive, used by the
+  Swarm view and the index summary). History swarms only; a live swarm's descriptors are computed
+  from raw points up to the query second (D-049, rule 3).
+- At seed 42: 8 history swarm incidents indexed, all 8 detected; the live `DEMO-SWARM-ECHO-0614`
+  is never indexed.
+
+## D-150 · Swarm matching: prefilter, prefix DTW, alignment · 2026-10-29
+- Decision: `match/swarm.py`. Query: the swarm seen up to `at_s` (default its whole observed
+  flight). Prefilter `swarm_windows` with `start_ts_ms <` the query's first radar point
+  (prefilter=True); every pre-filtered swarm is re-ranked (there are few). Re-rank: z-normalized
+  series `[spread, pd_q25, pd_q50, pd_q75, rot_rate, centroid_speed]` against candidate prefixes of
+  m = n × pace seconds, pace over `swarm.pace_range` (new `scoring.yaml` key, `[0.7, 1.4]`: ±40%,
+  the same pace band one operator shows across flights, §8.5 and `dtw_rerank.WARP_RANGE`), 15
+  steps, each prefix z-normalized on its own; banded C DTW (`dtw.band_fraction`, at least the
+  length difference plus one); distance = min `d / sqrt(n + m)`; similarity `1 / (1 + distance)`;
+  ties by start time, then incident id. The best prefix gives the pace (m / n) and the alignment
+  for the Swarm view, taken from the full DTW matrix (`dtw_rerank.series_path`): dtaidistance
+  2.5.1's C `warping_paths` is wrong near a band edge (phase 4), and a test checks the path costs
+  exactly the full DTW distance. `dtw_rerank` stays the only module that imports dtaidistance.
+- Why prefixes: a query seen for T seconds covers the start of the choreography; comparing it with
+  whole candidate flights would penalize a correct but partial match. On the full data the
+  whole-flight view ranks the right team first for all 4 answerable queries; shorter views are
+  weaker (report only, D-151).
+
+## D-151 · Swarm evaluation · 2026-10-29
+- Context: §19.3 defines swarm top-1 ("correct team ranked first for swarm queries") with no T;
+  §19.2's T grid is written for single tracks.
+- Decision: `eval/swarm.py`. Queries are the history swarm incidents of months 13–18; truth labels
+  each with its team (read in `eval/` only). A query with no earlier history swarm of its team is
+  unanswerable (D-009). The headline `swarm_top1` sees each query over its whole observed flight,
+  which is what the encore shows; `swarm_top1_by_t` reports the same share at every T of the §19.2
+  grid (report only). The demo row runs the live `DEMO-SWARM-ECHO-0614` the same way and passes when
+  `S1-GOLF-260503` ranks first; on a partial dataset without that night it is `pending (no data)`.
+  `swarm_top1` joins the regression-gated metrics; `targets.py` has no pending target left.
+- Arithmetic: 5 queries (JULIET-260316, S1-GOLF-260503, JULIET-260511, ECHO-260806,
+  HOTEL-260829); S1-GOLF-260503 is its team's first event, so 4 are answerable and the 0.80 target
+  needs 4 of 4. Result: 1.000 (4 of 4); the demo row passes (S1-GOLF-260503 at similarity 0.476,
+  pace 0.75; the best S2 swarm 0.426).
+
+## D-152 · Swarm routes and CLI · 2026-10-29
+- Decision: `GET /api/swarms` (every swarm incident, newest first) and
+  `GET /api/swarm/{incident_id}?at=&match=` (`api/routes_swarm.py`, models in
+  `api/schemas_swarm.py`): detection, the query's descriptor curves and target-relative drone
+  positions per observed second, the ranked earlier swarms, and for the selected match (default
+  rank 1) its whole flight, `aligned` (matched descriptor row per query row) and the DTW path. 404
+  unknown incident, 422 not a swarm or a match not among the results, 503 without the swarm
+  index. Results are cached in memory per (incident, at, match) (at most 64); nothing writes to
+  the ledger (§15.6, D-106). `kairos-defense swarm --incident ID [--at S] [--k 5]` prints the
+  ranking (`cli_swarm.py`); `kairos-defense index` prints the swarm counts.
+
+## D-153 · Performance pass (phase 9) · 2026-10-29
+- Measured (cProfile and timers, this container, 4 vCPU, while the eval and two test suites ran):
+  live query + match at T+90 about 0.5 s (prefilter 140 ms, signature 124 ms, DTW of 500
+  candidates 144 ms); swarm match over the whole flight about 0.27 s (raw points and resampling
+  100 ms, DTW over 15 prefixes × 8 candidates 137 ms). The eval's p95: DTW 258 ms, end to end
+  654 ms, both inside §10.9; prefilter 173 ms (WARN, report only, D-060; 30 ms on the laptop).
+- Decision: no LB_Keogh pruning: the DTW re-rank is far inside its 800 ms budget on both machines.
+  Caching where results repeat: swarm results per request in the API, the live loop's per-second
+  result cache (phase 7) and `replay --precompute` for the demo incidents. Nothing else changed.
+
+## D-154 · Slow-machine synchronization in two e2e specs · 2026-10-29
+- Context: the untouched phase 8 suite failed 2 of 29 tests here (27 passed in 11.5 min). At 5×
+  the replay clock passes T+91 and reaches about T+100 before the pause lands, so the lens shows
+  the T+100 rerun while `lens.spec.ts` asked the API for T+90; and `openLive` returned once the
+  command bar was ready while the lazy Live watch chunk still showed "Loading".
+- Decision: `openLive` also waits for the Live theater region; `lens.spec.ts` asks the API for
+  the paused clock's second. The assertions are unchanged (the connectors still equal the DTW
+  path's pairs at the second shown). Both pass here.
+
+## D-155 · LLM report paraphrase stays off in v1 · 2026-10-29
+- Context: D-043 deferred `reports_llm_paraphrase: true` to phase 9, when an LLM adapter would exist.
+  Phase 9 built the adapter (`agent/llm.py`) for the optional chat.
+- Decision: the flag stays refused (`gen` exits with a clear error); D-043's consequence is
+  superseded. The message now says why.
+- Why: paraphrased text would move the clue spans the recall overlay highlights, change the
+  planted DELTA report that the demo and its assertions depend on, and make generation depend on a
+  remote model (rule 4 determinism, rule 5 offline). The chat panel is the only LLM use, and it is
+  off by default.

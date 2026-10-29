@@ -1,6 +1,7 @@
 // Real API payloads captured from the dev data (tests/fixtures/dump_fixtures.py): T+90, T+105 and
 // T+120 stream results, the BRAVO scene, the installations, the case graph known then and now,
-// the diff, the shift delta, the explainer at T+90 and the eval report.
+// the diff, the shift delta, the explainer at T+90, the eval report, and (phase 9) the swarm list
+// and the live demo swarm's §14 result (positions trimmed to its first 180 s).
 import type {
   DtwMsg,
   ExplainResponse,
@@ -12,6 +13,8 @@ import type {
   MatchMsg,
   RecallMsg,
   Scene,
+  SwarmIncident,
+  SwarmResponse,
 } from "../src/api/messages";
 import type { CaseDiff, CaseGraph, EvalReport, HistoryPath, ShiftDeltaDoc } from "../src/api/pages";
 import casesJ from "./fixtures/cases.json";
@@ -24,6 +27,8 @@ import thenJ from "./fixtures/graph_then.json";
 import historyJ from "./fixtures/history_delta.json";
 import instJ from "./fixtures/installations.json";
 import sceneJ from "./fixtures/scene_bravo.json";
+import swarmJ from "./fixtures/swarm.json";
+import swarmsJ from "./fixtures/swarms.json";
 import t090J from "./fixtures/t090.json";
 import t105J from "./fixtures/t105.json";
 import t120J from "./fixtures/t120.json";
@@ -52,3 +57,5 @@ export const EXPLAIN = as<ExplainResponse>(explainJ);
 export const HISTORY = as<HistoryPath>(historyJ);
 export const CASES = as<CaseSummary[]>(casesJ);
 export const EVAL = as<EvalReport>(evalJ);
+export const SWARM = as<SwarmResponse>(swarmJ);
+export const SWARMS = as<SwarmIncident[]>(swarmsJ);

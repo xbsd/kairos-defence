@@ -1,22 +1,5 @@
-import { PLANNED, type PlannedPage } from "../app/routes";
-
-/** A page another phase builds: one plain sentence, no fake data (rule 10). */
-export function Planned({ page }: { page: PlannedPage }) {
-  const p = PLANNED[page];
-  return (
-    <main aria-labelledby="planned-title" className="grid flex-1 place-items-center p-8">
-      <div className="max-w-md text-center">
-        <h1 id="planned-title" className="text-18 font-bold text-ink-hi">
-          {p.title}
-        </h1>
-        <p className="mt-2 text-15 text-ink-mid">
-          The {p.title.toLowerCase()} arrives in phase {p.phase}, with the swarm encore. Live watch
-          and the other pages are ready now.
-        </p>
-      </div>
-    </main>
-  );
-}
+// Every planned page is built (phase 9 removed the last placeholder, the Swarm view); this file
+// keeps the not-found page.
 
 export function NotFound({ path }: { path: string }) {
   return (

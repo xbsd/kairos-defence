@@ -13,7 +13,7 @@ import {
 const id = (i: number) => BEATS[i]?.id;
 
 describe("Director engine (D-122, D-123)", () => {
-  it("has one beat per §1.2 row, encore left to phase 9", () => {
+  it("has one beat per §1.2 row, the swarm encore last (phase 9)", () => {
     expect(BEATS.map((b) => b.id)).toEqual([
       "detection",
       "recording",
@@ -23,7 +23,11 @@ describe("Director engine (D-122, D-123)", () => {
       "recall",
       "known",
       "evidence",
+      "encore",
     ]);
+    const encore = BEATS[8];
+    expect(encore).toMatchObject({ kind: "page", route: "swarm", key: "swarm-ghost" });
+    expect(encore?.start).toBeNull();
   });
 
   it("finds the clock beat for a replay second", () => {
@@ -51,7 +55,9 @@ describe("Director engine (D-122, D-123)", () => {
     expect(nextBeat(4)).toEqual({ kind: "seek", t: 120 });
     expect(nextBeat(5)).toEqual({ kind: "page", index: 6 });
     expect(nextBeat(6)).toEqual({ kind: "page", index: 7 });
-    expect(nextBeat(7)).toEqual({ kind: "none" });
+    expect(nextBeat(7)).toEqual({ kind: "page", index: 8 }); // the encore (phase 9)
+    expect(nextBeat(8)).toEqual({ kind: "none" });
+    expect(prevBeat(8)).toEqual({ kind: "page", index: 7 });
     expect(prevBeat(7)).toEqual({ kind: "page", index: 6 });
     expect(prevBeat(6)).toEqual({ kind: "live", index: 5, t: 120 });
     expect(prevBeat(3)).toEqual({ kind: "seek", t: 45 });

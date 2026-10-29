@@ -52,6 +52,7 @@ def _intro(s: dict) -> list[str]:
 
 def markdown(s: dict, figure: str) -> str:
     m, n = s["metrics"], s["counts"]
+    answerable = (m.get("swarm_queries") or 0) - (m.get("swarm_unanswerable") or 0)
     lines = [
         *_intro(s),
         "",
@@ -62,7 +63,8 @@ def markdown(s: dict, figure: str) -> str:
         f"| Probers (nights 2026-03-01 to 08-31) | {n['prober_queries']} | "
         f"{n['prober_unanswerable']} |",
         f"| Copycats | {n['copycat_queries']} | {n['copycat_unanswerable']} |",
-        f"| Swarm incidents | {n['swarm_incidents']} | matched in phase 9 |",
+        f"| Swarm incidents (§14) | {n['swarm_incidents']} | "
+        f"{n.get('swarm_unanswerable', '-')} (no earlier swarm of the same team) |",
         "",
         f"Each answerable query runs at T = {T_GRID_TEXT} s after its first radar point "
         f"({n['searches']} searches). T = 30 s is below `min_track_s` (45 s): the matcher waits, "
@@ -89,7 +91,8 @@ def markdown(s: dict, figure: str) -> str:
         f"| Forecast error at T = 90 s, median | {_m(m.get('forecast_median_t90_m'))} | "
         f"{tt('forecast_median_t90_m')} |",
         f"| Forecast error at T = 90 s, P80 | {_m(m.get('forecast_p80_t90_m'))} | report only |",
-        f"| Swarm top-1 | - | {tt('swarm_top1')} (phase 9) |",
+        f"| Swarm top-1, whole observed flight ({answerable} answerable) | "
+        f"{_fmt(m.get('swarm_top1'))} | {tt('swarm_top1')} |",
         "",
         "## Recall by time since first contact",
         "",

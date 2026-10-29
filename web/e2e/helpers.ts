@@ -20,6 +20,8 @@ export async function reseed(request: APIRequestContext): Promise<number> {
 export async function openLive(page: Page): Promise<void> {
   await page.goto(`/live/${INCIDENT}`);
   await expect(page.getByTestId("replay-status")).toHaveText(/Paused|Live/);
+  // Live watch is a lazy page: on a slow machine the command bar is ready before its chunk loads.
+  await expect(page.getByLabel("Live theater", { exact: true })).toBeVisible({ timeout: 60_000 });
 }
 
 export async function play(page: Page, speed: 1 | 2 | 5 = 5): Promise<void> {

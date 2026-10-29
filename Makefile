@@ -58,8 +58,8 @@ e2e: ## Playwright end-to-end tests, UI screenshots and accessibility checks
 	$(KD) replay --precompute
 	$(NPM) run e2e
 
-mcp: ## MCP server over stdio
-	$(KD) mcp
+mcp: ## MCP server over stdio (silent recipe: stdout carries only the protocol)
+	@$(KD) mcp
 
 clean: ## Remove generated data, exports, builds and caches
 	rm -rf data exports web/dist .pytest_cache .ruff_cache

@@ -1118,6 +1118,101 @@
      }
     }
    }
+  },
+  "/api/swarms": {
+   "get": {
+    "summary": "Swarms",
+    "operationId": "swarms_api_swarms_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/SwarmIncident"
+         },
+         "type": "array",
+         "title": "Response Swarms Api Swarms Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/swarm/{incident_id}": {
+   "get": {
+    "summary": "Swarm",
+    "operationId": "swarm_api_swarm__incident_id__get",
+    "parameters": [
+     {
+      "name": "incident_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Incident Id"
+      }
+     },
+     {
+      "name": "at",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "number",
+         "minimum": 0
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "At"
+      }
+     },
+     {
+      "name": "match",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "maxLength": 200
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Match"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwarmResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
   }
  },
  "components": {
@@ -4274,6 +4369,476 @@
     ],
     "title": "StreamSchema",
     "description": "``GET /api/schema/stream``: one message, so OpenAPI includes every stream type."
+   },
+   "SwarmCurves": {
+    "properties": {
+     "t_s": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "T S"
+     },
+     "n_drones": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "N Drones"
+     },
+     "spread_m": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Spread M"
+     },
+     "pd_q25_m": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Pd Q25 M"
+     },
+     "pd_q50_m": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Pd Q50 M"
+     },
+     "pd_q75_m": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Pd Q75 M"
+     },
+     "rot_rate_dps": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Rot Rate Dps"
+     },
+     "centroid_speed_ms": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Centroid Speed Ms"
+     },
+     "axis_angle_deg": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Axis Angle Deg"
+     },
+     "centroid_x_rel_m": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Centroid X Rel M"
+     },
+     "centroid_y_rel_m": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Centroid Y Rel M"
+     }
+    },
+    "type": "object",
+    "required": [
+     "t_s",
+     "n_drones",
+     "spread_m",
+     "pd_q25_m",
+     "pd_q50_m",
+     "pd_q75_m",
+     "rot_rate_dps",
+     "centroid_speed_ms",
+     "axis_angle_deg",
+     "centroid_x_rel_m",
+     "centroid_y_rel_m"
+    ],
+    "title": "SwarmCurves"
+   },
+   "SwarmFlightOut": {
+    "properties": {
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "region_id": {
+      "type": "string",
+      "title": "Region Id"
+     },
+     "start_ts": {
+      "type": "string",
+      "title": "Start Ts"
+     },
+     "n_drones": {
+      "type": "integer",
+      "title": "N Drones"
+     },
+     "track_ids": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Track Ids"
+     },
+     "is_swarm": {
+      "type": "boolean",
+      "title": "Is Swarm"
+     },
+     "together_s": {
+      "type": "integer",
+      "title": "Together S"
+     },
+     "target": {
+      "$ref": "#/components/schemas/SwarmTarget"
+     },
+     "curves": {
+      "$ref": "#/components/schemas/SwarmCurves"
+     },
+     "t_s": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "T S"
+     },
+     "positions": {
+      "items": {
+       "items": {
+        "items": {
+         "anyOf": [
+          {
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "type": "array"
+       },
+       "type": "array"
+      },
+      "type": "array",
+      "title": "Positions"
+     }
+    },
+    "type": "object",
+    "required": [
+     "incident_id",
+     "installation_id",
+     "region_id",
+     "start_ts",
+     "n_drones",
+     "track_ids",
+     "is_swarm",
+     "together_s",
+     "target",
+     "curves",
+     "t_s",
+     "positions"
+    ],
+    "title": "SwarmFlightOut"
+   },
+   "SwarmIncident": {
+    "properties": {
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "region_id": {
+      "type": "string",
+      "title": "Region Id"
+     },
+     "start_ts": {
+      "type": "string",
+      "title": "Start Ts"
+     },
+     "n_tracks": {
+      "type": "integer",
+      "title": "N Tracks"
+     },
+     "status": {
+      "type": "string",
+      "title": "Status"
+     }
+    },
+    "type": "object",
+    "required": [
+     "incident_id",
+     "installation_id",
+     "region_id",
+     "start_ts",
+     "n_tracks",
+     "status"
+    ],
+    "title": "SwarmIncident"
+   },
+   "SwarmMatchOut": {
+    "properties": {
+     "rank": {
+      "type": "integer",
+      "title": "Rank"
+     },
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "region_id": {
+      "type": "string",
+      "title": "Region Id"
+     },
+     "start_ts": {
+      "type": "string",
+      "title": "Start Ts"
+     },
+     "n_drones": {
+      "type": "integer",
+      "title": "N Drones"
+     },
+     "duration_s": {
+      "type": "number",
+      "title": "Duration S"
+     },
+     "distance": {
+      "type": "number",
+      "title": "Distance"
+     },
+     "similarity": {
+      "type": "number",
+      "title": "Similarity"
+     },
+     "warp_ratio": {
+      "type": "number",
+      "title": "Warp Ratio"
+     },
+     "matched_s": {
+      "type": "integer",
+      "title": "Matched S"
+     }
+    },
+    "type": "object",
+    "required": [
+     "rank",
+     "incident_id",
+     "installation_id",
+     "region_id",
+     "start_ts",
+     "n_drones",
+     "duration_s",
+     "distance",
+     "similarity",
+     "warp_ratio",
+     "matched_s"
+    ],
+    "title": "SwarmMatchOut"
+   },
+   "SwarmResponse": {
+    "properties": {
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "at_s": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "At S"
+     },
+     "observed_s": {
+      "type": "integer",
+      "title": "Observed S"
+     },
+     "model_version": {
+      "type": "string",
+      "title": "Model Version"
+     },
+     "query": {
+      "$ref": "#/components/schemas/SwarmFlightOut"
+     },
+     "matches": {
+      "items": {
+       "$ref": "#/components/schemas/SwarmMatchOut"
+      },
+      "type": "array",
+      "title": "Matches"
+     },
+     "match": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/SwarmFlightOut"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "match_rank": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Match Rank"
+     },
+     "aligned": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "Aligned"
+     },
+     "path": {
+      "items": {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      "type": "array",
+      "title": "Path"
+     },
+     "elapsed_ms": {
+      "type": "number",
+      "title": "Elapsed Ms"
+     }
+    },
+    "type": "object",
+    "required": [
+     "incident_id",
+     "at_s",
+     "observed_s",
+     "model_version",
+     "query",
+     "matches",
+     "match",
+     "match_rank",
+     "aligned",
+     "path",
+     "elapsed_ms"
+    ],
+    "title": "SwarmResponse"
+   },
+   "SwarmTarget": {
+    "properties": {
+     "asset_id": {
+      "type": "string",
+      "title": "Asset Id"
+     },
+     "kind": {
+      "type": "string",
+      "title": "Kind"
+     },
+     "x_m": {
+      "type": "number",
+      "title": "X M"
+     },
+     "y_m": {
+      "type": "number",
+      "title": "Y M"
+     }
+    },
+    "type": "object",
+    "required": [
+     "asset_id",
+     "kind",
+     "x_m",
+     "y_m"
+    ],
+    "title": "SwarmTarget"
    },
    "ValidationError": {
     "properties": {

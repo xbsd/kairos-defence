@@ -9,7 +9,8 @@ match on ``dist_target_m``), ``target_asset_id`` and ``elapsed_ms``, the measure
 time. A cached result keeps its original ``elapsed_ms`` and is marked ``cached`` (rule 10).
 
 Queries use the track's points up to the replay second only (rule 3); the matcher keeps its
-started-before filter. Swarm incidents get no single-track result (swarm matching is phase 9).
+started-before filter. Swarm incidents get no single-track result: they are matched by choreography
+(``match.swarm``, the Swarm view and ``kairos-defense swarm``, phase 9).
 Every store access holds ``lock``: one DuckDB connection is never used by two threads at once
 (D-110).
 """

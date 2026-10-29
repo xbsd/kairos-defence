@@ -1,8 +1,8 @@
 # kairos_defense.match
 
-The matching engine (SPEC §10). Phase 3 built the query, the no-look-ahead prefilter and the
+The matching engine (SPEC §10, §14). Phase 3 built the query, the no-look-ahead prefilter and the
 Euclidean baseline. Phase 4 added the DTW re-rank, the partial live signature, fusion,
-explanations and the `DtwMatcher`.
+explanations and the `DtwMatcher`. Phase 9 added swarm choreography matching (`swarm.py`).
 
 ## Responsibilities
 
@@ -18,6 +18,9 @@ explanations and the `DtwMatcher`.
   (`matcher.py`, `explain.py`).
 - Refuse a stale index, missing models and a missing C extension (`candidates.check_index`,
   `fusion.ModelError`, `dtw_rerank.require_c`; D-075, D-013).
+- Rank earlier swarms against a swarm incident by choreography (`swarm.py`, §14, D-150): the
+  `swarm_windows` prefilter (started before the query), then multichannel DTW on the descriptor
+  series against candidate prefixes over `swarm.pace_range`.
 
 Business logic depends only on the `TrackStore` and `VectorStore` ports (rule 6). `dtw_rerank.py`
 is the only module that imports dtaidistance; serving never imports scikit-learn and never reads
@@ -73,6 +76,18 @@ truth (training lives in `kairos_defense.eval.training`).
   `matcher.load_models(models_dir, scoring)`.
   `EXPLAIN_TOP = 20`.
 - `types.Match` (frozen, §10.8) and `Match.to_dict()` (JSON-safe: NaN becomes None).
+- `swarm.SwarmMatcher(store, vstore, scoring)` (phase 9, §14, D-150): `match(incident_id,
+  at_s=None, k=5) -> SwarmResult` (`query` a `features.swarm_features.SwarmFlight`, `matches` a
+  list of `SwarmMatch` best first, `paths` incident → DTW path `[(i, j)…]`, `timings` in ms:
+  `load_ms`, `prefilter_ms`, `dtw_ms`, `total_ms`; `aligned(incident_id)` → for each described query
+  second, the matched descriptor row); `candidate_descriptors(incident_id)`.
+  `SwarmMatch` (`rank`, `incident_id`, `installation_id`, `region_id`, `start_ts`, `n_drones`,
+  `duration_s`, `distance`, `similarity` = 1 / (1 + distance), `warp_ratio`, `matched_s`;
+  `to_dict()`). `swarm.prefix_dtw`, `prefix_lengths`, `dtw_band`, `warping_path`;
+  `SwarmIndexMissing`; `MODEL_VERSION = "swarm-dtw-v1"`.
+- `dtw_rerank.series_distance(a, b, window)` and `series_path(a, b)` (phase 9): banded C distance
+  and the full-matrix optimal path between two prepared multichannel series (the swarm matcher's
+  only dtaidistance calls, so `dtw_rerank` stays the only importer).
 
 - `lens.lens_payload(query, candidate, *, channel, band_fraction, warp_ratio, match_track_id)`
   (phase 7, D-117): one channel, raw units, `(n,)` and `(m,)`; PAA to ≤ 128 points; band
@@ -114,6 +129,15 @@ truth (training lives in `kairos_defense.eval.training`).
 Measured on the dev laptop with the default dataset (eval, 165 searches): prefilter p95 30 ms,
 DTW of 500 candidates p95 57 ms, end to end p95 124 ms.
 
+**Swarms (§14, D-150).** The query swarm is rebuilt from raw points up to `at_s` (whole flight by
+default). Its z-normalized descriptor series (spread, three pair-distance quartiles, rotation rate,
+centroid speed) gives a 96-d PAA vector for the `swarm_windows` prefilter (`start_ts_ms <` the
+query's first radar point; every earlier swarm is re-ranked, there are few). Each candidate's
+indexed descriptors (`swarm_features`) are compared as prefixes of m = n × pace seconds, pace over
+`swarm.pace_range` in 15 steps, each prefix z-normalized on its own, banded C DTW with
+`dtw.band_fraction`; distance = min `d / sqrt(n + m)`. The best prefix gives the pace (`m / n`)
+and the full-matrix alignment for the Swarm view.
+
 ## Configuration
 
 `scoring.yaml` (§6.5): `prefilter.k_windows` (10,000) and `candidate_tracks` (500);
@@ -121,7 +145,8 @@ DTW of 500 candidates p95 57 ms, end to end p95 124 ms.
 `dtw.band_fraction` (0.25), `anchor_before` (0.5), `anchor_after` (1.5), `tau` (`auto` reads the
 calibration, a number overrides it), `normalize` (`fixed`; `series` and `floored` for comparison,
 D-079; retrain with `make models` after changing it); `fusion.features` (the model's order is checked);
-`live.min_track_s` (CLI warning). `app.paths.models` (where the model files live).
+`live.min_track_s` (CLI warning). `app.paths.models` (where the model files live). Swarms:
+`swarm.pace_range` ([0.7, 1.4]) and `dtw.band_fraction`; `windows.paa_segments` for the vector.
 
 ## Tests
 
@@ -135,6 +160,10 @@ D-079; retrain with `make models` after changing it); `fusion.features` (the mod
 - `tests/unit/test_matcher.py` (P1 nights, hand-set `toy_models`): fields and order,
   determinism, timings, stale index refused, missing models refused, top 3 are P1.
 - `tests/unit/test_no_lookahead.py`: both matchers, every track at T = 45, 90 and 180.
+- `tests/unit/test_swarm_match.py` (phase 9, `swarm_index` fixture): the demo swarm's top 1 is
+  `S1-GOLF-260503` (§20), no look-ahead (earlier incidents only; points up to `at_s`), the path is
+  monotone, covers both ends and costs exactly the full DTW distance, an S1 event ranks S1 first,
+  short queries, unknown incidents and a missing index.
 - `tests/slow/test_full_models.py`: full-data copycat check and DTW eval.
 - Run: `uv run pytest tests/unit -q -k "dtw or fusion or explain or matcher or signature or
   lookahead"`.
@@ -177,3 +206,5 @@ D-079; retrain with `make models` after changing it); `fusion.features` (the mod
 - Phase 5: `MatchResult.signature` and `signatures`; `warp_path` takes the scaling mode (D-087).
 - Phase 7: `lens.py`, the time-warp lens payload of the `dtw` message (D-117).
 - Phase 8: `explain.contribution_table` for the Match explainer (D-135).
+- Phase 9: `swarm.py` (§14 swarm matching, D-150); `dtw_rerank.series_distance` and
+  `series_path`. The single-track matcher is unchanged.

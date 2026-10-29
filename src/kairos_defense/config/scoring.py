@@ -78,6 +78,14 @@ class SwarmScoringConfig(StrictModel):
     min_drones: Annotated[int, Field(ge=2)]
     max_spacing_m: Pos
     min_duration_s: Pos
+    # candidate seconds per query second tried by the §14 prefix DTW (D-149)
+    pace_range: tuple[Pos, Pos] = (0.7, 1.4)
+
+    @model_validator(mode="after")
+    def _pace_order(self) -> SwarmScoringConfig:
+        if self.pace_range[0] > self.pace_range[1]:
+            raise ValueError("swarm.pace_range must be [low, high] with low <= high")
+        return self
 
 
 class ScoringConfig(StrictModel):

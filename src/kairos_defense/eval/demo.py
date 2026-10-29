@@ -7,7 +7,8 @@ reason. Under ``--method euclidean`` it stays information only, since the baseli
 (D-076). Phase 5 adds two rows (D-088): at T+120 the expected incident is among the top 3 matched
 incidents and its recall rank 1 is its own report (§1.2); at ``forecast_at_s`` the forecast
 center is within ``forecast_error_max_m`` of the true recovery point. Both are information only
-under the Euclidean baseline, like the top 3. The swarm check is pending until phase 9.
+under the Euclidean baseline, like the top 3. Phase 9 adds the swarm row
+(``eval.swarm.swarm_demo``): the live demo swarm's top 1 over its whole observed flight (§14).
 """
 
 from __future__ import annotations
@@ -109,9 +110,11 @@ def demo_rows(
     ranker,
     assert_top3: bool = True,
     downstream=None,
+    swarm=None,
 ) -> list[DemoRow]:
-    """Every ``scenario_demo.yaml`` row this phase can check; ``downstream`` (an
-    ``eval.downstream.Downstream``) enables the forecast and recall rows."""
+    """Every ``scenario_demo.yaml`` row; ``downstream`` (an ``eval.downstream.Downstream``)
+    enables the forecast and recall rows, ``swarm`` (a ``match.swarm.SwarmMatcher``) the swarm
+    row (phase 9)."""
     ex = cfg.scenario.expectations
     live = cfg.scenario.live_incident
     track = f"{live}-T1"
@@ -157,5 +160,10 @@ def demo_rows(
         q = load_query(store, track, int(ex.forecast_at_s), cfg.scoring)
         fc, err, _ = downstream.forecast(q, ranker(q))
         rows.append(forecast_row(cfg, fc, err, assert_top3))
-    rows.append(DemoRow("swarm_top1", ex.swarm_top1, "-", "pending (phase 9)"))
+    if swarm is None:
+        rows.append(DemoRow("swarm_top1", ex.swarm_top1, "-", "pending (no swarm matcher)"))
+    else:
+        from kairos_defense.eval.swarm import swarm_demo
+
+        rows.append(swarm_demo(cfg, swarm))
     return rows

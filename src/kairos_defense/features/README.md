@@ -62,9 +62,27 @@ through the `TrackStore` port.
 - `windows.query_window_size(n_seconds, scoring) -> int` and `query_vector(features, scoring) ->
   (vector (80,), W, rows used)`.
 - `build.build_index(cfg) -> IndexSummary` (counts, target kinds, loiter directions, failures,
-  elapsed); `build.windows_table(rows, vectors, dim) -> pyarrow.Table`. `kairos-defense index`
-  runs `build_index` and then `recall.index.build_reports_index` (phase 5, D-089); `build.py`
-  itself is unchanged.
+  swarm counts, elapsed); `build.windows_table(rows, vectors, dim) -> pyarrow.Table`.
+  `kairos-defense index` runs `build_index` and then `recall.index.build_reports_index` (phase 5,
+  D-089). Phase 9: `build.build_swarm_index(cfg, store, summary)` (called by `build_index`) and
+  `build.swarm_windows_table(rows, vectors, dim)`.
+- `swarm_features` (phase 9, SPEC §14, D-149), pure functions over numpy and pandas:
+  - `drone_grid(points, max_gap_s) -> (t_s (n,) int, track_ids, positions (d, n, 3))`: every drone
+    track of one incident resampled (§9.1) onto the incident's common 1 Hz grid, region meters,
+    NaN where a drone has no position;
+  - `detect_swarm(xy (d, n, 2), min_drones, max_spacing_m, min_duration_s) -> (bool, run_s)`;
+  - `swarm_descriptors(t_s, positions, target_xy, min_drones) -> DataFrame` with
+    `DESCRIPTOR_COLUMNS` (the §7.2 `swarm_features` columns: `t_s`, `n_drones`,
+    `centroid_x_rel_m`, `centroid_y_rel_m`, `centroid_speed_ms`, `spread_m`, `pd_q25_m`,
+    `pd_q50_m`, `pd_q75_m`, `axis_angle_deg`, `rot_rate_dps`) for seconds with at least
+    `min_drones` drones;
+  - `swarm_series(desc) -> (n, 6)`: `SERIES_COLUMNS` z-normalized (a constant channel is zeros);
+  - `swarm_vector(series, segments) -> (6 × segments,) float32`, PAA, channel-major, unit norm;
+  - `principal_axis_deg`, `unwrap_axis`, `pairwise_distances`, `longest_run`, `centered_mean`;
+  - `SwarmFlight` (incident ids, `start_ts`, `track_ids`, `t_s`, `positions`, `target`,
+    `descriptors`, `is_swarm`, `together_s`; `n_drones`, `relative_positions()`), built by
+    `build_flight(meta, points, site, scoring)` or `load_swarm(store, incident_id, scoring,
+    until_s=None)` (raw points through the port, only up to `until_s`).
 
 ## Data in and out
 
@@ -76,8 +94,13 @@ through the `TrackStore` port.
   - LanceDB `flight_windows` (§7.5): `window_id` (`<track>:<W>:<offset>`), `track_id`,
     `incident_id`, `installation_id`, `region_id`, `window_s`, `offset_s`, `start_ts_ms` (first
     radar point), `win_ts_ms`, `rf_family`, `tod_minutes`, `vector` float32[80].
+  - DuckDB `swarm_features` (§7.2, phase 9): one row per described second of each history swarm
+    incident;
+  - LanceDB `swarm_windows` (§7.5, phase 9): one row per history swarm incident with
+    `incident_id`, `installation_id`, `start_ts_ms`, `n_drones` and the 96-d `vector`, plus
+    `region_id`, `duration_s`, `together_s` and `is_swarm` (D-149).
 - At seed 42: 800,148 feature rows, 1,898 signatures, 57,462 / 51,297 / 27,507 windows of 60 / 120
-  / 300 s.
+  / 300 s; 8 history swarm incidents (all detected), the live `DEMO-SWARM-ECHO-0614` skipped.
 
 ## How it works
 
@@ -103,6 +126,13 @@ through the `TrackStore` port.
   the planted P1 flights rank 855 to 953 of 1,882 for the live query at T+90 (D-058).
 - **Queries (D-050).** W is the largest size not above the seconds seen; before 60 s the query uses
   all its rows against the 60 s windows. `match/query.py` calls these same functions.
+- **Swarms (§14, D-149).** Each drone track is resampled as above and placed on the incident's
+  common grid; a second counts when at least `swarm.min_drones` drones have a position. Per
+  second: the centroid (target-relative; the target is `choose_target` on the centroid path), its
+  speed, the RMS spread, the pairwise-distance quartiles, the PCA principal axis (bearing,
+  unwrapped with period 180°) and its rate of turn (5 s centered mean, clipped to ±20 °/s so a
+  near-round formation cannot spike it). Detection: the longest run of seconds with at least
+  `min_drones` drones all within `max_spacing_m` of each other must last `min_duration_s`.
 - **Build (D-049, D-053).** Live tracks are skipped everywhere. The build uses the adapters
   directly (bulk RF and Remote ID association, `write_table`, `replace`); no random draws.
 
@@ -115,7 +145,9 @@ through the `TrackStore` port.
 - `windows.sizes_s` (60, 120, 300), `windows.stride_s` (10), `windows.paa_segments` (16),
   `windows.normalize` (`fixed` | `window`), `features.channel_scales` (one positive unit per
   channel);
-- `ScoringConfig.vector_dim`, a property: channels × segments = 80.
+- `ScoringConfig.vector_dim`, a property: channels × segments = 80;
+- `swarm.min_drones` (3), `swarm.max_spacing_m` (300), `swarm.min_duration_s` (60) for §14
+  detection and the described seconds; the swarm vector uses `windows.paa_segments` (6 × 16 = 96).
 
 `app.yaml`: `paths.duckdb` and `paths.lancedb` (build only).
 
@@ -128,8 +160,13 @@ through the `TrackStore` port.
   planted P1 signatures (approach 315° ± 15°, radius 180 ± 25 m, `ccw`), the live signature from
   its points, live incidents absent everywhere, window-size filters, metadata, 1 Hz rows, a
   deterministic rebuild.
+- `tests/unit/test_swarm_features.py` (phase 9): known answers on hand-made formations (a 40 m
+  square's spread and quartiles, a line turning 3 °/s, permutation invariance, detection true and
+  false, shapes and norms, too few drones, the common grid).
+- `tests/unit/test_swarm_match.py` (phase 9, `swarm_index` fixture): `swarm_windows` and
+  `swarm_features` hold the history swarms only.
 - `tests/slow/test_full_index.py`: full volumes; two full builds give identical hashes.
-- Run: `uv run pytest tests/unit -q -k "resample or channels or signatures or windows or index"`.
+- Run: `uv run pytest tests/unit -q -k "resample or channels or signatures or windows or index or swarm"`.
 
 ## Gotchas
 
@@ -144,7 +181,8 @@ through the `TrackStore` port.
   and the fuel farm from about T+90).
 - 1,800 of 1,898 tracks have the fence as target: hobbyists launch from parks 2.2 km out and never
   come within 500 m of the fence. Target choice is still wrong for P6, C2 and swarm drones
-  (D-046).
+  (D-046). A swarm's target (its centroid's) only sets the Swarm view's frame: the matching
+  series are frame-free (spread, quartiles, rotation rate, speed).
 - Keep `window_vectors` the single source of vectors. `test_query_vector_equals_indexed_window`
   (and its `_both_modes` twin) fails if the query and index paths diverge.
 - **Changing `windows.normalize` or `channel_scales` means rerunning `make index`.** The DTW
@@ -159,3 +197,6 @@ through the `TrackStore` port.
   vector functions; `vector_scales`; `fill_nan` made public (D-068). Window counts unchanged.
 - Phase 5: no code change. `kairos-defense index` also builds the report index after this
   package's tables (D-089).
+- Phase 9: `swarm_features.py` (§14 descriptors, detection, series, vectors, `load_swarm`);
+  `build.py` writes `swarm_features` and `swarm_windows` (D-149). The single-track tables are
+  unchanged.

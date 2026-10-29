@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { BeatId } from "../src/director/beats";
-import { caption, localHM, paceOf, type CaptionCtx } from "../src/director/captions";
+import { caption, encoreCaption, localHM, paceOf, type CaptionCtx } from "../src/director/captions";
 import { INSTALLATIONS, SCENE, T090, T105, T120 } from "./real";
 
 const offsets = Object.fromEntries(
@@ -34,6 +34,7 @@ const ALL: BeatId[] = [
   "recall",
   "known",
   "evidence",
+  "encore",
 ];
 
 describe("Director captions (D-125)", () => {
@@ -89,6 +90,30 @@ describe("Director captions (D-125)", () => {
       expect(text.length).toBeGreaterThan(10);
       expect(text).not.toMatch(/undefined|NaN|null|\{|\}/);
     }
+  });
+
+  it("computes the encore from the swarm match, never 'tonight' (phase 9)", () => {
+    const swarm = {
+      queryBase: "Echo",
+      queryDay: "Jun 14",
+      matchBase: "Golf",
+      matchDay: "May 3",
+      weeks: 6,
+      otherRegion: true,
+      sameBase: false,
+    };
+    expect(caption("encore", ctx({ facts: { swarm } }))).toBe(
+      "Same choreography, six weeks apart, in another region: Golf on May 3 and Echo on Jun 14.",
+    );
+    expect(encoreCaption({ ...swarm, otherRegion: false })).toBe(
+      "Same choreography, six weeks apart, at another base: Golf on May 3 and Echo on Jun 14.",
+    );
+    expect(encoreCaption({ ...swarm, weeks: 0, otherRegion: false, sameBase: true })).toBe(
+      "Same choreography: Golf on May 3 and Echo on Jun 14.",
+    );
+    const none = encoreCaption(undefined);
+    expect(none).not.toMatch(/undefined|NaN|null|tonight/);
+    expect(none.length).toBeGreaterThan(10);
   });
 
   it("uses the matcher's pace words and local times", () => {

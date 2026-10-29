@@ -87,6 +87,12 @@ Phase 7 addition:
   (§16.2, D-103). Required; must differ from `duckdb`, `truth` and `memory`. `replay --reset`
   empties it.
 
+Phase 9 addition:
+
+- `scoring.yaml` `swarm.pace_range` (`[0.7, 1.4]`, default when absent): the candidate seconds per
+  query second the §14 swarm DTW tries (prefixes of the candidate's descriptor series; ±40%, the
+  same pace band one operator shows across flights, D-150). `low <= high` is checked.
+
 ## Tests
 
 - `tests/unit/test_config.py`, 42 tests: the shipped files load; decision values survive (D-003,
@@ -115,3 +121,4 @@ Phase 7 addition:
 - Phase 5: `paths.cache` (D-084) and `forecast.anchor` (D-090).
 - Phase 7: `paths.live` (`data/live.duckdb`, the `live_*` scratch tables, D-103); the
   distinct-files check covers `duckdb`, `truth`, `memory` and `live`.
+- Phase 9: `swarm.pace_range` (D-150).

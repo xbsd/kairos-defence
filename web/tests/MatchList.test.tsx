@@ -23,8 +23,13 @@ describe("MatchList", () => {
     expect(screen.getByTestId("match-waiting")).toHaveTextContent("The matcher starts at T+00:45");
     act(() => replayStore.getState().apply({ ...HELLO, matching: false, is_swarm: true }));
     await flush();
+    // phase 9: a live swarm points to its choreography match (§14) on the Swarm view
     expect(screen.getByTestId("match-waiting")).toHaveTextContent(
-      "Swarm matching arrives in phase 9",
+      "Its choreography match is in the Swarm view",
+    );
+    expect(screen.getByRole("link", { name: "Swarm view" })).toHaveAttribute(
+      "href",
+      `/swarm?incident=${HELLO.incident_id}`,
     );
   });
 

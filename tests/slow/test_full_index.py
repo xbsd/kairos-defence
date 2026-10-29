@@ -57,3 +57,33 @@ def test_full_eval(indexed, tmp_path) -> None:
     assert n["prober_queries"] >= 20 and n["copycat_queries"] >= 8
     assert s["metrics"]["recall_at_5_t120"] is not None
     assert gate(s, tmp_path / "baseline.json") == []
+
+
+def test_full_swarm_matching(indexed) -> None:
+    """§14 and §19.3 on the full data (phase 9): the eight history swarms are indexed and
+    detected, every answerable swarm query ranks its own team first (swarm_top1 >= 0.80) and the
+    live demo swarm ranks S1-GOLF-260503 first."""
+    from kairos_defense.eval.harness import query_sets, track_list
+    from kairos_defense.eval.swarm import (
+        incident_starts,
+        incident_teams,
+        swarm_cases,
+        swarm_demo,
+        swarm_metrics,
+        swarm_outcomes,
+    )
+    from kairos_defense.match.swarm import SwarmMatcher
+
+    c, s = indexed
+    assert s.swarm_incidents == 8 and s.swarm_detected == 8
+    truth = track_truth(c.app)
+    with DuckTrackStore(c.app.paths.duckdb, c.app) as store:
+        m = SwarmMatcher(store, LanceVectorStore(c.app.paths.lancedb), c.scoring)
+        teams = incident_teams(truth)
+        cases = swarm_cases(query_sets(track_list(store), truth).swarm_incidents,
+                            incident_starts(store), teams)  # fmt: skip
+        met = swarm_metrics(cases, swarm_outcomes(cases, m, teams, ()), ())
+        row = swarm_demo(c, m)
+    assert met["swarm_queries"] == 5 and met["swarm_unanswerable"] == 1
+    assert met["swarm_top1"] >= 0.80
+    assert row.status == "pass" and row.observed.startswith("#1 S1-GOLF-260503")

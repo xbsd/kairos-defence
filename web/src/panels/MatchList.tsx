@@ -174,11 +174,11 @@ export function MatchList() {
   const m = s.match;
 
   let waiting = "Waiting for the replay";
+  const swarm = hello?.matching === false ? hello.incident_id : null;
   if (hello)
-    waiting =
-      hello.matching === false
-        ? "Swarm matching arrives in phase 9"
-        : `The matcher starts at ${tPlus(hello.min_track_s)}`;
+    waiting = swarm
+      ? "A swarm: single-flight matching does not apply. Its choreography match is in the"
+      : `The matcher starts at ${tPlus(hello.min_track_s)}`;
 
   return (
     <Panel
@@ -191,6 +191,18 @@ export function MatchList() {
         {!m || m.matches.length === 0 ? (
           <p data-testid="match-waiting" className="px-3 py-2 text-13 text-ink-mid">
             {m ? "No earlier flight to match" : waiting}
+            {!m && swarm ? (
+              <>
+                {" "}
+                <Link
+                  to={`/swarm?incident=${encodeURIComponent(swarm)}`}
+                  className="rounded-button text-flash underline"
+                >
+                  Swarm view
+                </Link>
+                .
+              </>
+            ) : null}
           </p>
         ) : (
           <>

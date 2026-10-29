@@ -122,6 +122,23 @@ def shape_distance(
     return float(d) / np.sqrt(n)
 
 
+def series_distance(a: np.ndarray, b: np.ndarray, window: int) -> float:
+    """Banded multichannel DTW distance (C, squared Euclidean inner distance, square root of the
+    path sum) between already prepared series ``a`` (n, c) and ``b`` (m, c); used by the §14
+    swarm matcher (D-149)."""
+    return float(dtw_ndim.distance(np.ascontiguousarray(a), np.ascontiguousarray(b),
+                                   window=window, use_c=True))  # fmt: skip
+
+
+def series_path(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    """Optimal alignment of all of ``a`` (n, c) to all of ``b`` (m, c) from the full DTW matrix
+    (no band: the module docstring's C ``warping_paths`` caveat): ``(p, 2)`` int, monotone, from
+    ``(0, 0)`` to ``(n - 1, m - 1)``."""
+    _, paths = dtw_ndim.warping_paths(np.ascontiguousarray(a), np.ascontiguousarray(b),
+                                      use_c=True)  # fmt: skip
+    return np.asarray(dtw.best_path(paths), dtype=np.int64)
+
+
 def shape_sim(d_norm: float | np.ndarray, tau: float) -> float | np.ndarray:
     """``exp(−d_norm / τ)`` in (0, 1]."""
     return np.exp(-np.asarray(d_norm, dtype=np.float64) / tau)

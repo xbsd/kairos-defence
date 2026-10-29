@@ -5,6 +5,7 @@ import type { ForecastMsg, HelloMsg, MatchMsg, RecallMsg, Scene } from "../api/m
 import { baseName, localDate } from "../lib/format";
 import { chooseReport, zoneRoad } from "../overlay/clues";
 import { compass8, distanceBearing, pointInPolygons, roughDistance } from "../three/forecastMath";
+import { weeksWord, type SwarmFacts } from "../swarm/swarmMath";
 import type { Vec2 } from "../three/sceneMath";
 import type { BeatId } from "./beats";
 
@@ -13,6 +14,8 @@ export interface DirectorFacts {
   caseLabel?: string;
   caseClosedOn?: string;
   pending?: number;
+  /** Set by the Swarm view from its §14 result (the encore, D-155). */
+  swarm?: SwarmFacts;
 }
 
 export interface CaptionCtx {
@@ -155,6 +158,19 @@ function evidence(c: CaptionCtx): string {
   return `Approve the links you agree with, ${tail}`;
 }
 
+/** The encore (Appendix B row 7): computed from the swarm match, never "tonight" (that is
+ * BRAVO's night); without a result it says what the page does. */
+export function encoreCaption(f: SwarmFacts | undefined): string {
+  if (!f) return "Every earlier swarm, searched for the same choreography.";
+  const apart = f.weeks >= 1 ? `, ${weeksWord(f.weeks)} apart` : "";
+  const where = f.otherRegion ? ", in another region" : f.sameBase ? "" : ", at another base";
+  return `Same choreography${apart}${where}: ${f.matchBase} on ${f.matchDay} and ${f.queryBase} on ${f.queryDay}.`;
+}
+
+function encore(c: CaptionCtx): string {
+  return encoreCaption(c.facts.swarm);
+}
+
 const BY_BEAT: Record<BeatId, (c: CaptionCtx) => string> = {
   detection,
   recording,
@@ -164,6 +180,7 @@ const BY_BEAT: Record<BeatId, (c: CaptionCtx) => string> = {
   recall,
   known,
   evidence,
+  encore,
 };
 
 export function caption(beat: BeatId, c: CaptionCtx): string {

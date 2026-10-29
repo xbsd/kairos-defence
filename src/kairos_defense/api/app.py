@@ -11,7 +11,14 @@ from pathlib import Path
 from fastapi import FastAPI
 
 from kairos_defense import __version__
-from kairos_defense.api import routes, routes_explain, routes_memory, stream
+from kairos_defense.api import (
+    routes,
+    routes_chat,
+    routes_explain,
+    routes_memory,
+    routes_swarm,
+    stream,
+)
 
 log = logging.getLogger(__name__)
 
@@ -42,6 +49,8 @@ def create_app(cfg=None, *, static_dir: Path | str | None = None,
     app.include_router(routes.router)
     app.include_router(routes_memory.router)
     app.include_router(routes_explain.router)
+    app.include_router(routes_swarm.router)
+    app.include_router(routes_chat.router)
     app.include_router(stream.router)
     if static_dir is not None:
         from kairos_defense.api.static import mount_web

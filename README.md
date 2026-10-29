@@ -15,8 +15,9 @@ bitemporal, tamper-evident case memory, built on DuckDB and LanceDB. **Synthetic
 | 5 | Report recall and analog forecast | done | [report](docs/phases/phase-05/REPORT.md), [exit check](docs/phases/phase-05/EXIT_CHECK.md) |
 | 6 | Case memory (Kairos-lite) | done | [report](docs/phases/phase-06/REPORT.md), [exit check](docs/phases/phase-06/EXIT_CHECK.md) |
 | 7 | Streaming API and Command Center foundation | done | [report](docs/phases/phase-07/REPORT.md), [exit check](docs/phases/phase-07/EXIT_CHECK.md) |
-| 8 | Command Center: the memorable moments | built; awaiting the autopilot gate | [report](docs/phases/phase-08/REPORT.md), [exit check](docs/phases/phase-08/EXIT_CHECK.md) |
-| 9 to 10 | Swarms, agent and MCP through the user guide | not started | `docs/SPEC.md` §20, `docs/phases/PHASE_10.md` |
+| 8 | Command Center: the memorable moments | done | [report](docs/phases/phase-08/REPORT.md), [exit check](docs/phases/phase-08/EXIT_CHECK.md) |
+| 9 | Swarms, agent, MCP, hardening and runbook | built; awaiting the gate (`scripts/cloud_gate.py`) | [report](docs/phases/phase-09/REPORT.md), [exit check](docs/phases/phase-09/EXIT_CHECK.md), [runbook](docs/DEMO.md) |
+| 10 | User guide, one-pager and rollback guide | not started | `docs/phases/PHASE_10.md` |
 
 Works today: `make check`, `make data` (seeded synthetic world, flights, swarms, sensors, paperwork
 and truth), `make index` (tracks, windows, and the report index with full-text search), `make
@@ -45,24 +46,34 @@ afterglow ghosts in tonight's frame, the forecast draws its dotted exit path and
 zone with County Rd 12 lit inside it, and the DELTA report resolves at the lower left with a beam
 to that road; → opens the Case board (Known then: hobbyist, no links; Known now: the proposals and
 the diff; approve with a click) and Evidence (export with a confirm, per-file hashing, the checks,
-Verify package). The Match explainer, Shift delta and Eval pages are in the Pages menu. Everything runs
+Verify package). The Match explainer, Shift delta and Eval pages are in the Pages menu. From phase
+9: the swarm encore (Director's ninth beat, or Pages → Swarm view): ECHO's five-drone swarm with
+its formation edges, the matched GOLF swarm from six weeks earlier as an afterglow ghost aligned
+by DTW time, and the descriptor curves; `uv run kairos-defense swarm --incident
+DEMO-SWARM-ECHO-0614` ranks the earlier swarms (S1-GOLF-260503 first; swarm top-1 1.000 in `make
+eval`); `make mcp` serves six read-only agent tools over MCP (`--allow-proposals` adds the two
+proposal tools); an optional chat slide-over appears when `config/app.yaml` names an LLM provider.
+The presenter's runbook is [docs/DEMO.md](docs/DEMO.md). Everything runs
 offline; `kairos-defense fetch-models` is the only command that downloads (an optional embedding
 model). Each
 phase's plan, report and exit-check evidence is in `docs/phases/phase-NN/`, and the per-session log
 is in `docs/PROGRESS.md`.
 
-## Run it (after Phase 9)
+## Run it
 
-Prerequisites: git, uv, Python 3.11+, Node 22 LTS.
+Prerequisites: git, uv, Python 3.11+, Node 22 LTS, a C compiler with OpenMP (dtaidistance builds
+from source, D-064).
 
 ```bash
 uv sync && npm --prefix web install
-make data index models eval
-make demo      # http://localhost:8000 (Director mode, D, arrives in phase 8)
+make data index models eval   # make eval exits 1 on the one accepted demo gap (D-081); see docs/DEMO.md
+make demo      # http://localhost:8000; press D on Live watch for Director mode
 make dev       # API on :8000 and Vite on :5173 with hot reload
 make e2e       # first time: npx --prefix web playwright install chromium
-make mcp       # optional: MCP server over stdio
+make mcp       # MCP server over stdio: claude mcp add kairos-defense -- uv run kairos-defense mcp
 ```
+
+Before presenting, follow [docs/DEMO.md](docs/DEMO.md) (reset, rehearsal, the script, fallbacks).
 
 ## Build it with Claude Code
 

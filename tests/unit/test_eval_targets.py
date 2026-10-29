@@ -43,7 +43,8 @@ def test_targets_met_and_text() -> None:
     assert texts["copycat_first_t120"] == "≤ 5%" and texts["forecast_median_t90_m"] == "≤ 400 m"
     assert texts["time_to_match_t90"] == "≥ 70%" and texts["latency_end_to_end_p95_ms"] == (
         "≤ 1,500 ms")  # fmt: skip
-    assert BY_KEY["swarm_top1"].pending == "phase 9"
+    assert BY_KEY["swarm_top1"].pending is None  # measured from phase 9 (§14)
+    assert all(t.pending is None for t in TARGETS)
 
 
 def _summary() -> dict:
@@ -73,5 +74,5 @@ def test_report_md_target_column_from_targets() -> None:
     for key in ("recall_at_5_t120", "dtw_lift", "copycat_first_t120", "report_linkage",
                 "forecast_median_t90_m", "time_to_match_t90"):  # fmt: skip
         assert f"| {BY_KEY[key].text()} |" in md, key
-    assert "| ≥ 0.80 (phase 9) |" in md
+    assert "answerable) | - | ≥ 0.80 |" in md  # the swarm row, no metric in this summary
     assert "| 1,500 |" in md and "| 800 (for 50) |" in md

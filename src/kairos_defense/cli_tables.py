@@ -102,7 +102,9 @@ def eval_table(s: dict, method: str) -> Table:
         med, p80 = m.get(f"forecast_median_{key}_m"), m.get(f"forecast_p80_{key}_m")
         t.add_row(f"forecast error {label} median / P80",
                   "-" if med is None else f"{med:,.0f} / {p80:,.0f} m")  # fmt: skip
-    for stage in ("query_build", "prefilter", "dtw", "end_to_end", "forecast", "recall"):
+    sq = (m.get("swarm_queries") or 0) - (m.get("swarm_unanswerable") or 0)
+    t.add_row(f"swarm top-1, whole flight ({sq} answerable)", f(m.get("swarm_top1")))
+    for stage in ("query_build", "prefilter", "dtw", "end_to_end", "forecast", "recall", "swarm"):
         p50, p95 = m.get(f"latency_{stage}_p50_ms"), m.get(f"latency_{stage}_p95_ms")
         t.add_row(f"latency {stage.replace('_', ' ')} p50 / p95",
                   "-" if p50 is None else f"{p50:.0f} / {p95:.0f} ms")  # fmt: skip
@@ -159,7 +161,11 @@ def replay_table(rows) -> Table:
     for inc, loop, state, s in rows:
         reruns = f"{len(loop.schedule)}"
         if not loop.single or inc.is_swarm:
-            reruns, cached, pre = "-", "-", "detections only: swarm matching is phase 9"
+            reruns, cached, pre = (
+                "-",
+                "-",
+                "detections only: swarm matching in `swarm` and the Swarm view",
+            )
         else:
             cached = f"{state['results']}/{len(loop.schedule)}" + (" fresh" if state["fresh"]
                                                                   else " stale")  # fmt: skip

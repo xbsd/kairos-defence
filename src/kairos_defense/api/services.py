@@ -68,6 +68,8 @@ class Services:
         self.incident_ids = live_incident_ids(self.store)
         self._incidents: dict[str, LiveIncident] = {}
         self._loops: dict[str, LiveLoop] = {}
+        self.swarm_matcher = None  # match.swarm.SwarmMatcher, built on first use (routes_swarm)
+        self.swarm_cache: dict[tuple, dict] = {}
 
     # --- construction -----------------------------------------------------------------------
     def _matching(self):

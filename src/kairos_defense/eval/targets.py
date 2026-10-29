@@ -101,7 +101,7 @@ TARGETS: tuple[Target, ...] = (
     Target(
         "time_to_match_t90", ">=", 0.70, "Time to match: top 3 by T = 90 s", "§19.3", 9, fmt="pct"
     ),
-    Target("swarm_top1", ">=", 0.80, "Swarm top-1", "§19.3", 9, pending="phase 9"),
+    Target("swarm_top1", ">=", 0.80, "Swarm top-1", "§19.3", 9),
 )
 
 BY_KEY = {t.key: t for t in TARGETS}

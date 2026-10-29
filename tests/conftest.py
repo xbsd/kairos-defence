@@ -305,3 +305,23 @@ def api(toy_models, seeded_p1, tmp_path_factory):
     with TestClient(create_app(c)) as client:
         client.cfg = c
         yield client
+
+
+SWARM_NIGHTS = (date(2025, 3, 25), date(2026, 3, 16), date(2026, 4, 19), date(2026, 5, 3),
+                date(2026, 5, 10), date(2026, 6, 14), date(2026, 8, 6),
+                date(2026, 8, 28))  # fmt: skip
+
+
+@pytest.fixture(scope="session")
+def swarm_index(cfg, tmp_path_factory):
+    """Both planted swarm events, three more S1 and three S2 events (and the planted DELTA and live
+    BRAVO nights, so the ledger can be seeded), generated, written and indexed in a temporary
+    folder."""
+    from kairos_defense.features.build import build_index
+    from kairos_defense.sim.generate import generate
+    from kairos_defense.sim.writers import write_all
+
+    c = tmp_config(cfg, tmp_path_factory.mktemp("swarm"))
+    g = generate(cfg, 42, nights=SWARM_NIGHTS)
+    write_all(c.app, g.tables, g.truth)
+    return c, build_index(c)

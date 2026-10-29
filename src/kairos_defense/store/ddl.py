@@ -82,6 +82,11 @@ DERIVED_DDL: dict[str, str] = {  # written by `kairos-defense index`, history tr
   rf_family VARCHAR, rid_present BOOLEAN, rid_serial VARCHAR)""",
     "report_clues": """CREATE TABLE report_clues (
   report_id VARCHAR, clue_type VARCHAR, clue_value VARCHAR)""",  # §12.4, history reports only
+    "swarm_features": """CREATE TABLE swarm_features (
+  incident_id VARCHAR, t_s INTEGER, n_drones INTEGER,
+  centroid_x_rel_m DOUBLE, centroid_y_rel_m DOUBLE, centroid_speed_ms DOUBLE,
+  spread_m DOUBLE, pd_q25_m DOUBLE, pd_q50_m DOUBLE, pd_q75_m DOUBLE,
+  axis_angle_deg DOUBLE, rot_rate_dps DOUBLE)""",  # §7.2, §14: history swarm incidents only
 }
 
 _COL = re.compile(r"^\s*([a-z_][a-z0-9_]*)\s+[A-Z]", re.M)

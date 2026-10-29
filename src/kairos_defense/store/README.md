@@ -104,15 +104,18 @@ truth-isolation guard every app connection goes through.
     `parks`, `sensors`, `incidents`, `track_points`, `rf_detections`, `remote_id`, `weather`,
     `base_events`, `public_events`, `reports`, `assessments`;
   - derived tables (§7.2), written by `kairos-defense index`, history tracks only (D-049):
-    `track_features`, `track_signatures`, and `report_clues` (phase 5, history reports, D-089).
+    `track_features`, `track_signatures`, `report_clues` (phase 5, history reports, D-089) and
+    `swarm_features` (phase 9, §7.2: one row per described second of each history swarm
+    incident, D-149).
 - `data/truth.duckdb` (§7.3): `track_truth`, `true_paths`, `clue_truth`, `assessment_truth`.
   Only `sim.writers` writes it and only `kairos_defense.eval` reads it; this package defines the
   DDL only.
 - `data/memory.duckdb` (§7.4, §15.1): table `ledger` and macro `ledger_asof(t)`, written only by
   `DuckCaseMemory` (insert only, rule 7).
 - `data/lancedb/`: `flight_windows`, with scalar indexes on `window_s`, `start_ts_ms` and
-  `incident_id`; `reports` (§7.5, phase 5) with a full-text index on `text`. `swarm_windows` is
-  keyed here for phase 9.
+  `incident_id`; `reports` (§7.5, phase 5) with a full-text index on `text`; `swarm_windows`
+  (§7.5, phase 9: one 96-d vector per history swarm incident, keyed by `incident_id`, with the
+  §7.5 columns plus `region_id`, `duration_s`, `together_s` and `is_swarm`, D-149).
 
 ## How it works
 
@@ -182,3 +185,5 @@ truth-isolation guard every app connection goes through.
 - Phase 7: `LIVE_DDL`; `live_duck.py` (`DuckLiveSink`), `live_cache.py` (`FileResultCache`);
   `reseed_ledger` and `check_unlocked` moved here from the CLI (D-103, D-104). DuckDB 2.0: fetch a
   result fully (`fetchall`) before `register()`.
+- Phase 9: `swarm_features` DDL (the §7.2 columns); `swarm_windows` written through
+  `LanceVectorStore.replace` (D-149).

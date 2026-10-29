@@ -17,9 +17,23 @@ describe("Eval view model (D-140)", () => {
     const by = Object.fromEntries(ts.map((t) => [t.key, t]));
     expect(by.recall_at_5_t120?.status).toBe("pass");
     expect(by.latency_dtw_p95_ms?.status).toBe("report only");
-    expect(by.swarm_top1?.status).toBe("pending");
-    expect(by.swarm_top1?.target).toBe("≥ 0.80 (phase 9)");
-    expect(by.forecast_median_t90_m?.value).toBe("340 m");
+    // phase 9 measures swarm top-1 (§14): a real tile now
+    expect(by.swarm_top1?.status).toBe("pass");
+    expect(by.swarm_top1?.target).toBe("≥ 0.80");
+    expect(by.swarm_top1?.value).toBe("1.00");
+    // a target the report does not measure yet still reads as pending, with its phase
+    const targets = (EVAL.targets ?? []).map((t) =>
+      t.key === "swarm_top1" ? { ...t, pending: "phase 9" } : t,
+    );
+    const pend = tiles({ ...EVAL, targets, metrics: { ...EVAL.metrics, swarm_top1: null } });
+    expect(pend?.find((t) => t.key === "swarm_top1")).toMatchObject({
+      status: "pending",
+      target: "≥ 0.80 (phase 9)",
+    });
+    // the value as `make eval` wrote it (340 m on the laptop, 341 m after this machine's refit)
+    const med = EVAL.metrics.forecast_median_t90_m ?? Number.NaN;
+    expect(by.forecast_median_t90_m?.value).toBe(`${Math.round(med)} m`);
+    expect(by.forecast_median_t90_m?.status).toBe("pass");
     const gap = tiles({ ...EVAL, metrics: { ...EVAL.metrics, recall_at_5_t120: 0.5 } });
     expect(gap?.find((t) => t.key === "recall_at_5_t120")?.status).toBe("gap");
     expect(tiles({ ...EVAL, targets: undefined } as never)).toBeNull(); // a stale report
@@ -48,7 +62,12 @@ describe("Eval view model (D-140)", () => {
     const rows = demoRows(EVAL);
     expect(rows).toHaveLength(6);
     expect(rows.find((r) => r.key === "live_top3_incidents")?.word).toBe("Fail");
-    expect(rows.find((r) => r.key === "swarm_top1")?.word).toMatch(/^Pending/);
+    expect(rows.find((r) => r.key === "swarm_top1")?.word).toBe("Pass"); // phase 9
+    const pending = demoRows({
+      ...EVAL,
+      demo: [{ key: "x", expected: "", observed: "", status: "pending (no data)" }],
+    });
+    expect(pending[0]?.word).toBe("Pending (no data)");
     expect(recallSeries(EVAL).map((r) => r.t)).toEqual([45, 60, 90, 120, 180]);
   });
 });
