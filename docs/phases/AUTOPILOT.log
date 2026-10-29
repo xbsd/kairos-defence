@@ -297,3 +297,9 @@ p=pathlib.Path("src/eval/Charts.tsx"); s=p.read
 [2026-10-29 03:54:21]   … running 75 min. last tool: Edit /Users/ndkx/work/kairos_defence/docs/phases/phase-08/REPORT.md
 [2026-10-29 03:55:31] phase 8: gate attempt 1
 [2026-10-29 04:05:41] phase 8: gate passed
+[2026-10-29 04:05:41] === Phase 8: done, tagged phase-08-done, estimated cost $40.67 ===
+[2026-10-29 04:06:05]   git push origin main: ok
+[2026-10-29 04:06:06]   git push origin --tags: ok
+[2026-10-29 04:06:06] === Phase 9: start (auto mode) ===
+[2026-10-29 04:06:06] phase 9: planning
+[2026-10-29 04:06:36]   session failed (exit 143); retrying in 60 s

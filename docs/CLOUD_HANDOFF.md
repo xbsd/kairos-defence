@@ -96,9 +96,22 @@ For phase N (8, then 9, then 10):
 6. **Close:** `python3 scripts/cloud_gate.py close N` (marks the phase done, writes the index, commits,
    tags). Then push: `git push origin HEAD` and the tag.
 
-## Phase 8 state at handoff
+## State at handoff (2026-10-29 04:08 local)
 
-<!-- filled in at handoff time -->
+- **Phases 0 to 8 are done**, tagged `phase-00-done`… `phase-08-done` (phases 0 to 3 have no done tag;
+  they were built by hand) and pushed. Phase 8 passed its gate on the first attempt: Director at 1×
+  through every §1.2 row, median 59.9 fps at 1920 × 1080 on the laptop, 30 screenshots reviewed.
+- Every §19 target measured so far is met (Recall@5 1.00, DTW lift +0.52, copycat-first 0, report
+  linkage 1.00, forecast median 340 m) except one accepted gap: `demo:live_top3_incidents`
+  (P1-ALPHA-260502 ranks #5 at T+90; phase 4 GAPS.md). It shows as WARN and is not retried, but phase 9's
+  "all §19 targets met (or gaps approved in DECISIONS.md)" is satisfied by D-063 plus that GAPS.md. If
+  you have time left after phase 10, improving it honestly (shape over time-of-night weighting) is the
+  most valuable extra.
+- **Start with phase 9 from planning.** The local run was stopped seconds into phase 9's planning; the
+  partial files were removed, so `docs/phases/phase-09/` does not exist yet.
+- Phase 9's gate starts with `make clean` and rebuilds everything, and includes `make test-all` (slow
+  tests). Allow 15 to 30 minutes for it.
+- The laptop is off from about 04:30 to 09:00. Nobody can answer questions.
 
 ## When everything is done
 
