@@ -1,0 +1,164 @@
+# Gate for phase 5, attempt 1, 2026-10-28 23:06:12
+
+$ make check
+uv run ruff check .
+All checks passed!
+uv run ruff format --check .
+132 files already formatted
+uv run pytest -m "not slow" -q
+........................................................................ [ 14%]
+........................................................................ [ 28%]
+........................................................................ [ 43%]
+........................................................................ [ 57%]
+........................................................................ [ 72%]
+........................................................................ [ 86%]
+.................................................................        [100%]
+497 passed, 12 deselected in 20.67s
+npm --prefix web run check
+
+> kairos-defense-web@0.0.1 check
+> npm run lint && npm run typecheck && npm run test
+
+
+> kairos-defense-web@0.0.1 lint
+> eslint . --max-warnings 0 && prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!
+
+> kairos-defense-web@0.0.1 typecheck
+> tsc --noEmit -p tsconfig.json
+
+
+> kairos-defense-web@0.0.1 test
+> vitest run
+
+
+ RUN  v5.0.5 /Users/ndkx/work/kairos_defence/web
+
+
+ Test Files  2 passed (2)
+      Tests  5 passed (5)
+   Start at  23:06:36
+   Duration  803ms (environment 78%, setup 15%, tests 5%, transform 1%)
+
+[exit 0 after 24 s]
+
+$ make index
+uv run kairos-defense index
+kairos-defense index                                                                               
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Item                           ┃                                                          Value ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ tracks                         │                                                          1,904 │
+│ history tracks indexed         │                                                          1,898 │
+│ live tracks skipped            │                                                              6 │
+│ track_features rows            │                                                        800,148 │
+│ gap seconds                    │                                                  62,850 (7.9%) │
+│ track_signatures rows          │                                                          1,898 │
+│ flight_windows 60 s            │                                                         57,462 │
+│ flight_windows 120 s           │                                                         51,297 │
+│ flight_windows 300 s           │                                                         27,507 │
+│ targets                        │ fence 1,800, flight_line 35, fuel_farm 19, hq 16, munitions 28 │
+│ loiter direction               │                                       ccw 20, cw 1, none 1,877 │
+│ RF family unknown              │                                                              0 │
+│ Remote ID present              │                                                          1,634 │
+│ reports indexed (live skipped) │                                                        956 (0) │
+│ report_clues rows              │                        road 40, vehicle 42 (82, in 68 reports) │
+│ embedder                       │             hashing-v1-384 (384 dims); full-text index on text │
+│ elapsed                        │                                          7.0 s + reports 0.1 s │
+└────────────────────────────────┴────────────────────────────────────────────────────────────────┘
+wrote track_features, track_signatures and report_clues to /Users/ndkx/work/kairos_defence/data/kairos_defense.duckdb, 
+flight_windows and reports to /Users/ndkx/work/kairos_defence/data/lancedb
+[exit 0 after 8 s]
+
+$ make eval || echo 'make eval exited non-zero; check_targets.py judges the targets'
+uv run kairos-defense eval
+kairos-defense eval · dtw                                                                                               
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Metric                                          ┃                                                              Value ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ prober queries (unanswerable)                   │                                                             23 (0) │
+│ copycat queries (unanswerable)                  │                                                             10 (0) │
+│ model · candidates per query                    │                                                    fusion-v1 · 500 │
+│ Recall@5 at T=120 s                             │                                                              1.000 │
+│ Recall@5 at T=120 s, Euclidean order (same run) │                                                              0.478 │
+│ DTW lift                                        │                                                              0.522 │
+│ MRR at T=120 s                                  │                                                              1.000 │
+│ time to match (top 3 by T=90 s)                 │                                                                96% │
+│ copycat-first at T=120 s                        │                                                                 0% │
+│ Recall@5 at T=120 s, copycats                   │                                                              1.000 │
+│ report linkage (T=120 s, top 3, k=5)            │                                                   1.000 (65 of 65) │
+│ forecast error T=90 s median / P80              │                                                        340 / 495 m │
+│ forecast error T=120 s median / P80             │                                                        346 / 532 m │
+│ latency query build p50 / p95                   │                                                           4 / 4 ms │
+│ latency prefilter p50 / p95                     │                                                         27 / 30 ms │
+│ latency dtw p50 / p95                           │                                                         31 / 55 ms │
+│ latency end to end p50 / p95                    │                                                        94 / 122 ms │
+│ latency forecast p50 / p95                      │                                                           8 / 9 ms │
+│ latency recall p50 / p95                        │                                                           5 / 6 ms │
+│ demo live_first_contact_local                   │                                               pass: 21:40:06, 71 m │
+│ demo live_orbit_established_s                   │                                                       pass: T+79 s │
+│ demo live_top3_incidents                        │        fail: 2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of │
+│                                                 │          night'); P1-ALPHA-260303 #2 (1.00, 'Same time of night'); │
+│                                                 │                    P1-ALPHA-260502 #5 (0.99, 'Same time of night') │
+│ demo live_rank1_report_for                      │   pass: R-P1-DELTA-260419-1 rank 1 of 1 for P1-DELTA-260419 (match │
+│                                                 │ #1, score 0.0328); clues: white pickup; County Rd 12 (County Rd 12 │
+│                                                 │                            runs through tonight's predicted zone.) │
+│ demo forecast_error_max_m                       │                pass: 139 m (radius 370 m; analogs P1-ALPHA-260303, │
+│                                                 │        HOTEL-250818-2126, FOXTROT-251215-2125; roads County Rd 12) │
+│ demo swarm_top1                                 │                                               pending (phase 9): - │
+│ elapsed                                         │                                                             35.1 s │
+└─────────────────────────────────────────────────┴────────────────────────────────────────────────────────────────────┘
+wrote /Users/ndkx/work/kairos_defence/reports/eval_2026-10-29.md and 
+/Users/ndkx/work/kairos_defence/reports/eval_2026-10-29.json
+demo assertion failed: live_top3_incidents (2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of night'); 
+P1-ALPHA-260303 #2 (1.00, 'Same time of night'); P1-ALPHA-260502 #5 (0.99, 'Same time of night'))
+make: *** [eval] Error 1
+make eval exited non-zero; check_targets.py judges the targets
+[exit 0 after 37 s]
+
+$ uv run kairos-defense forecast --incident DEMO-BRAVO-0828 --at 105
+query DEMO-BRAVO-0828-T1 at T+105 s · target BRAVO-fuel_farm · method dtw · 500 candidates
+center (21,253, -4,178) m region frame · 2,164 m at 320° (northwest) of BRAVO-fuel_farm · radius 370 m · anchor 
+match_kind
+analogs (top matches with a known recovery point)                                                                  
+┏━━━┳━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┓
+┃ # ┃ incident            ┃ score ┃ recovery rel. (m) ┃ rotation ┃ anchor          ┃ j* (s) ┃ mapped recovery (m) ┃
+┡━━━╇━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━┩
+│ 1 │ P1-ALPHA-260303     │ 1.000 │ (-1,442, 1,320)   │      +0° │ BRAVO-fuel_farm │    191 │ (21,207, -4,511)    │
+│ 2 │ HOTEL-250818-2126   │ 0.993 │ (2,197, -284)     │    -133° │ BRAVO-fuel_farm │    231 │ (21,347, -4,040)    │
+│ 3 │ FOXTROT-251215-2125 │ 0.990 │ (2,334, -243)     │    -134° │ BRAVO-fuel_farm │    233 │ (21,206, -3,981)    │
+└───┴─────────────────────┴───────┴───────────────────┴──────────┴─────────────────┴────────┴─────────────────────┘
+exit path: 60 points from (22,518, -5,698) to (21,207, -4,511) m
+roads crossing the zone: County Rd 12
+[exit 0 after 1 s]
+
+$ python3 scripts/check_targets.py 5
+PASS  Recall@5 at T=120 s (§19.3): 1 (target >= 0.8)
+PASS  DTW lift over the Euclidean baseline (§19.3): 0.5217 (target >= 0.1)
+PASS  Copycat-first rate (§19.3): 0 (target <= 0.05)
+PASS  Prefilter p95 ms (§10.9): 29.63 (target <= 50)
+PASS  DTW re-rank of 50 candidates p95 ms (§10.9): 55.17 (target <= 800)
+PASS  End-to-end live update p95 ms (§10.9): 122.1 (target <= 1500)
+PASS  Report linkage (§19.3): 1 (target >= 0.7)
+PASS  Forecast median error at T=90 s, m (§19.3): 340.4 (target <= 400)
+PASS  demo forecast_error_max_m: pass
+PASS  demo live_first_contact_local: pass
+PASS  demo live_orbit_established_s: pass
+PASS  demo live_rank1_report_for: pass
+WARN  demo live_top3_incidents: fail
+
+All targets met (accepted gaps shown as WARN).
+[exit 0 after 0 s]
+
+# Documentation check
+ok
+
+# Test count
+passed 497, minimum 443
+
+# Skip or xfail markers added this run (review them)
+none
+
+# Result: PASS

@@ -135,3 +135,5 @@ p = Path("tests/unit/test_recall_sear
 [2026-10-28 23:03:42]   … running 30 min. last tool: Bash uv run python -c "
 import duckdb
 t = duckdb.connect('data/truth.duckdb', read_on
+[2026-10-28 23:06:12] phase 5: gate attempt 1
+[2026-10-28 23:07:24] phase 5: gate passed
