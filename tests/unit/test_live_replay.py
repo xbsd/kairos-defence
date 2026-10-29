@@ -6,7 +6,12 @@ import json
 
 import pytest
 
-from kairos_defense.live.replay import ReplayEngine, live_incident_ids, load_incident
+from kairos_defense.live.replay import (
+    ReplayEngine,
+    live_incident_ids,
+    load_incident,
+    scaled_clock,
+)
 
 
 class FakeTime:
@@ -42,6 +47,20 @@ def test_clock_advances_by_speed_times_wall(live_kit) -> None:
     e.set_speed(1.0)
     now.t += 2.0
     assert e.elapsed_s == pytest.approx(12.0)
+
+
+def test_scaled_clock_runs_the_replay_in_slow_motion(live_kit) -> None:
+    """D-168: at time scale 0.25 a 5× replay advances 1.25 replay seconds per wall second."""
+    now = FakeTime()
+    assert scaled_clock(1.0, now) is now
+    e = ReplayEngine(live_kit.incident, 5.0, scaled_clock(0.25, now))
+    e.play()
+    now.t += 4.0
+    assert e.elapsed_s == pytest.approx(5.0)
+    assert e.speed == 5.0  # the speed the client sees is unchanged
+    for bad in (0.0, 0.01, 1.5):
+        with pytest.raises(ValueError, match="time scale"):
+            scaled_clock(bad, now)
 
 
 def test_pause_freezes_clock(live_kit) -> None:

@@ -37,6 +37,10 @@ def api_cmd(
     reseed: bool = typer.Option(False, "--reseed", help="Reseed the ledger before serving."),
     exports: str | None = typer.Option(None, "--exports",
                                        help="Evidence export folder (default: paths.exports)."),
+    time_scale: float = typer.Option(1.0, "--time-scale", min=0.05, max=1.0,
+                                     help="Replay clock against wall time; below 1 replays run "
+                                          "in slow motion for screen capture (make demo-video, "
+                                          "D-168)."),
     config: str = typer.Option("config", help=CONFIG_HELP),
 ) -> None:  # fmt: skip
     """Serve the FastAPI backend: REST (§16.4), the replay WebSocket (§16.3) and the web app."""
@@ -62,7 +66,8 @@ def api_cmd(
     if reload:
         os.environ.update({"KD_CONFIG": config, "KD_STATIC": static or "",
                            "KD_MEMORY": memory or "", "KD_LIVE_DB": live_db or "",
-                           "KD_EXPORTS": exports or ""})  # fmt: skip
+                           "KD_EXPORTS": exports or "",
+                           "KD_TIME_SCALE": str(time_scale)})  # fmt: skip
         src = str(Path(__file__).parent)
         uvicorn.run("kairos_defense.api.app:factory", factory=True, host=host, port=port,
                     reload=True, reload_dirs=[src], log_level="info")  # fmt: skip
@@ -74,9 +79,12 @@ def api_cmd(
         live_path=live_db,
         reseed=reseed,
         exports_path=exports,
+        time_scale=time_scale,
     )
     cli.console.print(f"Kairos Defense API on http://{host}:{port}"
-                      + (f" serving {static}" if static else ""))  # fmt: skip
+                      + (f" serving {static}" if static else "")
+                      + (f" · replays at {time_scale:g}× wall time (slow motion)"
+                         if time_scale != 1.0 else ""))  # fmt: skip
     uvicorn.run(app, host=host, port=port, log_level="info", ws_ping_interval=20)
 
 

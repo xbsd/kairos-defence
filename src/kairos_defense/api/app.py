@@ -25,17 +25,19 @@ log = logging.getLogger(__name__)
 
 def create_app(cfg=None, *, static_dir: Path | str | None = None,
                memory_path: Path | str | None = None, live_path: Path | str | None = None,
-               reseed: bool = False,
-               exports_path: Path | str | None = None) -> FastAPI:  # fmt: skip
+               reseed: bool = False, exports_path: Path | str | None = None,
+               time_scale: float = 1.0) -> FastAPI:  # fmt: skip
     """The app. ``cfg=None`` builds a schema-only app (``--dump-openapi``): no lifespan, no
-    services. Services are built on startup and closed on shutdown."""
+    services. Services are built on startup and closed on shutdown. ``time_scale`` below 1 runs
+    replays in slow motion for frame-perfect screen capture (``make demo-video``, D-168)."""
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         from kairos_defense.api.services import Services
 
         app.state.services = Services(cfg, memory_path=memory_path, live_path=live_path,
-                                      reseed=reseed, exports_path=exports_path)  # fmt: skip
+                                      reseed=reseed, exports_path=exports_path,
+                                      time_scale=time_scale)  # fmt: skip
         log.info("API ready: %s", app.state.services.health())
         try:
             yield
@@ -68,4 +70,5 @@ def factory() -> FastAPI:
                       static_dir=env.get("KD_STATIC") or None,
                       memory_path=env.get("KD_MEMORY") or None,
                       live_path=env.get("KD_LIVE_DB") or None,
-                      exports_path=env.get("KD_EXPORTS") or None)  # fmt: skip
+                      exports_path=env.get("KD_EXPORTS") or None,
+                      time_scale=float(env.get("KD_TIME_SCALE") or 1.0))  # fmt: skip

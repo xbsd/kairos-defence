@@ -21,8 +21,26 @@ import pandas as pd
 from kairos_defense.ports import TrackStore
 
 SPEEDS = (1.0, 2.0, 5.0)  # §6.1
+TIME_SCALE_MIN = 0.05  # slowest slow-motion clock for screen capture (D-168)
 KIND_ORDER = {"point": 0, "rf": 1, "rid": 2}
 TABLES = {"point": "live_points", "rf": "live_rf", "rid": "live_rid"}
+
+
+def scaled_clock(scale: float = 1.0, now: Callable[[], float] = time.monotonic,
+                 ) -> Callable[[], float]:  # fmt: skip
+    """A monotonic time source in seconds that runs ``scale`` times as fast as ``now``.
+
+    ``scale = 1`` returns ``now`` itself. Below 1 the replay runs in slow motion: the demo
+    recorder slows the browser's clocks by the same factor and captures every frame, so the video
+    plays back at the real pace (``make demo-video``, D-168). Speeds and replay seconds are
+    unchanged; only how much wall time a replay second takes."""
+    scale = float(scale)
+    if not TIME_SCALE_MIN <= scale <= 1.0:
+        raise ValueError(f"time scale must be in [{TIME_SCALE_MIN}, 1], not {scale!r}")
+    if scale == 1.0:
+        return now
+    t0 = now()
+    return lambda: t0 + (now() - t0) * scale
 
 
 def _naive(ts) -> datetime:

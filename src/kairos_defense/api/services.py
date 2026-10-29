@@ -21,7 +21,12 @@ from kairos_defense import __version__
 from kairos_defense.live.broadcast import Broadcaster, PublishingMemory
 from kairos_defense.live.loop import LiveLoop
 from kairos_defense.live.precompute import fingerprint
-from kairos_defense.live.replay import LiveIncident, live_incident_ids, load_incident
+from kairos_defense.live.replay import (
+    LiveIncident,
+    live_incident_ids,
+    load_incident,
+    scaled_clock,
+)
 from kairos_defense.live.session import Session
 
 log = logging.getLogger(__name__)
@@ -34,7 +39,8 @@ class ServiceError(RuntimeError):
 class Services:
     def __init__(self, cfg, *, memory_path: Path | str | None = None,
                  live_path: Path | str | None = None, reseed: bool = False,
-                 exports_path: Path | str | None = None) -> None:  # fmt: skip
+                 exports_path: Path | str | None = None,
+                 time_scale: float = 1.0) -> None:  # fmt: skip
         import duckdb
 
         from kairos_defense.store.duck import DuckTrackStore
@@ -57,6 +63,8 @@ class Services:
         self.matcher, self.recall, self.model = self._matching()
         self.cache = FileResultCache(Path(self.app.paths.cache) / "live")
         self.exports = Path(exports_path or self.app.paths.exports)  # e2e: a scratch folder
+        scaled_clock(time_scale)  # validate early: [0.05, 1]
+        self.time_scale = float(time_scale)  # < 1: slow-motion replays for capture (D-168)
         self.live_path = Path(live_path or self.app.paths.live)
         try:
             self.sink = DuckLiveSink(self.live_path, self.app)
@@ -152,7 +160,8 @@ class Services:
         loop = self.loop(incident_id)
         speed = float(self.app.replay.default_speed)
         return Session(loop.incident, loop, sink=self.sink, memory=self.memory,
-                       feed=self.bus.subscribe(), model=self.model, speed=speed)  # fmt: skip
+                       feed=self.bus.subscribe(), model=self.model, speed=speed,
+                       now=scaled_clock(self.time_scale))  # fmt: skip
 
     # --- admin (D-010) ----------------------------------------------------------------------
     def reset_live(self) -> dict[str, int]:

@@ -142,3 +142,33 @@ def test_api_exports_option_reaches_services_and_reload_env(toy, monkeypatch) ->
     assert r.exit_code == 0, r.output
     assert os.environ["KD_EXPORTS"] == "scratch/exports"
     assert seen["run"][0][0] == "kairos_defense.api.app:factory"
+
+
+def test_api_time_scale_option_reaches_create_app(toy, monkeypatch) -> None:
+    """D-168: `api --time-scale` slows replays for screen capture; outside [0.05, 1] it exits 2."""
+    import os
+
+    import uvicorn
+
+    import kairos_defense.api.app as app_mod
+
+    seen: dict = {}
+
+    def fake_create(cfg=None, **kw):
+        seen.update(kw)
+        return object()
+
+    monkeypatch.setattr(app_mod, "create_app", fake_create)
+    monkeypatch.setattr(uvicorn, "run", lambda *a, **k: seen.__setitem__("run", (a, k)))
+    for k in ("KD_CONFIG", "KD_STATIC", "KD_MEMORY", "KD_LIVE_DB", "KD_EXPORTS", "KD_TIME_SCALE"):
+        monkeypatch.setenv(k, "")
+    r = _run("api", "--time-scale", "0.2", "--port", "8799")
+    assert r.exit_code == 0, r.output
+    assert seen["time_scale"] == pytest.approx(0.2)
+    assert "slow motion" in r.output
+    r = _run("api", "--port", "8799")
+    assert r.exit_code == 0 and seen["time_scale"] == 1.0 and "slow motion" not in r.output
+    r = _run("api", "--reload", "--time-scale", "0.25")
+    assert r.exit_code == 0, r.output
+    assert os.environ["KD_TIME_SCALE"] == "0.25"
+    assert _run("api", "--time-scale", "0.01").exit_code == 2

@@ -71,7 +71,9 @@ export function CommandBar({ trail, replay = false }: CommandBarProps) {
   const live = status === "Live";
   const clock = replay && r.hello ? tPlus(r.t) : null;
   return (
-    <header className="flex h-12 shrink-0 items-center gap-4 border-b border-hairline bg-glass px-4 backdrop-blur-glass">
+    // relative z-30: the header (a stacking context, for its blur) paints above page panels, so
+    // the Pages menu opens over them instead of behind them (D-168)
+    <header className="relative z-30 flex h-12 shrink-0 items-center gap-4 border-b border-hairline bg-glass px-4 backdrop-blur-glass">
       <nav aria-label="Breadcrumb" className="min-w-0 flex-1">
         <ol className="flex items-center gap-2 truncate text-15">
           <li className="font-bold text-ink-hi">
