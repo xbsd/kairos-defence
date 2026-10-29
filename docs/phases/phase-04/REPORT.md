@@ -348,3 +348,32 @@ training split only.
   forbid. Recommendation for GAPS.md: accept the miss, since all of the top 4 are P1. Phase 8 can
   add a target-aware re-rank once the live orbit is established, if the product owner wants
   CHARLIE demoted.
+
+### Fix attempt 3 (gate-3.log): root cause recorded, the gap left to GAPS.md
+
+- **Gate result:** the same single GAP, `demo:live_top3_incidents` (CHARLIE #3, ALPHA-0502 #5).
+- **Cause, with evidence (D-081):** the only trait that makes CHARLIE the weaker match is its
+  target (the flight line). A partial track's target-dependent fields are not reliable yet at T+90
+  (training queries, months 1 to 12):
+  - all 48 same-actor target mismatches come from partial queries whose target had not settled;
+    once it has, same-actor pairs agree 108/108;
+  - the partial loiter radius is off from the track's own final radius by a median of 1,116 m at
+    T = 90 s (1,415 m at 45 s, 894 m at 120 s, 275 m at 180 s);
+  - the live P1 reads "fence" until T+80 and the fuel farm from T+90.
+  A causal "settled target" rule would therefore treat tonight's target as unknown at T+90, and the
+  order would not change. Every dimension the training data supports puts CHARLIE closer to
+  tonight's flight: altitude 110 m against 118 m (tonight 90 m), shape 0.459 against 0.418.
+- **Change:** none to the method. Anything that would flip this beat (a target signal the
+  training split rejects, or less weight on altitude for this case) is tuning toward the demo,
+  which D-070 rules out.
+- **Evidence (full gate list, rerun):**
+  - `make check` exit 0, 443 passed.
+  - `make models` hash `418c5edfafd908e6` (unchanged).
+  - `make eval`: unchanged, no regression.
+  - `match` exit 0.
+  - `check_targets.py 4`: 8 PASS, 1 GAP, exit 1.
+  - `make test-all`: 453 passed in 3 min 12 s.
+- **For GAPS.md:** the top 4 at T+90 are all P1 flights, each with a score and three reasons.
+  Follow-up for phase 7 or 8: mark partial-signature target, radius and the "Same orbit radius"
+  reason as unknown until the loiter at the current target is established, then test a
+  target-aware re-rank on the training split.

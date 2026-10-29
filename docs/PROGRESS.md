@@ -26,6 +26,17 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Next: …
 -->
 
+### 2026-10-28 · Phase 4 (gate fix attempt 3, autopilot)
+- Gate 3: the same single GAP, `demo:live_top3_incidents`.
+- Root cause recorded (D-081): CHARLIE's "weaker" trait is its target, and partial tracks' targets
+  and loiter radii are unreliable at T+90. All 48 same-actor target mismatches come from unsettled
+  partial targets, and the partial radius is off by a median of 1.1 km at T = 90 s. No honest
+  method change flips the beat, so there is no code change. The gap goes to GAPS.md.
+- Gate list rerun: `make check` 443 passed; `make models` hash unchanged; `make eval` unchanged;
+  `match` exit 0; `check_targets.py 4` 8 PASS, 1 GAP; `make test-all` 453 passed.
+- Follow-up (phase 7 or 8): mark partial-signature target, radius and radius reasons unknown until
+  the loiter is established.
+
 ### 2026-10-28 · Phase 4 (gate fix attempt 2, autopilot)
 - Gate 2: every command passed; the same single GAP, `demo:live_top3_incidents` (ALPHA-0502 #5).
 - Tried (D-080, criterion registered first): a `target_match` fusion feature. On the held-out

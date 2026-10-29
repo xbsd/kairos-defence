@@ -1195,3 +1195,37 @@ Where this file and the SPEC ever disagree, this file wins.
   ALPHA-0502's 118 m (tonight 90 m), shape 0.459 against 0.418. Its "weaker on purpose" trait is
   its target (the flight line), which the training split says a partial-track matcher cannot use
   reliably. Tuning stops for this attempt.
+
+## D-081 · Gate fix attempt 3: the live top-3 gap cannot be closed honestly at T+90 · 2026-10-28
+- Context: the third gate (`gate-3.log`) again has one GAP, `demo:live_top3_incidents`.
+  CHARLIE-260710 (planted "weaker on purpose": it orbits the flight line, not the fuel farm) is
+  #3, and ALPHA-260502 #5. D-079 made the shape informative; D-080 showed a `target_match` feature
+  hurts on the training split.
+- Diagnosis (training queries, months 1 to 12, truth read in a diagnostic only):
+  - Target. Among same-actor pairs where both targets are a named asset, all 48 mismatches come
+    from partial queries whose target was **not yet its final one**: P5 reads flight line or
+    munitions before HQ (23), P6 reads housing before the flight line (25). Once the partial target
+    equals the final one, same-actor pairs agree 108/108.
+  - Loiter radius. A partial track's radius differs from its own full-track radius by a median of
+    1,415 m at T = 45 s, 1,116 m at 90 s, 894 m at 120 s and 275 m at 180 s. The loiter mask
+    (slower than 1.2 × the median speed, within 600 m of the current target) catches approach
+    seconds and transient targets until the orbit dominates the track.
+  - The live P1 track reads the fence as its target until T+80 and the fuel farm from T+90, with
+    its loiter direction unestablished until about T+200.
+- Decision: no method change in attempt 3. The one trait that makes CHARLIE the weaker match is its
+  target, and at T+90 the training split shows a partial track's target is not yet reliable
+  evidence. A causal "settled target" rule would treat tonight's target as unknown at T+90 and
+  leave the order unchanged. Weighting a target signal anyway, or the altitude feature less, only
+  for this beat would be tuning toward the demo (D-070). On every dimension the training data
+  supports, CHARLIE is closer to tonight's flight: altitude 110 m against ALPHA-0502's 118 m
+  (tonight 90 m), shape 0.459 against 0.418.
+- Consequences:
+  - The gap goes to GAPS.md (D-063). All four top matches at T+90 are P1, each with a score and
+    three reasons, which meets §1.2's acceptance text ("All three are actor P1 (any order)") in
+    spirit but not `scenario_demo.yaml`'s exact incident list.
+  - Follow-up for phase 7 or 8 (live replay and Match Explainer): partial signatures should mark
+    target-dependent fields (target, loiter radius, the "Same orbit radius" reason) as unknown
+    until the loiter at the current target is established. The radius error above makes today's
+    early radius reasons unreliable; FOXTROT-251215's "Same orbit radius (~240 m)" at T+90 is one
+    example. A target-aware re-rank can then be tested on the training split once a settled
+    target exists.

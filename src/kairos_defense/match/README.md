@@ -127,6 +127,11 @@ D-079; retrain with `make models` after changing it); `fusion.features` (the mod
 - **The shape distance is in fixed units now** (D-079): altitude and speed levels count, as
   `alt_sim` and `radius_sim` do. A flight at the other end of its actor's altitude band scores a
   lower shape, which is why ALPHA 2026-05-02 ranks fifth at T+90.
+- **Partial signatures report target-dependent fields too early** (D-081). The loiter radius of a
+  track seen T seconds in is off from its final radius by a median of 1.1 km at T = 90 s, and its
+  target can still be transient (the live P1 reads "fence" until T+80). So `radius_sim` and the
+  "Same orbit radius" reason are unreliable early. Planned follow-up: treat them as unknown until
+  the loiter is established.
 - **`use_c=True` everywhere.** dtaidistance silently falls back to pure Python (500x slower)
   without it; `require_c()` runs when a matcher is built.
 - **dtaidistance 2.5.1's C `warping_paths` with a `window` returns a wrong paths matrix** near the

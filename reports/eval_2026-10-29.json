@@ -2,8 +2,8 @@
  "method": "dtw",
  "model_version": "fusion-v1",
  "candidate_tracks": 500,
- "created_at": "2026-10-29T01:57:14",
- "elapsed_s": 35.1,
+ "created_at": "2026-10-29T02:06:07",
+ "elapsed_s": 35.5,
  "metrics": {
   "recall_at_5_t120": 1.0,
   "recall_at_5_t120_baseline": 0.4782608695652174,
@@ -13,14 +13,14 @@
   "copycat_first_t120": 0.0,
   "recall_at_5_t120_copycats": 1.0,
   "median_time_to_match_s": 45.0,
-  "latency_query_build_p50_ms": 3.9171670068753883,
-  "latency_query_build_p95_ms": 4.248700206517242,
-  "latency_prefilter_p50_ms": 27.284833005978726,
-  "latency_prefilter_p95_ms": 29.56589120440185,
-  "latency_dtw_p50_ms": 31.260792005923577,
-  "latency_dtw_p95_ms": 55.94090880767908,
-  "latency_end_to_end_p50_ms": 95.26183299021795,
-  "latency_end_to_end_p95_ms": 124.32001659472006
+  "latency_query_build_p50_ms": 3.956334010581486,
+  "latency_query_build_p95_ms": 4.405799796222709,
+  "latency_prefilter_p50_ms": 27.35720899363514,
+  "latency_prefilter_p95_ms": 29.90516659046989,
+  "latency_dtw_p50_ms": 32.80579099373426,
+  "latency_dtw_p95_ms": 57.78407500765752,
+  "latency_end_to_end_p50_ms": 96.66029199433979,
+  "latency_end_to_end_p95_ms": 126.0663420020137
  },
  "counts": {
   "prober_queries": 23,
@@ -206,9 +206,9 @@
    "true_rank": null,
    "copycat_rank": null,
    "window_s": 60,
-   "query_ms": 4.485875004320405,
-   "prefilter_ms": 27.689666996593587,
-   "total_ms": 205.494333000388,
+   "query_ms": 4.571500001475215,
+   "prefilter_ms": 27.727249995223247,
+   "total_ms": 207.92516699293628,
    "top": [
     "FOXTROT-250418-2022-T1",
     "HOTEL-250314-2030-T1",
@@ -218,7 +218,7 @@
    ],
    "baseline_rank": null,
    "baseline_copycat_rank": null,
-   "dtw_ms": 139.56920799682848,
+   "dtw_ms": 142.28437500423752,
    "candidates": 500
   },
   {
@@ -230,9 +230,9 @@
    "true_rank": null,
    "copycat_rank": 284,
    "window_s": 60,
-   "query_ms": 4.086250002728775,
-   "prefilter_ms": 25.009207995026372,
-   "total_ms": 127.10670799424406,
+   "query_ms": 4.103541999938898,
+   "prefilter_ms": 24.65812499576714,
+   "total_ms": 126.26970899873413,
    "top": [
     "HOTEL-250521-2059-T1",
     "ECHO-250813-2034-T1",
@@ -242,7 +242,7 @@
    ],
    "baseline_rank": null,
    "baseline_copycat_rank": 498,
-   "dtw_ms": 66.1545409966493,
+   "dtw_ms": 66.16254099935759,
    "candidates": 500
   },
   {
@@ -254,9 +254,9 @@
    "true_rank": null,
    "copycat_rank": 85,
    "window_s": 60,
-   "query_ms": 3.896499998518266,
-   "prefilter_ms": 24.65029200538993,
-   "total_ms": 124.41849999595433,
+   "query_ms": 4.08475000585895,
+   "prefilter_ms": 24.70616699429229,
+   "total_ms": 127.12499999906868,
    "top": [
     "HOTEL-260220-2126-T1",
     "HOTEL-250521-2059-T1",
@@ -266,7 +266,7 @@
    ],
    "baseline_rank": null,
    "baseline_copycat_rank": 2,
-   "dtw_ms": 64.71674999920651,
+   "dtw_ms": 67.15016700036358,
    "candidates": 500
   },
   {
@@ -278,9 +278,9 @@
    "true_rank": 1,
    "copycat_rank": 69,
    "window_s": 60,
-   "query_ms": 3.9614589913981035,
-   "prefilter_ms": 23.83808400190901,
-   "total_ms": 101.16362500411924,
+   "query_ms": 4.001749999588355,
+   "prefilter_ms": 23.706958003458567,
+   "total_ms": 102.94004100433085,
    "top": [
     "P1-BRAVO-251114-T1",
     "HOTEL-260220-2126-T1",
@@ -290,7 +290,7 @@
    ],
    "baseline_rank": 106,
    "baseline_copycat_rank": 8,
-   "dtw_ms": 42.24695800803602,
+   "dtw_ms": 44.05433298961725,
    "candidates": 500
   },
   {
@@ -302,9 +302,9 @@
    "true_rank": 1,
    "copycat_rank": 65,
    "window_s": 120,
-   "query_ms": 4.153417001361959,
-   "prefilter_ms": 24.11112499248702,
-   "total_ms": 118.89749999681953,
+   "query_ms": 4.027542003314011,
+   "prefilter_ms": 24.56075001100544,
+   "total_ms": 120.0971250073053,
    "top": [
     "P1-BRAVO-251114-T1",
     "HOTEL-260220-2126-T1",
@@ -314,7 +314,7 @@
    ],
    "baseline_rank": 59,
    "baseline_copycat_rank": 13,
-   "dtw_ms": 55.959125005756505,
+   "dtw_ms": 56.245290994411334,
    "candidates": 500
   },
   {
@@ -344,9 +344,9 @@
    "true_rank": 1,
    "copycat_rank": 44,
    "window_s": 60,
-   "query_ms": 4.116374999284744,
-   "prefilter_ms": 25.687917004688643,
-   "total_ms": 100.52062501199543,
+   "query_ms": 4.059416998643428,
+   "prefilter_ms": 25.534040993079543,
+   "total_ms": 101.96095900028013,
    "top": [
     "INDIA-250528-2000-T1",
     "INDIA-260223-2005-T1",
@@ -356,7 +356,7 @@
    ],
    "baseline_rank": 267,
    "baseline_copycat_rank": 390,
-   "dtw_ms": 39.57224999612663,
+   "dtw_ms": 41.35687499365304,
    "candidates": 500
   },
   {
@@ -368,9 +368,9 @@
    "true_rank": 1,
    "copycat_rank": 52,
    "window_s": 60,
-   "query_ms": 3.905124991433695,
-   "prefilter_ms": 25.466416002018377,
-   "total_ms": 91.3062909967266,
+   "query_ms": 3.9189160015666857,
+   "prefilter_ms": 25.581666006473824,
+   "total_ms": 92.81129100418184,
    "top": [
     "KILO-250315-2022-T1",
     "INDIA-250528-2000-T1",
@@ -380,7 +380,7 @@
    ],
    "baseline_rank": 44,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 31.046415999298915,
+   "dtw_ms": 31.846583995502442,
    "candidates": 500
   },
   {
@@ -392,9 +392,9 @@
    "true_rank": 1,
    "copycat_rank": 63,
    "window_s": 60,
-   "query_ms": 3.8193749933270738,
-   "prefilter_ms": 24.500625004293397,
-   "total_ms": 87.4673329963116,
+   "query_ms": 3.978249995270744,
+   "prefilter_ms": 24.499499995727092,
+   "total_ms": 89.44408300158102,
    "top": [
     "KILO-250315-2022-T1",
     "INDIA-260128-1931-T1",
@@ -404,7 +404,7 @@
    ],
    "baseline_rank": 18,
    "baseline_copycat_rank": 3,
-   "dtw_ms": 27.75679199839942,
+   "dtw_ms": 29.435082993586548,
    "candidates": 500
   },
   {
@@ -416,9 +416,9 @@
    "true_rank": 1,
    "copycat_rank": 61,
    "window_s": 120,
-   "query_ms": 3.8107500004116446,
-   "prefilter_ms": 24.759583990089595,
-   "total_ms": 113.41612499381881,
+   "query_ms": 4.337709004175849,
+   "prefilter_ms": 25.07175000209827,
+   "total_ms": 116.19929199514445,
    "top": [
     "KILO-250315-2022-T1",
     "INDIA-260128-1931-T1",
@@ -428,7 +428,7 @@
    ],
    "baseline_rank": 21,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 50.330582991591655,
+   "dtw_ms": 51.489874997059815,
    "candidates": 500
   },
   {
@@ -440,9 +440,9 @@
    "true_rank": 1,
    "copycat_rank": 56,
    "window_s": 120,
-   "query_ms": 4.179167008260265,
-   "prefilter_ms": 24.689458005013876,
-   "total_ms": 114.68612500175368,
+   "query_ms": 4.308832998503931,
+   "prefilter_ms": 24.86195800884161,
+   "total_ms": 117.33666600775905,
    "top": [
     "KILO-250315-2022-T1",
     "LIMA-251008-2019-T1",
@@ -452,7 +452,7 @@
    ],
    "baseline_rank": 27,
    "baseline_copycat_rank": 12,
-   "dtw_ms": 50.879582995548844,
+   "dtw_ms": 53.0463330069324,
    "candidates": 500
   },
   {
@@ -482,9 +482,9 @@
    "true_rank": 1,
    "copycat_rank": 28,
    "window_s": 60,
-   "query_ms": 3.705667011672631,
-   "prefilter_ms": 24.587209001765586,
-   "total_ms": 102.26920900458936,
+   "query_ms": 3.907790989615023,
+   "prefilter_ms": 24.61333299288526,
+   "total_ms": 103.86320800171234,
    "top": [
     "HOTEL-250314-2030-T1",
     "FOXTROT-251215-2125-T1",
@@ -494,7 +494,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 9,
-   "dtw_ms": 43.775083002401516,
+   "dtw_ms": 44.49241700058337,
    "candidates": 500
   },
   {
@@ -506,9 +506,9 @@
    "true_rank": 1,
    "copycat_rank": 32,
    "window_s": 60,
-   "query_ms": 3.896709007676691,
-   "prefilter_ms": 24.18512500298675,
-   "total_ms": 86.95700000680517,
+   "query_ms": 3.751249998458661,
+   "prefilter_ms": 24.580916011473164,
+   "total_ms": 89.48354200401809,
    "top": [
     "HOTEL-250314-2030-T1",
     "FOXTROT-251215-2125-T1",
@@ -518,7 +518,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 28.40341700357385,
+   "dtw_ms": 30.01050000602845,
    "candidates": 500
   },
   {
@@ -530,9 +530,9 @@
    "true_rank": 1,
    "copycat_rank": 38,
    "window_s": 60,
-   "query_ms": 3.8341250037774444,
-   "prefilter_ms": 24.05429100326728,
-   "total_ms": 85.7483330037212,
+   "query_ms": 3.733124991413206,
+   "prefilter_ms": 24.74183400045149,
+   "total_ms": 87.98762499645818,
    "top": [
     "HOTEL-250314-2030-T1",
     "FOXTROT-251215-2125-T1",
@@ -542,7 +542,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 16,
-   "dtw_ms": 26.962499992805533,
+   "dtw_ms": 28.278041994781233,
    "candidates": 500
   },
   {
@@ -554,9 +554,9 @@
    "true_rank": 1,
    "copycat_rank": 101,
    "window_s": 120,
-   "query_ms": 3.9037090027704835,
-   "prefilter_ms": 24.906791993998922,
-   "total_ms": 120.94545899890363,
+   "query_ms": 4.123582999454811,
+   "prefilter_ms": 24.86345799115952,
+   "total_ms": 122.06437499844469,
    "top": [
     "HOTEL-250314-2030-T1",
     "FOXTROT-251215-2125-T1",
@@ -566,7 +566,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 57.09170800400898,
+   "dtw_ms": 58.01904099644162,
    "candidates": 500
   },
   {
@@ -578,9 +578,9 @@
    "true_rank": 1,
    "copycat_rank": 35,
    "window_s": 120,
-   "query_ms": 3.9171670068753883,
-   "prefilter_ms": 24.93779201176949,
-   "total_ms": 119.61979200714268,
+   "query_ms": 4.000750006525777,
+   "prefilter_ms": 24.733792000915855,
+   "total_ms": 122.63570900540799,
    "top": [
     "HOTEL-250314-2030-T1",
     "FOXTROT-251215-2125-T1",
@@ -590,7 +590,7 @@
    ],
    "baseline_rank": 3,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 56.10758300463203,
+   "dtw_ms": 59.50575000315439,
    "candidates": 500
   },
   {
@@ -620,9 +620,9 @@
    "true_rank": 1,
    "copycat_rank": 365,
    "window_s": 60,
-   "query_ms": 3.827666994766332,
-   "prefilter_ms": 26.966750010615215,
-   "total_ms": 95.15979200659785,
+   "query_ms": 4.001459004939534,
+   "prefilter_ms": 26.683832998969592,
+   "total_ms": 96.60012500535231,
    "top": [
     "GOLF-251117-2305-T1",
     "GOLF-250512-2256-T1",
@@ -632,7 +632,7 @@
    ],
    "baseline_rank": 2,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 34.42283300682902,
+   "dtw_ms": 35.195167001802474,
    "candidates": 500
   },
   {
@@ -644,9 +644,9 @@
    "true_rank": 1,
    "copycat_rank": 363,
    "window_s": 60,
-   "query_ms": 3.7605830002576113,
-   "prefilter_ms": 26.075957997818477,
-   "total_ms": 88.81758300412912,
+   "query_ms": 3.8293749967124313,
+   "prefilter_ms": 26.832249990548007,
+   "total_ms": 91.50345899979584,
    "top": [
     "GOLF-250512-2256-T1",
     "GOLF-251117-2305-T1",
@@ -656,7 +656,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 28.161624999484047,
+   "dtw_ms": 29.83804100949783,
    "candidates": 500
   },
   {
@@ -668,9 +668,9 @@
    "true_rank": 1,
    "copycat_rank": 344,
    "window_s": 60,
-   "query_ms": 4.081000006408431,
-   "prefilter_ms": 26.431499994941987,
-   "total_ms": 88.71933301270474,
+   "query_ms": 4.111250003916211,
+   "prefilter_ms": 25.571459002094343,
+   "total_ms": 88.23770799790509,
    "top": [
     "GOLF-250512-2256-T1",
     "GOLF-251117-2305-T1",
@@ -680,7 +680,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 26.707958008046262,
+   "dtw_ms": 27.416291006375104,
    "candidates": 500
   },
   {
@@ -692,9 +692,9 @@
    "true_rank": 1,
    "copycat_rank": 363,
    "window_s": 120,
-   "query_ms": 4.072374998941086,
-   "prefilter_ms": 25.948082999093458,
-   "total_ms": 114.83195799519308,
+   "query_ms": 4.198208000161685,
+   "prefilter_ms": 25.806042001931928,
+   "total_ms": 114.96141599491239,
    "top": [
     "GOLF-251117-2305-T1",
     "GOLF-250512-2256-T1",
@@ -704,7 +704,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 9,
-   "dtw_ms": 50.14791700523347,
+   "dtw_ms": 50.275625006179325,
    "candidates": 500
   },
   {
@@ -716,9 +716,9 @@
    "true_rank": 1,
    "copycat_rank": 357,
    "window_s": 120,
-   "query_ms": 4.154916008701548,
-   "prefilter_ms": 24.957874993560836,
-   "total_ms": 112.3537910025334,
+   "query_ms": 3.93354200059548,
+   "prefilter_ms": 25.580332992831245,
+   "total_ms": 113.93608400248922,
    "top": [
     "GOLF-251117-2305-T1",
     "GOLF-250512-2256-T1",
@@ -728,7 +728,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 8,
-   "dtw_ms": 47.93683299794793,
+   "dtw_ms": 49.63608300022315,
    "candidates": 500
   },
   {
@@ -758,9 +758,9 @@
    "true_rank": null,
    "copycat_rank": 288,
    "window_s": 60,
-   "query_ms": 3.7967500102240592,
-   "prefilter_ms": 26.775457998155616,
-   "total_ms": 94.59045800031163,
+   "query_ms": 3.6396670038811862,
+   "prefilter_ms": 27.50858299259562,
+   "total_ms": 96.60983399953693,
    "top": [
     "LIMA-250406-2217-T1",
     "LIMA-250508-2204-T1",
@@ -770,7 +770,7 @@
    ],
    "baseline_rank": null,
    "baseline_copycat_rank": 31,
-   "dtw_ms": 33.10849999252241,
+   "dtw_ms": 34.155333996750414,
    "candidates": 500
   },
   {
@@ -782,9 +782,9 @@
    "true_rank": 1,
    "copycat_rank": 192,
    "window_s": 60,
-   "query_ms": 3.835249997791834,
-   "prefilter_ms": 26.55383299861569,
-   "total_ms": 94.80058400367852,
+   "query_ms": 3.975750005338341,
+   "prefilter_ms": 27.130540998768993,
+   "total_ms": 96.14412501105107,
    "top": [
     "P1-ALPHA-260303-T1",
     "HOTEL-260220-2126-T1",
@@ -794,7 +794,7 @@
    ],
    "baseline_rank": 399,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 32.805708004161716,
+   "dtw_ms": 33.62674999516457,
    "candidates": 500
   },
   {
@@ -806,9 +806,9 @@
    "true_rank": 1,
    "copycat_rank": 139,
    "window_s": 60,
-   "query_ms": 3.807083994615823,
-   "prefilter_ms": 26.044583006296307,
-   "total_ms": 93.72924998751841,
+   "query_ms": 3.924791992176324,
+   "prefilter_ms": 25.891291006701067,
+   "total_ms": 94.97679199557751,
    "top": [
     "P1-BRAVO-251114-T1",
     "P1-ALPHA-260303-T1",
@@ -818,7 +818,7 @@
    ],
    "baseline_rank": 101,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 32.51345799071714,
+   "dtw_ms": 33.22437500173692,
    "candidates": 500
   },
   {
@@ -830,9 +830,9 @@
    "true_rank": 1,
    "copycat_rank": 144,
    "window_s": 120,
-   "query_ms": 3.7919589958619326,
-   "prefilter_ms": 25.443833990721032,
-   "total_ms": 119.1465000010794,
+   "query_ms": 3.671207989100367,
+   "prefilter_ms": 25.379333004821092,
+   "total_ms": 120.10204199759755,
    "top": [
     "P1-BRAVO-251114-T1",
     "P1-ALPHA-260303-T1",
@@ -842,7 +842,7 @@
    ],
    "baseline_rank": 101,
    "baseline_copycat_rank": 3,
-   "dtw_ms": 54.89524999575224,
+   "dtw_ms": 56.41529099375475,
    "candidates": 500
   },
   {
@@ -854,9 +854,9 @@
    "true_rank": 1,
    "copycat_rank": 85,
    "window_s": 120,
-   "query_ms": 3.9620830066269264,
-   "prefilter_ms": 25.962333005736582,
-   "total_ms": 119.32483300915919,
+   "query_ms": 3.874250003718771,
+   "prefilter_ms": 25.315916995168664,
+   "total_ms": 121.18254099914338,
    "top": [
     "P1-ALPHA-260303-T1",
     "HOTEL-260220-2126-T1",
@@ -866,7 +866,7 @@
    ],
    "baseline_rank": 49,
    "baseline_copycat_rank": 3,
-   "dtw_ms": 54.04550000093877,
+   "dtw_ms": 56.559083008323796,
    "candidates": 500
   },
   {
@@ -896,9 +896,9 @@
    "true_rank": 1,
    "copycat_rank": 37,
    "window_s": 60,
-   "query_ms": 4.081084000063129,
-   "prefilter_ms": 26.45308300270699,
-   "total_ms": 96.1170420050621,
+   "query_ms": 3.749458002857864,
+   "prefilter_ms": 26.55179200519342,
+   "total_ms": 97.29116699600127,
    "top": [
     "INDIA-250528-2000-T1",
     "LIMA-251008-2019-T1",
@@ -908,7 +908,7 @@
    ],
    "baseline_rank": 256,
    "baseline_copycat_rank": 149,
-   "dtw_ms": 34.14829200482927,
+   "dtw_ms": 35.903208001400344,
    "candidates": 500
   },
   {
@@ -920,9 +920,9 @@
    "true_rank": 1,
    "copycat_rank": 8,
    "window_s": 60,
-   "query_ms": 4.081541992491111,
-   "prefilter_ms": 27.14137500151992,
-   "total_ms": 95.34695799811743,
+   "query_ms": 4.18474999605678,
+   "prefilter_ms": 26.56204100640025,
+   "total_ms": 95.97804199438542,
    "top": [
     "KILO-250315-2022-T1",
     "INDIA-250528-2000-T1",
@@ -932,7 +932,7 @@
    ],
    "baseline_rank": 247,
    "baseline_copycat_rank": 59,
-   "dtw_ms": 32.585124994511716,
+   "dtw_ms": 33.44029099389445,
    "candidates": 500
   },
   {
@@ -944,9 +944,9 @@
    "true_rank": 1,
    "copycat_rank": 10,
    "window_s": 60,
-   "query_ms": 3.932334002456628,
-   "prefilter_ms": 26.311624998925254,
-   "total_ms": 91.8911670014495,
+   "query_ms": 4.128332991967909,
+   "prefilter_ms": 26.194334001047537,
+   "total_ms": 93.1141250039218,
    "top": [
     "KILO-250315-2022-T1",
     "LIMA-250610-1936-T1",
@@ -956,7 +956,7 @@
    ],
    "baseline_rank": 9,
    "baseline_copycat_rank": 2,
-   "dtw_ms": 30.230083997594193,
+   "dtw_ms": 31.05841699289158,
    "candidates": 500
   },
   {
@@ -968,9 +968,9 @@
    "true_rank": 1,
    "copycat_rank": 10,
    "window_s": 120,
-   "query_ms": 4.034249999676831,
-   "prefilter_ms": 25.450749992160127,
-   "total_ms": 116.14500000723638,
+   "query_ms": 3.858291995129548,
+   "prefilter_ms": 25.792582993744873,
+   "total_ms": 116.64645899145398,
    "top": [
     "KILO-250315-2022-T1",
     "INDIA-260322-2013-T1",
@@ -980,7 +980,7 @@
    ],
    "baseline_rank": 13,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 51.77037500834558,
+   "dtw_ms": 51.585749999503605,
    "candidates": 500
   },
   {
@@ -992,9 +992,9 @@
    "true_rank": 1,
    "copycat_rank": 10,
    "window_s": 120,
-   "query_ms": 3.8741669995943084,
-   "prefilter_ms": 24.766625007032417,
-   "total_ms": 111.67508398648351,
+   "query_ms": 3.774625001824461,
+   "prefilter_ms": 25.773040993954055,
+   "total_ms": 115.02445799123961,
    "top": [
     "KILO-250315-2022-T1",
     "INDIA-260128-1931-T1",
@@ -1004,7 +1004,7 @@
    ],
    "baseline_rank": 13,
    "baseline_copycat_rank": 11,
-   "dtw_ms": 48.103083987371065,
+   "dtw_ms": 49.69587500090711,
    "candidates": 500
   },
   {
@@ -1034,9 +1034,9 @@
    "true_rank": 1,
    "copycat_rank": 199,
    "window_s": 60,
-   "query_ms": 4.145917002460919,
-   "prefilter_ms": 26.15120800328441,
-   "total_ms": 84.22316699579824,
+   "query_ms": 3.8574589998461306,
+   "prefilter_ms": 25.85449999605771,
+   "total_ms": 86.09595899179112,
    "top": [
     "BRAVO-250725-0208-T1",
     "GOLF-260212-0152-T1",
@@ -1046,7 +1046,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 4,
-   "dtw_ms": 23.032375000184402,
+   "dtw_ms": 25.288749995524995,
    "candidates": 500
   },
   {
@@ -1058,9 +1058,9 @@
    "true_rank": 1,
    "copycat_rank": 185,
    "window_s": 60,
-   "query_ms": 3.965124997193925,
-   "prefilter_ms": 25.74612500029616,
-   "total_ms": 83.93545800936408,
+   "query_ms": 3.6859579995507374,
+   "prefilter_ms": 25.672332994872704,
+   "total_ms": 84.28208300028928,
    "top": [
     "GOLF-260212-0152-T1",
     "BRAVO-250725-0208-T1",
@@ -1070,7 +1070,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 4,
-   "dtw_ms": 22.423916991101578,
+   "dtw_ms": 23.468875006074086,
    "candidates": 500
   },
   {
@@ -1082,9 +1082,9 @@
    "true_rank": 1,
    "copycat_rank": 193,
    "window_s": 60,
-   "query_ms": 3.9869579923106357,
-   "prefilter_ms": 25.207915998180397,
-   "total_ms": 85.31312500417698,
+   "query_ms": 4.023417001008056,
+   "prefilter_ms": 25.36975000111852,
+   "total_ms": 87.50704200065229,
    "top": [
     "GOLF-260212-0152-T1",
     "BRAVO-250725-0208-T1",
@@ -1094,7 +1094,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 12,
-   "dtw_ms": 24.454833008348942,
+   "dtw_ms": 26.0065409966046,
    "candidates": 500
   },
   {
@@ -1106,9 +1106,9 @@
    "true_rank": 1,
    "copycat_rank": 163,
    "window_s": 120,
-   "query_ms": 3.8293749967124313,
-   "prefilter_ms": 25.144500003079884,
-   "total_ms": 109.82141699059866,
+   "query_ms": 3.936749999411404,
+   "prefilter_ms": 25.83358300034888,
+   "total_ms": 112.52791600418277,
    "top": [
     "GOLF-260212-0152-T1",
     "BRAVO-250725-0208-T1",
@@ -1118,7 +1118,7 @@
    ],
    "baseline_rank": 3,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 45.83858299884014,
+   "dtw_ms": 46.99883300054353,
    "candidates": 500
   },
   {
@@ -1130,9 +1130,9 @@
    "true_rank": 1,
    "copycat_rank": 202,
    "window_s": 120,
-   "query_ms": 3.907749996869825,
-   "prefilter_ms": 25.210666994098574,
-   "total_ms": 111.11854200134985,
+   "query_ms": 3.9150829979917035,
+   "prefilter_ms": 25.10283399897162,
+   "total_ms": 113.16583299776539,
    "top": [
     "GOLF-260212-0152-T1",
     "BRAVO-250725-0208-T1",
@@ -1142,7 +1142,7 @@
    ],
    "baseline_rank": 2,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 47.04741699970327,
+   "dtw_ms": 48.90408299979754,
    "candidates": 500
   },
   {
@@ -1172,9 +1172,9 @@
    "true_rank": 1,
    "copycat_rank": 412,
    "window_s": 60,
-   "query_ms": 3.966000003856607,
-   "prefilter_ms": 26.64950001053512,
-   "total_ms": 90.0714580056956,
+   "query_ms": 3.7984169903211296,
+   "prefilter_ms": 26.89325000392273,
+   "total_ms": 91.95641700353008,
    "top": [
     "CHARLIE-260120-0016-T1",
     "DELTA-251126-0018-T1",
@@ -1184,7 +1184,7 @@
    ],
    "baseline_rank": 221,
    "baseline_copycat_rank": 278,
-   "dtw_ms": 28.51616700354498,
+   "dtw_ms": 29.703417007112876,
    "candidates": 500
   },
   {
@@ -1196,9 +1196,9 @@
    "true_rank": 1,
    "copycat_rank": 414,
    "window_s": 60,
-   "query_ms": 3.9077080000424758,
-   "prefilter_ms": 26.636416994733736,
-   "total_ms": 90.13566700741649,
+   "query_ms": 3.7680829991586506,
+   "prefilter_ms": 26.781874999869615,
+   "total_ms": 90.78666700224858,
    "top": [
     "CHARLIE-250603-2306-T1",
     "DELTA-250401-2344-T1",
@@ -1208,7 +1208,7 @@
    ],
    "baseline_rank": 176,
    "baseline_copycat_rank": 241,
-   "dtw_ms": 27.64262500568293,
+   "dtw_ms": 28.923708989168517,
    "candidates": 500
   },
   {
@@ -1220,9 +1220,9 @@
    "true_rank": 1,
    "copycat_rank": 377,
    "window_s": 60,
-   "query_ms": 4.004583999630995,
-   "prefilter_ms": 26.580666992231272,
-   "total_ms": 89.41837500606198,
+   "query_ms": 4.13016599486582,
+   "prefilter_ms": 26.570375004666857,
+   "total_ms": 90.80216599977575,
    "top": [
     "CHARLIE-260120-0016-T1",
     "CHARLIE-260212-0037-T1",
@@ -1232,7 +1232,7 @@
    ],
    "baseline_rank": 39,
    "baseline_copycat_rank": 19,
-   "dtw_ms": 26.869249995797873,
+   "dtw_ms": 28.336165996734053,
    "candidates": 500
   },
   {
@@ -1244,9 +1244,9 @@
    "true_rank": 1,
    "copycat_rank": 397,
    "window_s": 60,
-   "query_ms": 3.884167002979666,
-   "prefilter_ms": 26.269874986610375,
-   "total_ms": 88.8828330062097,
+   "query_ms": 3.899999996065162,
+   "prefilter_ms": 26.0065839975141,
+   "total_ms": 89.88908299943432,
    "top": [
     "CHARLIE-260120-0016-T1",
     "CHARLIE-250528-0047-T1",
@@ -1256,7 +1256,7 @@
    ],
    "baseline_rank": 13,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 26.71720800572075,
+   "dtw_ms": 28.175291008665226,
    "candidates": 500
   },
   {
@@ -1268,9 +1268,9 @@
    "true_rank": 1,
    "copycat_rank": 317,
    "window_s": 120,
-   "query_ms": 4.229166006552987,
-   "prefilter_ms": 26.05491699068807,
-   "total_ms": 121.33995800104458,
+   "query_ms": 4.2379590013297275,
+   "prefilter_ms": 26.420750000397675,
+   "total_ms": 124.36225000419654,
    "top": [
     "CHARLIE-260120-0016-T1",
     "CHARLIE-250528-0047-T1",
@@ -1280,7 +1280,7 @@
    ],
    "baseline_rank": 12,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 55.57641600898933,
+   "dtw_ms": 57.822875009151176,
    "candidates": 500
   },
   {
@@ -1310,9 +1310,9 @@
    "true_rank": 1,
    "copycat_rank": 15,
    "window_s": 60,
-   "query_ms": 4.2499170085648075,
-   "prefilter_ms": 26.288291002856568,
-   "total_ms": 86.88670799892861,
+   "query_ms": 4.056709003634751,
+   "prefilter_ms": 25.88429200113751,
+   "total_ms": 87.71020900167059,
    "top": [
     "FOXTROT-250418-2022-T1",
     "HOTEL-250521-2059-T1",
@@ -1322,7 +1322,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 4,
-   "dtw_ms": 25.29216698894743,
+   "dtw_ms": 26.633209010469727,
    "candidates": 500
   },
   {
@@ -1334,9 +1334,9 @@
    "true_rank": 1,
    "copycat_rank": 15,
    "window_s": 60,
-   "query_ms": 4.059583006892353,
-   "prefilter_ms": 25.70495799591299,
-   "total_ms": 85.627166001359,
+   "query_ms": 4.032166994875297,
+   "prefilter_ms": 25.59929199924227,
+   "total_ms": 86.9684170029359,
    "top": [
     "HOTEL-250521-2059-T1",
     "FOXTROT-250418-2022-T1",
@@ -1346,7 +1346,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 23.994250004761852,
+   "dtw_ms": 25.252041989006102,
    "candidates": 500
   },
   {
@@ -1358,9 +1358,9 @@
    "true_rank": 1,
    "copycat_rank": 15,
    "window_s": 60,
-   "query_ms": 3.9038329996401444,
-   "prefilter_ms": 26.08416700968519,
-   "total_ms": 87.49466598965228,
+   "query_ms": 3.8842919893795624,
+   "prefilter_ms": 26.069625004311092,
+   "total_ms": 90.39545799896587,
    "top": [
     "FOXTROT-250718-2029-T1",
     "FOXTROT-250418-2022-T1",
@@ -1370,7 +1370,7 @@
    ],
    "baseline_rank": 5,
    "baseline_copycat_rank": 11,
-   "dtw_ms": 26.007749998825602,
+   "dtw_ms": 28.933459005202167,
    "candidates": 500
   },
   {
@@ -1382,9 +1382,9 @@
    "true_rank": 1,
    "copycat_rank": 14,
    "window_s": 120,
-   "query_ms": 3.9788750000298023,
-   "prefilter_ms": 25.7256249897182,
-   "total_ms": 110.89854099554941,
+   "query_ms": 3.7831670051673427,
+   "prefilter_ms": 25.6915840000147,
+   "total_ms": 113.18404199846555,
    "top": [
     "FOXTROT-250418-2022-T1",
     "HOTEL-250521-2059-T1",
@@ -1394,7 +1394,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 22,
-   "dtw_ms": 46.92937500658445,
+   "dtw_ms": 48.31912500958424,
    "candidates": 500
   },
   {
@@ -1406,9 +1406,9 @@
    "true_rank": 1,
    "copycat_rank": 19,
    "window_s": 120,
-   "query_ms": 3.919042006600648,
-   "prefilter_ms": 25.907375005772337,
-   "total_ms": 114.70087499765214,
+   "query_ms": 4.008167001302354,
+   "prefilter_ms": 25.905542002874427,
+   "total_ms": 116.99512500490528,
    "top": [
     "FOXTROT-250418-2022-T1",
     "HOTEL-250521-2059-T1",
@@ -1418,7 +1418,7 @@
    ],
    "baseline_rank": 5,
    "baseline_copycat_rank": 12,
-   "dtw_ms": 49.98275000252761,
+   "dtw_ms": 52.02812500647269,
    "candidates": 500
   },
   {
@@ -1448,9 +1448,9 @@
    "true_rank": null,
    "copycat_rank": 149,
    "window_s": 60,
-   "query_ms": 3.6941670114174485,
-   "prefilter_ms": 26.581459009321406,
-   "total_ms": 87.12704200297594,
+   "query_ms": 3.9417919906554744,
+   "prefilter_ms": 26.84466699429322,
+   "total_ms": 89.25629199075047,
    "top": [
     "FOXTROT-250418-2022-T1",
     "FOXTROT-251215-2125-T1",
@@ -1460,7 +1460,7 @@
    ],
    "baseline_rank": null,
    "baseline_copycat_rank": 82,
-   "dtw_ms": 26.530707997153513,
+   "dtw_ms": 27.87687499949243,
    "candidates": 500
   },
   {
@@ -1472,9 +1472,9 @@
    "true_rank": null,
    "copycat_rank": 277,
    "window_s": 60,
-   "query_ms": 3.7484159984160215,
-   "prefilter_ms": 26.653124994481914,
-   "total_ms": 89.2711250053253,
+   "query_ms": 4.021249987999909,
+   "prefilter_ms": 26.665958008379675,
+   "total_ms": 90.5907499982277,
    "top": [
     "FOXTROT-260224-2059-T1",
     "FOXTROT-251215-2125-T1",
@@ -1484,7 +1484,7 @@
    ],
    "baseline_rank": null,
    "baseline_copycat_rank": 33,
-   "dtw_ms": 27.35533298982773,
+   "dtw_ms": 28.343500001938082,
    "candidates": 500
   },
   {
@@ -1496,9 +1496,9 @@
    "true_rank": 1,
    "copycat_rank": 63,
    "window_s": 60,
-   "query_ms": 3.7952919956296682,
-   "prefilter_ms": 26.649499995983206,
-   "total_ms": 88.0663339921739,
+   "query_ms": 3.9939999987836927,
+   "prefilter_ms": 26.211917007458396,
+   "total_ms": 88.49454099254217,
    "top": [
     "P1-ALPHA-260303-T1",
     "HOTEL-260220-2126-T1",
@@ -1508,7 +1508,7 @@
    ],
    "baseline_rank": 16,
    "baseline_copycat_rank": 9,
-   "dtw_ms": 26.524250002694316,
+   "dtw_ms": 27.042250003432855,
    "candidates": 500
   },
   {
@@ -1520,9 +1520,9 @@
    "true_rank": 1,
    "copycat_rank": 67,
    "window_s": 120,
-   "query_ms": 3.96474999433849,
-   "prefilter_ms": 25.615958002163097,
-   "total_ms": 112.64058400411159,
+   "query_ms": 3.900707990396768,
+   "prefilter_ms": 25.665708002634346,
+   "total_ms": 113.93391599995084,
    "top": [
     "P1-ALPHA-260303-T1",
     "HOTEL-260220-2126-T1",
@@ -1532,7 +1532,7 @@
    ],
    "baseline_rank": 96,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 48.54358400916681,
+   "dtw_ms": 49.517833002028055,
    "candidates": 500
   },
   {
@@ -1544,9 +1544,9 @@
    "true_rank": 1,
    "copycat_rank": 35,
    "window_s": 120,
-   "query_ms": 3.7664169940399006,
-   "prefilter_ms": 25.691500006360002,
-   "total_ms": 117.4597920035012,
+   "query_ms": 4.43129098857753,
+   "prefilter_ms": 25.9585000021616,
+   "total_ms": 122.27045799954794,
    "top": [
     "P1-ALPHA-260303-T1",
     "HOTEL-260220-2126-T1",
@@ -1556,7 +1556,7 @@
    ],
    "baseline_rank": 45,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 53.334957992774434,
+   "dtw_ms": 56.586292004794814,
    "candidates": 500
   },
   {
@@ -1586,9 +1586,9 @@
    "true_rank": 1,
    "copycat_rank": 447,
    "window_s": 60,
-   "query_ms": 3.6478330002864823,
-   "prefilter_ms": 27.2786670102505,
-   "total_ms": 100.1807499997085,
+   "query_ms": 3.930457998649217,
+   "prefilter_ms": 27.711333998013288,
+   "total_ms": 103.55499999423046,
    "top": [
     "DELTA-250401-2344-T1",
     "DELTA-260427-0053-T1",
@@ -1598,7 +1598,7 @@
    ],
    "baseline_rank": 12,
    "baseline_copycat_rank": 239,
-   "dtw_ms": 37.76983299758285,
+   "dtw_ms": 39.4781659997534,
    "candidates": 500
   },
   {
@@ -1610,9 +1610,9 @@
    "true_rank": 1,
    "copycat_rank": 393,
    "window_s": 60,
-   "query_ms": 3.8812499988125637,
-   "prefilter_ms": 26.926833001198247,
-   "total_ms": 96.9654159998754,
+   "query_ms": 3.8420830096583813,
+   "prefilter_ms": 27.165541992872022,
+   "total_ms": 98.248207999859,
    "top": [
     "DELTA-250401-2344-T1",
     "JULIET-260316-2209-T1",
@@ -1622,7 +1622,7 @@
    ],
    "baseline_rank": 16,
    "baseline_copycat_rank": 470,
-   "dtw_ms": 33.93483399122488,
+   "dtw_ms": 34.99004199693445,
    "candidates": 500
   },
   {
@@ -1634,9 +1634,9 @@
    "true_rank": 1,
    "copycat_rank": 410,
    "window_s": 60,
-   "query_ms": 4.035332996863872,
-   "prefilter_ms": 27.284833005978726,
-   "total_ms": 99.05229099967983,
+   "query_ms": 3.943957999581471,
+   "prefilter_ms": 27.34866699029226,
+   "total_ms": 99.48066600190941,
    "top": [
     "CHARLIE-260120-0016-T1",
     "DELTA-250401-2344-T1",
@@ -1646,7 +1646,7 @@
    ],
    "baseline_rank": 153,
    "baseline_copycat_rank": 244,
-   "dtw_ms": 35.19804200914223,
+   "dtw_ms": 35.49799999746028,
    "candidates": 500
   },
   {
@@ -1658,9 +1658,9 @@
    "true_rank": 1,
    "copycat_rank": 405,
    "window_s": 120,
-   "query_ms": 3.8783750060247257,
-   "prefilter_ms": 27.45737500663381,
-   "total_ms": 124.95266599580646,
+   "query_ms": 4.5045420120004565,
+   "prefilter_ms": 27.905625000130385,
+   "total_ms": 130.5864590103738,
    "top": [
     "DELTA-250401-2344-T1",
     "CHARLIE-260120-0016-T1",
@@ -1670,7 +1670,7 @@
    ],
    "baseline_rank": 34,
    "baseline_copycat_rank": 143,
-   "dtw_ms": 57.99808300798759,
+   "dtw_ms": 62.03062500571832,
    "candidates": 500
   },
   {
@@ -1682,9 +1682,9 @@
    "true_rank": 1,
    "copycat_rank": 283,
    "window_s": 120,
-   "query_ms": 4.171958004008047,
-   "prefilter_ms": 27.91962499031797,
-   "total_ms": 119.30612499418203,
+   "query_ms": 4.340833998867311,
+   "prefilter_ms": 27.919041996938176,
+   "total_ms": 124.33533399598673,
    "top": [
     "DELTA-250401-2344-T1",
     "DELTA-251126-0018-T1",
@@ -1694,7 +1694,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 24,
-   "dtw_ms": 51.87566700624302,
+   "dtw_ms": 56.470124996849336,
    "candidates": 500
   },
   {
@@ -1724,9 +1724,9 @@
    "true_rank": 1,
    "copycat_rank": 4,
    "window_s": 60,
-   "query_ms": 3.916875008144416,
-   "prefilter_ms": 28.153708000900224,
-   "total_ms": 91.23141701275017,
+   "query_ms": 4.814707994228229,
+   "prefilter_ms": 29.27070799341891,
+   "total_ms": 97.02320799988229,
    "top": [
     "KILO-260419-2014-T1",
     "INDIA-260128-1931-T1",
@@ -1736,7 +1736,7 @@
    ],
    "baseline_rank": 64,
    "baseline_copycat_rank": 82,
-   "dtw_ms": 28.30512498621829,
+   "dtw_ms": 30.435874999966472,
    "candidates": 500
   },
   {
@@ -1748,9 +1748,9 @@
    "true_rank": 1,
    "copycat_rank": 14,
    "window_s": 60,
-   "query_ms": 4.113417002372444,
-   "prefilter_ms": 28.148041004897095,
-   "total_ms": 90.11429199017584,
+   "query_ms": 4.3986670061713085,
+   "prefilter_ms": 28.13758399861399,
+   "total_ms": 94.94783300033305,
    "top": [
     "KILO-250315-2022-T1",
     "KILO-260419-2014-T1",
@@ -1760,7 +1760,7 @@
    ],
    "baseline_rank": 25,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 26.734917002613656,
+   "dtw_ms": 29.887583004892804,
    "candidates": 500
   },
   {
@@ -1772,9 +1772,9 @@
    "true_rank": 1,
    "copycat_rank": 11,
    "window_s": 60,
-   "query_ms": 3.857542003970593,
-   "prefilter_ms": 27.360041000065394,
-   "total_ms": 90.58254200499505,
+   "query_ms": 4.459040996152908,
+   "prefilter_ms": 27.625208007520996,
+   "total_ms": 94.32616599951871,
    "top": [
     "KILO-250315-2022-T1",
     "KILO-260419-2014-T1",
@@ -1784,7 +1784,7 @@
    ],
    "baseline_rank": 11,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 27.432249989942648,
+   "dtw_ms": 29.59841600386426,
    "candidates": 500
   },
   {
@@ -1796,9 +1796,9 @@
    "true_rank": 1,
    "copycat_rank": 11,
    "window_s": 120,
-   "query_ms": 3.854624999803491,
-   "prefilter_ms": 27.549833001103252,
-   "total_ms": 116.82687498978339,
+   "query_ms": 4.3337499955669045,
+   "prefilter_ms": 28.084332996513695,
+   "total_ms": 120.36812498990912,
    "top": [
     "KILO-250315-2022-T1",
     "KILO-260419-2014-T1",
@@ -1808,7 +1808,7 @@
    ],
    "baseline_rank": 9,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 50.722208005026914,
+   "dtw_ms": 52.39095800789073,
    "candidates": 500
   },
   {
@@ -1820,9 +1820,9 @@
    "true_rank": 1,
    "copycat_rank": 11,
    "window_s": 120,
-   "query_ms": 3.876959002809599,
-   "prefilter_ms": 27.287333010463044,
-   "total_ms": 115.2087499940535,
+   "query_ms": 4.020583000965416,
+   "prefilter_ms": 27.462166995974258,
+   "total_ms": 118.00500001118053,
    "top": [
     "KILO-250315-2022-T1",
     "KILO-260419-2014-T1",
@@ -1832,7 +1832,7 @@
    ],
    "baseline_rank": 28,
    "baseline_copycat_rank": 21,
-   "dtw_ms": 48.2637090026401,
+   "dtw_ms": 50.755459000356495,
    "candidates": 500
   },
   {
@@ -1862,9 +1862,9 @@
    "true_rank": 1,
    "copycat_rank": 36,
    "window_s": 60,
-   "query_ms": 3.8661669968860224,
-   "prefilter_ms": 27.376875004847534,
-   "total_ms": 93.01345799758565,
+   "query_ms": 4.191041996818967,
+   "prefilter_ms": 27.38516600220464,
+   "total_ms": 94.6087920019636,
    "top": [
     "HOTEL-260428-2016-T1",
     "HOTEL-250521-2059-T1",
@@ -1874,7 +1874,7 @@
    ],
    "baseline_rank": 4,
    "baseline_copycat_rank": 81,
-   "dtw_ms": 29.814208988682367,
+   "dtw_ms": 30.986375000793487,
    "candidates": 500
   },
   {
@@ -1886,9 +1886,9 @@
    "true_rank": 1,
    "copycat_rank": 22,
    "window_s": 60,
-   "query_ms": 3.9240409969352186,
-   "prefilter_ms": 27.412750001531094,
-   "total_ms": 90.84329099277966,
+   "query_ms": 4.033707999042235,
+   "prefilter_ms": 27.466999992611818,
+   "total_ms": 91.83649999613408,
    "top": [
     "ECHO-250813-2034-T1",
     "HOTEL-260428-2016-T1",
@@ -1898,7 +1898,7 @@
    ],
    "baseline_rank": 6,
    "baseline_copycat_rank": 63,
-   "dtw_ms": 27.436167001724243,
+   "dtw_ms": 28.19854200060945,
    "candidates": 500
   },
   {
@@ -1910,9 +1910,9 @@
    "true_rank": 1,
    "copycat_rank": 19,
    "window_s": 60,
-   "query_ms": 3.8333749980665743,
-   "prefilter_ms": 26.672958003473468,
-   "total_ms": 89.38987499277573,
+   "query_ms": 3.9522080041933805,
+   "prefilter_ms": 26.841875005629845,
+   "total_ms": 91.37866699893493,
    "top": [
     "ECHO-250813-2034-T1",
     "HOTEL-250521-2059-T1",
@@ -1922,7 +1922,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 14,
-   "dtw_ms": 27.078833998530172,
+   "dtw_ms": 28.34133300348185,
    "candidates": 500
   },
   {
@@ -1934,9 +1934,9 @@
    "true_rank": 1,
    "copycat_rank": 54,
    "window_s": 120,
-   "query_ms": 3.84174998907838,
-   "prefilter_ms": 27.952667005592957,
-   "total_ms": 124.49354199634399,
+   "query_ms": 3.8628750044154003,
+   "prefilter_ms": 28.090791995055042,
+   "total_ms": 124.41324999963399,
    "top": [
     "ECHO-250813-2034-T1",
     "FOXTROT-250418-2022-T1",
@@ -1946,7 +1946,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 30,
-   "dtw_ms": 57.01091700757388,
+   "dtw_ms": 57.08866601344198,
    "candidates": 500
   },
   {
@@ -1958,9 +1958,9 @@
    "true_rank": 1,
    "copycat_rank": 28,
    "window_s": 120,
-   "query_ms": 4.116124997381121,
-   "prefilter_ms": 28.04437499435153,
-   "total_ms": 123.92608298978303,
+   "query_ms": 3.8844160008011386,
+   "prefilter_ms": 27.63779100496322,
+   "total_ms": 125.80658300430514,
    "top": [
     "ECHO-250813-2034-T1",
     "FOXTROT-250418-2022-T1",
@@ -1970,7 +1970,7 @@
    ],
    "baseline_rank": 2,
    "baseline_copycat_rank": 14,
-   "dtw_ms": 55.94333400949836,
+   "dtw_ms": 58.37212498590816,
    "candidates": 500
   },
   {
@@ -2000,9 +2000,9 @@
    "true_rank": 1,
    "copycat_rank": 238,
    "window_s": 60,
-   "query_ms": 3.925707991584204,
-   "prefilter_ms": 26.543208994553424,
-   "total_ms": 87.5839999935124,
+   "query_ms": 3.956334010581486,
+   "prefilter_ms": 27.03320801083464,
+   "total_ms": 88.77250000659842,
    "top": [
     "BRAVO-250725-0208-T1",
     "GOLF-260212-0152-T1",
@@ -2012,7 +2012,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 14,
-   "dtw_ms": 25.323459005448967,
+   "dtw_ms": 26.45645898883231,
    "candidates": 500
   },
   {
@@ -2024,9 +2024,9 @@
    "true_rank": 1,
    "copycat_rank": 213,
    "window_s": 60,
-   "query_ms": 4.083916996023618,
-   "prefilter_ms": 26.77312499145046,
-   "total_ms": 86.08537499094382,
+   "query_ms": 3.965124997193925,
+   "prefilter_ms": 26.98712500568945,
+   "total_ms": 86.29316699807532,
    "top": [
     "BRAVO-250725-0208-T1",
     "GOLF-260212-0152-T1",
@@ -2036,7 +2036,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 14,
-   "dtw_ms": 22.849375003715977,
+   "dtw_ms": 22.848042004625313,
    "candidates": 500
   },
   {
@@ -2048,9 +2048,9 @@
    "true_rank": 1,
    "copycat_rank": 204,
    "window_s": 60,
-   "query_ms": 3.88474999635946,
-   "prefilter_ms": 26.797207989147864,
-   "total_ms": 91.85737499501556,
+   "query_ms": 3.8789590034866706,
+   "prefilter_ms": 26.950125000439584,
+   "total_ms": 93.06162501161452,
    "top": [
     "GOLF-260212-0152-T1",
     "BRAVO-250423-0107-T1",
@@ -2060,7 +2060,7 @@
    ],
    "baseline_rank": 2,
    "baseline_copycat_rank": 18,
-   "dtw_ms": 28.950541993253864,
+   "dtw_ms": 29.74825000273995,
    "candidates": 500
   },
   {
@@ -2072,9 +2072,9 @@
    "true_rank": 1,
    "copycat_rank": 202,
    "window_s": 120,
-   "query_ms": 3.766124995308928,
-   "prefilter_ms": 27.682915999321267,
-   "total_ms": 119.89141699450556,
+   "query_ms": 4.060416002175771,
+   "prefilter_ms": 27.53791699069552,
+   "total_ms": 123.56800000998192,
    "top": [
     "BRAVO-250423-0107-T1",
     "BRAVO-250725-0208-T1",
@@ -2084,7 +2084,7 @@
    ],
    "baseline_rank": 6,
    "baseline_copycat_rank": 16,
-   "dtw_ms": 52.59762499190401,
+   "dtw_ms": 55.65045800176449,
    "candidates": 500
   },
   {
@@ -2096,9 +2096,9 @@
    "true_rank": 1,
    "copycat_rank": 176,
    "window_s": 120,
-   "query_ms": 4.016166989458725,
-   "prefilter_ms": 27.6246660068864,
-   "total_ms": 123.2564999954775,
+   "query_ms": 4.166291997535154,
+   "prefilter_ms": 27.783582991105504,
+   "total_ms": 126.13029200292658,
    "top": [
     "BRAVO-250725-0208-T1",
     "BRAVO-250423-0107-T1",
@@ -2108,7 +2108,7 @@
    ],
    "baseline_rank": 2,
    "baseline_copycat_rank": 12,
-   "dtw_ms": 55.931208000401966,
+   "dtw_ms": 58.10725000628736,
    "candidates": 500
   },
   {
@@ -2138,9 +2138,9 @@
    "true_rank": 1,
    "copycat_rank": 342,
    "window_s": 60,
-   "query_ms": 4.175499998382293,
-   "prefilter_ms": 28.236707992618904,
-   "total_ms": 89.49195800232701,
+   "query_ms": 3.987999996752478,
+   "prefilter_ms": 27.91474999685306,
+   "total_ms": 90.70000000065193,
    "top": [
     "JULIET-250815-2326-T1",
     "JULIET-260228-2244-T1",
@@ -2150,7 +2150,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 25.7319579977775,
+   "dtw_ms": 27.33333299693186,
    "candidates": 500
   },
   {
@@ -2162,9 +2162,9 @@
    "true_rank": 1,
    "copycat_rank": 350,
    "window_s": 60,
-   "query_ms": 3.799957994488068,
-   "prefilter_ms": 27.901583001948893,
-   "total_ms": 90.58629100036342,
+   "query_ms": 4.018874999019317,
+   "prefilter_ms": 27.782707998994738,
+   "total_ms": 92.7219159930246,
    "top": [
     "JULIET-250815-2326-T1",
     "JULIET-260228-2244-T1",
@@ -2174,7 +2174,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 4,
-   "dtw_ms": 26.461499990546145,
+   "dtw_ms": 28.11866700358223,
    "candidates": 500
   },
   {
@@ -2186,9 +2186,9 @@
    "true_rank": 1,
    "copycat_rank": 341,
    "window_s": 60,
-   "query_ms": 4.234624997479841,
-   "prefilter_ms": 27.471082998090424,
-   "total_ms": 91.4456250029616,
+   "query_ms": 3.7174589961068705,
+   "prefilter_ms": 26.91491700534243,
+   "total_ms": 90.66516699385829,
    "top": [
     "JULIET-250815-2326-T1",
     "JULIET-260228-2244-T1",
@@ -2198,7 +2198,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 9,
-   "dtw_ms": 26.62620799674187,
+   "dtw_ms": 27.484040998388082,
    "candidates": 500
   },
   {
@@ -2210,9 +2210,9 @@
    "true_rank": 1,
    "copycat_rank": 352,
    "window_s": 120,
-   "query_ms": 3.871459004585631,
-   "prefilter_ms": 27.58804200857412,
-   "total_ms": 112.20670900365803,
+   "query_ms": 3.786667002714239,
+   "prefilter_ms": 27.86858299805317,
+   "total_ms": 117.43370900512673,
    "top": [
     "JULIET-250815-2326-T1",
     "GOLF-250512-2256-T1",
@@ -2222,7 +2222,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 11,
-   "dtw_ms": 46.50066699832678,
+   "dtw_ms": 49.87625000649132,
    "candidates": 500
   },
   {
@@ -2234,9 +2234,9 @@
    "true_rank": 1,
    "copycat_rank": 336,
    "window_s": 120,
-   "query_ms": 4.0490410028724,
-   "prefilter_ms": 27.503000004799105,
-   "total_ms": 114.68266599695198,
+   "query_ms": 4.070708004292101,
+   "prefilter_ms": 27.270542006590404,
+   "total_ms": 116.37958299252205,
    "top": [
     "JULIET-250815-2326-T1",
     "GOLF-260409-2248-T1",
@@ -2246,7 +2246,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 47.99012500734534,
+   "dtw_ms": 49.8052920011105,
    "candidates": 500
   },
   {
@@ -2276,9 +2276,9 @@
    "true_rank": 1,
    "copycat_rank": 438,
    "window_s": 60,
-   "query_ms": 4.103332990780473,
-   "prefilter_ms": 28.451542006223463,
-   "total_ms": 90.22162499604747,
+   "query_ms": 3.8989169988781214,
+   "prefilter_ms": 28.17833398876246,
+   "total_ms": 90.95970900671091,
    "top": [
     "DELTA-260427-0053-T1",
     "DELTA-260531-0005-T1",
@@ -2288,7 +2288,7 @@
    ],
    "baseline_rank": 93,
    "baseline_copycat_rank": 235,
-   "dtw_ms": 26.534832999459468,
+   "dtw_ms": 27.52070799760986,
    "candidates": 500
   },
   {
@@ -2300,9 +2300,9 @@
    "true_rank": 1,
    "copycat_rank": 440,
    "window_s": 60,
-   "query_ms": 3.8735830021323636,
-   "prefilter_ms": 27.61237500817515,
-   "total_ms": 90.21420800127089,
+   "query_ms": 3.8517499924637377,
+   "prefilter_ms": 27.521791998879053,
+   "total_ms": 90.1992079889169,
    "top": [
     "CHARLIE-260120-0016-T1",
     "CHARLIE-260212-0037-T1",
@@ -2312,7 +2312,7 @@
    ],
    "baseline_rank": 378,
    "baseline_copycat_rank": 266,
-   "dtw_ms": 26.452417005202733,
+   "dtw_ms": 26.76320901082363,
    "candidates": 500
   },
   {
@@ -2324,9 +2324,9 @@
    "true_rank": 1,
    "copycat_rank": 386,
    "window_s": 60,
-   "query_ms": 3.9339999930234626,
-   "prefilter_ms": 27.4457499908749,
-   "total_ms": 86.26183299929835,
+   "query_ms": 3.8103340048110113,
+   "prefilter_ms": 28.00695798941888,
+   "total_ms": 89.11687499494292,
    "top": [
     "DELTA-260427-0053-T1",
     "CHARLIE-250810-0015-T1",
@@ -2336,7 +2336,7 @@
    ],
    "baseline_rank": 58,
    "baseline_copycat_rank": 28,
-   "dtw_ms": 22.76700000220444,
+   "dtw_ms": 25.071541997021995,
    "candidates": 500
   },
   {
@@ -2348,9 +2348,9 @@
    "true_rank": 1,
    "copycat_rank": 402,
    "window_s": 120,
-   "query_ms": 3.837875003227964,
-   "prefilter_ms": 28.236792000825517,
-   "total_ms": 118.42208300367929,
+   "query_ms": 3.9219579921336845,
+   "prefilter_ms": 28.39187500649132,
+   "total_ms": 119.76800000411458,
    "top": [
     "DELTA-260427-0053-T1",
     "CHARLIE-250810-0015-T1",
@@ -2360,7 +2360,7 @@
    ],
    "baseline_rank": 28,
    "baseline_copycat_rank": 31,
-   "dtw_ms": 50.208333996124566,
+   "dtw_ms": 51.053375005722046,
    "candidates": 500
   },
   {
@@ -2372,9 +2372,9 @@
    "true_rank": 1,
    "copycat_rank": 302,
    "window_s": 120,
-   "query_ms": 4.252500002621673,
-   "prefilter_ms": 27.503999997861683,
-   "total_ms": 117.48854200413916,
+   "query_ms": 4.2110409995075315,
+   "prefilter_ms": 27.89195800141897,
+   "total_ms": 119.64829100179486,
    "top": [
     "DELTA-260427-0053-T1",
     "CHARLIE-250810-0015-T1",
@@ -2384,7 +2384,7 @@
    ],
    "baseline_rank": 25,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 49.70566599513404,
+   "dtw_ms": 51.90474999835715,
    "candidates": 500
   },
   {
@@ -2414,9 +2414,9 @@
    "true_rank": null,
    "copycat_rank": 193,
    "window_s": 60,
-   "query_ms": 3.7769580085296184,
-   "prefilter_ms": 29.2956250050338,
-   "total_ms": 99.02358301042113,
+   "query_ms": 3.6743750097230077,
+   "prefilter_ms": 29.086584007018246,
+   "total_ms": 99.60741600662004,
    "top": [
     "ECHO-250813-2034-T1",
     "HOTEL-260428-2016-T1",
@@ -2426,7 +2426,7 @@
    ],
    "baseline_rank": null,
    "baseline_copycat_rank": 72,
-   "dtw_ms": 34.12354200554546,
+   "dtw_ms": 34.999666997464374,
    "candidates": 500
   },
   {
@@ -2438,9 +2438,9 @@
    "true_rank": 1,
    "copycat_rank": 92,
    "window_s": 60,
-   "query_ms": 3.8122499972814694,
-   "prefilter_ms": 29.176583004300483,
-   "total_ms": 99.33208300208207,
+   "query_ms": 3.7237499927869067,
+   "prefilter_ms": 29.58704200864304,
+   "total_ms": 99.52320899174083,
    "top": [
     "P1-ALPHA-260303-T1",
     "P1-DELTA-260419-T1",
@@ -2450,7 +2450,7 @@
    ],
    "baseline_rank": 327,
    "baseline_copycat_rank": 15,
-   "dtw_ms": 33.426707988837734,
+   "dtw_ms": 33.28112499730196,
    "candidates": 500
   },
   {
@@ -2462,9 +2462,9 @@
    "true_rank": 1,
    "copycat_rank": 80,
    "window_s": 60,
-   "query_ms": 3.8147919985931367,
-   "prefilter_ms": 28.67133400286548,
-   "total_ms": 92.67383298720233,
+   "query_ms": 4.011124998214655,
+   "prefilter_ms": 28.74795898969751,
+   "total_ms": 96.27541599911638,
    "top": [
     "P1-ALPHA-260303-T1",
     "P1-ALPHA-260502-T1",
@@ -2474,7 +2474,7 @@
    ],
    "baseline_rank": 39,
    "baseline_copycat_rank": 9,
-   "dtw_ms": 27.945209003519267,
+   "dtw_ms": 30.68399999756366,
    "candidates": 500
   },
   {
@@ -2486,9 +2486,9 @@
    "true_rank": 1,
    "copycat_rank": 79,
    "window_s": 120,
-   "query_ms": 4.060708000906743,
-   "prefilter_ms": 28.24379199591931,
-   "total_ms": 140.0711250025779,
+   "query_ms": 4.104791994905099,
+   "prefilter_ms": 28.437125001801178,
+   "total_ms": 142.2044589999132,
    "top": [
     "P1-ALPHA-260303-T1",
     "P1-ALPHA-260502-T1",
@@ -2498,7 +2498,7 @@
    ],
    "baseline_rank": 126,
    "baseline_copycat_rank": 4,
-   "dtw_ms": 52.33175000466872,
+   "dtw_ms": 53.78654200467281,
    "candidates": 500
   },
   {
@@ -2510,9 +2510,9 @@
    "true_rank": 1,
    "copycat_rank": 55,
    "window_s": 120,
-   "query_ms": 4.303875000914559,
-   "prefilter_ms": 28.180082998005673,
-   "total_ms": 116.80079200596083,
+   "query_ms": 4.147540996200405,
+   "prefilter_ms": 28.169583005364984,
+   "total_ms": 120.09645800571889,
    "top": [
     "P1-ALPHA-260303-T1",
     "P1-ALPHA-260502-T1",
@@ -2522,7 +2522,7 @@
    ],
    "baseline_rank": 31,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 48.323125010938384,
+   "dtw_ms": 52.319999987958,
    "candidates": 500
   },
   {
@@ -2552,9 +2552,9 @@
    "true_rank": 1,
    "copycat_rank": 23,
    "window_s": 60,
-   "query_ms": 3.919957991456613,
-   "prefilter_ms": 27.73604200046975,
-   "total_ms": 95.26183299021795,
+   "query_ms": 3.8355419965228066,
+   "prefilter_ms": 27.696042001480237,
+   "total_ms": 96.38066700426862,
    "top": [
     "HOTEL-250314-2030-T1",
     "HOTEL-260220-2126-T1",
@@ -2564,7 +2564,7 @@
    ],
    "baseline_rank": 4,
    "baseline_copycat_rank": 22,
-   "dtw_ms": 31.876749999355525,
+   "dtw_ms": 32.80579099373426,
    "candidates": 500
   },
   {
@@ -2576,9 +2576,9 @@
    "true_rank": 1,
    "copycat_rank": 26,
    "window_s": 60,
-   "query_ms": 3.699041990330443,
-   "prefilter_ms": 27.769499996793456,
-   "total_ms": 95.19449999788776,
+   "query_ms": 4.133499998715706,
+   "prefilter_ms": 29.388499999186024,
+   "total_ms": 97.2277499968186,
    "top": [
     "HOTEL-260220-2126-T1",
     "ECHO-251026-2046-T1",
@@ -2588,7 +2588,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 32,
-   "dtw_ms": 30.76362500723917,
+   "dtw_ms": 30.80512500309851,
    "candidates": 500
   },
   {
@@ -2600,9 +2600,9 @@
    "true_rank": 1,
    "copycat_rank": 48,
    "window_s": 60,
-   "query_ms": 3.817500008153729,
-   "prefilter_ms": 28.215750004164875,
-   "total_ms": 89.71704100258648,
+   "query_ms": 4.119583987630904,
+   "prefilter_ms": 28.520749998278916,
+   "total_ms": 90.03141699940898,
    "top": [
     "ECHO-251026-2046-T1",
     "HOTEL-260220-2126-T1",
@@ -2612,7 +2612,7 @@
    ],
    "baseline_rank": 4,
    "baseline_copycat_rank": 19,
-   "dtw_ms": 24.500375002389774,
+   "dtw_ms": 25.040416992851533,
    "candidates": 500
   },
   {
@@ -2624,9 +2624,9 @@
    "true_rank": 1,
    "copycat_rank": 97,
    "window_s": 120,
-   "query_ms": 3.8935830089030787,
-   "prefilter_ms": 28.10158400097862,
-   "total_ms": 122.89716600207612,
+   "query_ms": 4.109792003873736,
+   "prefilter_ms": 28.48729200195521,
+   "total_ms": 125.81054199836217,
    "top": [
     "HOTEL-260428-2016-T1",
     "HOTEL-250521-2059-T1",
@@ -2636,7 +2636,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 20,
-   "dtw_ms": 54.8724590044003,
+   "dtw_ms": 57.03833300503902,
    "candidates": 500
   },
   {
@@ -2648,9 +2648,9 @@
    "true_rank": 1,
    "copycat_rank": 37,
    "window_s": 120,
-   "query_ms": 3.7822090089321136,
-   "prefilter_ms": 27.74300001328811,
-   "total_ms": 116.82141700293869,
+   "query_ms": 3.897791000781581,
+   "prefilter_ms": 28.415042004780844,
+   "total_ms": 121.13366600533482,
    "top": [
     "ECHO-251026-2046-T1",
     "HOTEL-260220-2126-T1",
@@ -2660,7 +2660,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 19,
-   "dtw_ms": 49.6302499959711,
+   "dtw_ms": 52.14666700339876,
    "candidates": 500
   },
   {
@@ -2690,9 +2690,9 @@
    "true_rank": 1,
    "copycat_rank": 239,
    "window_s": 60,
-   "query_ms": 3.942084003938362,
-   "prefilter_ms": 28.36375001061242,
-   "total_ms": 90.1868340006331,
+   "query_ms": 3.896959009580314,
+   "prefilter_ms": 28.706125012831762,
+   "total_ms": 92.17941699898802,
    "top": [
     "BRAVO-250725-0208-T1",
     "CHARLIE-251023-0249-T1",
@@ -2702,7 +2702,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 17,
-   "dtw_ms": 26.11658300156705,
+   "dtw_ms": 27.680833009071648,
    "candidates": 500
   },
   {
@@ -2714,9 +2714,9 @@
    "true_rank": 1,
    "copycat_rank": 215,
    "window_s": 60,
-   "query_ms": 3.7147920083953068,
-   "prefilter_ms": 28.495790989836678,
-   "total_ms": 95.79191700322554,
+   "query_ms": 3.8579999963985756,
+   "prefilter_ms": 28.013832998112775,
+   "total_ms": 95.5739169876324,
    "top": [
     "BRAVO-250725-0208-T1",
     "BRAVO-260421-0217-T1",
@@ -2726,7 +2726,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 16,
-   "dtw_ms": 30.08404199499637,
+   "dtw_ms": 30.695791996549815,
    "candidates": 500
   },
   {
@@ -2738,9 +2738,9 @@
    "true_rank": 1,
    "copycat_rank": 209,
    "window_s": 60,
-   "query_ms": 3.8560420071007684,
-   "prefilter_ms": 27.921249988139607,
-   "total_ms": 96.72154200961813,
+   "query_ms": 3.688041993882507,
+   "prefilter_ms": 28.143667004769668,
+   "total_ms": 98.01233299367595,
    "top": [
     "BRAVO-250725-0208-T1",
     "BRAVO-260625-0136-T1",
@@ -2750,7 +2750,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 20,
-   "dtw_ms": 32.38337500079069,
+   "dtw_ms": 33.24358300596941,
    "candidates": 500
   },
   {
@@ -2762,9 +2762,9 @@
    "true_rank": 1,
    "copycat_rank": 205,
    "window_s": 120,
-   "query_ms": 3.8128330052131787,
-   "prefilter_ms": 28.051500004949048,
-   "total_ms": 119.7734580055112,
+   "query_ms": 4.015332990093157,
+   "prefilter_ms": 27.846249999129213,
+   "total_ms": 119.87862500245683,
    "top": [
     "BRAVO-250725-0208-T1",
     "BRAVO-260625-0136-T1",
@@ -2774,7 +2774,7 @@
    ],
    "baseline_rank": 3,
    "baseline_copycat_rank": 19,
-   "dtw_ms": 52.24695899232756,
+   "dtw_ms": 51.97633399802726,
    "candidates": 500
   },
   {
@@ -2786,9 +2786,9 @@
    "true_rank": 1,
    "copycat_rank": 191,
    "window_s": 120,
-   "query_ms": 3.951624996261671,
-   "prefilter_ms": 28.056042006937787,
-   "total_ms": 114.94737499742769,
+   "query_ms": 3.940540991607122,
+   "prefilter_ms": 28.39429199229926,
+   "total_ms": 116.34049999702256,
    "top": [
     "BRAVO-250725-0208-T1",
     "CHARLIE-251023-0249-T1",
@@ -2798,7 +2798,7 @@
    ],
    "baseline_rank": 6,
    "baseline_copycat_rank": 11,
-   "dtw_ms": 46.90587500226684,
+   "dtw_ms": 47.93174999940675,
    "candidates": 500
   },
   {
@@ -2828,9 +2828,9 @@
    "true_rank": 1,
    "copycat_rank": 358,
    "window_s": 60,
-   "query_ms": 3.7256250070640817,
-   "prefilter_ms": 29.612416998133995,
-   "total_ms": 90.8694590034429,
+   "query_ms": 3.777625010116026,
+   "prefilter_ms": 28.671375010162592,
+   "total_ms": 91.20279100898188,
    "top": [
     "GOLF-251117-2305-T1",
     "GOLF-250512-2256-T1",
@@ -2840,7 +2840,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 15,
-   "dtw_ms": 25.791833002585918,
+   "dtw_ms": 26.681083007133566,
    "candidates": 500
   },
   {
@@ -2852,9 +2852,9 @@
    "true_rank": 1,
    "copycat_rank": 336,
    "window_s": 60,
-   "query_ms": 3.7246249994495884,
-   "prefilter_ms": 28.940040996531025,
-   "total_ms": 91.51466601178981,
+   "query_ms": 3.7992909929016605,
+   "prefilter_ms": 29.461166996043175,
+   "total_ms": 91.94237500196323,
    "top": [
     "GOLF-251117-2305-T1",
     "GOLF-250512-2256-T1",
@@ -2864,7 +2864,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 26.059791998704895,
+   "dtw_ms": 26.594083989039063,
    "candidates": 500
   },
   {
@@ -2876,9 +2876,9 @@
    "true_rank": 1,
    "copycat_rank": 331,
    "window_s": 60,
-   "query_ms": 3.9805830019759014,
-   "prefilter_ms": 28.327207997790538,
-   "total_ms": 89.1411250049714,
+   "query_ms": 3.984875002061017,
+   "prefilter_ms": 28.287292007007636,
+   "total_ms": 89.59520800272003,
    "top": [
     "GOLF-251117-2305-T1",
     "GOLF-250512-2256-T1",
@@ -2888,7 +2888,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 24.50475000659935,
+   "dtw_ms": 24.996125008328818,
    "candidates": 500
   },
   {
@@ -2900,9 +2900,9 @@
    "true_rank": 1,
    "copycat_rank": 336,
    "window_s": 120,
-   "query_ms": 3.9031669875839725,
-   "prefilter_ms": 28.63387500110548,
-   "total_ms": 114.27104199538007,
+   "query_ms": 3.8829169934615493,
+   "prefilter_ms": 28.51050000754185,
+   "total_ms": 116.05145900102798,
    "top": [
     "GOLF-251117-2305-T1",
     "GOLF-250512-2256-T1",
@@ -2912,7 +2912,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 11,
-   "dtw_ms": 46.66183399967849,
+   "dtw_ms": 48.09304200171027,
    "candidates": 500
   },
   {
@@ -2924,9 +2924,9 @@
    "true_rank": 1,
    "copycat_rank": 332,
    "window_s": 120,
-   "query_ms": 4.112459006137215,
-   "prefilter_ms": 27.749208005843684,
-   "total_ms": 115.37912499625236,
+   "query_ms": 3.8269170036073774,
+   "prefilter_ms": 28.415042004780844,
+   "total_ms": 117.99316700489726,
    "top": [
     "GOLF-250512-2256-T1",
     "JULIET-251227-2224-T1",
@@ -2936,7 +2936,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 47.58595800376497,
+   "dtw_ms": 49.84454100485891,
    "candidates": 500
   },
   {
@@ -2966,9 +2966,9 @@
    "true_rank": 1,
    "copycat_rank": 42,
    "window_s": 60,
-   "query_ms": 3.698874992551282,
-   "prefilter_ms": 28.88404199620709,
-   "total_ms": 93.4619159961585,
+   "query_ms": 4.03991699567996,
+   "prefilter_ms": 28.59666699077934,
+   "total_ms": 93.67779199965298,
    "top": [
     "HOTEL-250314-2030-T1",
     "FOXTROT-251215-2125-T1",
@@ -2978,7 +2978,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 80,
-   "dtw_ms": 28.676957997959107,
+   "dtw_ms": 28.839457998401485,
    "candidates": 500
   },
   {
@@ -2990,9 +2990,9 @@
    "true_rank": 1,
    "copycat_rank": 54,
    "window_s": 60,
-   "query_ms": 3.8867499970365316,
-   "prefilter_ms": 28.7957499967888,
-   "total_ms": 93.05650000169408,
+   "query_ms": 3.7544170045293868,
+   "prefilter_ms": 28.626667000935413,
+   "total_ms": 93.44670799328014,
    "top": [
     "HOTEL-250314-2030-T1",
     "HOTEL-260220-2126-T1",
@@ -3002,7 +3002,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 23,
-   "dtw_ms": 27.249750011833385,
+   "dtw_ms": 28.242291999049485,
    "candidates": 500
   },
   {
@@ -3014,9 +3014,9 @@
    "true_rank": 1,
    "copycat_rank": 40,
    "window_s": 60,
-   "query_ms": 3.871083987178281,
-   "prefilter_ms": 28.712707993690856,
-   "total_ms": 93.03241698944476,
+   "query_ms": 4.042416010634042,
+   "prefilter_ms": 28.919624994159676,
+   "total_ms": 94.87833300954662,
    "top": [
     "HOTEL-260220-2126-T1",
     "FOXTROT-260224-2059-T1",
@@ -3026,7 +3026,7 @@
    ],
    "baseline_rank": 3,
    "baseline_copycat_rank": 78,
-   "dtw_ms": 27.385708002839237,
+   "dtw_ms": 28.750957993906923,
    "candidates": 500
   },
   {
@@ -3038,9 +3038,9 @@
    "true_rank": 1,
    "copycat_rank": 34,
    "window_s": 120,
-   "query_ms": 3.940374997910112,
-   "prefilter_ms": 28.638916002819315,
-   "total_ms": 120.2009580010781,
+   "query_ms": 4.259499997715466,
+   "prefilter_ms": 29.025458003161475,
+   "total_ms": 122.80079099582508,
    "top": [
     "HOTEL-250314-2030-T1",
     "HOTEL-260220-2126-T1",
@@ -3050,7 +3050,7 @@
    ],
    "baseline_rank": 5,
    "baseline_copycat_rank": 77,
-   "dtw_ms": 51.08062499493826,
+   "dtw_ms": 52.84416700305883,
    "candidates": 500
   },
   {
@@ -3062,9 +3062,9 @@
    "true_rank": 1,
    "copycat_rank": 55,
    "window_s": 120,
-   "query_ms": 4.3415000109234825,
-   "prefilter_ms": 29.107582988217473,
-   "total_ms": 118.74691701086704,
+   "query_ms": 4.105040992726572,
+   "prefilter_ms": 28.91220900346525,
+   "total_ms": 121.61054099851754,
    "top": [
     "FOXTROT-251215-2125-T1",
     "ECHO-260323-2034-T1",
@@ -3074,7 +3074,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 60,
-   "dtw_ms": 49.388125000405125,
+   "dtw_ms": 51.971207998576574,
    "candidates": 500
   },
   {
@@ -3104,9 +3104,9 @@
    "true_rank": 1,
    "copycat_rank": 188,
    "window_s": 60,
-   "query_ms": 4.1484170069452375,
-   "prefilter_ms": 30.44337499886751,
-   "total_ms": 98.41741700074635,
+   "query_ms": 3.90549999428913,
+   "prefilter_ms": 30.108874998404644,
+   "total_ms": 99.02366698952392,
    "top": [
     "DELTA-260629-0045-T1",
     "CHARLIE-250603-2306-T1",
@@ -3116,7 +3116,7 @@
    ],
    "baseline_rank": 164,
    "baseline_copycat_rank": 22,
-   "dtw_ms": 31.245667007169686,
+   "dtw_ms": 32.7101250004489,
    "candidates": 500
   },
   {
@@ -3128,9 +3128,9 @@
    "true_rank": 1,
    "copycat_rank": 177,
    "window_s": 60,
-   "query_ms": 3.9962090086191893,
-   "prefilter_ms": 29.777500007185154,
-   "total_ms": 100.232374999905,
+   "query_ms": 3.8782079936936498,
+   "prefilter_ms": 29.968041999381967,
+   "total_ms": 101.47733299527317,
    "top": [
     "DELTA-260531-0005-T1",
     "CHARLIE-260120-0016-T1",
@@ -3140,7 +3140,7 @@
    ],
    "baseline_rank": 22,
    "baseline_copycat_rank": 15,
-   "dtw_ms": 33.28704099112656,
+   "dtw_ms": 34.5777909969911,
    "candidates": 500
   },
   {
@@ -3152,9 +3152,9 @@
    "true_rank": 1,
    "copycat_rank": 132,
    "window_s": 60,
-   "query_ms": 4.15337500453461,
-   "prefilter_ms": 28.954541005077772,
-   "total_ms": 99.23445800086483,
+   "query_ms": 3.879333002259955,
+   "prefilter_ms": 29.04783299891278,
+   "total_ms": 99.31183299340773,
    "top": [
     "DELTA-260531-0005-T1",
     "DELTA-260629-0045-T1",
@@ -3164,7 +3164,7 @@
    ],
    "baseline_rank": 34,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 32.648916996549815,
+   "dtw_ms": 33.13141599937808,
    "candidates": 500
   },
   {
@@ -3176,9 +3176,9 @@
    "true_rank": 1,
    "copycat_rank": 145,
    "window_s": 120,
-   "query_ms": 4.056040997966193,
-   "prefilter_ms": 29.15933300391771,
-   "total_ms": 120.8489160053432,
+   "query_ms": 3.779999999096617,
+   "prefilter_ms": 28.848957997979596,
+   "total_ms": 120.95870800840203,
    "top": [
     "DELTA-260531-0005-T1",
     "DELTA-260629-0045-T1",
@@ -3188,7 +3188,7 @@
    ],
    "baseline_rank": 14,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 51.32166600378696,
+   "dtw_ms": 51.84004201146308,
    "candidates": 500
   },
   {
@@ -3200,9 +3200,9 @@
    "true_rank": 1,
    "copycat_rank": 180,
    "window_s": 120,
-   "query_ms": 4.139791999477893,
-   "prefilter_ms": 28.93591699830722,
-   "total_ms": 119.00400000740774,
+   "query_ms": 4.001124994829297,
+   "prefilter_ms": 28.802916000131518,
+   "total_ms": 119.86045799858402,
    "top": [
     "DELTA-260531-0005-T1",
     "DELTA-251021-2339-T1",
@@ -3212,7 +3212,7 @@
    ],
    "baseline_rank": 7,
    "baseline_copycat_rank": 21,
-   "dtw_ms": 49.03983300027903,
+   "dtw_ms": 50.03620800562203,
    "candidates": 500
   },
   {
@@ -3242,9 +3242,9 @@
    "true_rank": 1,
    "copycat_rank": 83,
    "window_s": 60,
-   "query_ms": 3.9720839995425195,
-   "prefilter_ms": 31.027709002955817,
-   "total_ms": 96.68358399358112,
+   "query_ms": 3.8886250113137066,
+   "prefilter_ms": 30.835208992357366,
+   "total_ms": 98.45958300866187,
    "top": [
     "INDIA-260223-2005-T1",
     "GOLF-260503-1922-T1",
@@ -3254,7 +3254,7 @@
    ],
    "baseline_rank": 362,
    "baseline_copycat_rank": 175,
-   "dtw_ms": 29.574917003628798,
+   "dtw_ms": 31.20462500373833,
    "candidates": 500
   },
   {
@@ -3266,9 +3266,9 @@
    "true_rank": 1,
    "copycat_rank": 27,
    "window_s": 60,
-   "query_ms": 4.033457997138612,
-   "prefilter_ms": 30.49804198963102,
-   "total_ms": 115.387166995788,
+   "query_ms": 4.062292005983181,
+   "prefilter_ms": 30.56554099021014,
+   "total_ms": 115.59354199562222,
    "top": [
     "KILO-260612-1950-T1",
     "INDIA-260223-2005-T1",
@@ -3278,7 +3278,7 @@
    ],
    "baseline_rank": 372,
    "baseline_copycat_rank": 189,
-   "dtw_ms": 27.996750010061078,
+   "dtw_ms": 28.446666998206638,
    "candidates": 500
   },
   {
@@ -3290,9 +3290,9 @@
    "true_rank": 1,
    "copycat_rank": 56,
    "window_s": 60,
-   "query_ms": 4.3300830002408475,
-   "prefilter_ms": 29.541791998781264,
-   "total_ms": 94.2722909967415,
+   "query_ms": 4.29654199979268,
+   "prefilter_ms": 30.023499988601543,
+   "total_ms": 96.07991699886043,
    "top": [
     "KILO-260612-1950-T1",
     "KILO-250315-2022-T1",
@@ -3302,7 +3302,7 @@
    ],
    "baseline_rank": 29,
    "baseline_copycat_rank": 3,
-   "dtw_ms": 27.59270800743252,
+   "dtw_ms": 27.933625009609386,
    "candidates": 500
   },
   {
@@ -3314,9 +3314,9 @@
    "true_rank": 1,
    "copycat_rank": 55,
    "window_s": 60,
-   "query_ms": 3.9301669894484803,
-   "prefilter_ms": 29.12674999970477,
-   "total_ms": 93.38858300179709,
+   "query_ms": 3.843165992293507,
+   "prefilter_ms": 28.877625009045005,
+   "total_ms": 94.34454099391587,
    "top": [
     "KILO-260612-1950-T1",
     "KILO-260419-2014-T1",
@@ -3326,7 +3326,7 @@
    ],
    "baseline_rank": 2,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 27.281290997052565,
+   "dtw_ms": 28.608167005586438,
    "candidates": 500
   },
   {
@@ -3338,9 +3338,9 @@
    "true_rank": 1,
    "copycat_rank": 55,
    "window_s": 120,
-   "query_ms": 4.113832997973077,
-   "prefilter_ms": 29.369875002885237,
-   "total_ms": 125.20054100605194,
+   "query_ms": 3.9198750018840656,
+   "prefilter_ms": 29.07979099836666,
+   "total_ms": 127.59874999755993,
    "top": [
     "KILO-260612-1950-T1",
     "KILO-250315-2022-T1",
@@ -3350,7 +3350,7 @@
    ],
    "baseline_rank": 52,
    "baseline_copycat_rank": 8,
-   "dtw_ms": 55.32949999906123,
+   "dtw_ms": 57.6288750016829,
    "candidates": 500
   },
   {
@@ -3380,9 +3380,9 @@
    "true_rank": 8,
    "copycat_rank": 257,
    "window_s": 60,
-   "query_ms": 3.9014170033624396,
-   "prefilter_ms": 24.487958013196476,
-   "total_ms": 80.71283300523646,
+   "query_ms": 3.735541002242826,
+   "prefilter_ms": 24.935082998126745,
+   "total_ms": 81.61958299751859,
    "top": [
     "KILO-250410-1945-T1",
     "KILO-251216-2200-T1",
@@ -3392,7 +3392,7 @@
    ],
    "baseline_rank": 283,
    "baseline_copycat_rank": 26,
-   "dtw_ms": 21.836333005921915,
+   "dtw_ms": 22.91262500511948,
    "candidates": 500
   },
   {
@@ -3404,9 +3404,9 @@
    "true_rank": 1,
    "copycat_rank": 243,
    "window_s": 60,
-   "query_ms": 3.8104999985080212,
-   "prefilter_ms": 24.439874992822297,
-   "total_ms": 81.7293339932803,
+   "query_ms": 3.879790994687937,
+   "prefilter_ms": 24.514291013474576,
+   "total_ms": 81.88704100030009,
    "top": [
     "INDIA-251027-2036-T1",
     "KILO-250410-1945-T1",
@@ -3416,7 +3416,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 49,
-   "dtw_ms": 22.506416993564926,
+   "dtw_ms": 22.466000009444542,
    "candidates": 500
   },
   {
@@ -3428,9 +3428,9 @@
    "true_rank": 1,
    "copycat_rank": 209,
    "window_s": 60,
-   "query_ms": 3.889083003741689,
-   "prefilter_ms": 23.706124993623234,
-   "total_ms": 81.23158299713396,
+   "query_ms": 3.7983329966664314,
+   "prefilter_ms": 24.039083989919163,
+   "total_ms": 82.56699999037664,
    "top": [
     "INDIA-251027-2036-T1",
     "KILO-250410-1945-T1",
@@ -3440,7 +3440,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 12,
-   "dtw_ms": 22.83095799793955,
+   "dtw_ms": 23.952584000653587,
    "candidates": 500
   },
   {
@@ -3452,9 +3452,9 @@
    "true_rank": 3,
    "copycat_rank": 164,
    "window_s": 120,
-   "query_ms": 3.976374995545484,
-   "prefilter_ms": 24.955042012152262,
-   "total_ms": 108.41079099918716,
+   "query_ms": 3.7555839953711256,
+   "prefilter_ms": 24.706042007892393,
+   "total_ms": 110.1901249930961,
    "top": [
     "LIMA-251208-2020-T1",
     "LIMA-251231-2123-T1",
@@ -3464,7 +3464,7 @@
    ],
    "baseline_rank": 19,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 45.02708300424274,
+   "dtw_ms": 47.55920800380409,
    "candidates": 500
   },
   {
@@ -3476,9 +3476,9 @@
    "true_rank": 1,
    "copycat_rank": 199,
    "window_s": 120,
-   "query_ms": 4.0529999969294295,
-   "prefilter_ms": 24.819582991767675,
-   "total_ms": 111.23858400969766,
+   "query_ms": 4.032291995827109,
+   "prefilter_ms": 24.632375003420748,
+   "total_ms": 112.46820799715351,
    "top": [
     "INDIA-251027-2036-T1",
     "INDIA-260228-1955-T1",
@@ -3488,7 +3488,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 252,
-   "dtw_ms": 47.84041701350361,
+   "dtw_ms": 49.38287500408478,
    "candidates": 500
   },
   {
@@ -3518,9 +3518,9 @@
    "true_rank": 8,
    "copycat_rank": 351,
    "window_s": 60,
-   "query_ms": 3.791249997448176,
-   "prefilter_ms": 25.12637499603443,
-   "total_ms": 80.10266700875945,
+   "query_ms": 4.766458994708955,
+   "prefilter_ms": 26.209458999801427,
+   "total_ms": 83.39249998971354,
    "top": [
     "ALPHA-260307-1928-T1",
     "CHARLIE-251207-2124-T1",
@@ -3530,7 +3530,7 @@
    ],
    "baseline_rank": 358,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 20.856041999650188,
+   "dtw_ms": 22.004291997291148,
    "candidates": 500
   },
   {
@@ -3542,9 +3542,9 @@
    "true_rank": 1,
    "copycat_rank": 286,
    "window_s": 60,
-   "query_ms": 3.8977499934844673,
-   "prefilter_ms": 25.856334003037773,
-   "total_ms": 82.89170799253043,
+   "query_ms": 3.8838749896967784,
+   "prefilter_ms": 26.02145900891628,
+   "total_ms": 84.8631669941824,
    "top": [
     "BRAVO-250830-1907-T1",
     "ALPHA-260118-2026-T1",
@@ -3554,7 +3554,7 @@
    ],
    "baseline_rank": 28,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 22.33445800084155,
+   "dtw_ms": 23.443625002983026,
    "candidates": 500
   },
   {
@@ -3566,9 +3566,9 @@
    "true_rank": 1,
    "copycat_rank": 198,
    "window_s": 60,
-   "query_ms": 4.091541006346233,
-   "prefilter_ms": 24.34324999921955,
-   "total_ms": 82.31891600007657,
+   "query_ms": 3.660332993604243,
+   "prefilter_ms": 24.552208007662557,
+   "total_ms": 84.27379099885002,
    "top": [
     "DELTA-250517-2008-T1",
     "DELTA-250723-1948-T1",
@@ -3578,7 +3578,7 @@
    ],
    "baseline_rank": 5,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 22.796208009822294,
+   "dtw_ms": 24.799499995424412,
    "candidates": 500
   },
   {
@@ -3590,9 +3590,9 @@
    "true_rank": 1,
    "copycat_rank": 172,
    "window_s": 60,
-   "query_ms": 3.8930000009713694,
-   "prefilter_ms": 24.096833003568463,
-   "total_ms": 82.08170799480285,
+   "query_ms": 3.82437500229571,
+   "prefilter_ms": 24.094207998132333,
+   "total_ms": 83.3965000056196,
    "top": [
     "DELTA-250517-2008-T1",
     "BRAVO-251106-2017-T1",
@@ -3602,7 +3602,7 @@
    ],
    "baseline_rank": 13,
    "baseline_copycat_rank": 2,
-   "dtw_ms": 22.79116600402631,
+   "dtw_ms": 23.805667005944997,
    "candidates": 500
   },
   {
@@ -3614,9 +3614,9 @@
    "true_rank": 1,
    "copycat_rank": 146,
    "window_s": 120,
-   "query_ms": 4.035250007291324,
-   "prefilter_ms": 24.725666007725522,
-   "total_ms": 109.5447499974398,
+   "query_ms": 3.9275000017369166,
+   "prefilter_ms": 24.846874992363155,
+   "total_ms": 111.0611250041984,
    "top": [
     "BRAVO-251106-2017-T1",
     "DELTA-250723-1948-T1",
@@ -3626,7 +3626,7 @@
    ],
    "baseline_rank": 2,
    "baseline_copycat_rank": 13,
-   "dtw_ms": 46.13687499659136,
+   "dtw_ms": 47.68291699292604,
    "candidates": 500
   },
   {
@@ -3656,9 +3656,9 @@
    "true_rank": 3,
    "copycat_rank": 332,
    "window_s": 60,
-   "query_ms": 3.8138339878059924,
-   "prefilter_ms": 26.717959000961855,
-   "total_ms": 82.71570899523795,
+   "query_ms": 4.00120900303591,
+   "prefilter_ms": 27.000292000593618,
+   "total_ms": 83.27874999667984,
    "top": [
     "ALPHA-251002-2037-T1",
     "ALPHA-260307-1928-T1",
@@ -3668,7 +3668,7 @@
    ],
    "baseline_rank": 275,
    "baseline_copycat_rank": 31,
-   "dtw_ms": 20.643583993660286,
+   "dtw_ms": 21.087625005748123,
    "candidates": 500
   },
   {
@@ -3680,9 +3680,9 @@
    "true_rank": 4,
    "copycat_rank": 274,
    "window_s": 60,
-   "query_ms": 4.055708006490022,
-   "prefilter_ms": 27.135374999488704,
-   "total_ms": 83.7449579994427,
+   "query_ms": 4.03783300134819,
+   "prefilter_ms": 27.35720899363514,
+   "total_ms": 86.02320800127927,
    "top": [
     "ALPHA-251119-1940-T1",
     "ALPHA-251002-2037-T1",
@@ -3692,7 +3692,7 @@
    ],
    "baseline_rank": 205,
    "baseline_copycat_rank": 99,
-   "dtw_ms": 21.032457996625453,
+   "dtw_ms": 23.363041997072287,
    "candidates": 500
   },
   {
@@ -3704,9 +3704,9 @@
    "true_rank": 1,
    "copycat_rank": 208,
    "window_s": 60,
-   "query_ms": 4.184916993835941,
-   "prefilter_ms": 25.396875003934838,
-   "total_ms": 89.34424999461044,
+   "query_ms": 3.9697920001344755,
+   "prefilter_ms": 25.50162500119768,
+   "total_ms": 90.56812500057276,
    "top": [
     "DELTA-250517-2008-T1",
     "DELTA-250723-1948-T1",
@@ -3716,7 +3716,7 @@
    ],
    "baseline_rank": 3,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 28.01108300627675,
+   "dtw_ms": 29.360582993831486,
    "candidates": 500
   },
   {
@@ -3728,9 +3728,9 @@
    "true_rank": 1,
    "copycat_rank": 215,
    "window_s": 60,
-   "query_ms": 4.421666992129758,
-   "prefilter_ms": 25.310042008641176,
-   "total_ms": 90.15924998675473,
+   "query_ms": 4.171917011262849,
+   "prefilter_ms": 25.20820900099352,
+   "total_ms": 90.30554200580809,
    "top": [
     "DELTA-250517-2008-T1",
     "DELTA-250723-1948-T1",
@@ -3740,7 +3740,7 @@
    ],
    "baseline_rank": 12,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 27.69212498969864,
+   "dtw_ms": 28.563917003339157,
    "candidates": 500
   },
   {
@@ -3752,9 +3752,9 @@
    "true_rank": 1,
    "copycat_rank": 150,
    "window_s": 120,
-   "query_ms": 4.594415993778966,
-   "prefilter_ms": 24.848500004736707,
-   "total_ms": 118.43299999600276,
+   "query_ms": 3.9826670108595863,
+   "prefilter_ms": 25.309457996627316,
+   "total_ms": 117.67837499792222,
    "top": [
     "DELTA-250723-1948-T1",
     "BRAVO-260322-1913-T1",
@@ -3764,7 +3764,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 8,
-   "dtw_ms": 52.68150000483729,
+   "dtw_ms": 53.25500000617467,
    "candidates": 500
   },
   {
@@ -3794,9 +3794,9 @@
    "true_rank": 1,
    "copycat_rank": 203,
    "window_s": 60,
-   "query_ms": 4.2817499925149605,
-   "prefilter_ms": 27.394249991630204,
-   "total_ms": 85.56895899528172,
+   "query_ms": 3.977707994636148,
+   "prefilter_ms": 26.579917001072317,
+   "total_ms": 81.94795799499843,
    "top": [
     "INDIA-251027-2036-T1",
     "INDIA-260228-1955-T1",
@@ -3806,7 +3806,7 @@
    ],
    "baseline_rank": 14,
    "baseline_copycat_rank": 106,
-   "dtw_ms": 20.778416001121514,
+   "dtw_ms": 20.401708999997936,
    "candidates": 500
   },
   {
@@ -3818,9 +3818,9 @@
    "true_rank": 1,
    "copycat_rank": 187,
    "window_s": 60,
-   "query_ms": 4.056540987221524,
-   "prefilter_ms": 26.05591701285448,
-   "total_ms": 84.26237499224953,
+   "query_ms": 4.042082990054041,
+   "prefilter_ms": 26.293874994735233,
+   "total_ms": 85.39941599883605,
    "top": [
     "INDIA-260228-1955-T1",
     "ECHO-250401-2027-T1",
@@ -3830,7 +3830,7 @@
    ],
    "baseline_rank": 4,
    "baseline_copycat_rank": 24,
-   "dtw_ms": 22.40899999742396,
+   "dtw_ms": 23.809541991795413,
    "candidates": 500
   },
   {
@@ -3842,9 +3842,9 @@
    "true_rank": 1,
    "copycat_rank": 165,
    "window_s": 60,
-   "query_ms": 4.027791990665719,
-   "prefilter_ms": 25.355042002047412,
-   "total_ms": 83.63362499221694,
+   "query_ms": 3.8247909978963435,
+   "prefilter_ms": 25.55587500683032,
+   "total_ms": 84.01345799211413,
    "top": [
     "INDIA-260228-1955-T1",
     "INDIA-251027-2036-T1",
@@ -3854,7 +3854,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 22.667166995233856,
+   "dtw_ms": 23.136416988563724,
    "candidates": 500
   },
   {
@@ -3866,9 +3866,9 @@
    "true_rank": 1,
    "copycat_rank": 151,
    "window_s": 120,
-   "query_ms": 4.05633301124908,
-   "prefilter_ms": 24.98600000399165,
-   "total_ms": 110.73825000494253,
+   "query_ms": 3.6675000010291114,
+   "prefilter_ms": 25.285874988185242,
+   "total_ms": 111.5130410034908,
    "top": [
     "ECHO-260313-2032-T1",
     "ECHO-250401-2027-T1",
@@ -3878,7 +3878,7 @@
    ],
    "baseline_rank": 9,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 45.84570799488574,
+   "dtw_ms": 48.09229099191725,
    "candidates": 500
   },
   {
@@ -3890,9 +3890,9 @@
    "true_rank": 1,
    "copycat_rank": 181,
    "window_s": 120,
-   "query_ms": 3.8421659992309287,
-   "prefilter_ms": 25.12291699531488,
-   "total_ms": 132.55216600373387,
+   "query_ms": 4.99037500412669,
+   "prefilter_ms": 25.966667002649046,
+   "total_ms": 138.33641599921975,
    "top": [
     "INDIA-260228-1955-T1",
     "INDIA-251027-2036-T1",
@@ -3902,7 +3902,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 20,
-   "dtw_ms": 48.53408299095463,
+   "dtw_ms": 52.28512499888893,
    "candidates": 500
   },
   {
@@ -3932,9 +3932,9 @@
    "true_rank": 4,
    "copycat_rank": 300,
    "window_s": 60,
-   "query_ms": 3.990708995843306,
-   "prefilter_ms": 27.851082995766774,
-   "total_ms": 92.98370899341535,
+   "query_ms": 4.091625000000931,
+   "prefilter_ms": 27.005750001990236,
+   "total_ms": 92.25270799652208,
    "top": [
     "CHARLIE-260428-2107-T1",
     "ALPHA-251002-2037-T1",
@@ -3944,7 +3944,7 @@
    ],
    "baseline_rank": 51,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 28.697624991764314,
+   "dtw_ms": 28.821665997384116,
    "candidates": 500
   },
   {
@@ -3956,9 +3956,9 @@
    "true_rank": 2,
    "copycat_rank": 293,
    "window_s": 60,
-   "query_ms": 3.7557499890681356,
-   "prefilter_ms": 26.67495800415054,
-   "total_ms": 90.48458299366757,
+   "query_ms": 3.829458000836894,
+   "prefilter_ms": 26.86800000083167,
+   "total_ms": 92.30879100505263,
    "top": [
     "CHARLIE-260428-2107-T1",
     "DELTA-250607-2023-T1",
@@ -3968,7 +3968,7 @@
    ],
    "baseline_rank": 37,
    "baseline_copycat_rank": 3,
-   "dtw_ms": 27.848583995364606,
+   "dtw_ms": 29.2594999918947,
    "candidates": 500
   },
   {
@@ -3980,9 +3980,9 @@
    "true_rank": 1,
    "copycat_rank": 184,
    "window_s": 60,
-   "query_ms": 3.7253750051604584,
-   "prefilter_ms": 26.082333002705127,
-   "total_ms": 90.11733300576452,
+   "query_ms": 3.778250000323169,
+   "prefilter_ms": 26.402667004731484,
+   "total_ms": 91.71470800356474,
    "top": [
     "DELTA-250607-2023-T1",
     "DELTA-260207-1901-T1",
@@ -3992,7 +3992,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 27.701209008228034,
+   "dtw_ms": 28.586291999090463,
    "candidates": 500
   },
   {
@@ -4004,9 +4004,9 @@
    "true_rank": 1,
    "copycat_rank": 204,
    "window_s": 120,
-   "query_ms": 3.9415829960489646,
-   "prefilter_ms": 27.064207999501377,
-   "total_ms": 117.33249999815598,
+   "query_ms": 3.974042003392242,
+   "prefilter_ms": 26.989582998794504,
+   "total_ms": 117.889417000697,
    "top": [
     "DELTA-250607-2023-T1",
     "DELTA-260207-1901-T1",
@@ -4016,7 +4016,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 46,
-   "dtw_ms": 50.4357500030892,
+   "dtw_ms": 51.49524999433197,
    "candidates": 500
   },
   {
@@ -4028,9 +4028,9 @@
    "true_rank": 1,
    "copycat_rank": 179,
    "window_s": 120,
-   "query_ms": 3.842833000817336,
-   "prefilter_ms": 26.672082996810786,
-   "total_ms": 113.9622079936089,
+   "query_ms": 4.017999992356636,
+   "prefilter_ms": 27.08633399743121,
+   "total_ms": 116.9023330003256,
    "top": [
     "DELTA-250607-2023-T1",
     "DELTA-260207-1901-T1",
@@ -4040,7 +4040,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 48.270125000271946,
+   "dtw_ms": 50.16566699487157,
    "candidates": 500
   },
   {
@@ -4070,9 +4070,9 @@
    "true_rank": 1,
    "copycat_rank": 189,
    "window_s": 60,
-   "query_ms": 3.8097920041764155,
-   "prefilter_ms": 28.84466700197663,
-   "total_ms": 86.61529200617224,
+   "query_ms": 3.9711249992251396,
+   "prefilter_ms": 28.640332995564677,
+   "total_ms": 88.58945900283288,
    "top": [
     "ECHO-250401-2027-T1",
     "INDIA-251027-2036-T1",
@@ -4082,7 +4082,7 @@
    ],
    "baseline_rank": 13,
    "baseline_copycat_rank": 96,
-   "dtw_ms": 21.8970830028411,
+   "dtw_ms": 23.51954199548345,
    "candidates": 500
   },
   {
@@ -4094,9 +4094,9 @@
    "true_rank": 1,
    "copycat_rank": 200,
    "window_s": 60,
-   "query_ms": 3.7314579967642203,
-   "prefilter_ms": 27.535625005839393,
-   "total_ms": 85.95229100319557,
+   "query_ms": 4.138332995353267,
+   "prefilter_ms": 28.290957998251542,
+   "total_ms": 88.84429100726265,
    "top": [
     "ECHO-250401-2027-T1",
     "INDIA-251027-2036-T1",
@@ -4106,7 +4106,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 15,
-   "dtw_ms": 22.635000001173466,
+   "dtw_ms": 23.37429200997576,
    "candidates": 500
   },
   {
@@ -4118,9 +4118,9 @@
    "true_rank": 1,
    "copycat_rank": 168,
    "window_s": 60,
-   "query_ms": 3.820917001576163,
-   "prefilter_ms": 27.023458009352908,
-   "total_ms": 86.63908400922082,
+   "query_ms": 4.134874994633719,
+   "prefilter_ms": 26.785417008795775,
+   "total_ms": 86.83920800103806,
    "top": [
     "ECHO-250401-2027-T1",
     "INDIA-260228-1955-T1",
@@ -4130,7 +4130,7 @@
    ],
    "baseline_rank": 3,
    "baseline_copycat_rank": 2,
-   "dtw_ms": 23.198290989967063,
+   "dtw_ms": 23.30833300948143,
    "candidates": 500
   },
   {
@@ -4142,9 +4142,9 @@
    "true_rank": 1,
    "copycat_rank": 160,
    "window_s": 120,
-   "query_ms": 3.7671250029234216,
-   "prefilter_ms": 27.19687500211876,
-   "total_ms": 114.8216669971589,
+   "query_ms": 3.8477919879369438,
+   "prefilter_ms": 27.73812499071937,
+   "total_ms": 115.58558300021105,
    "top": [
     "ECHO-250401-2027-T1",
     "INDIA-260228-1955-T1",
@@ -4154,7 +4154,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 17,
-   "dtw_ms": 47.523208006168716,
+   "dtw_ms": 48.71641700447071,
    "candidates": 500
   },
   {
@@ -4166,9 +4166,9 @@
    "true_rank": 1,
    "copycat_rank": 155,
    "window_s": 120,
-   "query_ms": 4.24383299832698,
-   "prefilter_ms": 27.26095900288783,
-   "total_ms": 115.6582499970682,
+   "query_ms": 4.107957996893674,
+   "prefilter_ms": 27.944292000029236,
+   "total_ms": 117.1079999912763,
    "top": [
     "ECHO-250401-2027-T1",
     "INDIA-260228-1955-T1",
@@ -4178,7 +4178,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 4,
-   "dtw_ms": 48.03854199417401,
+   "dtw_ms": 49.64879200269934,
    "candidates": 500
   },
   {
@@ -4208,9 +4208,9 @@
    "true_rank": 3,
    "copycat_rank": 259,
    "window_s": 60,
-   "query_ms": 3.995708000729792,
-   "prefilter_ms": 28.732042002957314,
-   "total_ms": 85.94070799881592,
+   "query_ms": 3.8511250022565946,
+   "prefilter_ms": 27.98712499497924,
+   "total_ms": 85.60862501326483,
    "top": [
     "CHARLIE-260428-2107-T1",
     "ALPHA-251119-1925-T1",
@@ -4220,7 +4220,7 @@
    ],
    "baseline_rank": 168,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 20.902041011140682,
+   "dtw_ms": 21.591957993223332,
    "candidates": 500
   },
   {
@@ -4232,9 +4232,9 @@
    "true_rank": 2,
    "copycat_rank": 256,
    "window_s": 60,
-   "query_ms": 3.7897919974057004,
-   "prefilter_ms": 27.90691700647585,
-   "total_ms": 87.04695900087245,
+   "query_ms": 3.7691659963456914,
+   "prefilter_ms": 28.256292003788985,
+   "total_ms": 89.29683300084434,
    "top": [
     "ALPHA-251119-1940-T1",
     "BRAVO-250830-1907-T1",
@@ -4244,7 +4244,7 @@
    ],
    "baseline_rank": 54,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 22.341542004141957,
+   "dtw_ms": 24.975041989819147,
    "candidates": 500
   },
   {
@@ -4256,9 +4256,9 @@
    "true_rank": 1,
    "copycat_rank": 234,
    "window_s": 60,
-   "query_ms": 3.765083005419001,
-   "prefilter_ms": 26.7712499917252,
-   "total_ms": 85.34925000276417,
+   "query_ms": 3.88679098978173,
+   "prefilter_ms": 27.271165992715396,
+   "total_ms": 87.71112500107847,
    "top": [
     "DELTA-250517-2008-T1",
     "BRAVO-250830-1907-T1",
@@ -4268,7 +4268,7 @@
    ],
    "baseline_rank": 9,
    "baseline_copycat_rank": 1,
-   "dtw_ms": 22.656667002593167,
+   "dtw_ms": 23.48833400174044,
    "candidates": 500
   },
   {
@@ -4280,9 +4280,9 @@
    "true_rank": 2,
    "copycat_rank": 246,
    "window_s": 120,
-   "query_ms": 3.9587499923072755,
-   "prefilter_ms": 27.379666003980674,
-   "total_ms": 115.15766699449159,
+   "query_ms": 4.139332988415845,
+   "prefilter_ms": 28.716250002617016,
+   "total_ms": 118.24370799877215,
    "top": [
     "ALPHA-251119-1940-T1",
     "DELTA-250517-2008-T1",
@@ -4292,7 +4292,7 @@
    ],
    "baseline_rank": 17,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 48.031875005108304,
+   "dtw_ms": 48.96800000278745,
    "candidates": 500
   },
   {
@@ -4304,9 +4304,9 @@
    "true_rank": 1,
    "copycat_rank": 178,
    "window_s": 120,
-   "query_ms": 4.035916994325817,
-   "prefilter_ms": 27.823459007777274,
-   "total_ms": 115.61662500025705,
+   "query_ms": 4.5786250120727345,
+   "prefilter_ms": 30.609082998125814,
+   "total_ms": 121.13429199962411,
    "top": [
     "BRAVO-260407-1940-T1",
     "BRAVO-250830-1907-T1",
@@ -4316,7 +4316,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 20,
-   "dtw_ms": 47.17424999398645,
+   "dtw_ms": 48.146957997232676,
    "candidates": 500
   },
   {
@@ -4346,9 +4346,9 @@
    "true_rank": 1,
    "copycat_rank": 217,
    "window_s": 60,
-   "query_ms": 3.9969159988686442,
-   "prefilter_ms": 29.232417000457644,
-   "total_ms": 87.92179099691566,
+   "query_ms": 3.9214590069605038,
+   "prefilter_ms": 29.890833000536077,
+   "total_ms": 89.33079200505745,
    "top": [
     "INDIA-250730-2013-T1",
     "INDIA-260228-1955-T1",
@@ -4358,7 +4358,7 @@
    ],
    "baseline_rank": 18,
    "baseline_copycat_rank": 242,
-   "dtw_ms": 22.84695800335612,
+   "dtw_ms": 23.561709007481113,
    "candidates": 500
   },
   {
@@ -4370,9 +4370,9 @@
    "true_rank": 1,
    "copycat_rank": 192,
    "window_s": 60,
-   "query_ms": 3.8371659902622923,
-   "prefilter_ms": 28.52020900172647,
-   "total_ms": 87.09520800039172,
+   "query_ms": 3.8475000037578866,
+   "prefilter_ms": 29.30729200306814,
+   "total_ms": 90.4268750018673,
    "top": [
     "INDIA-251027-2036-T1",
     "ECHO-260408-2055-T1",
@@ -4382,7 +4382,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 28,
-   "dtw_ms": 22.586833001696505,
+   "dtw_ms": 24.39008399960585,
    "candidates": 500
   },
   {
@@ -4394,9 +4394,9 @@
    "true_rank": 1,
    "copycat_rank": 170,
    "window_s": 60,
-   "query_ms": 3.9602500037290156,
-   "prefilter_ms": 27.878000008058734,
-   "total_ms": 87.25983300246298,
+   "query_ms": 4.007707990240306,
+   "prefilter_ms": 28.47775000554975,
+   "total_ms": 89.3795419979142,
    "top": [
     "INDIA-251027-2036-T1",
     "ECHO-260408-2055-T1",
@@ -4406,7 +4406,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 2,
-   "dtw_ms": 22.85654199658893,
+   "dtw_ms": 24.118124987580813,
    "candidates": 500
   },
   {
@@ -4418,9 +4418,9 @@
    "true_rank": 1,
    "copycat_rank": 170,
    "window_s": 120,
-   "query_ms": 3.7237919896142557,
-   "prefilter_ms": 27.89791699615307,
-   "total_ms": 115.0875829916913,
+   "query_ms": 3.8462910015368834,
+   "prefilter_ms": 28.024875005939975,
+   "total_ms": 116.28954100888222,
    "top": [
     "INDIA-251027-2036-T1",
     "ECHO-260408-2055-T1",
@@ -4430,7 +4430,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 19,
-   "dtw_ms": 47.36141698958818,
+   "dtw_ms": 49.225000009755604,
    "candidates": 500
   },
   {
@@ -4442,9 +4442,9 @@
    "true_rank": 1,
    "copycat_rank": 166,
    "window_s": 120,
-   "query_ms": 4.0025000052992254,
-   "prefilter_ms": 27.946208996581845,
-   "total_ms": 115.90045900084078,
+   "query_ms": 4.048542003147304,
+   "prefilter_ms": 27.769792010076344,
+   "total_ms": 116.95508399861865,
    "top": [
     "INDIA-251027-2036-T1",
     "INDIA-260228-1955-T1",
@@ -4454,7 +4454,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 48.48370800027624,
+   "dtw_ms": 49.142584000946954,
    "candidates": 500
   },
   {
@@ -4484,9 +4484,9 @@
    "true_rank": 1,
    "copycat_rank": 149,
    "window_s": 60,
-   "query_ms": 3.714082995429635,
-   "prefilter_ms": 29.571916005806997,
-   "total_ms": 93.73379200405907,
+   "query_ms": 3.95804199797567,
+   "prefilter_ms": 29.908749987953342,
+   "total_ms": 94.82058399589732,
    "top": [
     "INDIA-251217-1947-T1",
     "INDIA-250319-1945-T1",
@@ -4496,7 +4496,7 @@
    ],
    "baseline_rank": 3,
    "baseline_copycat_rank": 28,
-   "dtw_ms": 27.126542001497,
+   "dtw_ms": 28.109457998652942,
    "candidates": 500
   },
   {
@@ -4508,9 +4508,9 @@
    "true_rank": 1,
    "copycat_rank": 137,
    "window_s": 60,
-   "query_ms": 3.955332998884842,
-   "prefilter_ms": 29.13612499833107,
-   "total_ms": 94.5877920021303,
+   "query_ms": 3.710666991537437,
+   "prefilter_ms": 29.199958997196518,
+   "total_ms": 95.64145898912102,
    "top": [
     "INDIA-251217-1947-T1",
     "INDIA-250319-1945-T1",
@@ -4520,7 +4520,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 18,
-   "dtw_ms": 28.09979100129567,
+   "dtw_ms": 29.095332996803336,
    "candidates": 500
   },
   {
@@ -4532,9 +4532,9 @@
    "true_rank": 1,
    "copycat_rank": 148,
    "window_s": 60,
-   "query_ms": 3.8611670024693012,
-   "prefilter_ms": 28.986083998461254,
-   "total_ms": 90.44833401276264,
+   "query_ms": 3.815916003077291,
+   "prefilter_ms": 28.75649998895824,
+   "total_ms": 92.24941598949954,
    "top": [
     "INDIA-250319-1945-T1",
     "INDIA-251217-1947-T1",
@@ -4544,7 +4544,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 5,
-   "dtw_ms": 24.678166009834968,
+   "dtw_ms": 26.42295800615102,
    "candidates": 500
   },
   {
@@ -4556,9 +4556,9 @@
    "true_rank": 1,
    "copycat_rank": 143,
    "window_s": 120,
-   "query_ms": 3.759416998946108,
-   "prefilter_ms": 28.527208007290028,
-   "total_ms": 143.34024999698158,
+   "query_ms": 3.665958996862173,
+   "prefilter_ms": 28.789500007405877,
+   "total_ms": 143.34279199829325,
    "top": [
     "ECHO-250909-2009-T1",
     "INDIA-250319-1945-T1",
@@ -4568,7 +4568,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 10,
-   "dtw_ms": 53.96304099122062,
+   "dtw_ms": 54.28104200109374,
    "candidates": 500
   },
   {
@@ -4580,9 +4580,9 @@
    "true_rank": 1,
    "copycat_rank": 145,
    "window_s": 120,
-   "query_ms": 4.164291996858083,
-   "prefilter_ms": 28.415666994987987,
-   "total_ms": 117.41099999926519,
+   "query_ms": 4.3333749927114695,
+   "prefilter_ms": 29.07950000371784,
+   "total_ms": 121.75458400452044,
    "top": [
     "INDIA-250319-1945-T1",
     "INDIA-251217-1947-T1",
@@ -4592,7 +4592,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 6,
-   "dtw_ms": 48.27566700987518,
+   "dtw_ms": 51.425792000372894,
    "candidates": 500
   },
   {
@@ -4622,9 +4622,9 @@
    "true_rank": 9,
    "copycat_rank": 348,
    "window_s": 60,
-   "query_ms": 3.913874999852851,
-   "prefilter_ms": 31.0965840035351,
-   "total_ms": 93.90029199130367,
+   "query_ms": 3.876458009472117,
+   "prefilter_ms": 31.17541701067239,
+   "total_ms": 95.63579100358766,
    "top": [
     "GOLF-251229-1933-T1",
     "ALPHA-250418-2044-T1",
@@ -4634,7 +4634,7 @@
    ],
    "baseline_rank": 141,
    "baseline_copycat_rank": 80,
-   "dtw_ms": 26.86391700990498,
+   "dtw_ms": 28.054209004039876,
    "candidates": 500
   },
   {
@@ -4646,9 +4646,9 @@
    "true_rank": 3,
    "copycat_rank": 361,
    "window_s": 60,
-   "query_ms": 3.7612080050166696,
-   "prefilter_ms": 30.40474999579601,
-   "total_ms": 98.67191599914804,
+   "query_ms": 3.810583002632484,
+   "prefilter_ms": 30.65299999434501,
+   "total_ms": 102.07616699335631,
    "top": [
     "ALPHA-260307-1928-T1",
     "GOLF-260628-2012-T1",
@@ -4658,7 +4658,7 @@
    ],
    "baseline_rank": 66,
    "baseline_copycat_rank": 80,
-   "dtw_ms": 31.260792005923577,
+   "dtw_ms": 34.036458004266024,
    "candidates": 500
   },
   {
@@ -4670,9 +4670,9 @@
    "true_rank": 1,
    "copycat_rank": 217,
    "window_s": 60,
-   "query_ms": 3.7184170068940148,
-   "prefilter_ms": 28.648291001445614,
-   "total_ms": 93.68925000308082,
+   "query_ms": 4.407582993735559,
+   "prefilter_ms": 29.51629199378658,
+   "total_ms": 96.66029199433979,
    "top": [
     "BRAVO-260407-1940-T1",
     "DELTA-250723-1948-T1",
@@ -4682,7 +4682,7 @@
    ],
    "baseline_rank": 19,
    "baseline_copycat_rank": 3,
-   "dtw_ms": 28.49929200601764,
+   "dtw_ms": 29.370791991823353,
    "candidates": 500
   },
   {
@@ -4694,9 +4694,9 @@
    "true_rank": 1,
    "copycat_rank": 214,
    "window_s": 120,
-   "query_ms": 3.8520410016644746,
-   "prefilter_ms": 29.667834009160288,
-   "total_ms": 122.99524999980349,
+   "query_ms": 3.9365830016322434,
+   "prefilter_ms": 29.33925000252202,
+   "total_ms": 124.45712499902584,
    "top": [
     "BRAVO-260407-1940-T1",
     "DELTA-250723-1948-T1",
@@ -4706,7 +4706,7 @@
    ],
    "baseline_rank": 60,
    "baseline_copycat_rank": 2,
-   "dtw_ms": 52.85550000553485,
+   "dtw_ms": 54.08670799806714,
    "candidates": 500
   },
   {
@@ -4718,9 +4718,9 @@
    "true_rank": 1,
    "copycat_rank": 170,
    "window_s": 120,
-   "query_ms": 4.008125004475005,
-   "prefilter_ms": 28.93575000052806,
-   "total_ms": 115.13637499592733,
+   "query_ms": 4.136333998758346,
+   "prefilter_ms": 29.4860419962788,
+   "total_ms": 119.55812500673346,
    "top": [
     "BRAVO-260407-1940-T1",
     "DELTA-250723-1948-T1",
@@ -4730,7 +4730,7 @@
    ],
    "baseline_rank": 1,
    "baseline_copycat_rank": 7,
-   "dtw_ms": 45.99933300050907,
+   "dtw_ms": 49.40574998909142,
    "candidates": 500
   }
  ]
