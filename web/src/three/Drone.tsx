@@ -167,7 +167,7 @@ export const Drone = memo(function Drone({ trackId, origin }: { trackId: string;
           tone="--alert"
           anchorX="center"
           anchorY="bottom"
-          dyPx={16}
+          dyPx={28} // above the orbit ring of the trail, so the tag stays legible (D-166)
         />
       </group>
     </group>

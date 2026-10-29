@@ -67,7 +67,7 @@ messages when a rerun second is crossed, then `ledger` messages for rows appende
 returns `clock` with `seeked: true` and a 120 s catch-up. Results come from `LiveLoop.result_at`,
 which snaps to the latest rerun and serves memory, then the cache, then computes (about 120–300
 ms on the laptop). Proposals target the case holding the best-ranked top-3 incident (D-106); the
-§15.6 dedup makes reruns and seeks append nothing new. The swarm incident streams detections only.
+§15.6 dedup makes reruns and seeks append nothing new. The swarm incident streams detections only: swarm matching lives in `match.swarm`, the Swarm view and `kairos-defense swarm` (phase 9), and the swarm replay proposes nothing.
 
 ## Configuration
 
@@ -96,3 +96,8 @@ read-only connection must close before other modules write the P1 file).
 ## Changelog
 
 - Phase 7: package created.
+- Phase 8: the lens, ghosts, forecast and recall messages the Director and the Case board read
+  (D-128 to D-147).
+- Phase 9: the swarm replay stays detections only (matching in `match.swarm`); docstrings and the
+  `replay` CLI say so (D-105, D-152).
+- Phase 10: this README brought current.

@@ -169,7 +169,12 @@ computed from the same stores. The lens shows the stream's `dtw` or a chosen mat
   watch at T+120), `pages8.spec.ts` (each page and its screenshots `phase08-page-*`); phase 9:
   `swarm.spec.ts` (Swarm view at both sizes: top match S1-GOLF-260503, ghost, curves, Play
   advances the playhead, `phase09-swarm-*` screenshots, axe) and the encore step in
-  `director.spec.ts` (`phase08-beat-09-encore-*`, ledger head unchanged).
+  `director.spec.ts` (`phase08-beat-09-encore-*`, ledger head unchanged); phase 10:
+  `guide.spec.ts` (the user guide's 20 screenshots, written to `docs/guide/img/` from the running
+  app on every `make e2e`: Live watch at T+90 at both sizes and at T+120 with the Forecast camera,
+  the nine Director beats, every page, the shortcuts dialog; each waits for the element that
+  proves its state first, D-163). Rename or add a shot there and in `docs/USER_GUIDE.md`
+  together: `tests/unit/test_docs.py` checks every guide image is written by this spec.
   Playwright starts its own API on :8765 with scratch ledger, live and export folders under
   `data/cache/e2e` (D-113, D-137).
   First time on a machine: `npx --prefix web playwright install chromium`.
@@ -199,3 +204,7 @@ web/openapi.json && npm --prefix web run gen:types`; `check:types` fails on stal
   mode, Performance mode, static grain, lazy pages (D-122 to D-147).
 - Phase 9: Swarm view, Director's swarm encore, chat slide-over (hidden by default), MatchList's
   swarm link; the planned-page placeholder removed (D-160 to D-162).
+- Phase 10: `e2e/guide.spec.ts` (D-163); from its screenshot review (D-166): ghost labels of nearby
+  recovery points share one anchor and stack (`labelSlots` in `three/ghostMath.ts`), the radar
+  shadow label reads leftward from the wedge's center, the "No Remote ID" tag sits above the orbit
+  ring, and the compact lens measures its header so the cost matrix and its caption fit the rail.

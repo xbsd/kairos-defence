@@ -53,3 +53,38 @@ export function dissolveAlpha(k: number, g: number, age: number): number {
   const thr = segmentHash(k) * 0.8;
   return Math.min(1, Math.max(0, (u - thr) / 0.2));
 }
+
+/** Ghost end points closer than this share one label anchor (meters, D-166). */
+export const LABEL_CLUSTER_M = 400;
+
+/**
+ * Where each ghost's label goes (§17.13, D-166): ghosts whose end points lie within `radiusM` of
+ * an earlier ghost's end point share that ghost's end point as their anchor and stack one row
+ * apart (`slot`), so labels never overprint when the recovery points sit close but not on top of
+ * each other. A ghost with no end point gets `anchor: -1`.
+ */
+export function labelSlots(
+  ends: (GhostPoint | null | undefined)[],
+  radiusM = LABEL_CLUSTER_M,
+): { anchor: number; slot: number }[] {
+  const out: { anchor: number; slot: number }[] = [];
+  const used = new Map<number, number>();
+  ends.forEach((e, i) => {
+    if (!e) {
+      out.push({ anchor: -1, slot: 0 });
+      return;
+    }
+    let anchor = i;
+    for (const [root] of used) {
+      const r = ends[root];
+      if (r && Math.hypot(e.x - r.x, e.y - r.y) <= radiusM) {
+        anchor = root;
+        break;
+      }
+    }
+    const slot = used.get(anchor) ?? 0;
+    used.set(anchor, slot + 1);
+    out.push({ anchor, slot });
+  });
+  return out;
+}

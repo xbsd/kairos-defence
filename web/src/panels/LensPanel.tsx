@@ -73,7 +73,7 @@ export function LensPanel() {
             mode={s.mode}
             reduce={reduce}
             variant="compact"
-            budget={height - 96}
+            budget={height}
             onMode={(m) => matchStore.getState().setLensMode(m)}
             onTrack={(tr) => pick(tr, channel)}
             onChannel={(ch) => pick(track ?? top[0]?.track_id ?? "", ch)}

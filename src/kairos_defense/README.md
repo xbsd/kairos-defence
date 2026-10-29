@@ -151,6 +151,9 @@ Phase 5 added `paths.cache` (the FastEmbed cache, `app.yaml`) and `forecast.anch
 - Phase 7: `tests/unit/test_cli.py` (`api --dump-openapi`, `api --static` without a build) and
   `tests/unit/test_live_cli.py` (`replay` list, `--precompute` then fresh, `--reset`, both D-010
   fallbacks, loopback-only `call_api`).
+- Phase 10: `tests/unit/test_docs.py` walks this Typer app's command tree (every command and
+  `memory` subcommand) and fails when the user guide (`docs/USER_GUIDE.md`) does not document one
+  as `kairos-defense <command>`; add a new command to the guide's section 6 (D-164).
 - `tests/unit/test_rng.py`: pinned values and stream independence.
 - `tests/unit/test_geo.py`: cardinals, wrap edges, clockwise rotation, rectangles, frame round trips.
 - Run: `uv run pytest tests/unit -q -k "cli or rng or geo"`.
@@ -181,4 +184,6 @@ Phase 5 added `paths.cache` (the FastEmbed cache, `app.yaml`) and `forecast.anch
   running API; ports `IngestStat`, `LiveSink`, `ResultCache`.
 - Phase 8: `api --exports` (and `KD_EXPORTS` under `--reload`).
 - Phase 9: `swarm` (`cli_swarm.py`) and `mcp` (`cli_agent.py`) became real; `index` prints the
-  swarm counts; `eval` prints swarm top-1 and its latency.
+  swarm counts; `eval` prints swarm top-1 and its latency; CLI messages soft-wrap (D-156).
+- Phase 10: no code change; every command is documented in `docs/USER_GUIDE.md` (checked by
+  `tests/unit/test_docs.py`, D-164).

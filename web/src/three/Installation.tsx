@@ -122,7 +122,16 @@ export function Installation({ scene, origin }: { scene: Scene; origin: Origin }
         </line>
       ))}
       {shadow && shadowLabel ? (
-        <Label text={shadow.label} position={shadowLabel} px={13} tone="--ink-mid" />
+        // right-anchored: the label reads leftward from the wedge's center, clear of the
+        // recovery zone and the ghost labels that sit inside the shadow (D-166)
+        <Label
+          text={shadow.label}
+          position={shadowLabel}
+          px={13}
+          tone="--ink-mid"
+          anchorX="right"
+          dxPx={-8}
+        />
       ) : null}
     </group>
   );

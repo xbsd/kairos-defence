@@ -5,6 +5,7 @@ import {
   alignedIndex,
   dissolveAlpha,
   isFenceTarget,
+  labelSlots,
   mapGhost,
   segmentHash,
   STAGGER_MS,
@@ -59,6 +60,24 @@ describe("ghost mapping (D-128)", () => {
     expect(dissolveAlpha(5, 2, 1200 + 2 * STAGGER_MS)).toBe(1);
     const mid = Array.from({ length: 50 }, (_, k) => dissolveAlpha(k, 0, 600));
     expect(new Set(mid).size).toBeGreaterThan(2); // a dissolve, not a uniform fade
+  });
+
+  it("stacks the labels of nearby ghost ends on one anchor, one row apart (D-166)", () => {
+    const at = (x: number, y: number) => ({ t: 0, x, y, alt: 0 });
+    // three recovery points 60 m and 300 m apart share the first one's anchor
+    expect(labelSlots([at(0, 0), at(60, -20), at(-250, 160)])).toEqual([
+      { anchor: 0, slot: 0 },
+      { anchor: 0, slot: 1 },
+      { anchor: 0, slot: 2 },
+    ]);
+    // a far end keeps its own anchor; a missing end gets none
+    expect(labelSlots([at(0, 0), at(5000, 0), null, at(10, 10)])).toEqual([
+      { anchor: 0, slot: 0 },
+      { anchor: 1, slot: 0 },
+      { anchor: -1, slot: 0 },
+      { anchor: 0, slot: 1 },
+    ]);
+    expect(labelSlots([])).toEqual([]);
   });
 
   it("lights a core beam only behind its head", () => {

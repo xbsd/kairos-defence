@@ -1,7 +1,49 @@
 # Kairos Defense (demo)
 
-Cross-installation drone pattern memory: DTW shape matching, hybrid report search and a
-bitemporal, tamper-evident case memory, built on DuckDB and LanceDB. **Synthetic data only.**
+A cross-installation memory of drone behavior. Kairos Defense matches a live drone track against
+every past track at every base (DTW shape matching), retrieves the written reports tied to those
+past flights (hybrid vector and keyword search), forecasts where the drone will be recovered,
+matches swarm choreography, and keeps a bitemporal, tamper-evident case memory. It runs offline on
+DuckDB and LanceDB, with a 3D Command Center in the browser. **All data is synthetic.**
+
+![Live watch at T+120: the drone orbiting Bravo's fuel farm, the amber ghosts of three matched past flights, the predicted recovery zone on County Rd 12 and the linked Delta report](docs/guide/img/live-watch-t120.png)
+
+## Documentation
+
+| Document | For | What it covers |
+|---|---|---|
+| [User guide](docs/USER_GUIDE.md) | Operators, analysts, new users | Install, every screen with real screenshots, the demo, evidence, CLI, MCP, configuration, evaluation, troubleshooting |
+| [One-pager](docs/ONE_PAGER.md) | Non-technical readers | The problem, what it does, the demo in five beats, how to run it |
+| [Demo runbook](docs/DEMO.md) | Presenters | Before the audience, the four-minute script, keys, fallbacks, likely questions |
+| [Rollback guide](docs/ROLLBACK.md) | Maintainers | How the history and tags are organized, how to inspect and roll back a phase |
+| [Autopilot](docs/AUTOPILOT.md) | Maintainers | How the phases were built and gated unattended |
+| [Specification](docs/SPEC.md) | Builders | The full product and build specification |
+| [Progress](docs/PROGRESS.md), [decisions](docs/DECISIONS.md), [phase index](docs/phases/INDEX.md) | Everyone | What was built when, why, and the evidence |
+
+Package READMEs: [kairos_defense](src/kairos_defense/README.md) (CLI, ports, geometry),
+[agent](src/kairos_defense/agent/README.md), [api](src/kairos_defense/api/README.md),
+[config](src/kairos_defense/config/README.md), [eval](src/kairos_defense/eval/README.md),
+[features](src/kairos_defense/features/README.md), [forecast](src/kairos_defense/forecast/README.md),
+[live](src/kairos_defense/live/README.md), [match](src/kairos_defense/match/README.md),
+[memory](src/kairos_defense/memory/README.md), [recall](src/kairos_defense/recall/README.md),
+[sim](src/kairos_defense/sim/README.md), [store](src/kairos_defense/store/README.md),
+[web](web/README.md).
+
+## Quick start
+
+Prerequisites: git, [uv](https://docs.astral.sh/uv/), Node 22 LTS, and a C compiler with OpenMP
+(dtaidistance builds from source, D-064).
+
+```bash
+uv sync && npm --prefix web install
+make data index models eval   # exits 1 on the one accepted demo gap (D-081); see docs/DEMO.md
+make demo                     # http://localhost:8000, press D on Live watch for Director mode
+```
+
+Other targets: `make check` (lint, type checks and fast tests), `make test-all` (with the slow
+tests), `make dev` (API and Vite with hot reload), `make e2e` (Playwright, screenshots, axe),
+`make mcp` (the MCP server: `claude mcp add kairos-defense -- uv run kairos-defense mcp`),
+`make help` (every target).
 
 ## Status
 
@@ -12,73 +54,24 @@ bitemporal, tamper-evident case memory, built on DuckDB and LanceDB. **Synthetic
 | 2 | Swarms, RF, Remote ID, reports and assessments | done | [report](docs/phases/phase-02/REPORT.md) |
 | 3 | Features, windows, Euclidean baseline and eval skeleton | done | [report](docs/phases/phase-03/REPORT.md) |
 | 4 | DTW matcher and fusion model | done with one accepted gap (live top 3, [GAPS](docs/phases/phase-04/GAPS.md)) | [report](docs/phases/phase-04/REPORT.md) |
-| 5 | Report recall and analog forecast | done | [report](docs/phases/phase-05/REPORT.md), [exit check](docs/phases/phase-05/EXIT_CHECK.md) |
-| 6 | Case memory (Kairos-lite) | done | [report](docs/phases/phase-06/REPORT.md), [exit check](docs/phases/phase-06/EXIT_CHECK.md) |
-| 7 | Streaming API and Command Center foundation | done | [report](docs/phases/phase-07/REPORT.md), [exit check](docs/phases/phase-07/EXIT_CHECK.md) |
-| 8 | Command Center: the memorable moments | done | [report](docs/phases/phase-08/REPORT.md), [exit check](docs/phases/phase-08/EXIT_CHECK.md) |
-| 9 | Swarms, agent, MCP, hardening and runbook | built; awaiting the gate (`scripts/cloud_gate.py`) | [report](docs/phases/phase-09/REPORT.md), [exit check](docs/phases/phase-09/EXIT_CHECK.md), [runbook](docs/DEMO.md) |
-| 10 | User guide, one-pager and rollback guide | not started | `docs/phases/PHASE_10.md` |
+| 5 | Report recall and analog forecast | done | [report](docs/phases/phase-05/REPORT.md) |
+| 6 | Case memory (Kairos-lite) | done | [report](docs/phases/phase-06/REPORT.md) |
+| 7 | Streaming API and Command Center foundation | done | [report](docs/phases/phase-07/REPORT.md) |
+| 8 | Command Center: the memorable moments | done | [report](docs/phases/phase-08/REPORT.md) |
+| 9 | Swarms, agent, MCP, hardening and runbook | done | [report](docs/phases/phase-09/REPORT.md) |
+| 10 | User guide, one-pager and rollback guide | built; awaiting the gate | [report](docs/phases/phase-10/REPORT.md) |
 
-Works today: `make check`, `make data` (seeded synthetic world, flights, swarms, sensors, paperwork
-and truth), `make index` (tracks, windows, and the report index with full-text search), `make
-models` (fusion model and DTW calibration, about 45 s), `make eval` (DTW + fusion: Recall@5 1.000,
-DTW lift +0.522, copycat-first 0%, report linkage 1.000, forecast median 340 m at T = 90 s),
-`uv run kairos-defense match --incident DEMO-BRAVO-0828 --at 90` (DTW by default; `--method
-euclidean` for the baseline), `uv run kairos-defense forecast --incident DEMO-BRAVO-0828 --at 105`
-(the recovery zone, 2.2 km northwest of BRAVO's fuel farm, with County Rd 12 crossing it) and
-`uv run kairos-defense recall --incident DEMO-BRAVO-0828 --at 120` (the DELTA report at rank 1,
-clues linked), and the case memory: `uv run kairos-defense memory reseed` (4,681 history events,
-hash-chained), `memory verify`, `memory show CASE-P1-DELTA-260419 --as-of 2026-04-20T10:00-05:00`
-(hobbyist, closed, no links), `memory demo --approve` (the case "known then" and "known now" side
-by side, on a scratch copy), `export --case … --approve` (a signed evidence package) and
-`verify-evidence <dir>`. From phase 7 the Command Center runs: `make demo` (http://localhost:8000,
-one offline process: the FastAPI REST API, the `/ws/replay/{incident}` stream and the built web
-app) opens Live watch for `DEMO-BRAVO-0828`: a 3D theater fed by the real replay (radar sweep, RF
-bearings, the drone and its phosphor trail, data packets into the Kairos core), the Stream,
-Signals, Recorder and Ledger chain instruments, and the match list with Approve and Reject that
-write to the ledger. `make dev` runs the API and Vite with hot reload; `make e2e` runs Playwright
-(screenshots and a frame-rate probe in `reports/figures/ui/`, axe checks). `uv run kairos-defense
-replay --reset` and `memory reseed` work while the demo runs (through the API). From phase 8 the
-demo's memorable moments run too: press D on Live watch for Director mode (one beat per §1.2 row
-with computed captions and camera shots; Space, →, ←, R, M, F, ?): the time-warp lens morphs its
-connectors from "Same time" onto the real DTW path, the matched past flights rise as amber
-afterglow ghosts in tonight's frame, the forecast draws its dotted exit path and pulsing recovery
-zone with County Rd 12 lit inside it, and the DELTA report resolves at the lower left with a beam
-to that road; → opens the Case board (Known then: hobbyist, no links; Known now: the proposals and
-the diff; approve with a click) and Evidence (export with a confirm, per-file hashing, the checks,
-Verify package). The Match explainer, Shift delta and Eval pages are in the Pages menu. From phase
-9: the swarm encore (Director's ninth beat, or Pages → Swarm view): ECHO's five-drone swarm with
-its formation edges, the matched GOLF swarm from six weeks earlier as an afterglow ghost aligned
-by DTW time, and the descriptor curves; `uv run kairos-defense swarm --incident
-DEMO-SWARM-ECHO-0614` ranks the earlier swarms (S1-GOLF-260503 first; swarm top-1 1.000 in `make
-eval`); `make mcp` serves six read-only agent tools over MCP (`--allow-proposals` adds the two
-proposal tools); an optional chat slide-over appears when `config/app.yaml` names an LLM provider.
-The presenter's runbook is [docs/DEMO.md](docs/DEMO.md). Everything runs
-offline; `kairos-defense fetch-models` is the only command that downloads (an optional embedding
-model). Each
-phase's plan, report and exit-check evidence is in `docs/phases/phase-NN/`, and the per-session log
-is in `docs/PROGRESS.md`.
-
-## Run it
-
-Prerequisites: git, uv, Python 3.11+, Node 22 LTS, a C compiler with OpenMP (dtaidistance builds
-from source, D-064).
-
-```bash
-uv sync && npm --prefix web install
-make data index models eval   # make eval exits 1 on the one accepted demo gap (D-081); see docs/DEMO.md
-make demo      # http://localhost:8000; press D on Live watch for Director mode
-make dev       # API on :8000 and Vite on :5173 with hot reload
-make e2e       # first time: npx --prefix web playwright install chromium
-make mcp       # MCP server over stdio: claude mcp add kairos-defense -- uv run kairos-defense mcp
-```
-
-Before presenting, follow [docs/DEMO.md](docs/DEMO.md) (reset, rehearsal, the script, fallbacks).
+Latest evaluation (`make eval`): Recall@5 1.000, DTW lift +0.52, copycat-first 0%, time to match
+96%, report linkage 1.000, forecast median 341 m at T = 90 s, swarm top-1 1.000 (4 of 4). Every
+demo assertion passes except the accepted `live_top3_incidents` gap
+([phase 4 GAPS](docs/phases/phase-04/GAPS.md)). Each phase's plan, report and exit-check evidence
+is in `docs/phases/phase-NN/`.
 
 ## Build it with Claude Code
 
 1. Copy this kit into an empty git repo (`CLAUDE.md`, `docs/`, `.claude/`).
 2. Run `claude` in the repo and paste the kickoff prompt from `docs/SPEC.md` §0.1, then type `/phase 0`.
 3. Approve each plan, review the exit check, then `/clear` and `/phase <next>`.
+   Or run the remaining phases unattended with the autopilot ([docs/AUTOPILOT.md](docs/AUTOPILOT.md)).
 
-Everything else is in `docs/SPEC.md`.
+Everything else is in [docs/SPEC.md](docs/SPEC.md).

@@ -2299,3 +2299,70 @@ Where this file and the SPEC ever disagree, this file wins.
   returns `enabled: true`; any failure (no route, an error, offline) counts as disabled, so the
   default `llm.provider: none` shows nothing. Each reply lists its tool calls; the panel states the
   §18.3 rules. Live watch's match list for a swarm incident now points to the Swarm view.
+
+## D-163 · Guide screenshots come from the running app on every `make e2e` · 2026-10-29
+- Decision: `web/e2e/guide.spec.ts` (three tests) drives the real app on Playwright's own server
+  (scratch ledger and exports, D-137) and writes 20 PNGs to `docs/guide/img/`: Live watch at T+90
+  (1920 × 1080 and 1440 × 900, the screen whose layout changes most between the two sizes, D-145)
+  and T+120, the nine Director beats at 5×, the Match explainer, the Case board (Known then and
+  Known now), Evidence after an approved export and a verify, Shift delta, Eval, the Swarm view and
+  the shortcuts dialog. Every shot first waits for the element that proves its state (three
+  ghosts, lens curves, forecast label, recall overlay, case graph, the proposals diff, a passing
+  verify, the swarm ghost, an eval tile, a delta group, the dialog), then lets fades settle (1.6 s);
+  Live watch plays at 2× so a slow machine overshoots the target second by little (D-154), and
+  Director pauses each beat with Space as `director.spec.ts` does. No mock-ups, no editing, no
+  placeholder or loading state.
+- The PNGs are committed. Every `make e2e`, the gate's included, rewrites them, and
+  `cloud_gate.py close` commits the rewritten files, so the committed images are the gate run's.
+
+## D-164 · Documentation tests · 2026-10-29
+- Decision: `tests/unit/test_docs.py` parses links and images with `scripts/check_docs.py`'s
+  pattern and checks every relative target in `README.md`, `docs/USER_GUIDE.md`,
+  `docs/ONE_PAGER.md` and `docs/ROLLBACK.md` exists; it walks the Typer app's command tree (every
+  command and `memory` subcommand, not the help text, whose layout depends on the terminal) and
+  requires `kairos-defense <command>` in the guide; and it checks the guide's images are PNGs of at
+  least 20 kB with distinct hashes (the gate's own rule, early in `make check`).
+
+## D-165 · README and user documents · 2026-10-29
+- Decision: the root README leads with what the product is and a table of the documents (user
+  guide, one-pager, runbook, rollback guide, autopilot, spec, progress, decisions, phase index),
+  then every package README, a three-command quick start, the status table and the latest
+  evaluation. The guide's command-line examples are real output from this build (trimmed); its
+  numbers are the phase 9 eval's. The one-pager's hero image is `live-watch-t120`. The rollback
+  guide names phases 0 to 3 by commit (they have no done tag) and tells merges to avoid squashing
+  so the phase 9 and 10 tags stay on the main line.
+
+## D-166 · Fixes from the guide's screenshot review (§17.13) · 2026-10-29
+- Context: reviewing the first `guide.spec.ts` run showed (a) the ghost labels of two matched
+  flights overprinting ("Delta, Apr 19" over "Alpha, Mar 3") at both sizes: the stack offset per
+  index assumed the recovery points sit on top of each other, but they lie tens of pixels apart;
+  (b) at 1440 × 900 the "Radar shadow" label running into the ghost labels; (c) the compact lens
+  overflowing the rail (a guessed 96 px header: at 1440 the controls wrap, so the cost matrix was
+  hidden below the fold, and its caption was cut at 1920); (d) the "No Remote ID" tag drawn over
+  the drone's orbit ring; (e) the Live watch shot at T+120 repeating the T+90 shot, because outside
+  Director the forecast and the report already show from the first rerun.
+- Decision: (a) `labelSlots` (`three/ghostMath.ts`, unit-tested): a ghost whose end point lies
+  within 400 m of an earlier ghost's end point hangs its label from that ghost's end point, one
+  16 px row higher per member, so the labels of one cluster can never overprint; a far ghost keeps
+  its own anchor. (b) The radar shadow label is right-anchored 8 px left of the wedge's center, so
+  it reads away from the recovery zone inside the shadow. (c) `TimeWarpLens` measures its header
+  (controls and readouts) with a ResizeObserver and splits what remains, less a two-line caption,
+  the gaps and the padding, between the curves and the matrix; `LensPanel` passes its whole box
+  height. (d) The tag sits 28 px above the drone instead of 16. (e) The T+120 shot uses the
+  Forecast camera (orbit, zone and County Rd 12), and the guide says when each result appears
+  outside and inside Director. No number or behavior changed; every element still shows real
+  results.
+- Consequences: the screenshots of the gate run (and of `director.spec.ts` and `screens.spec.ts`)
+  show the stacked labels and the full lens. At 1440 × 900 the lens caption may still need a scroll
+  when the readouts wrap; the matrix itself is visible.
+
+## D-167 · Tags the cloud session could not push · 2026-10-29
+- Context: in this Claude Code cloud session the git remote accepts branch pushes but refuses tag
+  pushes (`send-pack: unexpected disconnect while reading sideband packet`, every retry, while
+  branch pushes succeed and the proxy reports no failure). `cloud_gate.py close` creates
+  `phase-09-done` and `phase-10-done` locally.
+- Decision: push the branch after every phase (the handoff's requirement) and record the tags'
+  commits in `docs/phases/INDEX.md` (written by `close`) and in `docs/ROLLBACK.md`, which gives the
+  two commands that recreate and push them from any clone. No tag is moved or rewritten.
+- Consequences: until someone runs those commands, the remote lists tags up to `phase-08-done`;
+  both commits are on `claude/cloud-phases-9-10`.

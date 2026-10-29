@@ -16,7 +16,7 @@ import { replayStore } from "../state/replayStore";
 import { reduceMotion, uiStore } from "../state/uiStore";
 import type { StoreApi } from "zustand/vanilla";
 import { currentGhosts, useGhostLoader, type GhostSpec } from "./ghostLayer";
-import { dissolveAlpha } from "./ghostMath";
+import { dissolveAlpha, labelSlots, type GhostPoint } from "./ghostMath";
 import { Label } from "./Label";
 import { color } from "./palette";
 import { toScene, type Origin } from "./sceneMath";
@@ -56,7 +56,16 @@ function stepGhost(
   st.lastBright.current = bright;
 }
 
-function Ghost({ spec, index, origin }: { spec: GhostSpec; index: number; origin: Origin }) {
+function Ghost(props: {
+  spec: GhostSpec;
+  index: number;
+  origin: Origin;
+  /** The end point the label hangs from (this ghost's, or a nearby earlier ghost's, D-166). */
+  labelAt: GhostPoint | null;
+  /** Row of the label in its stack. */
+  slot: number;
+}) {
+  const { spec, index, origin, labelAt, slot } = props;
   const line = useMemo(() => {
     const pos = spec.points.flatMap((p) => toScene(p.x, p.y, p.alt, origin));
     const geom = new LineGeometry();
@@ -88,13 +97,12 @@ function Ghost({ spec, index, origin }: { spec: GhostSpec; index: number; origin
 
   useFrame(({ size }) => stepGhost(line, spec, index, size, { born, done, lastBright }));
 
-  const end = spec.points[spec.points.length - 1];
-  const at = end ? toScene(end.x, end.y, end.alt, origin) : null;
+  const at = labelAt ? toScene(labelAt.x, labelAt.y, labelAt.alt, origin) : null;
   return (
     <group>
       <primitive object={line} />
       {at ? (
-        // the recovery points sit together: stack the labels so they never overprint
+        // nearby recovery points share one anchor: the labels stack and never overprint
         <Label
           text={spec.label}
           position={[at[0], at[1] + 6, at[2]]}
@@ -102,7 +110,7 @@ function Ghost({ spec, index, origin }: { spec: GhostSpec; index: number; origin
           tone="--afterglow"
           anchorX="left"
           dxPx={10}
-          dyPx={6 + 16 * index}
+          dyPx={6 + 16 * slot}
         />
       ) : null}
     </group>
@@ -120,10 +128,19 @@ export function Ghosts({ scene, origin }: { scene: Scene; origin: Origin }) {
   const shown = useThrottledStore(directorStore, (d) => revealOf(d.active, d.beat).ghosts, 4);
   if (!shown) return null;
   const target = g.key.split("|")[0];
+  const ends = g.ghosts.map((s) => s.points[s.points.length - 1] ?? null);
+  const slots = labelSlots(ends);
   return (
     <group>
       {g.ghosts.map((spec, i) => (
-        <Ghost key={`${target}:${spec.track}`} spec={spec} index={i} origin={origin} />
+        <Ghost
+          key={`${target}:${spec.track}`}
+          spec={spec}
+          index={i}
+          origin={origin}
+          labelAt={ends[slots[i]?.anchor ?? -1] ?? null}
+          slot={slots[i]?.slot ?? 0}
+        />
       ))}
     </group>
   );

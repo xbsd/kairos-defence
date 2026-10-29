@@ -114,8 +114,10 @@ swarm, what the sensors saw, the paperwork, and the ground truth.
   parks, roads), `installation_template`, `sensors_template`.
 - `actors.yaml`: `hobbyists`, `probers`, `copycats`, `swarms`.
 - `scenario_demo.yaml`: `live_incident`, `p1_flights`, `swarm_events`, `expectations`.
-- `app.yaml`: `paths.duckdb`, `paths.truth`, `paths.memory`, `reports_llm_paraphrase` (true stops
-  generation until phase 9, D-043).
+- `app.yaml`: `paths.duckdb`, `paths.truth`, `paths.memory`, `reports_llm_paraphrase` (must stay
+  false: `true` stops generation with a clear error, because paraphrased text would move the clue
+  spans and break seeded determinism; the phase 9 LLM adapter serves the optional chat only,
+  D-043, D-155).
 - CLI: `kairos-defense gen [--seed N] [--config DIR] [--figures/--no-figures]`. `make data` passes
   `--seed 42`.
 
@@ -176,3 +178,6 @@ swarm, what the sensors saw, the paperwork, and the ground truth.
 - Backfill (2026-10-28): this README; D-065 notes the figures' font.
 - Phase 2 backfill (2026-10-28): checked against the code at `ba703ec`; added the `nights=` option
   and the phase 2 fixtures (D-066). No code changes.
+- Phase 9: `paperwork.py` refuses `reports_llm_paraphrase: true` with a message naming D-155 (the
+  paraphrase stays off in v1); no change to the generated data.
+- Phase 10: this README brought current (the paraphrase setting).
