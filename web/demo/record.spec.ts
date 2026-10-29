@@ -343,7 +343,8 @@ async function story(
   await n.cursorHide();
   await chapter(9, "Measured", "Every number scored against ground truth");
   const tiles = page.getByTestId("eval-tile");
-  const tile = async (i: number) => ((await tiles.nth(i).innerText()).split("\n")[1] ?? "").trim();
+  const tile = async (i: number) =>
+    ((await tiles.nth(i).locator("p.font-mono").innerText()) ?? "").trim();
   await n.hold(0.6);
   await n.callout("eval", [tiles.nth(0), tiles.nth(9)], {
     side: "bottom",

@@ -177,7 +177,11 @@ export function CommandBar({ trail, replay = false }: CommandBarProps) {
         <summary className="cursor-pointer list-none rounded-button border border-hairline px-3 py-1 text-13 text-ink-mid hover:text-ink-hi">
           Pages
         </summary>
-        <ul className="absolute right-0 z-40 mt-1 w-56 rounded-panel border border-hairline bg-scope p-1 text-13">
+        <ul
+          className="absolute right-0 z-40 mt-1 w-56 rounded-panel border border-hairline bg-scope p-1 text-13"
+          // choosing a page closes the menu (it stayed open over the new page)
+          onClick={(e) => e.currentTarget.closest("details")?.removeAttribute("open")}
+        >
           <li>
             <Link
               to="/"

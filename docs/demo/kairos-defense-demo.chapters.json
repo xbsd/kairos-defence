@@ -1,0 +1,46 @@
+[
+ {
+  "name": "start",
+  "at_s": 0
+ },
+ {
+  "name": "Detect",
+  "at_s": 5.6
+ },
+ {
+  "name": "Recognize",
+  "at_s": 15.11
+ },
+ {
+  "name": "Time warp",
+  "at_s": 29.59
+ },
+ {
+  "name": "Anticipate",
+  "at_s": 40.72
+ },
+ {
+  "name": "Recall",
+  "at_s": 49.26
+ },
+ {
+  "name": "Remember",
+  "at_s": 56.77
+ },
+ {
+  "name": "Prove",
+  "at_s": 73.34
+ },
+ {
+  "name": "Swarms",
+  "at_s": 83.41
+ },
+ {
+  "name": "Measured",
+  "at_s": 93.43
+ },
+ {
+  "name": "end",
+  "at_s": 104.66
+ }
+]

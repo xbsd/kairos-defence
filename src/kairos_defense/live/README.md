@@ -101,3 +101,5 @@ read-only connection must close before other modules write the P1 file).
 - Phase 9: the swarm replay stays detections only (matching in `match.swarm`); docstrings and the
   `replay` CLI say so (D-105, D-152).
 - Phase 10: this README brought current.
+- Demo video (D-168): `replay.scaled_clock(scale, now)`: a monotonic source running `scale` times
+  as fast as wall time (`[0.05, 1]`); sessions use it when the API runs with `--time-scale`.

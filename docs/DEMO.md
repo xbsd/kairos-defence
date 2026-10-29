@@ -36,6 +36,15 @@ incident `DEMO-BRAVO-0828` (21:40:06 local at Installation Bravo, 28 Aug 2026).
    (reduce motion) or turn on **Performance mode** in the command bar: the story still works,
    every number stays, only camera flights, bloom, particles and grain go.
 
+## The recorded demo video
+
+`docs/demo/kairos-defense-demo.mp4` (about 1 min 45 s, 1920 × 1080) is the same story recorded from
+the running app with a narration layer: chapter titles, callouts that explain each mechanism and a
+visible pointer for every click. Show it when there is no time for a live run, or send it ahead.
+`make demo-video` records it again (its own scratch ledger on port 8766; the real ledger is
+untouched). In the cloud container it records in slow motion (`DEMO_SLOW=5`, about 9 minutes);
+on a laptop with a GPU `DEMO_SLOW=1 make demo-video` takes about 2 minutes (D-168).
+
 ## Director keys
 
 | Key | Action |

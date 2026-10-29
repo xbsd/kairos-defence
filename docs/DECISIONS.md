@@ -2389,4 +2389,9 @@ Where this file and the SPEC ever disagree, this file wins.
   against its own scratch ledger, live tables and exports (`data/cache/demo`, port 8766).
 - Found by the recording and fixed: the command bar's Pages menu opened behind the Swarm view's
   panels (the header's blur makes it a stacking context painted below later panels), so it could
-  not be clicked there. The header is now `relative z-30`.
+  not be clicked there. The header is now `relative z-30`. Choosing a page in that menu now also
+  closes it (it stayed open over the new page).
+- Capture detail: CDP's document-timeline slow-down also slows the browser's own
+  requestAnimationFrame timestamps, so the time shim gives every frame callback the slowed
+  `performance.now()` instead; code that mixes the two clocks (the report's text resolve) otherwise
+  stalled at its first frame.

@@ -8,12 +8,16 @@ DuckDB and LanceDB, with a 3D Command Center in the browser. **All data is synth
 
 ![Live watch at T+120: the drone orbiting Bravo's fuel farm, the amber ghosts of three matched past flights, the predicted recovery zone on County Rd 12 and the linked Delta report](docs/guide/img/live-watch-t120.png)
 
+**Watch the two-minute narrated demo:** [docs/demo/kairos-defense-demo.mp4](docs/demo/kairos-defense-demo.mp4)
+(recorded from the running app by `make demo-video`; every number on screen is computed).
+
 ## Documentation
 
 | Document | For | What it covers |
 |---|---|---|
 | [User guide](docs/USER_GUIDE.md) | Operators, analysts, new users | Install, every screen with real screenshots, the demo, evidence, CLI, MCP, configuration, evaluation, troubleshooting |
 | [One-pager](docs/ONE_PAGER.md) | Non-technical readers | The problem, what it does, the demo in five beats, how to run it |
+| [Demo video](docs/demo/kairos-defense-demo.mp4) | Everyone | The story in under two minutes, narrated, with every click shown |
 | [Demo runbook](docs/DEMO.md) | Presenters | Before the audience, the four-minute script, keys, fallbacks, likely questions |
 | [Rollback guide](docs/ROLLBACK.md) | Maintainers | How the history and tags are organized, how to inspect and roll back a phase |
 | [Autopilot](docs/AUTOPILOT.md) | Maintainers | How the phases were built and gated unattended |

@@ -193,6 +193,18 @@ web/openapi.json && npm --prefix web run gen:types`; `check:types` fails on stal
   `useFrame`, never in the component body; component files export only components (D-147).
 - A clicked button keeps Space: e2e key presses blur first (`press` in `e2e/helpers.ts`).
 
+## Demo video recorder (`demo/`, D-168)
+
+`make demo-video` records `docs/demo/kairos-defense-demo.mp4` from the running app:
+`demo/record.spec.ts` (the storyboard: Director at 5×, paused on each beat while the narration
+explains it, then the Case board, Evidence, the Swarm view and Eval), `demo/overlay.ts` (the
+narration layer: title cards, chapter pill, callouts, pointer; a top-layer shadow root, no pointer
+events, numbers only as read from the screen), `demo/timeshim.ts` and `demo/kit.ts` (slow-motion
+clocks and CDP frame capture), `demo/encode.mjs` (frames to a 30 fps H.264 file and its chapter
+times), `demo/playwright.config.ts` (its own API on :8766 with `--time-scale 1/K` and scratch files
+under `data/cache/demo`). `DEMO_SLOW` sets K (5 by default; 1 on a GPU machine records in real
+time). It is not part of `make e2e`.
+
 ## Changelog
 
 - Phase 0: scaffold, tokens, fonts, motion helpers, command bar and placeholder Live watch (D-019,
@@ -208,3 +220,5 @@ web/openapi.json && npm --prefix web run gen:types`; `check:types` fails on stal
   recovery points share one anchor and stack (`labelSlots` in `three/ghostMath.ts`), the radar
   shadow label reads leftward from the wedge's center, the "No Remote ID" tag sits above the orbit
   ring, and the compact lens measures its header so the cost matrix and its caption fit the rail.
+- Demo video (D-168): `demo/` recorder; the command bar is `relative z-30` so the Pages menu opens
+  above page panels (it opened behind the Swarm view's panels).

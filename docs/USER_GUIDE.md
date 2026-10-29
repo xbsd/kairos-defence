@@ -284,6 +284,10 @@ Press **?** on any page for the list. Shortcuts are ignored while you type in a 
 
 ## 4. Running the demo
 
+A narrated two-minute recording of this story is in
+[docs/demo/kairos-defense-demo.mp4](demo/kairos-defense-demo.mp4); `make demo-video` records it again
+from the running app (on a machine with a GPU, `DEMO_SLOW=1 make demo-video` records in real time).
+
 Director mode plays the demo story one beat at a time, keyed to the replay clock. It sets a camera
 shot, dims the panels that do not matter for the beat and shows one plain-language caption at the
 bottom center. Every caption is computed from the data on screen, never scripted. A thin rail at the
@@ -414,7 +418,7 @@ with the command that fixes it ("no index: run `make index`").
 | `kairos-defense memory` | The case memory: `seed`, `reseed`, `verify`, `show`, `delta`, `demo` | see below |
 | `kairos-defense export` | Exports a signed evidence package for a case | `--case`, `--approve` (required), `--analyst`, `--at`, `--ledger`, `--out` |
 | `kairos-defense verify-evidence` | Verifies an evidence package | folder, `--ledger`, `--pubkey` |
-| `kairos-defense api` | Serves the REST API, the replay stream and (with `--static`) the web app | `--host`, `--port`, `--static`, `--reload`, `--dump-openapi`, `--memory`, `--live-db`, `--exports`, `--reseed` |
+| `kairos-defense api` | Serves the REST API, the replay stream and (with `--static`) the web app | `--host`, `--port`, `--static`, `--reload`, `--dump-openapi`, `--memory`, `--live-db`, `--exports`, `--reseed`, `--time-scale` (slow-motion replays for screen capture) |
 | `kairos-defense replay` | Lists the live replays, precomputes their results, or resets the live tables | `--incident`, `--precompute`, `--force`, `--reset`, `--api` |
 | `kairos-defense mcp` | Runs the MCP server over stdio | `--allow-proposals`, `--agent`, `--memory`, `--api` |
 | `kairos-defense fetch-models` | Downloads the optional embedding model (the only command that downloads) | `--model` |

@@ -112,3 +112,6 @@ calls).
   verify; `--exports` / `exports_path` (D-135 to D-137).
 - Phase 9: `routes_swarm.py`, `schemas_swarm.py` (D-152); `routes_chat.py`, `schemas_chat.py`
   (§18.3); `Services.swarm_matcher` and `swarm_cache`.
+- Demo video (D-168): `create_app(..., time_scale=)` and `Services(time_scale=)`: below 1 the replay
+  WebSocket's sessions run on `live.replay.scaled_clock` (slow motion for frame-perfect screen
+  capture, `api --time-scale`); `KD_TIME_SCALE` under `--reload`.

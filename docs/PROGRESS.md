@@ -26,6 +26,21 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Next: …
 -->
 
+### 2026-10-29 · The narrated demo video (after phase 10, same cloud session)
+- Built (D-168): `make demo-video` records `docs/demo/kairos-defense-demo.mp4` (1 min 45 s,
+  1920 × 1080, 30 fps, about 19 MB) from the running app: Director mode at 5× with a narration layer
+  (title cards, a chapter pill, callouts that ring the element that matters and explain how it
+  works, a visible pointer for every click) over nine chapters: Detect, Recognize, Time warp,
+  Anticipate, Recall, Remember, Prove, Swarms, Measured. Every number in a callout is read from the
+  screen. Slow-motion capture (`api --time-scale`, `web/demo/timeshim.ts`) gives 33 captured frames
+  per video second here, where Chromium renders the scene at about 7 fps.
+- Found by the recordings and fixed in the app: the Pages menu opened behind the Swarm view's
+  panels, and it stayed open over the page it opened.
+- Reviewed: three takes, every chapter checked frame by frame (chapter pill placement, callout
+  placement over the Case board graph, a stale row count, the report text resolve, the pointer
+  over the export confirm, the Eval values).
+- Tests: `scaled_clock` and `api --time-scale` (2 new Python tests); Vitest unchanged.
+
 ### 2026-10-29 · Summary of phases 8 to 10 (end of the cloud session)
 - Phase 8 (autopilot build on the laptop, gate passed): the Command Center's memorable moments:
   the time-warp lens, afterglow ghosts, core beams, region constellation, forecast with the road
