@@ -148,3 +148,51 @@ def test_write_table_checks_columns(tiny) -> None:
 def test_adapter_refuses_truth(cfg) -> None:
     with pytest.raises(TruthAccessError):
         DuckTrackStore(cfg.app.paths.truth, cfg.app)
+
+
+def _add_rf(store, rows: list[tuple[int, str, float]]) -> None:
+    """Extra RF detections at T0 + s seconds: (s, family, bearing)."""
+    df = pd.DataFrame([{"installation_id": "TEST", "sensor_id": "TEST-RF-1",
+                        "ts": T0 + timedelta(seconds=s), "band": "2.4GHz", "protocol_family": fam,
+                        "bearing_deg": brg, "snr_db": 20.0} for s, fam, brg in rows],
+                      columns=RAW_COLUMNS["rf_detections"])  # fmt: skip
+    store.con.register("df_in", df)
+    store.con.execute("INSERT INTO rf_detections SELECT * FROM df_in")
+    store.con.unregister("df_in")
+
+
+def test_sensor_context_until_is_bounded(tiny) -> None:
+    """D-071: RF and Remote ID heard after ``until`` never change the partial context; before it
+    they do."""
+    full = tiny.sensor_context_until("IA-T1", T0 + timedelta(hours=1))
+    assert full == {"rf_family": "FAM-07", "rid_serials": ("SN-A",),
+                    "rid_operator_xy": (-50.0, 3000.0)}  # fmt: skip
+    early = tiny.sensor_context_until("IA-T1", T0 + timedelta(seconds=20))
+    assert early == full
+    _add_rf(tiny, [(s, "FAM-30", 1.0) for s in range(21, 121)])  # a louder family, later
+    assert tiny.sensor_context_until("IA-T1", T0 + timedelta(seconds=20)) == early
+    assert tiny.sensor_context_until("IA-T1", T0 + timedelta(hours=1))["rf_family"] == "FAM-30"
+    _add_rf(tiny, [(s, "FAM-30", 1.0) for s in range(0, 20)] * 2)  # before T: it counts
+    assert tiny.sensor_context_until("IA-T1", T0 + timedelta(seconds=20))["rf_family"] == "FAM-30"
+    none = tiny.sensor_context_until("IA-T1", T0 - timedelta(seconds=1))  # nothing seen yet
+    assert none == {"rf_family": "unknown", "rid_serials": (), "rid_operator_xy": None}
+
+
+def test_concurrency_uses_only_tracks_seen_by_until(tiny) -> None:
+    """IB starts at T0+30 s. At T0+20 s nobody knows it will fly, so IA is alone and its RF is not
+    bearing-gated; over the full span the gate drops the off-bearing detection."""
+    _add_rf(tiny, [(10, "FAM-02", 89.0)])
+    early = tiny.rf_association(["IA-T1"], until=T0 + timedelta(seconds=20))
+    assert dict(zip(early.protocol_family, early.n, strict=True)) == {"FAM-07": 11, "FAM-02": 1}
+    full = tiny.rf_association(["IA-T1"])
+    assert set(full.protocol_family) == {"FAM-07"}  # concurrent with IB: gated
+    assert tiny.rf_association().equals(tiny.rf_association(until=None))  # bulk path unchanged
+
+
+def test_features_many_matches_features(p1_index) -> None:
+    with DuckTrackStore(p1_index.cfg.app.paths.duckdb, p1_index.cfg.app) as st:
+        ids = sorted(st.tracks_before(T0 + timedelta(days=400)).track_id)[:3]
+        many = st.features_many(list(reversed(ids)))
+        one = pd.concat([st.features(t) for t in ids], ignore_index=True)
+        assert many.equals(one)
+        assert len(st.features_many([])) == 0

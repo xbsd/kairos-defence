@@ -904,3 +904,217 @@ Where this file and the SPEC ever disagree, this file wins.
   - `scripts/check_targets.py` picks the newest eval JSON by modification time and requires it to
     be newer than the gate's start, so the committed `eval_2026-10-29.json` cannot stand in for
     phase 4's own run.
+
+## D-068 · Fixed-unit window vectors and a wide candidate list (resolves D-058) · 2026-10-28
+- Context: D-058. With per-window z-normalization the three planted P1 flights ranked 1,149 to
+  1,194 of 1,882 earlier tracks for the live query at T+90, far outside the 50 candidates DTW
+  sees. Planning found the normalization erases the orbit radius, speeds and altitude that make P1
+  distinctive.
+- Decision: `windows.normalize: fixed` divides each channel by a fixed unit,
+  `features.channel_scales: [5.0, 10.0, 200.0, 30.0, 1.0]` (m/s, °/s, m, m, m/s), times its
+  weight, with no centering. Then come the D-051 NaN fill, PAA and L2. `window` keeps phase 3's
+  per-window z for comparison. `prefilter.k_windows` is 10,000 and `prefilter.candidate_tracks`
+  500 (§6.5 says 200 and 50). Index and query share one function, so the recipe always matches.
+- Why: in planning, the same-actor track was among the top 50 candidates for 91% of prober queries at
+  T = 90 s (70% with per-window z). With 500 candidates the four 2026 P1 flights are candidates for
+  the live query (prefilter ranks 5, 7, 122 and 314 at T+90). The partial BRAVO 2025-11-14 flight
+  is a candidate at T+45 and T+60 but not at T+90. DTW plus fusion of 500 candidates
+  costs about 80 ms at p95.
+- Consequences: deviates from §9.3 (normalization "over the series being compared") for the
+  prefilter vectors only; DTW keeps §9.3. `make index` must be rerun after a recipe change; D-075
+  guards against a stale index. Window counts are unchanged (57,462 / 51,297 / 27,507). D-058 is
+  resolved. The prefilter p95 is now 30 ms (15 ms with 200 windows), inside §10.9's 50 ms.
+
+## D-069 · DTW details: relaxed ends, a speed-ratio warp, a dtaidistance quirk · 2026-10-28
+- Context: §10.4 aligns tonight's W rows end to end with a 2W-row anchored segment and regresses
+  the warping path for the pace. Neither worked as written.
+- Decision:
+  - Shape distance: §9.3 normalization of each series over itself, NaN filled (0 for a missing
+    channel), banded C `dtw_ndim.distance` (window `int(0.25 × max(n, m))`), and **psi relaxation
+    of the segment's two ends** (`(0, 0, m − n, m − n)` when the segment is longer).
+    `d_norm = d / sqrt(n)`, `shape_sim = exp(−d_norm / τ)`.
+  - Warp ratio: on the same alignment (full matrix), tonight's mean speed over the past flight's
+    mean speed on the segment rows the path visits. §8.5 makes a warp w divide every speed by w,
+    with geometry unchanged, so this ratio is w. Estimates outside 0.5 to 2.0 are not credible and
+    become NaN. Text: k > 1.1 gives "flown X% slower" (X = round((1 − 1/k) × 100)); k < 0.9 gives
+    "flown X% faster", the mirror formula.
+  - It is computed for the top 20 fused matches only; the rest keep NaN (D-054).
+  - `explain_alignment` (§10.4 step 6) wraps `subsequence_alignment` on raw `dist_target_m`, for
+    phase 8.
+  - The C extension is mandatory (`require_c`, `use_c=True` everywhere). LB_Keogh pruning is not
+    built: 500 candidates take 80 ms at p95, and `lb_keogh` needs equal lengths.
+- Why:
+  - End to end, an exact time-warped copy of a flight scored *below* an unrelated flight at
+    W = 120 (`test_relaxed_ends_rank_the_warped_copy_first`), which fails §20's "a time-warped copy
+    of a flight scores high".
+  - On real same-actor pairs of the training split, the path slope was off by 0.49 (median against
+    truth), whatever the normalization (live-window σ, σ floored at the channel units, geometry
+    channels only, whole tracks). The speed ratio was off by 0.091; it was chosen among five
+    variants on the training split, and validation agrees (0.088). Orbits carry no timing
+    information, and the best window often sits at another flight phase.
+  - dtaidistance 2.5.1's C `warping_paths` with a `window` returns a paths matrix that differs from
+    pure Python near the band edge (the distance is right). Without a window C equals Python,
+    which `test_c_paths_match_python_without_band` checks.
+- Consequences: deviates from §10.4 steps 3 and 5. Synthetic accuracy: within 0.2% at W = 120;
+  at W = 60 up to 4.3% low, because a 60 s window holds less than one cycle of the orbit's speed
+  wobble (the test allows 5%). P1's estimates stay weak: ALPHA-260303 reads 1.03 at T+90 against
+  the planted 1.22, so the §1.2 "flown ~18% slower" caption does not appear yet. Phase 8's lens
+  may revisit this with `explain_alignment`.
+
+## D-070 · Settings are chosen on the training split only · 2026-10-28
+- Context: the planning prototype looked at the month 13 to 18 queries and the demo; phase 4 must
+  not tune on them.
+- Decision: any choice among alternatives uses months 1 to 12 alone. The model is fitted on nights
+  before 2026-01-01 and scored on the held-out nights 2026-01-01 to 2026-02-28 (prober and copycat
+  queries). The criterion is Recall@5 at T = 120 s, with ties broken by candidate recall
+  (D-078 adds MRR at T = 90 s for its one question). The shipped model is then refit on all of
+  months 1 to 12. Pre-registered alternatives: prefilter scaling (fixed, dataset σ, per-window z),
+  `candidate_tracks` (200, 500, 1,000) and the training T grid ({60, 90, 120} or {45, 60, 90,
+  120, 180}). Defaults: fixed, 500, the wide grid. Nothing is special-cased for an incident,
+  actor, base or the demo.
+- Why: the demo and the §19 queries must stay honest measurements.
+- Consequences: two questions were decided this way (D-078, and D-069's warp estimator). The
+  defaults stand.
+
+## D-071 · Partial live signatures · 2026-10-28
+- Context: §10.5 says "live signatures are partial" but not what a live track knows.
+- Decision: the query signature is `signature()` (§9.4) on the query's own features, its first
+  radar point and its last point at or before T, and a sensor context bounded to T. RF and
+  Remote ID detections, the track's own points and the other tracks' spans (the D-048 concurrency
+  test) count only up to `until = first point + T`. A track that has not appeared by then cannot
+  bearing-gate anything. Unknown fields fuse as 0.5. Candidate signatures are the stored ones
+  (`tracks_before`, §11.3).
+- Why: CLAUDE.md rule 3. Without the bound, the live track's RF family or Remote ID could come from
+  after T.
+- Consequences: at T+90 the live P1 loiter radius reads 250 m (the orbit has just begun), so
+  `radius_sim` is low for every candidate. It reaches 187 m by T+120. A candidate that started
+  before the query but was still flying contributes its full-track signature and later windows.
+  That is allowed by rule 3 as written (filter on start), and it matters only for same-night eval
+  and training pairs, never for the demo, whose candidates are all from earlier nights.
+
+## D-072 · Two read-only `TrackStore` port methods · 2026-10-28
+- Context: the matcher needs many candidates' features and a T-bounded sensor context. Through the
+  existing port that is one round trip per candidate (50 calls take 76 ms) or SQL text in `match/`.
+- Decision: `TrackStore.features_many(track_ids)` and
+  `TrackStore.sensor_context_until(track_id, until) -> dict` (`rf_family`, `rid_serials`,
+  `rid_operator_xy`). `DuckTrackStore` implements them by giving `rf_association`,
+  `rid_association` and `sensor_context` an optional `until` bound (default None: phase 3's
+  behavior and tests unchanged). The matcher caches candidate channels per process, since history
+  features never change between index builds.
+- Why: rule 6 (business logic depends on ports only), and speed: 17 ms per live query.
+- Consequences: deviates from §4.1's port list. The KDB-X adapter (§22) must implement both.
+
+## D-073 · Fusion training · 2026-10-28
+- Context: §10.6 fixes the model but not the pair builder.
+- Decision: `kairos_defense.eval.training` builds the pairs and is the only code that labels
+  them with truth. It runs each query (history tracks, months 1 to 12) at T ∈ {45, 60, 90, 120,
+  180} through the matcher's own `CandidateBuilder`: same prefilter, `start < q.start`, own
+  incident excluded. The label is "same `actor_id`"; hobbyists, other probers and copycats are
+  negatives. τ = median `d_norm` of the positives. The model is
+  `LogisticRegression(class_weight="balanced", solver="lbfgs", max_iter=1000, C=1.0)` in
+  `scoring.fusion.features` order, fitted on rows sorted by (query, T, candidate). The training
+  hash is SHA-256 over keys, features and labels. Validation runs the same build on months 13 to
+  18 and records pair counts, ROC AUC, log loss and prober Recall@5 at T = 120 s; it is reported,
+  never used to choose. `models/fusion_v1.json` and `models/dtw_calibration.json` are both
+  written, and only `created_at` changes between runs. `TrainSplit` makes the dates parameters
+  for tests. Query kinds: D-078.
+- Why: training and serving share code, so they cannot drift; determinism (CLAUDE.md rule 4).
+- Consequences: 62 queries, 123,404 pairs (1,128 positive), τ 1.645, about 45 s on the laptop.
+  Validation AUC 0.998, validation Recall@5 1.000. The coefficients are large (`tod_sim` +26,
+  `rf_match` +19): probers keep schedules and radios and hobbyists do not, an honest signal in
+  this synthetic world that is reported, not suppressed.
+
+## D-074 · Explanations · 2026-10-28
+- Context: §10.7 gives conditions and texts, not ties or values.
+- Decision: a reason needs its §10.7 condition and a positive contribution `coef × x`. Reasons are
+  ordered by contribution, at most three. The warp reason ranks with `shape_sim`'s contribution
+  and needs a credible warp outside 0.9 to 1.1. Values come from the past flight's signature: its
+  family, its approach bearing rounded to 5°, its radius rounded to 10 m.
+- Why: a reason should never argue against the score it explains.
+- Consequences: P1's top matches read "Same time of night; Same RF family (FAM-07); Same approach
+  bearing (315°)".
+
+## D-075 · Stale-index and missing-model guards · 2026-10-28
+- Context: D-068 changed the vector recipe, and the autopilot gate reuses the build's `data/`
+  without rerunning `make index`.
+- Decision: `match.candidates.check_index` rebuilds the first window of each size of the earliest
+  indexed track with the current configuration. It looks each one up by `window_id` (k = 1) and
+  raises `IndexStale` ("index is stale: run `make index`") if a window is missing or more than
+  1e-6 away. `DtwMatcher` and `kairos-defense models` call it. Without `models/fusion_v1.json` or
+  `dtw_calibration.json`, `ModelError` says "run `make models`". A model whose feature order
+  differs from `scoring.fusion.features`, or whose τ disagrees with the calibration, is refused.
+  The CLI turns each into a one-line message and exit 1.
+- Why: a stale index would give wrong numbers silently.
+- Consequences: about 30 ms once per matcher. The test perturbs every stored vector, so it cannot
+  pass by choosing a lucky probe.
+
+## D-076 · Evaluation in phase 4 · 2026-10-28
+- Context: §19.3's DTW lift needs a Euclidean Recall@5 to subtract, and §10.9's DTW latency is
+  stated for 50 candidates.
+- Decision:
+  - `eval` and `match` default to `--method dtw`; `--method euclidean` still runs (§10.2).
+  - **The lift is measured in one run**: the matcher returns the same candidates in prefilter
+    order, the §10.2 baseline. New `Outcome` fields: `baseline_rank`, `baseline_copycat_rank`,
+    `dtw_ms`, `candidates`. New metric keys: `recall_at_5_t120_baseline`, `dtw_lift`,
+    `latency_dtw_p50_ms` and `latency_dtw_p95_ms` (over all 500 candidates, harder than §10.9's
+    50). `dtw_lift` and `latency_dtw_p95_ms` are gated; the JSON gains `model_version` and
+    `candidate_tracks`.
+  - `live_top3_incidents` is an assertion for `dtw` (all three in the top 3, each with a score
+    and a reason) and stays `info` for `euclidean`, which has no reasons.
+  - D-056's question: the §19.4 5% rule stays as written, with no absolute floor. `gates.json`
+    tolerates a non-zero `make eval`, and `check_targets.py` judges the targets.
+  - The first `reports/baseline.json` is the DTW run's.
+- Why: the same index and queries on both sides make the lift a clean comparison.
+- Consequences: the in-run Euclidean Recall@5 is 0.478 (fixed vectors; phase 3's per-window z gave
+  0.435). The lift over phase 3's frozen number would be +0.565.
+
+## D-077 · Figure font pinned in `eval/report.py` · 2026-10-28
+- Context: D-065 and D-067: the recall figure's bytes depended on the machine's default sans-serif.
+- Decision: `plot_recall` draws inside `plt.rc_context({"font.family": "DejaVu Sans"})`;
+  matplotlib bundles that font. The title names the method ("DTW + fusion").
+- Why: the next change to `eval/report.py` was the moment D-067 asked for.
+- Consequences: `sim/figures.py` still sets no font (D-065); phase 4 does not change `sim/`.
+
+## D-078 · Phase 4 target miss: the live top 3; proposed fix registered before any tuning · 2026-10-28
+- Context: the first full `make models && make eval` with the planned defaults (D-068 to D-073)
+  meets every §19.3 phase 4 metric: Recall@5 1.000, DTW lift +0.522, copycat-first 0%, time to
+  match 96%, end-to-end p95 146 ms. It misses one demo assertion: at T+90, P1-DELTA-260419 is
+  first but P1-ALPHA-260303 is fifth and P1-ALPHA-260502 thirteenth, behind P3 flights. P3 flies
+  RF family FAM-07 like P1, at the same time of night. The trained model gives `bearing_sim` a
+  coefficient of −1.03 and `radius_sim` +0.001. P1's approach bearing (315°) is exactly what
+  separates it from P3 here (`bearing_sim` 1.0 against 0.13 to 0.16).
+- Diagnosis (training pairs only): with swarm-drone queries removed, the fit gives `bearing_sim`
+  +2.65 and `radius_sim` +0.65. Same-team swarm drones in another swarm incident have mean
+  `bearing_sim` 0.16 and `launch_sim` 0.02. One drone's approach and launch inside a formation are
+  not traits of its team, yet the 87 to 132 swarm positives, upweighted by `class_weight="balanced"`,
+  teach the linear model that a different approach bearing is normal for a true match. Swarm
+  incidents are matched by their own choreography descriptors (§14, phase 9), and D-046 already
+  notes that swarm drones' single-track targets are mixed.
+- Proposed fix F1, registered here before it is evaluated: train the single-track fusion on prober
+  and copycat queries only, keeping every candidate (swarm drones stay as negatives). This deviates
+  from §10.6, which lists swarm drones among the queries.
+- Selection rule (D-070's: the training split only, months 13 to 18 and the demo never consulted):
+  refit both variants on nights 2025-03-01 to 2025-12-31 and evaluate on the held-out training
+  nights 2026-01-01 to 2026-02-28, on answerable prober and copycat queries. F1 is adopted if it is
+  no worse than the default in Recall@5 at T = 120 s and no worse in MRR at T = 90 s; otherwise the
+  default stays and the miss is a soft gap (D-063). No other setting is changed in this step.
+- Outcome: refit on 57 queries (nights 2025-03-01 to 2025-12-31), scored on the 11 answerable
+  held-out prober and copycat queries (2026-01-01 to 02-28). Default: Recall@5 at T = 120 s 1.000,
+  MRR at T = 90 s 1.000. F1: 1.000 and 1.000, with `bearing_sim` +2.13 instead of −1.63. F1 is no
+  worse on both, so it is adopted: `kairos_defense.eval.training.QUERY_KINDS` is prober and
+  copycat. The tie means the held-out split cannot tell the two apart. The choice rests on the
+  diagnosis above, not on a measured gain.
+- Result on the full data (`make models && make eval`): every §19.3 metric is unchanged (Recall@5
+  1.000, DTW lift +0.522, copycat-first 0%, time to match 96%, MRR at T = 120 s up from 0.942 to
+  1.000). At T+90 the top 4 are all P1 flights: DELTA-260419, ALPHA-260303, CHARLIE-260710,
+  ALPHA-260502, each with "Same approach bearing (315°)" among its reasons. The P3 flights fall to
+  fifth and below. The assertion still misses by one place: CHARLIE (planted as "weaker match on
+  purpose") leads ALPHA-0502 by 0.80 in logit, 0.68 of it from `alt_sim`. Tonight's median
+  altitude is 90 m; CHARLIE flew at 110 m and ALPHA-0502 at 118 m (§8.5's per-flight altitude
+  band).
+- A3 alternatives: the training T grid {60, 90, 120} ties the default on the held-out training
+  nights (Recall@5 at T = 120 s 1.000, MRR at T = 90 s 1.000), so the default stays. Prefilter
+  scaling and candidate count were not tried: the four 2026 P1 flights are already candidates at
+  T+90 (prefilter ranks 5, 7, 122 and 314 of 500), so neither can change their fused order.
+  Tuning stops here. The demo row is a soft gap under D-063, and REPORT.md shows the contribution
+  breakdown. Nothing is special-cased for an incident, an actor or the demo.

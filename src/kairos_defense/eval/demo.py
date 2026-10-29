@@ -1,9 +1,10 @@
-"""Demo assertions (SPEC §19.3, ``scenario_demo.yaml`` expectations) as far as phase 3 can check.
+"""Demo assertions (SPEC §19.3, ``scenario_demo.yaml`` expectations) as far as phase 4 can check.
 
 First contact is checked on the radar data; the orbit on the noiseless truth path with the phase 1
-definition (``orbit_established_s``). The live top 3 at T+90 is reported for information: it
-becomes a target with DTW and fusion in phase 4. Report recall, forecast and swarm checks are
-pending until phases 5 and 9.
+definition (``orbit_established_s``). The live top 3 at T+90 is an assertion for the DTW matcher
+(phase 4): it passes when every expected incident is in the top 3 with a score and at least one
+reason. Under ``--method euclidean`` it stays information only, since the baseline has no reasons
+(D-076). Report recall, forecast and swarm checks are pending until phases 5 and 9.
 """
 
 from __future__ import annotations
@@ -11,6 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import timedelta
 
+import numpy as np
 import pandas as pd
 import shapely
 
@@ -18,7 +20,7 @@ from kairos_defense.config import Config
 from kairos_defense.eval.truth import true_path
 from kairos_defense.features.channels import load_site
 from kairos_defense.match.query import load_query
-from kairos_defense.ports import TrackStore, VectorStore
+from kairos_defense.ports import TrackStore
 from kairos_defense.sim.scenario import orbit_established_s
 
 FENCE_WITHIN_M = 100.0  # §1.2: first point within 100 m of the fence
@@ -32,8 +34,33 @@ class DemoRow:
     status: str  # pass | fail | info (...) | pending (phase N)
 
 
+def top3_row(cfg: Config, matches: list, assert_top3: bool) -> DemoRow:
+    """``live_top3_incidents``: ranks of the expected incidents, each one's score and first
+    reason; ``pass`` only when all are in the top 3 with a score and a reason."""
+    ex = cfg.scenario.expectations
+    ranked = [m.incident_id for m in matches]
+    found = {inc: ranked.index(inc) + 1 if inc in ranked else None
+             for inc in ex.live_top3_incidents}  # fmt: skip
+    hits = sum(r is not None and r <= 3 for r in found.values())
+    parts = []
+    for inc, r in found.items():
+        if r is None:
+            parts.append(f"{inc} -")
+            continue
+        m = matches[r - 1]
+        why = f", {m.reasons[0]!r}" if m.reasons else ""
+        parts.append(f"{inc} #{r} ({m.score:.2f}{why})")
+    observed = f"{hits}/3 in top 3; " + "; ".join(parts)
+    expected = f"{', '.join(ex.live_top3_incidents)} at T+{ex.live_top3_at_s:g} s, with reasons"
+    if not assert_top3:
+        return DemoRow("live_top3_incidents", expected, observed, "info (Euclidean baseline)")
+    ok = all(r is not None and r <= 3 and matches[r - 1].reasons and
+             np.isfinite(matches[r - 1].score) for r in found.values())  # fmt: skip
+    return DemoRow("live_top3_incidents", expected, observed, "pass" if ok else "fail")
+
+
 def demo_rows(
-    cfg: Config, store: TrackStore, vstore: VectorStore, truth: pd.DataFrame, ranker
+    cfg: Config, store: TrackStore, truth: pd.DataFrame, ranker, assert_top3: bool = True
 ) -> list[DemoRow]:
     ex = cfg.scenario.expectations
     live = cfg.scenario.live_incident
@@ -63,16 +90,7 @@ def demo_rows(
                         "pass" if ok else "fail"))  # fmt: skip
 
     q = load_query(store, track, int(ex.live_top3_at_s), cfg.scoring)
-    matches, _ = ranker(q, vstore, cfg.scoring)
-    ranked = [m.incident_id for m in matches]
-    found = {
-        inc: (ranked.index(inc) + 1 if inc in ranked else None) for inc in ex.live_top3_incidents
-    }
-    hits = sum(r is not None and r <= 3 for r in found.values())
-    observed = f"{hits}/3 in top 3; ranks " + ", ".join(
-        f"{inc} {'-' if r is None else r}" for inc, r in found.items())  # fmt: skip
-    expected = f"{', '.join(ex.live_top3_incidents)} at T+{ex.live_top3_at_s:g} s"
-    rows.append(DemoRow("live_top3_incidents", expected, observed, "info (target from phase 4)"))
+    rows.append(top3_row(cfg, ranker(q).matches, assert_top3))
     rows.append(
         DemoRow("live_rank1_report_for", ex.live_rank1_report_for, "-", "pending (phase 5)")
     )

@@ -2,9 +2,9 @@
 ``--baseline`` regression gate.
 
 ``eval --baseline`` writes ``reports/baseline.json``; a later run without the flag fails if a gated
-metric is more than 5% worse (relative) than the baseline, or a demo assertion fails. Phase 3
-reports the Euclidean baseline numbers only; the first ``baseline.json`` is written in phase 4
-(D-056).
+metric is more than 5% worse (relative) than the baseline, or a demo assertion fails. Phase 4's exit
+check writes the first ``baseline.json`` from the DTW matcher (D-056, D-076). The Markdown writer is
+in ``report_md.py``.
 """
 
 from __future__ import annotations
@@ -19,12 +19,14 @@ from kairos_defense.eval.harness import T_GRID, EvalRun
 from kairos_defense.eval.metrics import (
     Outcome,
     copycat_first_rate,
+    dtw_lift,
     mrr,
     percentiles,
     recall_at_k,
     time_to_match_share,
     times_to_match,
 )
+from kairos_defense.eval.report_md import markdown
 
 TOLERANCE = 0.05  # §19.4: fail when a metric worsens by more than 5% relative
 # Latency is timing noise at the 5% level, so it regresses only when more than 50% plus 2 ms worse
@@ -33,19 +35,18 @@ LATENCY_TOLERANCE = 0.5
 LATENCY_SLACK_MS = 2.0
 GATED = {  # metric -> +1 higher is better, -1 lower is better
     "recall_at_5_t120": 1, "mrr_t120": 1, "time_to_match_t90": 1, "copycat_first_t120": -1,
-    "recall_at_5_t120_copycats": 1, "latency_prefilter_p95_ms": -1,
-    "latency_end_to_end_p95_ms": -1,
+    "recall_at_5_t120_copycats": 1, "dtw_lift": 1, "latency_prefilter_p95_ms": -1,
+    "latency_dtw_p95_ms": -1, "latency_end_to_end_p95_ms": -1,
 }  # fmt: skip
 PENDING = {
-    "dtw_lift": "phase 4 (needs DTW + fusion)",
     "report_linkage": "phase 5",
     "forecast_error_t90": "phase 5",
     "swarm_top1": "phase 9",
-    "latency_dtw": "phase 4",
 }
-LATENCY_STAGES = (("query_build", "query_ms"), ("prefilter", "prefilter_ms"),
+LATENCY_STAGES = (("query_build", "query_ms"), ("prefilter", "prefilter_ms"), ("dtw", "dtw_ms"),
                   ("end_to_end", "total_ms"))  # fmt: skip
-BUDGET_MS = {"prefilter": 50, "end_to_end": 1500}  # §10.9 p95 (end to end includes DTW later)
+# §10.9 p95 budgets. The DTW budget is for 50 candidates; phase 4 re-ranks 500 (D-068, D-076).
+BUDGET_MS = {"prefilter": 50, "dtw": 800, "end_to_end": 1500}
 
 
 def _actor_table(outcomes: list[Outcome], at_s: int = 120) -> dict[str, dict]:
@@ -66,8 +67,11 @@ def summarize(run: EvalRun) -> dict:
     ran = [o for o in p + c if o.ran]
     lat = {stage: percentiles([getattr(o, f) for o in ran]) for stage, f in LATENCY_STAGES}
     ttm = [v for v in times_to_match(p).values() if v is not None]
+    lift, _, base_r5 = dtw_lift(p, 5, 120)
     metrics = {
         "recall_at_5_t120": recall_at_k(p, 5, 120)[0],
+        "recall_at_5_t120_baseline": base_r5,
+        "dtw_lift": lift,
         "mrr_t120": mrr(p, 120)[0],
         "time_to_match_t90": time_to_match_share(p, 90)[0],
         "copycat_first_t120": copycat_first_rate(p, 120)[0],
@@ -98,6 +102,8 @@ def summarize(run: EvalRun) -> dict:
     }
     return {
         "method": run.method,
+        "model_version": run.model_version,
+        "candidate_tracks": run.candidate_tracks,
         "created_at": run.created_at.isoformat(timespec="seconds"),
         "elapsed_s": round(run.elapsed_s, 1),
         "metrics": metrics,
@@ -128,100 +134,19 @@ def regressions(metrics: dict, baseline: dict, tol: float = TOLERANCE) -> list[s
     return out
 
 
-def _fmt(v, pct: bool = False) -> str:
-    if v is None:
-        return "-"
-    return f"{v:.0%}" if pct else f"{v:.3f}"
-
-
-def _ms(v) -> str:
-    return "-" if v is None else f"{v:.0f}"
-
-
-def markdown(s: dict, figure: str) -> str:
-    m, n = s["metrics"], s["counts"]
-    day = s["created_at"][:10]
-    lines = [
-        f"# Evaluation · {s['method']} baseline · {day}",
-        "",
-        f"`kairos-defense eval` (phase 3): the Euclidean baseline (§10.2) on the §19 protocol. "
-        "No targets apply yet; these numbers are the reference for phase 4's DTW lift. "
-        f"Run time {s['elapsed_s']:.0f} s.",
-        "",
-        "## Query sets (§19.1)",
-        "",
-        "| Set | Queries | Unanswerable (no earlier same-actor track, D-009) |",
-        "|---|---:|---:|",
-        f"| Probers (nights 2026-03-01 to 08-31) | {n['prober_queries']} | "
-        f"{n['prober_unanswerable']} |",
-        f"| Copycats | {n['copycat_queries']} | {n['copycat_unanswerable']} |",
-        f"| Swarm incidents | {n['swarm_incidents']} | matched in phase 9 |",
-        "",
-        f"Each answerable query runs at T = {', '.join(map(str, T_GRID))} s after its first radar "
-        f"point ({n['searches']} searches). T = 30 s is below `min_track_s` (45 s): the matcher "
-        "waits, which counts as a miss.",
-        "",
-        "## Headline metrics (§19.3, probers unless noted)",
-        "",
-        "| Metric | Value | v1 target (from phase 4) |",
-        "|---|---:|---|",
-        f"| Recall@5 at T = 120 s | {_fmt(m['recall_at_5_t120'])} | ≥ 0.80 |",
-        f"| MRR at T = 120 s | {_fmt(m['mrr_t120'])} | report only |",
-        f"| Time to match: top 3 by T = 90 s | {_fmt(m['time_to_match_t90'], True)} | ≥ 70% |",
-        f"| Copycat-first rate at T = 120 s | {_fmt(m['copycat_first_t120'], True)} | ≤ 5% |",
-        f"| Recall@5 at T = 120 s, copycat queries | {_fmt(m['recall_at_5_t120_copycats'])} "
-        "| report only |",
-        "| DTW lift | - | ≥ +0.10 (phase 4) |",
-        "| Report linkage | - | ≥ 0.70 (phase 5) |",
-        "| Forecast error at T = 90 s | - | median ≤ 400 m (phase 5) |",
-        "| Swarm top-1 | - | ≥ 0.80 (phase 9) |",
-        "",
-        "## Recall by time since first contact",
-        "",
-        "| T (s) | Window W (s) | Recall@5 probers | Top-3 probers | Recall@5 copycats |",
-        "|---:|---|---:|---:|---:|",
-    ]
-    for t, r in s["recall_by_t"].items():
-        w = ", ".join(map(str, r["window_s"])) if r["ran"] else "not run"
-        cells = [t, w, _fmt(r["recall_at_5_probers"]), _fmt(r["top3_probers"]),
-                 _fmt(r["recall_at_5_copycats"])]  # fmt: skip
-        lines.append("| " + " | ".join(cells) + " |")
-    lines += ["", f"![Recall@5 against T]({figure})", "",
-              "## Per actor (Recall@5 at T = 120 s)", "",
-              "| Actor | Queries | Recall@5 | Found in top 50 | Median best rank |",
-              "|---|---:|---:|---:|---:|"]  # fmt: skip
-    for actor, a in s["per_actor"].items():
-        med = "-" if a["median_best_rank"] is None else f"{a['median_best_rank']:.0f}"
-        lines.append(f"| {actor} | {a['queries']} | {_fmt(a['recall_at_5'])} | "
-                     f"{a['found_in_candidates']} | {med} |")  # fmt: skip
-    lines += ["", "## Latency (§10.9)", "", "| Stage | p50 (ms) | p95 (ms) | p95 budget (ms) |",
-              "|---|---:|---:|---:|"]  # fmt: skip
-    names = {
-        "query_build": "Query build (resample, target, PAA)",
-        "prefilter": "Prefilter (LanceDB search + grouping)",
-        "end_to_end": "End to end",
-    }
-    for stage, label in names.items():
-        budget = BUDGET_MS.get(stage)
-        lines.append(f"| {label} | {_ms(m[f'latency_{stage}_p50_ms'])} | "
-                     f"{_ms(m[f'latency_{stage}_p95_ms'])} | {budget or '-'} |")  # fmt: skip
-    lines += ["| DTW re-rank (50 candidates) | - | - | 800 (phase 4) |", "",
-              "## Demo assertions (`scenario_demo.yaml`)", "",
-              "| Expectation | Expected | Observed | Status |", "|---|---|---|---|"]  # fmt: skip
-    for r in s["demo"]:
-        lines.append(f"| `{r['key']}` | {r['expected']} | {r['observed']} | {r['status']} |")
-    lines += ["", "Truth is read only by `kairos_defense.eval` to label outcomes (CLAUDE.md "
-              "rule 2); every search is filtered to tracks that started before the query "
-              "(rule 3).", ""]  # fmt: skip
-    return "\n".join(lines)
-
-
 def plot_recall(s: dict, path: Path) -> Path:
     """Recall@5 against T for prober and copycat queries (one axis, two series)."""
     from kairos_defense.sim.figures import INK, INK_2, MUTED, SERIES_PATH, SERIES_RADAR, SURFACE
     from kairos_defense.sim.figures import _plt as plt_
 
     plt = plt_()
+    with plt.rc_context({"font.family": "DejaVu Sans"}):  # bundled with matplotlib (D-077)
+        _draw_recall(plt, s, path, (INK, INK_2, MUTED, SERIES_PATH, SERIES_RADAR, SURFACE))
+    return path
+
+
+def _draw_recall(plt, s: dict, path: Path, colors: tuple) -> None:
+    INK, INK_2, MUTED, SERIES_PATH, SERIES_RADAR, SURFACE = colors
     ts = [int(t) for t, r in s["recall_by_t"].items() if r["ran"]]
     fig, ax = plt.subplots(figsize=(6.4, 3.6), dpi=110, facecolor=SURFACE)
     ax.set_facecolor(SURFACE)
@@ -244,8 +169,8 @@ def plot_recall(s: dict, path: Path) -> Path:
     ax.set_xticks(ts)
     ax.set_xlabel("T, seconds after first radar contact", color=INK_2, fontsize=9)
     ax.set_ylabel("Recall@5", color=INK_2, fontsize=9)
-    ax.set_title(f"{s['method'].title()} baseline: same actor in the top 5", color=INK,
-                 fontsize=10, loc="left")  # fmt: skip
+    title = "DTW + fusion" if s["method"] == "dtw" else f"{s['method'].title()} baseline"
+    ax.set_title(f"{title}: same actor in the top 5", color=INK, fontsize=10, loc="left")
     ax.grid(axis="y", color=MUTED, lw=0.5, alpha=0.4)
     for side in ("top", "right"):
         ax.spines[side].set_visible(False)
@@ -257,7 +182,6 @@ def plot_recall(s: dict, path: Path) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, facecolor=SURFACE, metadata={"Software": None})
     plt.close(fig)
-    return path
 
 
 def write_reports(run: EvalRun, reports_dir: Path | str) -> tuple[Path, Path, dict]:

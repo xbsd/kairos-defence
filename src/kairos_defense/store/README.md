@@ -27,6 +27,10 @@ truth-isolation guard every app connection goes through.
   - Port methods:
     - `track_points(track_id)`: rows ordered by `ts`; meters in the region frame.
     - `features(track_id)`: 1 Hz rows from `track_features`.
+    - `features_many(track_ids)`: the same for many tracks, ordered by `track_id`, `t_s` (D-072).
+    - `sensor_context_until(track_id, until) -> dict`: `rf_family`, `rid_serials`,
+      `rid_operator_xy` from track points, RF, Remote ID and concurrent tracks at or before
+      `until` only (§10.5 partial signatures, D-071, D-072).
     - `signature(track_id) -> dict`: one `track_signatures` row.
     - `tracks_before(ts, exclude_incident=None)`: signatures of tracks that started **strictly
       before** `ts` (§11.3, rule 3).
@@ -35,10 +39,13 @@ truth-isolation guard every app connection goes through.
   - Extras:
     - `base_events_during(track_id)`.
     - `tracks()`: one row per track.
-    - `rf_association(track_ids=None)` (§11.2: ±30 s, with a 15° bearing gate when tracks overlap,
-      D-048).
-    - `rid_association(track_ids=None)` (±5 s and 100 m).
-    - `sensor_context(track_ids=None) -> dict[track_id, SensorContext]`.
+    - `rf_association(track_ids=None, until=None)` (§11.2: ±30 s, with a 15° bearing gate when
+      tracks overlap, D-048).
+    - `rid_association(track_ids=None, until=None)` (±5 s and 100 m).
+    - `sensor_context(track_ids=None, until=None) -> dict[track_id, SensorContext]`.
+    - `until` (naive UTC) bounds the track's points, the detections and the concurrency spans:
+      a track that has not appeared by `until` cannot gate anything. `None` (the default, used by
+      `index`) is phase 3's behavior.
     - `write_table(name, df) -> int`: drops and recreates one §7.2 derived table. The columns must
       match the DDL.
 - `lance.LanceVectorStore(uri)`:
@@ -81,7 +88,9 @@ truth-isolation guard every app connection goes through.
 
 - `tests/unit/test_truth_isolation.py`: the §7.6 scan and the guard against every path spelling.
 - `tests/unit/test_duck_store.py`: the RF bearing gate on concurrent tracks, Remote ID ±5 s / 100 m,
-  as-of weather, events, strict `tracks_before`, truth refused.
+  as-of weather, events, strict `tracks_before`, truth refused; `sensor_context_until` ignores
+  everything heard after `until`, concurrency uses only tracks seen by `until`, `features_many`
+  equals `features` per track.
 - `tests/unit/test_index.py` and `tests/unit/test_no_lookahead.py` exercise both adapters end to end.
 - Run: `uv run pytest tests/unit -q -k "truth or duck or index or lookahead"`.
 
@@ -94,6 +103,8 @@ truth-isolation guard every app connection goes through.
 - `tracks_before` is strict (`<`). A track never matches itself or anything that started after it.
 - `_distance` is squared L2, not cosine. The two rank the same only because window vectors are unit
   length.
+- `sensor_context_until` runs the RF association SQL for one track: about 17 ms on the laptop,
+  once per live query. A KDB-X adapter (§22) needs `features_many` and `sensor_context_until` too.
 
 ## Changelog
 
@@ -101,3 +112,5 @@ truth-isolation guard every app connection goes through.
 - Phase 1: `ddl.py`, the §7.1 raw and §7.3 truth DDL.
 - Phase 3: §7.2 derived DDL, `duck.py` (`DuckTrackStore`, §11 joins, D-048) and `lance.py`
   (`LanceVectorStore`, D-052).
+- Phase 4: `features_many`, `sensor_context_until` and the `until` bound on the association
+  queries (D-071, D-072).

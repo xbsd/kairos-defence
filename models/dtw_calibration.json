@@ -1,0 +1,23 @@
+{
+ "version": "dtw-calibration-v1",
+ "tau": 1.6453307801744441,
+ "n_pairs": 123404,
+ "n_positive": 1128,
+ "d_norm_same": {
+  "p10": 1.437843,
+  "p50": 1.645331,
+  "p90": 1.881035
+ },
+ "d_norm_other": {
+  "p10": 1.481752,
+  "p50": 1.688762,
+  "p90": 1.985688
+ },
+ "band_fraction": 0.25,
+ "anchor": [
+  0.5,
+  1.5
+ ],
+ "training_hash": "318e1b4cde4bb19f99235c3935525e6f1cd55272bdbd4185bde3ca5ae5ebb6fd",
+ "created_at": "2026-10-29T01:26:07"
+}

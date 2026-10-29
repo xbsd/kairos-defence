@@ -1,0 +1,181 @@
+{
+ "method": "dtw",
+ "model_version": "fusion-v1",
+ "candidate_tracks": 500,
+ "created_at": "2026-10-29T01:27:59",
+ "elapsed_s": 38.9,
+ "metrics": {
+  "recall_at_5_t120": 1.0,
+  "recall_at_5_t120_baseline": 0.4782608695652174,
+  "dtw_lift": 0.5217391304347826,
+  "mrr_t120": 1.0,
+  "time_to_match_t90": 0.9565217391304348,
+  "copycat_first_t120": 0.0,
+  "recall_at_5_t120_copycats": 1.0,
+  "median_time_to_match_s": 45.0,
+  "latency_query_build_p50_ms": 3.880167001625523,
+  "latency_query_build_p95_ms": 4.3329087988240635,
+  "latency_prefilter_p50_ms": 27.261166003881954,
+  "latency_prefilter_p95_ms": 29.704507801216096,
+  "latency_dtw_p50_ms": 55.5380830046488,
+  "latency_dtw_p95_ms": 81.27820799709298,
+  "latency_end_to_end_p50_ms": 119.08995799603872,
+  "latency_end_to_end_p95_ms": 149.01748280099127
+ },
+ "counts": {
+  "prober_queries": 23,
+  "prober_unanswerable": 0,
+  "copycat_queries": 10,
+  "copycat_unanswerable": 0,
+  "swarm_incidents": 5,
+  "searches": 165
+ },
+ "recall_by_t": {
+  "30": {
+   "recall_at_5_probers": 0.0,
+   "top3_probers": 0.0,
+   "recall_at_5_copycats": 0.0,
+   "window_s": [],
+   "ran": false
+  },
+  "45": {
+   "recall_at_5_probers": 0.8260869565217391,
+   "top3_probers": 0.8260869565217391,
+   "recall_at_5_copycats": 0.8,
+   "window_s": [
+    60
+   ],
+   "ran": true
+  },
+  "60": {
+   "recall_at_5_probers": 0.9130434782608695,
+   "top3_probers": 0.9130434782608695,
+   "recall_at_5_copycats": 1.0,
+   "window_s": [
+    60
+   ],
+   "ran": true
+  },
+  "90": {
+   "recall_at_5_probers": 0.9565217391304348,
+   "top3_probers": 0.9565217391304348,
+   "recall_at_5_copycats": 1.0,
+   "window_s": [
+    60
+   ],
+   "ran": true
+  },
+  "120": {
+   "recall_at_5_probers": 1.0,
+   "top3_probers": 1.0,
+   "recall_at_5_copycats": 1.0,
+   "window_s": [
+    60,
+    120
+   ],
+   "ran": true
+  },
+  "180": {
+   "recall_at_5_probers": 1.0,
+   "top3_probers": 1.0,
+   "recall_at_5_copycats": 1.0,
+   "window_s": [
+    120
+   ],
+   "ran": true
+  }
+ },
+ "per_actor": {
+  "C1": {
+   "queries": 5,
+   "recall_at_5": 1.0,
+   "median_best_rank": 1.0,
+   "found_in_candidates": 5
+  },
+  "C2": {
+   "queries": 5,
+   "recall_at_5": 1.0,
+   "median_best_rank": 1.0,
+   "found_in_candidates": 5
+  },
+  "P1": {
+   "queries": 4,
+   "recall_at_5": 1.0,
+   "median_best_rank": 1.0,
+   "found_in_candidates": 4
+  },
+  "P2": {
+   "queries": 4,
+   "recall_at_5": 1.0,
+   "median_best_rank": 1.0,
+   "found_in_candidates": 4
+  },
+  "P3": {
+   "queries": 5,
+   "recall_at_5": 1.0,
+   "median_best_rank": 1.0,
+   "found_in_candidates": 5
+  },
+  "P4": {
+   "queries": 3,
+   "recall_at_5": 1.0,
+   "median_best_rank": 1.0,
+   "found_in_candidates": 3
+  },
+  "P5": {
+   "queries": 4,
+   "recall_at_5": 1.0,
+   "median_best_rank": 1.0,
+   "found_in_candidates": 4
+  },
+  "P6": {
+   "queries": 3,
+   "recall_at_5": 1.0,
+   "median_best_rank": 1.0,
+   "found_in_candidates": 3
+  }
+ },
+ "pending": {
+  "report_linkage": "phase 5",
+  "forecast_error_t90": "phase 5",
+  "swarm_top1": "phase 9"
+ },
+ "demo": [
+  {
+   "key": "live_first_contact_local",
+   "expected": "21:39:30-21:40:30, <= 100 m from fence",
+   "observed": "21:40:06, 71 m",
+   "status": "pass"
+  },
+  {
+   "key": "live_orbit_established_s",
+   "expected": "T+65-100 s",
+   "observed": "T+79 s",
+   "status": "pass"
+  },
+  {
+   "key": "live_top3_incidents",
+   "expected": "P1-DELTA-260419, P1-ALPHA-260303, P1-ALPHA-260502 at T+90 s, with reasons",
+   "observed": "2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of night'); P1-ALPHA-260303 #2 (0.99, 'Same time of night'); P1-ALPHA-260502 #4 (0.98, 'Same time of night')",
+   "status": "fail"
+  },
+  {
+   "key": "live_rank1_report_for",
+   "expected": "P1-DELTA-260419",
+   "observed": "-",
+   "status": "pending (phase 5)"
+  },
+  {
+   "key": "forecast_error_max_m",
+   "expected": "<= 400 m at T+105 s",
+   "observed": "-",
+   "status": "pending (phase 5)"
+  },
+  {
+   "key": "swarm_top1",
+   "expected": "S1-GOLF-260503",
+   "observed": "-",
+   "status": "pending (phase 9)"
+  }
+ ]
+}

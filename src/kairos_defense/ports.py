@@ -28,6 +28,9 @@ class CaseSnapshot:
 class TrackStore(Protocol):
     def track_points(self, track_id: str) -> pd.DataFrame: ...
     def features(self, track_id: str) -> pd.DataFrame: ...  # 1 Hz rows, §9
+    def features_many(self, track_ids: Sequence[str]) -> pd.DataFrame: ...  # by track, t_s (D-072)
+    # RF family, Remote ID serials and operator from what was heard up to ``until`` (D-071, D-072)
+    def sensor_context_until(self, track_id: str, until: datetime) -> dict: ...
     def signature(self, track_id: str) -> dict: ...  # §9.4
     def tracks_before(self, ts: datetime, exclude_incident: str | None = None) -> pd.DataFrame: ...
     def context_asof(self, track_id: str) -> pd.DataFrame: ...  # weather and events per point, §11

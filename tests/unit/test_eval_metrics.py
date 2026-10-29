@@ -68,3 +68,17 @@ def test_regressions_respect_direction() -> None:
     )
     assert len(regressions({**bad, "latency_prefilter_p95_ms": 77.0}, base)) == 2
     assert regressions({"recall_at_5_t120": None}, base) == []
+
+
+def test_dtw_lift_known_answer() -> None:
+    from kairos_defense.eval.metrics import dtw_lift
+
+    def o(tid, at, rank, base):
+        return Outcome(tid, "P9", "prober", at, True, true_rank=rank, baseline_rank=base)
+
+    rows = [o("a", 120, 1, 9), o("b", 120, 3, 4), o("c", 120, None, 2), o("d", 120, 2, None),
+            o("a", 90, 1, 1), Outcome("e", "P9", "prober", 120, False)]  # fmt: skip
+    lift, fused, base = dtw_lift(rows, 5, 120)
+    assert fused == pytest.approx(3 / 5) and base == pytest.approx(2 / 5)  # e did not run: a miss
+    assert lift == pytest.approx(1 / 5)
+    assert dtw_lift([], 5, 120) == (None, None, None)

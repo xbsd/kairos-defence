@@ -14,19 +14,24 @@ The top-level package: the CLI entry point and the four core modules every other
 ## Public API
 
 - `cli.app`: the Typer app (script `kairos-defense`).
-  - Real commands: `gen` (phase 1, extended in phase 2), `index`, `match --method euclidean` and
-    `eval` (phase 3).
-  - Stubs in `STUBS`: `models`, `recall`, `forecast`, `replay`, `memory`, `export`,
-    `verify-evidence`, `fetch-models`, `api` and `mcp`.
+  - Real commands: `gen` (phase 1, extended in phase 2), `index` (phase 3), `models` (phase 4),
+    `match --method dtw|euclidean` and `eval [--baseline] [--method dtw|euclidean]` (phase 3; DTW
+    and the `dtw` default from phase 4). `match`, `models` and `eval` exit 1 with a fix-it message
+    for missing data, a missing or stale index, missing models or a missing DTW C extension.
+  - Stubs in `STUBS`: `recall`, `forecast`, `replay`, `memory`, `export`, `verify-evidence`,
+    `fetch-models`, `api` and `mcp`.
   - `--version`.
 - `ports`:
-  - `TrackStore`: `track_points`, `features`, `signature`, `tracks_before`, `context_asof`, `sql`.
+  - `TrackStore`: `track_points`, `features`, `features_many`, `sensor_context_until`,
+    `signature`, `tracks_before`, `context_asof`, `sql` (the two phase 4 additions, D-072).
   - `VectorStore`: `upsert`, `search`.
   - `ReportIndex`: `hybrid`, `fts`.
   - `Embedder`: `dim`, and `embed(texts) -> (n, dim) float32`, L2-normalized.
   - `CaseMemory`: `append`, `as_of`, `diff`, and `verify_chain() -> int | None` (D-014).
   - `LLM`: `chat`.
   - `CaseSnapshot`, a dataclass.
+- `cli_tables`: the `match`, `models` and `eval` tables (`match_table`, `models_table`,
+  `eval_table`); missing numbers print as `-`.
 - `rng.stable_int(name) -> int`: the first 8 bytes of SHA-256, little-endian.
 - `rng.rng_for(seed, *names) -> numpy.random.Generator`: an independent stream per component, e.g.
   `rng_for(42, "P2", "flight", "7")`.
@@ -64,7 +69,8 @@ None directly. `cli.py` reads `config/` and wires `store`, `sim`, `features`, `m
 ## Tests
 
 - `tests/unit/test_cli.py`: help lists every command; each stub exits 0 and names its phase;
-  `--version`; the real commands' error and happy paths.
+  `--version`; the real commands' error and happy paths (`match` with both methods, `models` on
+  the P1 nights, missing data, index and models).
 - `tests/unit/test_rng.py`: pinned values and stream independence.
 - `tests/unit/test_geo.py`: cardinals, wrap edges, clockwise rotation, rectangles, frame round trips.
 - Run: `uv run pytest tests/unit -q -k "cli or rng or geo"`.
@@ -83,3 +89,5 @@ None directly. `cli.py` reads `config/` and wires `store`, `sim`, `features`, `m
 - Phase 1: `gen` became real.
 - Phase 2: `gen` gained the swarm, RF, Remote ID and paperwork counts.
 - Phase 3: `index`, `match --method euclidean` and `eval [--baseline]` became real.
+- Phase 4: `models` became real; `match` and `eval` default to `--method dtw`; `cli_tables.py`;
+  `TrackStore.features_many` and `sensor_context_until` (D-072, D-076).

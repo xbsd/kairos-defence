@@ -3,13 +3,15 @@ features:
   max_interp_gap_s: 10
   channels: [speed_ms, turn_rate_dps, dist_target_m, alt_m, vspeed_ms]
   channel_weights: [1.0, 1.0, 1.2, 0.6, 0.4]
+  channel_scales: [5.0, 10.0, 200.0, 30.0, 1.0]   # m/s, °/s, m, m, m/s (fixed units, D-068)
 windows:
   sizes_s: [60, 120, 300]
   stride_s: 10
   paa_segments: 16                  # vector dim = 5 channels × 16 = 80
+  normalize: fixed                  # fixed | window; fixed keeps orbit radius and speed (D-068)
 prefilter:
-  k_windows: 200
-  candidate_tracks: 50
+  k_windows: 10000                  # §6.5 says 200; wider list for DTW (D-068)
+  candidate_tracks: 500             # §6.5 says 50 (D-068)
 dtw:
   band_fraction: 0.25               # Sakoe-Chiba window = 25% of the longer series
   anchor_before: 0.5                # anchor segment = [start − 0.5W, start + 1.5W]

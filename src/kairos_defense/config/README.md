@@ -62,11 +62,20 @@ Pydantic models for the five YAML files in `config/` and the one loader that val
 
 This package defines every key. See SPEC §6 for meanings and defaults.
 
+Phase 4 additions and changed values in `scoring.yaml` (D-068):
+
+- `features.channel_scales`: one positive unit per channel, `[5.0, 10.0, 200.0, 30.0, 1.0]` (m/s,
+  °/s, m, m, m/s); validated to match `channels` in length.
+- `windows.normalize`: `fixed` (divide by `channel_scales`) or `window` (per-window z, §9.3).
+- `prefilter.k_windows` 10,000 (§6.5 says 200) and `prefilter.candidate_tracks` 500 (§6.5 says 50).
+- `dtw.tau`: `auto` reads `models/dtw_calibration.json`; a positive number overrides it.
+
 ## Tests
 
-- `tests/unit/test_config.py`, 36 tests: the shipped files load; decision values survive (D-003,
-  D-004, D-006); YAML 1.2 booleans; root-relative paths; frozen models; 29 invalid variants rejected;
-  missing and unparsable files reported.
+- `tests/unit/test_config.py`, 39 tests: the shipped files load; decision values survive (D-003,
+  D-004, D-006); YAML 1.2 booleans; root-relative paths; frozen models; 32 invalid variants rejected
+  (phase 4 added `channel_scales` of the wrong length or not positive, and an unknown
+  `normalize`); missing and unparsable files reported.
 - Run: `uv run pytest tests/unit/test_config.py -q`.
 
 ## Gotchas
@@ -82,3 +91,5 @@ This package defines every key. See SPEC §6 for meanings and defaults.
 ## Changelog
 
 - Phase 0: package created (D-016 to D-018).
+- Phase 4: `features.channel_scales`, `windows.normalize`; prefilter widened to 10,000 windows and
+  500 tracks (D-068). Changing either vector key needs `make index`.

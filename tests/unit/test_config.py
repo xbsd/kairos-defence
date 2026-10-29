@@ -117,6 +117,9 @@ BAD = [
     ("scenario", _set("p1_flights.2.reports.0.grade", "Z9"), "grade"),
     ("scenario", _set("swarm_events.0.team", "S9"), "unknown swarm team"),
     ("scoring", _set("features.channel_weights", [1.0, 1.0]), "one weight per channel"),
+    ("scoring", _set("features.channel_scales", [1.0, 1.0]), "one scale per channel"),
+    ("scoring", _set("features.channel_scales", [5.0, 10.0, 0.0, 30.0, 1.0]), "channel_scales"),
+    ("scoring", _set("windows.normalize", "global"), "normalize"),
     ("scoring", _set("dtw.band_fraction", 0.0), "band_fraction"),
     ("scoring", _set("dtw.tau", "manual"), "tau"),
 ]

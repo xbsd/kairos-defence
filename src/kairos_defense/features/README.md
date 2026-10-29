@@ -51,8 +51,12 @@ through the `TrackStore` port.
 - `signatures.tod_minutes(start_utc, utc_offset_hours) -> int` (01:00 local → 1500),
   `approach_bearing(f)`, `loiter_mask(f)`, `loiter_direction(f, loiter) -> "cw" | "ccw" | "none"`.
 - `windows.paa_weights(n, segments) -> (segments, n) float64` (cached, read-only).
-- `windows.window_vectors(raw (n, c), size, offsets, weights, segments) -> (k, c × segments)
-  float32`, unit length; `window_vector(raw, weights, segments) -> (c × segments,)`.
+- `windows.window_vectors(raw (n, c), size, offsets, weights, segments, scales=None) -> (k, c ×
+  segments) float32`, unit length; `window_vector(raw, weights, segments, scales=None) -> (c ×
+  segments,)`. `scales` (c,) divides each channel by a fixed unit (no centering); None
+  z-normalizes per window. `vector_scales(scoring)` picks the argument from `windows.normalize`.
+- `windows.fill_nan(z (n, c)) -> (n, c)`: linear interpolation along time, 0 for an all-NaN
+  column (shared with the DTW re-rank).
 - `windows.iter_windows(features, scoring) -> Iterator[Window]` (`window_s`, `offset_s`,
   `vector`).
 - `windows.query_window_size(n_seconds, scoring) -> int` and `query_vector(features, scoring) ->
@@ -87,10 +91,14 @@ through the `TrackStore` port.
   centroid. The direction sums the bearing change over consecutive loiter seconds outside the
   polygon: `none` under 180°, `ccw` when negative (D-024). Launch is the single heard Remote ID
   serial's operator position, else a first point below 30 m; recovery is a last point below 30 m.
-- **Windows (§9.5, D-051).** Every 10 s for each size, skipping windows with more than 20% gap
-  seconds: z-normalize and weight per window, fill NaN by linear interpolation (all-NaN channel →
+- **Windows (§9.5, D-051, D-068).** Every 10 s for each size, skipping windows with more than 20%
+  gap seconds: scale and weight each channel, fill NaN by linear interpolation (all-NaN channel →
   0), average into 16 segments with exact fractional weights, flatten channel-major and
-  L2-normalize. One batch per size (strided view, one einsum).
+  L2-normalize. One batch per size (strided view, one einsum). Scaling follows
+  `windows.normalize`: `fixed` (the default since phase 4) divides by `features.channel_scales`
+  (5 m/s, 10 °/s, 200 m, 30 m, 1 m/s) without centering, so the orbit radius, speeds and altitude
+  survive into the vector; `window` z-normalizes per window (§9.3 as written, phase 3), which made
+  the planted P1 flights rank 855 to 953 of 1,882 for the live query at T+90 (D-058).
 - **Queries (D-050).** W is the largest size not above the seconds seen; before 60 s the query uses
   all its rows against the 60 s windows. `match/query.py` calls these same functions.
 - **Build (D-049, D-053).** Live tracks are skipped everywhere. The build uses the adapters
@@ -102,7 +110,9 @@ through the `TrackStore` port.
 
 - `features.max_interp_gap_s` (10), `features.channels` (speed, turn rate, distance to target,
   altitude, climb rate), `features.channel_weights` (1.0, 1.0, 1.2, 0.6, 0.4);
-- `windows.sizes_s` (60, 120, 300), `windows.stride_s` (10), `windows.paa_segments` (16);
+- `windows.sizes_s` (60, 120, 300), `windows.stride_s` (10), `windows.paa_segments` (16),
+  `windows.normalize` (`fixed` | `window`), `features.channel_scales` (one positive unit per
+  channel);
 - `ScoringConfig.vector_dim`, a property: channels × segments = 80.
 
 `app.yaml`: `paths.duckdb` and `paths.lancedb` (build only).
@@ -134,9 +144,14 @@ through the `TrackStore` port.
   come within 500 m of the fence. Target choice is still wrong for P6, C2 and swarm drones
   (D-046).
 - Keep `window_vectors` the single source of vectors. `test_query_vector_equals_indexed_window`
-  fails if the query and index paths diverge.
+  (and its `_both_modes` twin) fails if the query and index paths diverge.
+- **Changing `windows.normalize` or `channel_scales` means rerunning `make index`.** The DTW
+  matcher and `kairos-defense models` rebuild one stored window per size and refuse a stale index
+  ("index is stale: run `make index`", D-075).
 
 ## Changelog
 
 - Phase 3: the package (`resample.py`, `channels.py`, `signatures.py`, `windows.py`, `build.py`);
   D-046 to D-051, D-053.
+- Phase 4: `windows.normalize` (`fixed` by default) and `features.channel_scales`; `scales` on the
+  vector functions; `vector_scales`; `fill_nan` made public (D-068). Window counts unchanged.

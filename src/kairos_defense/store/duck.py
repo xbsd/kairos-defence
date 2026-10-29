@@ -3,6 +3,8 @@
 Every connection goes through ``connect_app_db``, so this adapter can never open ground truth.
 Besides the port, the adapter offers the bulk queries the index build needs: the track list, RF and
 Remote ID association for every track at once (§11.2, D-048), and writing the §7.2 derived tables.
+The association queries take an optional ``until`` bound so a live (partial) track's sensor context
+uses only what was heard up to the replay time (D-071, D-072).
 """
 
 from __future__ import annotations
@@ -28,6 +30,7 @@ RID_WINDOW_S = 5  # §9.4: Remote ID within ±5 s ...
 RID_RADIUS_M = 100.0  # ... and 100 m of track points
 
 _TRACK_FILTER = "WHERE ($ids IS NULL OR list_contains($ids, track_id))"
+_UNTIL = "($until IS NULL OR {col} <= $until)"  # D-071: nothing heard or seen after the bound
 _OFFSETS = "(VALUES (-1), (0), (1)) AS o(d)"  # neighbor time buckets for the window joins
 
 
@@ -70,6 +73,23 @@ class DuckTrackStore:
         return self.sql(
             "SELECT * FROM track_features WHERE track_id = $t ORDER BY t_s", {"t": track_id}
         )
+
+    def features_many(self, track_ids: Sequence[str]) -> pd.DataFrame:
+        """1 Hz features of many history tracks, ordered by ``track_id`` then ``t_s`` (D-072)."""
+        return self.sql(
+            "SELECT * FROM track_features WHERE list_contains($ids, track_id) "
+            "ORDER BY track_id, t_s",
+            {"ids": list(track_ids)},
+        )
+
+    def sensor_context_until(self, track_id: str, until: datetime) -> dict:
+        """RF family, Remote ID serials and operator position of one track, from track points,
+        detections and concurrent tracks up to ``until`` only (§10.5 partial signatures, D-071).
+        Keys: ``rf_family`` (``"unknown"`` if none), ``rid_serials`` (tuple, most frequent first),
+        ``rid_operator_xy`` (region meters or None)."""
+        ctx = self.sensor_context([track_id], until=until).get(track_id, SensorContext())
+        return {"rf_family": ctx.rf_family, "rid_serials": ctx.rid_serials,
+                "rid_operator_xy": ctx.rid_operator_xy}  # fmt: skip
 
     def signature(self, track_id: str) -> dict:
         df = self.sql("SELECT * FROM track_signatures WHERE track_id = $t", {"t": track_id})
@@ -127,20 +147,24 @@ class DuckTrackStore:
                GROUP BY ALL ORDER BY p.track_id"""
         )
 
-    def rf_association(self, track_ids: Sequence[str] | None = None) -> pd.DataFrame:
+    def rf_association(
+        self, track_ids: Sequence[str] | None = None, until: datetime | None = None
+    ) -> pd.DataFrame:
         """§11.2 for many tracks: ``track_id, protocol_family, n`` (most detections first).
 
         An RF detection belongs to a track if it is within ±30 s of one of its points. When another
         track at the same installation overlaps in time (±60 s), the detection's bearing must also
         be within 15° of the bearing from the RF sensor to the track point nearest in time (D-048).
+        ``until``: only points, detections and concurrent spans at or before it count (D-071).
         """
         return self.sql(
             f"""
             WITH pts AS (SELECT track_id, installation_id, ts, x_m, y_m,
                                 {_bucket("ts", RF_WINDOW_S)} + o.d AS b
-                         FROM track_points CROSS JOIN {_OFFSETS} {_TRACK_FILTER}),
+                         FROM track_points CROSS JOIN {_OFFSETS} {_TRACK_FILTER}
+                          AND {_UNTIL.format(col="ts")}),
             spans AS (SELECT track_id, installation_id, min(ts) AS t0, max(ts) AS t1
-                      FROM track_points GROUP BY ALL),
+                      FROM track_points WHERE {_UNTIL.format(col="ts")} GROUP BY ALL),
             conc AS (
               SELECT a.track_id, count(b.track_id) > 0 AS concurrent
               FROM spans a LEFT JOIN spans b
@@ -153,7 +177,8 @@ class DuckTrackStore:
                                         r.bearing_deg) AS rf_id,
                      r.installation_id, r.ts, r.protocol_family, r.bearing_deg,
                      s.x_m AS sx, s.y_m AS sy, {_bucket("r.ts", RF_WINDOW_S)} AS b
-              FROM rf_detections r JOIN sensors s USING (sensor_id)),
+              FROM rf_detections r JOIN sensors s USING (sensor_id)
+              WHERE {_UNTIL.format(col="r.ts")}),
             near AS (
               SELECT p.track_id, r.rf_id, any_value(r.protocol_family) AS fam,
                      any_value(r.bearing_deg) AS brg, any_value(r.sx) AS sx, any_value(r.sy) AS sy,
@@ -173,18 +198,23 @@ class DuckTrackStore:
                   <= {RF_BEARING_GATE_DEG}
             GROUP BY ALL ORDER BY n.track_id, n DESC, protocol_family
             """,
-            {"ids": None if track_ids is None else list(track_ids)},
+            {"ids": None if track_ids is None else list(track_ids), "until": until},
         )
 
-    def rid_association(self, track_ids: Sequence[str] | None = None) -> pd.DataFrame:
+    def rid_association(
+        self, track_ids: Sequence[str] | None = None, until: datetime | None = None
+    ) -> pd.DataFrame:
         """§9.4 for many tracks: ``track_id, serial, n, op_x_m, op_y_m`` for Remote ID broadcasts
-        within ±5 s and 100 m of a track point (most matches first; operator = median)."""
+        within ±5 s and 100 m of a track point (most matches first; operator = median).
+        ``until``: only points and broadcasts at or before it count (D-071)."""
         return self.sql(
             f"""
             WITH pts AS (SELECT track_id, installation_id, ts, x_m, y_m,
                                 {_bucket("ts", RID_WINDOW_S)} + o.d AS b
-                         FROM track_points CROSS JOIN {_OFFSETS} {_TRACK_FILTER}),
-            rid AS (SELECT *, {_bucket("ts", RID_WINDOW_S)} AS b FROM remote_id)
+                         FROM track_points CROSS JOIN {_OFFSETS} {_TRACK_FILTER}
+                          AND {_UNTIL.format(col="ts")}),
+            rid AS (SELECT *, {_bucket("ts", RID_WINDOW_S)} AS b FROM remote_id
+                    WHERE {_UNTIL.format(col="ts")})
             SELECT p.track_id, r.serial, count(*) AS n,
                    median(r.op_x_m) AS op_x_m, median(r.op_y_m) AS op_y_m
             FROM pts p JOIN rid r
@@ -195,14 +225,16 @@ class DuckTrackStore:
                 + (r.drone_y_m - p.y_m) * (r.drone_y_m - p.y_m) <= {RID_RADIUS_M**2}
             GROUP BY ALL ORDER BY p.track_id, n DESC, r.serial
             """,
-            {"ids": None if track_ids is None else list(track_ids)},
+            {"ids": None if track_ids is None else list(track_ids), "until": until},
         )
 
-    def sensor_context(self, track_ids: Sequence[str] | None = None) -> dict[str, SensorContext]:
+    def sensor_context(
+        self, track_ids: Sequence[str] | None = None, until: datetime | None = None
+    ) -> dict[str, SensorContext]:
         """RF family, Remote ID serials and operator position per track (tracks with neither are
-        absent: use ``SensorContext()``)."""
-        rf = self.rf_association(track_ids)
-        rid = self.rid_association(track_ids)
+        absent: use ``SensorContext()``). ``until`` bounds everything heard or seen (D-071)."""
+        rf = self.rf_association(track_ids, until)
+        rid = self.rid_association(track_ids, until)
         fam = rf.groupby("track_id", sort=False)["protocol_family"].first().to_dict()
         out: dict[str, SensorContext] = {}
         for tid in set(fam) | set(rid["track_id"]):

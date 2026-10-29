@@ -6,7 +6,7 @@
 | 1 | World, flights and radar | done | Exit check exit 0 in 46 s from `make clean`: 1,869 incidents and 1,869 tracks (≈1,900 / ≈1,950, within ±15%); figures for all 7 patterns; 53 selected tests pass; live first contact 21:39:51, orbit T+94 s | 2026-10-28 |
 | 2 | Swarms, RF, Remote ID, reports and assessments | done | Exit check exit 0 in 31 s from `make clean`: 1,878 incidents (9 swarms), 956 reports, 1,876 assessments; planted DELTA report, wrong label and both swarm events present; 109 selected tests pass; live orbit T+79 s (D-033 b) | 2026-10-28 |
 | 3 | Features, windows, Euclidean baseline and eval skeleton | done | Exit check exit 0 in 87 s after `make clean data`: 1,898 history tracks indexed (6 live skipped), 136,266 windows; baseline Recall@5 0.435, MRR 0.302, time to match 26%, copycat-first 57%, prefilter p95 83 ms; demo first contact and orbit pass | 2026-10-28 |
-| 4 | DTW matcher and fusion model | not started | | |
+| 4 | DTW matcher and fusion model | not started | `make index`, `make models` (62 queries, 123,404 pairs, τ 1.645, 44 s), `make eval`: Recall@5 1.000, DTW lift +0.522, copycat-first 0%, time to match 96%, p95 prefilter 30 / DTW (500) 81 / end to end 149 ms; first contact and orbit pass; live top 3 misses by one place (DELTA 1, ALPHA-0303 2, CHARLIE 3, ALPHA-0502 4; soft gap, D-078); `eval --baseline` written; `check_targets.py 4` 8 PASS, 1 GAP; 431 fast, 441 in all | 2026-10-28 |
 | 5 | Report recall and analog forecast | not started | | |
 | 6 | Case memory (Kairos-lite) | not started | | |
 | 7 | Streaming API and Command Center foundation | not started | | |
@@ -25,6 +25,38 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Open issues: …
 - Next: …
 -->
+
+### 2026-10-28 · Phase 4 (autopilot build)
+- Built: the DTW matcher and fusion model (SPEC §10.4 to §10.8).
+  - Fixed-unit window vectors and 500 candidates (D-068, resolving D-058).
+  - An anchored, end-relaxed banded DTW and a speed-ratio warp (D-069).
+  - Partial live signatures bounded to T, through two new read-only port methods (D-071, D-072).
+  - §10.5 fusion features, a logistic model trained in `eval/training.py` on prober and copycat
+    queries of months 1 to 12 (D-073, D-078), and §10.7 reasons (D-074).
+  - Stale-index and missing-model guards (D-075).
+  - `make models`; `match` and `eval` default to `--method dtw`; DTW lift measured in the same run
+    (D-076); the eval figure font pinned (D-077).
+  - Committed: `models/fusion_v1.json`, `models/dtw_calibration.json`, `reports/baseline.json`.
+- Exit check (`docs/phases/phase-04/EXIT_CHECK.md`), dev laptop:
+  - `make index` 7 s, unchanged counts. `make models` 44 s: 123,404 pairs, τ 1.645, validation
+    AUC 0.998.
+  - `make eval` 39 s: Recall@5 1.000, DTW lift +0.522 (the same candidates in prefilter order
+    give 0.478), MRR 1.000, time to match 96%, copycat-first 0%, copycat Recall@5 1.000.
+    p95: prefilter 30 ms, DTW of 500 candidates 81 ms, end to end 149 ms.
+  - Demo: first contact and orbit pass. `live_top3_incidents` fails by one place: DELTA #1,
+    ALPHA-0303 #2, CHARLIE-0710 #3, ALPHA-0502 #4, all P1, each with three reasons. `make eval`
+    therefore exits 1 and the SPEC chain stops there; `match --method dtw` alone exits 0.
+  - `eval --baseline` writes `reports/baseline.json`. `check_targets.py 4`: 8 PASS and 1 GAP
+    (the demo row), exit 1, a soft gap under D-063.
+  - `make check` 431 passed (367 at the start); `make test-all` 441 passed in 3 min 31 s.
+- Deviations: §9.3 for the prefilter vectors, §6.5 prefilter sizes, §10.4 steps 3 and 5, §4.1
+  ports, §10.6 query kinds. Each is in D-068 to D-078.
+- Open issues:
+  - The live top-3 gap: CHARLIE (planted as weaker) leads ALPHA-0502 by 0.80 logit, mostly on
+    altitude.
+  - The §1.2 "flown ~18% slower" caption does not appear (ALPHA-0303 warp reads 1.03).
+  - D-046 and D-065 carried over.
+- Next: phase 5 (report recall and analog forecast).
 
 ### 2026-10-28 · Phase 3 (documentation backfill, autopilot)
 - Built: no code. `docs/phases/phase-03/PLAN.md` (as built, from `e494995`), `REPORT.md` and

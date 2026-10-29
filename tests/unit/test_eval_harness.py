@@ -80,7 +80,11 @@ def test_outputs_and_gate(run, tmp_path: Path) -> None:
     assert data["metrics"]["recall_at_5_t120"] is not None and data["outcomes"]
     assert "Recall@5 at T = 120 s" in md.read_text()
     assert gate(s, tmp_path / "baseline.json") == []  # no baseline yet, demo checks pass
-    worse = {"metrics": {k: (v * 2 if "latency" in k else v) for k, v in s["metrics"].items()}}
+    worse = {  # latency_dtw_* are None for the Euclidean method
+        "metrics": {
+            k: (v * 2 if "latency" in k and v is not None else v) for k, v in s["metrics"].items()
+        }
+    }
     worse["metrics"]["latency_prefilter_p95_ms"] = s["metrics"]["latency_prefilter_p95_ms"] / 10
     jitter = {
         "metrics": {
@@ -94,16 +98,69 @@ def test_outputs_and_gate(run, tmp_path: Path) -> None:
     assert any("latency_prefilter_p95_ms" in p for p in gate(s, tmp_path / "baseline.json"))
 
 
-def test_cli_eval(p1_index, monkeypatch) -> None:
+def _with_reports(cfg, folder: Path):
+    paths = cfg.app.paths.model_copy(update={"reports": str(folder)})
+    return cfg.model_copy(update={"app": cfg.app.model_copy(update={"paths": paths})})
+
+
+def test_cli_eval(p1_index, toy_models, tmp_path: Path, monkeypatch) -> None:
+    """Replaces the phase 3 stub check (``eval --method dtw`` named phase 4)."""
     import kairos_defense.cli as cli
 
-    monkeypatch.setattr(cli, "_load_config", lambda _c: p1_index.cfg)
     runner = CliRunner()
-    res = runner.invoke(app, ["eval", "--baseline"], terminal_width=200)
+    current = {"cfg": _with_reports(p1_index.cfg, tmp_path / "euclidean")}
+    monkeypatch.setattr(cli, "_load_config", lambda _c: current["cfg"])
+    res = runner.invoke(app, ["eval"], terminal_width=200)  # dtw is the default: needs models
+    assert res.exit_code == 1 and "make models" in res.output, res.output
+    res = runner.invoke(app, ["eval", "--method", "euclidean", "--baseline"], terminal_width=200)
     assert res.exit_code == 0, res.output
-    reports = Path(p1_index.cfg.app.paths.reports)
+    reports = tmp_path / "euclidean"
     assert (reports / "baseline.json").exists() and list(reports.glob("eval_*.md"))
-    res = runner.invoke(app, ["eval"], terminal_width=200)  # same data: no regression
-    assert res.exit_code == 0, res.output
-    res = runner.invoke(app, ["eval", "--method", "dtw"])
-    assert res.exit_code == 1 and "phase 4" in res.output
+    res = runner.invoke(app, ["eval", "--method", "euclidean"], terminal_width=200)
+    assert res.exit_code == 0, res.output  # same data: no regression
+    # the DTW run in its own folder, before any baseline exists there
+    current["cfg"] = _with_reports(toy_models, tmp_path / "dtw")
+    res = runner.invoke(app, ["eval", "--method", "dtw"], terminal_width=200)
+    assert res.exit_code in (0, 1), res.output  # 1 only for a failed demo assertion
+    data = json.loads(next((tmp_path / "dtw").glob("eval_*.json")).read_text())
+    assert data["method"] == "dtw" and isinstance(data["metrics"]["dtw_lift"], float)
+    top3 = {r["key"]: r for r in data["demo"]}["live_top3_incidents"]
+    assert (res.exit_code == 0) == (top3["status"] == "pass")
+
+
+@pytest.fixture(scope="module")
+def dtw_run(toy_models):
+    cfg = toy_models
+    with DuckTrackStore(cfg.app.paths.duckdb, cfg.app) as store:
+        return evaluate(cfg, store, LanceVectorStore(cfg.app.paths.lancedb),
+                        track_truth(cfg.app), "dtw")  # fmt: skip
+
+
+def test_dtw_summary_keys(dtw_run, tmp_path: Path) -> None:
+    _, js, s = write_reports(dtw_run, tmp_path)
+    m = s["metrics"]
+    assert s["method"] == "dtw" and s["model_version"] == "fusion-v1"
+    assert s["candidate_tracks"] == 500
+    for key in (
+        "dtw_lift",
+        "recall_at_5_t120_baseline",
+        "latency_dtw_p50_ms",
+        "latency_dtw_p95_ms",
+        "latency_prefilter_p95_ms",
+        "latency_end_to_end_p95_ms",
+    ):
+        assert isinstance(m[key], float), key  # fmt: skip
+    assert m["dtw_lift"] == pytest.approx(m["recall_at_5_t120"] - m["recall_at_5_t120_baseline"])
+    assert "dtw_lift" not in s["pending"]
+    md = (tmp_path / js.name.replace(".json", ".md")).read_text()
+    assert "DTW + fusion" in md and "DTW lift" in md
+    p = [o for o in dtw_run.outcomes["probers"] if o.ran]
+    assert all(o.candidates and o.dtw_ms is not None for o in p)
+
+
+def test_demo_top3_is_an_assertion(dtw_run, run) -> None:
+    dtw_demo = {r.key: r for r in dtw_run.demo}["live_top3_incidents"]
+    assert dtw_demo.status in ("pass", "fail")
+    assert "P1-DELTA-260419" in dtw_demo.observed
+    euclid = {r.key: r for r in run.demo}["live_top3_incidents"]
+    assert euclid.status.startswith("info")  # the baseline has no reasons (D-076)

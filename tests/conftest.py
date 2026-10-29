@@ -114,13 +114,49 @@ P1_NIGHTS = (date(2025, 11, 14), date(2026, 3, 3), date(2026, 4, 19), date(2026,
 
 
 def tmp_config(cfg, folder: Path):
-    """``cfg`` with every data path under ``folder`` (app, truth, memory, LanceDB)."""
+    """``cfg`` with every data path under ``folder`` (app, truth, memory, LanceDB, models)."""
     paths = cfg.app.paths.model_copy(
         update={"duckdb": str(folder / "kd.duckdb"), "truth": str(folder / "gt.duckdb"),
                 "memory": str(folder / "mem.duckdb"), "lancedb": str(folder / "lancedb"),
-                "reports": str(folder / "reports")}
+                "reports": str(folder / "reports"), "models": str(folder / "models")}
     )  # fmt: skip
     return cfg.model_copy(update={"app": cfg.app.model_copy(update={"paths": paths})})
+
+
+def with_models(cfg, folder: Path):
+    """``cfg`` with ``paths.models`` set to ``folder``."""
+    paths = cfg.app.paths.model_copy(update={"models": str(folder)})
+    return cfg.model_copy(update={"app": cfg.app.model_copy(update={"paths": paths})})
+
+
+TOY_COEF = {"shape_sim": 4.0, "rf_match": 3.0, "bearing_sim": 1.5, "tod_sim": 2.0,
+            "launch_sim": 1.0, "radius_sim": 1.0, "alt_sim": 1.0}  # fmt: skip
+TOY_TAU = 1.6
+
+
+def write_toy_models(cfg, folder: Path) -> Path:
+    """Hand-set fusion model and DTW calibration (no truth, no training) in ``folder``."""
+    from kairos_defense.match.fusion import (
+        CALIBRATION_FILE,
+        MODEL_FILE,
+        DtwCalibration,
+        FusionModel,
+    )
+
+    feats = tuple(cfg.scoring.fusion.features)
+    FusionModel("fusion-v1", feats, tuple(TOY_COEF[f] for f in feats), -9.0, TOY_TAU,
+                "toy").save(folder / MODEL_FILE)  # fmt: skip
+    q = {"p10": 1.4, "p50": TOY_TAU, "p90": 1.9}
+    DtwCalibration("dtw-calibration-v1", TOY_TAU, 0, 0, q, q, cfg.scoring.dtw.band_fraction,
+                   [0.5, 1.5], "toy").save(folder / CALIBRATION_FILE)  # fmt: skip
+    return folder
+
+
+@pytest.fixture(scope="session")
+def toy_models(p1_index, tmp_path_factory):
+    """``p1_index.cfg`` with a hand-set model folder (matcher tests; training is tested apart)."""
+    folder = write_toy_models(p1_index.cfg, tmp_path_factory.mktemp("toy_models"))
+    return with_models(p1_index.cfg, folder)
 
 
 @dataclass

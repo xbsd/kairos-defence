@@ -103,3 +103,49 @@ def test_query_vector_equals_indexed_window(cfg) -> None:
     assert np.array_equal(vec, indexed[(120, 150)])
     vec, size, used = query_vector(f.iloc[:46], cfg.scoring)  # T = 45: all rows vs W = 60
     assert (size, used) == (60, 46) and vec.shape == (80,)
+
+
+def _with_normalize(cfg, mode: str):
+    win = cfg.scoring.windows.model_copy(update={"normalize": mode})
+    return cfg.scoring.model_copy(update={"windows": win})
+
+
+def test_fixed_scaling_keeps_levels(cfg) -> None:
+    """Same shape at 180 m and 1,800 m: identical under per-window z, different under fixed units
+    (D-068: the orbit radius must survive into the prefilter vector)."""
+    t = np.arange(60.0)
+    near = np.c_[10 + np.sin(t / 7), -3 + np.cos(t / 5), 180 + 20 * np.sin(t / 9),
+                 100 + t / 10, np.cos(t / 4)]  # fmt: skip
+    far = near.copy()
+    far[:, 2] *= 10.0
+    w, scales = cfg.scoring.features.channel_weights, cfg.scoring.features.channel_scales
+    assert np.allclose(window_vector(near, w, 16), window_vector(far, w, 16), atol=1e-6)
+    a, b = window_vector(near, w, 16, scales), window_vector(far, w, 16, scales)
+    assert np.isclose(np.linalg.norm(a), 1.0, atol=1e-6) and np.linalg.norm(a - b) > 0.5
+    # fixed units: proportional to raw / scale x weight (before the final L2 normalization)
+    expect = near / np.asarray(scales) * np.asarray(w)
+    paa = paa_weights(60, 16) @ expect
+    v = paa.T.reshape(-1)
+    assert np.allclose(a, v / np.linalg.norm(v), atol=1e-6)
+
+
+@pytest.mark.parametrize("mode", ["window", "fixed"])
+def test_query_vector_equals_indexed_window_both_modes(cfg, mode: str) -> None:
+    sc = _with_normalize(cfg, mode)
+    f = _features(400)
+    indexed = {(w.window_s, w.offset_s): w.vector for w in iter_windows(f, sc)}
+    vec, size, used = query_vector(f.iloc[: 150 + 120], sc)
+    assert (size, used) == (120, 120) and np.array_equal(vec, indexed[(120, 150)])
+    vec45, size, used = query_vector(f.iloc[:46], sc)  # T = 45: all rows vs W = 60
+    assert (size, used) == (60, 46) and vec45.shape == (80,)
+    other = _with_normalize(cfg, "fixed" if mode == "window" else "window")
+    assert not np.allclose(vec, query_vector(f.iloc[:270], other)[0])  # the modes really differ
+
+
+def test_fixed_mode_nan_handling(cfg) -> None:
+    rng = np.random.default_rng(4)
+    raw = rng.normal(size=(60, 5)) + 5
+    raw[10:14, 0] = np.nan
+    raw[:, 4] = np.nan
+    v = window_vector(raw, [1.0] * 5, 16, [1.0] * 5)
+    assert np.isfinite(v).all() and np.allclose(v[64:], 0.0)

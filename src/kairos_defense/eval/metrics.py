@@ -2,7 +2,8 @@
 
 An outcome is one query track at one protocol time T: whether the matcher ran, the 1-based rank of
 the best same-actor track (``true_rank``, None if absent) and of the best copycat track
-(``copycat_rank``), and latencies in milliseconds. Unanswerable queries (no earlier same-actor
+(``copycat_rank``), the same two ranks in the prefilter's Euclidean order of the same candidates
+(``baseline_*``, D-076), and latencies in milliseconds. Unanswerable queries (no earlier same-actor
 track, D-009) are excluded before these functions are called.
 """
 
@@ -28,6 +29,10 @@ class Outcome:
     prefilter_ms: float | None = None
     total_ms: float | None = None
     top: tuple[str, ...] = ()
+    baseline_rank: int | None = None  # same candidates, prefilter (Euclidean, §10.2) order
+    baseline_copycat_rank: int | None = None
+    dtw_ms: float | None = None  # DTW re-rank of every candidate (phase 4)
+    candidates: int | None = None
 
 
 def _at(outcomes: Iterable[Outcome], at_s: int) -> list[Outcome]:
@@ -42,6 +47,19 @@ def recall_at_k(outcomes: Iterable[Outcome], k: int, at_s: int) -> tuple[float |
         return None, 0
     hits = sum(o.ran and o.true_rank is not None and o.true_rank <= k for o in rows)
     return hits / len(rows), len(rows)
+
+
+def dtw_lift(outcomes: Iterable[Outcome], k: int = 5, at_s: int = 120) -> tuple[float | None, ...]:
+    """§19.3 DTW lift: Recall@k of the fused ranking minus Recall@k of the prefilter order of the
+    same candidates (the Euclidean baseline) at ``at_s``; ``(lift, recall, baseline recall)``."""
+    rows = _at(outcomes, at_s)
+    if not rows:
+        return None, None, None
+    fused = sum(o.ran and o.true_rank is not None and o.true_rank <= k for o in rows) / len(rows)
+    base = sum(o.ran and o.baseline_rank is not None and o.baseline_rank <= k for o in rows) / len(
+        rows
+    )
+    return fused - base, fused, base
 
 
 def mrr(outcomes: Iterable[Outcome], at_s: int) -> tuple[float | None, int]:

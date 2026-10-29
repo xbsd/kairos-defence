@@ -15,3 +15,54 @@
 [2026-10-28 20:10:54]   … running 6 min. last tool: Bash cat reports/eval_2026-10-29.md && grep -n "created_at=" src/kairos_defense/eval/
 [2026-10-28 20:13:54]   … running 9 min. last tool: Bash sed -n 30,45p src/kairos_defense/store/duck.py && sed -n 130,180p src/kairos_def
 [2026-10-28 20:16:55]   … running 12 min. last tool: Bash git add README.md docs/DECISIONS.md docs/PROGRESS.md docs/phases/phase-03/PLAN.m
+[2026-10-28 20:17:07] Autopilot run: phases 4..10, mode auto, rollback tag autopilot-start-20261028-2017, fast Python tests at start 367, push on
+[2026-10-28 20:17:07] === Phase 4: start (auto mode) ===
+[2026-10-28 20:17:07] phase 4: planning
+[2026-10-28 20:20:07]   … running 3 min. last tool: Bash sed -n 59,130p src/kairos_defence/store/duck.py 2>/dev/null || sed -n 59,130p sr
+[2026-10-28 20:23:07]   … running 6 min. last tool: Bash mkdir -p /tmp/kd_exp && cat > /tmp/kd_exp/pipeline.py <<'EOF'
+"""Read-only feasi
+[2026-10-28 20:26:07]   … running 9 min. last tool: Bash until [ $(grep -c "elapsed" /tmp/kd_exp/a.txt /tmp/kd_exp/b.txt /tmp/kd_exp/c.tx
+[2026-10-28 20:29:07]   … running 12 min. last tool: Bash sed -n 1,109p tests/unit/test_eval_harness.py && cat tests/slow/test_full_index.
+[2026-10-28 20:32:08]   … running 15 min. last tool: Bash sed -n 32,73p docs/DECISIONS.md
+[2026-10-28 20:35:08]   … running 18 min. last tool: Bash cat config/app.yaml && sed -n 1,56p src/kairos_defense/config/app.py | grep -n "
+[2026-10-28 20:38:08]   … running 21 min. last tool: Read /Users/ndkx/work/kairos_defence/docs/phases/phase-04/PLAN.md
+[2026-10-28 20:38:48] phase 4: independent plan review 1
+[2026-10-28 20:41:48]   … running 3 min. 
+[2026-10-28 20:42:58] phase 4: plan approved on review 1: I'm approving the Phase 4 plan. It meets all six criteria, and nothing in it would fail the exit check or break a CLAUDE
+[2026-10-28 20:42:58] phase 4: building in a fresh session
+[2026-10-28 20:45:58]   … running 3 min. 
+[2026-10-28 20:48:58]   … running 6 min. last tool: Bash uv run python -c "
+import time
+from kairos_defense.config import load_config
+fro
+[2026-10-28 20:51:59]   … running 9 min. last tool: Bash uv run python -c "
+import sys; sys.path.insert(0,'.')
+import numpy as np
+from dt
+[2026-10-28 20:54:59]   … running 12 min. last tool: Write /Users/ndkx/work/kairos_defence/src/kairos_defense/match/candidates.py
+[2026-10-28 20:57:59]   … running 15 min. last tool: Bash python3 - <<'EOF'
+p='src/kairos_defense/eval/metrics.py'
+s=open(p).read()
+s=s.re
+[2026-10-28 21:00:59]   … running 18 min. last tool: Bash cat > /tmp/kd4/pairs.py <<'EOF'
+import pickle, time
+from kairos_defense.config i
+[2026-10-28 21:03:59]   … running 21 min. last tool: Bash cat >> /tmp/kd4/warpexp.py <<'EOF'
+print('--- P1 detail')
+for (qid, at), g in po
+[2026-10-28 21:06:59]   … running 24 min. last tool: Read /Users/ndkx/work/kairos_defence/src/kairos_defense/match/dtw_rerank.py
+[2026-10-28 21:09:59]   … running 27 min. last tool: Bash uv run ruff format src tests -q; uv run ruff check src tests; uv run pytest -q -
+[2026-10-28 21:13:00]   … running 30 min. last tool: Bash time make models 2>&1 | tail -32
+[2026-10-28 21:16:00]   … running 33 min. last tool: Bash make models 2>&1 | grep -E "queries|pairs|τ|coefficient|intercept|Recall|AUC|has
+[2026-10-28 21:19:00]   … running 36 min. last tool: Bash python3 - <<'EOF'
+p='tests/unit/test_fusion.py'
+s=open(p).read()
+s=s.replace('''
+[2026-10-28 21:22:00]   … running 39 min. last tool: Bash uv run pytest -m "not slow" -q 2>&1 | tail -2 && git status --short | head -40
+[2026-10-28 21:25:00]   … running 42 min. last tool: Bash uv run ruff format tests -q; uv run ruff check tests && time uv run pytest -q te
+[2026-10-28 21:28:00]   … running 45 min. last tool: Bash (time uv run kairos-defense eval --baseline; echo "baseline exit $?") > /tmp/kd4
+[2026-10-28 21:31:00]   … running 48 min. last tool: Bash python3 - <<'EOF'
+p='README.md'
+s=open(p).read()
+s=s.replace('''`uv run kairos-d
+[2026-10-28 21:34:00]   … running 51 min. last tool: Write /Users/ndkx/work/kairos_defence/docs/phases/phase-04/REPORT.md

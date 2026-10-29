@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import math
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 
 
@@ -26,3 +27,15 @@ class Match:
     warp_ratio: float = float("nan")
     window_offset_s: int = 0
     model_version: str = ""
+
+    def to_dict(self) -> dict:
+        """JSON-safe dict: NaN becomes None (``json.dumps`` would write invalid ``NaN``), the start
+        time becomes ISO 8601."""
+
+        def clean(v):
+            return None if isinstance(v, float) and not math.isfinite(v) else v
+
+        d = asdict(self)
+        d["start_ts"] = self.start_ts.isoformat()
+        d["features"] = {k: clean(v) for k, v in self.features.items()}
+        return {k: clean(v) for k, v in d.items()}

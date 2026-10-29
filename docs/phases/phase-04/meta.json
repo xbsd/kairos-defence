@@ -1,0 +1,28 @@
+{
+  "phase": 4,
+  "status": "running",
+  "steps": [
+    {
+      "step": "plan",
+      "at": "2026-10-28 20:38:48",
+      "ok": true,
+      "session_id": "4c90d994-d869-487b-9f95-13491aaa2dd9",
+      "cost_usd": 5.6503306,
+      "minutes": 21.7,
+      "permission_denials": 0
+    },
+    {
+      "step": "review-1",
+      "at": "2026-10-28 20:42:58",
+      "ok": true,
+      "session_id": "e5a94b11-20c5-41d2-ba68-f7ff81d4c883",
+      "cost_usd": 1.7221444,
+      "minutes": 4.2,
+      "permission_denials": 0
+    }
+  ],
+  "started": "2026-10-28 20:17:07",
+  "sha_before": "261ebc5668bc34e4b5f951d21143b821b0e66647",
+  "plan_session": "4c90d994-d869-487b-9f95-13491aaa2dd9",
+  "plan_approved": true
+}

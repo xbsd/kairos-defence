@@ -28,7 +28,6 @@ app = typer.Typer(
 
 # name -> (phase that implements it, one-line help)
 STUBS: dict[str, tuple[str, str]] = {
-    "models": ("4", "Train the fusion model and calibrate DTW."),
     "recall": ("5", "Retrieve past reports for an incident's matches (hybrid search)."),
     "forecast": ("5", "Forecast the recovery area of an incident from its analogs."),
     "replay": ("7", "Replay a live incident; --precompute and --reset."),
@@ -73,6 +72,26 @@ def _need_data(cfg) -> None:
     if not Path(cfg.app.paths.duckdb).exists():
         console.print(f"[red]no data:[/red] {cfg.app.paths.duckdb} is missing; run `make data`.")
         raise typer.Exit(1)
+
+
+def _need_index(cfg):
+    """The LanceDB store, or exit 1 when ``flight_windows`` is missing."""
+    from kairos_defense.store.lance import LanceVectorStore
+
+    lance = LanceVectorStore(cfg.app.paths.lancedb)
+    if not lance.has("flight_windows"):
+        console.print("[red]no index:[/red] flight_windows is missing; run `make index`.")
+        raise typer.Exit(1)
+    return lance
+
+
+def _fail(exc: Exception) -> None:
+    """Print a model, index or DTW error readably and exit 1 (D-075)."""
+    console.print(f"[red]{type(exc).__name__}:[/red] {exc}")
+    raise typer.Exit(1) from exc
+
+
+METHOD_HELP = "dtw (DTW + fusion, phase 4) or euclidean (the §10.2 baseline)."
 
 
 @app.command()
@@ -159,7 +178,7 @@ def index(config: str = typer.Option("config", help="Folder with the five YAML f
 def match(
     incident: str = typer.Option(..., help="Incident to match, e.g. DEMO-BRAVO-0828."),
     at: int = typer.Option(..., help="Seconds after the track's first radar point (T)."),
-    method: str = typer.Option("euclidean", help="euclidean (phase 3) or dtw (phase 4)."),
+    method: str = typer.Option("dtw", help=METHOD_HELP),
     track: str | None = typer.Option(None, help="Track of the incident (default: its first)."),
     top: int = typer.Option(10, help="How many matches to show."),
     config: str = typer.Option("config", help="Folder with the five YAML files."),
@@ -168,15 +187,19 @@ def match(
     from datetime import timedelta
 
     from kairos_defense.match.baseline import euclidean_matches
+    from kairos_defense.match.candidates import IndexStale
+    from kairos_defense.match.dtw_rerank import DtwUnavailable
+    from kairos_defense.match.fusion import ModelError
+    from kairos_defense.match.matcher import DtwMatcher
     from kairos_defense.match.query import load_query
     from kairos_defense.store.duck import DuckTrackStore
-    from kairos_defense.store.lance import LanceVectorStore
 
-    if method != "euclidean":
-        console.print(f"[red]method {method!r} is not built yet:[/red] phase 4 adds dtw.")
+    if method not in ("dtw", "euclidean"):
+        console.print(f"[red]unknown method {method!r}:[/red] use dtw or euclidean.")
         raise typer.Exit(1)
     cfg = _load_config(config)
     _need_data(cfg)
+    lance = _need_index(cfg)
     with DuckTrackStore(cfg.app.paths.duckdb, cfg.app) as store:
         tracks = store.sql(
             "SELECT DISTINCT track_id FROM track_points WHERE incident_id = $i ORDER BY track_id",
@@ -195,9 +218,18 @@ def match(
                 "JOIN regions USING (region_id)"
             ).itertuples(index=False)
         )
+        try:
+            matcher = (DtwMatcher(store, lance, cfg.scoring, cfg.app.paths.models)
+                       if method == "dtw" else None)  # fmt: skip
+        except (ModelError, IndexStale, DtwUnavailable) as exc:
+            _fail(exc)
         t0 = time.perf_counter()
         q = load_query(store, track or tracks[0], at, cfg.scoring)
-        matches = euclidean_matches(q, LanceVectorStore(cfg.app.paths.lancedb), cfg.scoring)
+        if matcher is None:
+            matches, timings = euclidean_matches(q, lance, cfg.scoring), {}
+        else:
+            res = matcher.match(q)
+            matches, timings = res.matches, res.timings
         elapsed = time.perf_counter() - t0
 
     def local(ts, inst: str) -> str:
@@ -209,70 +241,70 @@ def match(
         f"{local(q.start_ts, q.installation_id)} local · {len(matches)} candidates · "
         f"{elapsed * 1000:.0f} ms"
     )
-    table = Table(title=f"euclidean matches for {incident}", title_justify="left")
-    for col in ("#", "track", "base", "start (local)", "score", "d²", "window"):
-        table.add_column(col, justify="right" if col in ("#", "score", "d²") else "left")
-    for i, m in enumerate(matches[:top], 1):
-        table.add_row(str(i), m.track_id, m.installation_id, local(m.start_ts, m.installation_id),
-                      f"{m.score:.3f}", f"{m.features['euclidean_d2']:.3f}",
-                      f"{int(m.features['window_s'])} s @ {m.window_offset_s} s")  # fmt: skip
-    console.print(table)
+    if matcher is not None:
+        stages = " · ".join(f"{k.removesuffix('_ms')} {v:.0f}" for k, v in timings.items())
+        console.print(f"model {matcher.model_version} · τ {matcher.tau:.3f} · ms: {stages}")
+    from kairos_defense.cli_tables import match_table
+
+    console.print(match_table(f"{method} matches for {incident}", matches[:top], method, local))
     if not matches:
         console.print("no earlier track to match (nothing started before this one)")
+
+
+@app.command()
+def models(config: str = typer.Option("config", help="Folder with the five YAML files.")) -> None:
+    """Train the fusion model and calibrate DTW (§10.6) from history; writes models/*.json."""
+    from kairos_defense.eval.training import train_models
+    from kairos_defense.eval.truth import track_truth
+    from kairos_defense.match.candidates import IndexStale
+    from kairos_defense.match.dtw_rerank import DtwUnavailable, require_c
+    from kairos_defense.store.duck import DuckTrackStore
+
+    cfg = _load_config(config)
+    _need_data(cfg)
+    lance = _need_index(cfg)
+    try:
+        require_c()
+        with DuckTrackStore(cfg.app.paths.duckdb, cfg.app) as store:
+            s = train_models(cfg, store, lance, track_truth(cfg.app))
+    except (IndexStale, DtwUnavailable, ValueError) as exc:
+        _fail(exc)
+    from kairos_defense.cli_tables import models_table
+
+    console.print(models_table(s))
+    console.print("wrote " + " and ".join(str(p) for p in s.paths))
 
 
 @app.command(name="eval")
 def eval_(
     baseline: bool = typer.Option(False, "--baseline", help="Write reports/baseline.json."),
-    method: str = typer.Option("euclidean", help="Matching method (euclidean in phase 3)."),
+    method: str = typer.Option("dtw", help=METHOD_HELP),
     config: str = typer.Option("config", help="Folder with the five YAML files."),
 ) -> None:
     """Run the evaluation harness (§19) and write reports/eval_<date>.md and .json."""
+    from kairos_defense.cli_tables import eval_table
     from kairos_defense.eval.harness import METHODS, evaluate
     from kairos_defense.eval.report import gate, write_reports
     from kairos_defense.eval.truth import track_truth
+    from kairos_defense.match.candidates import IndexStale
+    from kairos_defense.match.dtw_rerank import DtwUnavailable
+    from kairos_defense.match.fusion import ModelError
     from kairos_defense.store.duck import DuckTrackStore
-    from kairos_defense.store.lance import LanceVectorStore
 
     if method not in METHODS:
-        console.print(f"[red]method {method!r} is not built yet:[/red] phase 4 adds dtw.")
+        console.print(f"[red]unknown method {method!r}:[/red] use dtw or euclidean.")
         raise typer.Exit(1)
     cfg = _load_config(config)
     _need_data(cfg)
-    lance = LanceVectorStore(cfg.app.paths.lancedb)
-    if not lance.has("flight_windows"):
-        console.print("[red]no index:[/red] flight_windows is missing; run `make index`.")
-        raise typer.Exit(1)
+    lance = _need_index(cfg)
     truth = track_truth(cfg.app)
-    with DuckTrackStore(cfg.app.paths.duckdb, cfg.app) as store:
-        run = evaluate(cfg, store, lance, truth, method)
+    try:
+        with DuckTrackStore(cfg.app.paths.duckdb, cfg.app) as store:
+            run = evaluate(cfg, store, lance, truth, method)
+    except (ModelError, IndexStale, DtwUnavailable) as exc:
+        _fail(exc)
     md, js, s = write_reports(run, cfg.app.paths.reports)
-    m, n = s["metrics"], s["counts"]
-
-    def f(v, pct: bool = False) -> str:
-        return "-" if v is None else (f"{v:.0%}" if pct else f"{v:.3f}")
-
-    table = Table(title=f"kairos-defense eval · {method}", title_justify="left")
-    table.add_column("Metric")
-    table.add_column("Value", justify="right")
-    table.add_row(
-        "prober queries (unanswerable)", f"{n['prober_queries']} ({n['prober_unanswerable']})"
-    )
-    table.add_row("copycat queries (unanswerable)",
-                  f"{n['copycat_queries']} ({n['copycat_unanswerable']})")  # fmt: skip
-    table.add_row("Recall@5 at T=120 s", f(m["recall_at_5_t120"]))
-    table.add_row("MRR at T=120 s", f(m["mrr_t120"]))
-    table.add_row("time to match (top 3 by T=90 s)", f(m["time_to_match_t90"], True))
-    table.add_row("copycat-first at T=120 s", f(m["copycat_first_t120"], True))
-    table.add_row("Recall@5 at T=120 s, copycats", f(m["recall_at_5_t120_copycats"]))
-    for stage in ("query_build", "prefilter", "end_to_end"):
-        p50, p95 = m[f"latency_{stage}_p50_ms"], m[f"latency_{stage}_p95_ms"]
-        table.add_row(f"latency {stage.replace('_', ' ')} p50 / p95",
-                      "-" if p50 is None else f"{p50:.0f} / {p95:.0f} ms")  # fmt: skip
-    for r in s["demo"]:
-        table.add_row(f"demo {r['key']}", f"{r['status']}: {r['observed']}")
-    table.add_row("elapsed", f"{s['elapsed_s']:.1f} s")
-    console.print(table)
+    console.print(eval_table(s, method))
     console.print(f"wrote {md} and {js}")
     reports = Path(cfg.app.paths.reports)
     if baseline:

@@ -105,3 +105,29 @@ def test_prefilter_refuses_a_leaky_store(p1_index, stores) -> None:
     q = load_query(duck, "P1-DELTA-260419-T1", 90, p1_index.cfg.scoring)
     with pytest.raises(LookAheadError):
         prefilter(q, LeakyStore(q.start_ms), p1_index.cfg.scoring)
+
+
+def test_dtw_results_never_start_after_the_query(toy_models, stores) -> None:
+    """The phase 4 matcher keeps the rule: every fused match started before the query, the own
+    incident is excluded, and later P1 flights are never returned (CLAUDE.md rule 3)."""
+    from kairos_defense.match.matcher import DtwMatcher
+
+    duck, lance = stores
+    sc = toy_models.scoring
+    matcher = DtwMatcher(duck, lance, sc, toy_models.app.paths.models)
+    tracks = duck.tracks()
+    later_p1 = 0
+    for row in tracks.itertuples():
+        for at in T_GRID:
+            q = load_query(duck, row.track_id, at, sc)
+            res = matcher.match(q)
+            for m in res.matches + res.baseline:
+                assert m.start_ts < q.start_ts, (row.track_id, at, m.track_id)
+                assert m.incident_id != q.incident_id
+            if row.track_id == "P1-ALPHA-260303-T1":
+                later = tracks[
+                    (tracks.start_ts > q.start_ts) & tracks.incident_id.str.startswith("P1-")
+                ]
+                later_p1 += len(later)
+                assert not {m.track_id for m in res.matches} & set(later.track_id)
+    assert later_p1 > 0

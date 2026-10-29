@@ -1,10 +1,15 @@
 """Sliding windows and PAA vectors (SPEC §9.5).
 
 A window is ``W`` consecutive 1 Hz feature rows. Its vector: take the (W, 5) channel matrix,
-z-normalize and weight each channel over the window (§9.3), fill NaN by linear interpolation along
-time (0 for a channel with no value), average into 16 equal segments (piecewise aggregate
-approximation, exact for fractional segment lengths), flatten channel-major (all 16 segments of
-channel 0, then channel 1, ...), L2-normalize and store as float32 (D-051).
+scale and weight each channel, fill NaN by linear interpolation along time (0 for a channel with no
+value), average into 16 equal segments (piecewise aggregate approximation, exact for fractional
+segment lengths), flatten channel-major (all 16 segments of channel 0, then channel 1, ...),
+L2-normalize and store as float32 (D-051).
+
+Scaling follows ``windows.normalize``: ``window`` z-normalizes each channel over the window (§9.3 as
+written, phase 3); ``fixed`` divides by ``features.channel_scales`` without centering, so the orbit
+radius, speeds and altitude survive (D-068). The index and the query share these functions, so
+both sides always use the same recipe; changing it means rerunning ``make index``.
 
 A live query uses the same function on its most recent W seconds, with W the largest window size
 not longer than what has been seen; before the smallest size is reached it uses everything seen so
@@ -43,7 +48,7 @@ def paa_weights(n: int, segments: int) -> np.ndarray:
     return w
 
 
-def _fill_nan(z: np.ndarray) -> np.ndarray:
+def fill_nan(z: np.ndarray) -> np.ndarray:
     """Linear interpolation along axis 0 per column (edges take the nearest value); a column with
     no finite value becomes 0 (its mean after normalization)."""
     out = z.copy()
@@ -66,28 +71,47 @@ def window_vectors(
     offsets: np.ndarray | list[int],
     weights: np.ndarray | list[float],
     segments: int,
+    scales: np.ndarray | list[float] | None = None,
 ) -> np.ndarray:
     """Vectors of the windows ``raw[o : o + size]`` for each offset: ``(k, c * segments)`` float32,
-    unit length. ``raw`` is ``(n, c)`` raw channels; all windows are processed together."""
+    unit length. ``raw`` is ``(n, c)`` raw channels; all windows are processed together.
+
+    ``scales`` (c,) given: each channel is divided by its fixed unit (no centering, D-068);
+    None: z-normalized over each window (§9.3, phase 3)."""
     offsets = np.asarray(offsets, dtype=np.int64)
     win = np.moveaxis(sliding_window_view(raw, size, axis=0)[offsets], -1, 1)  # (k, size, c)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", RuntimeWarning)  # all-NaN channels: handled below
-        mu = np.nanmean(win, axis=1, keepdims=True)
-        sd = np.nanstd(win, axis=1, keepdims=True)
-    sd = np.where(np.isfinite(sd), np.maximum(sd, SIGMA_FLOOR), SIGMA_FLOOR)
-    z = (win - mu) / sd * np.asarray(weights, dtype=np.float64)
+    w = np.asarray(weights, dtype=np.float64)
+    if scales is not None:
+        z = win / np.asarray(scales, dtype=np.float64) * w
+    else:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)  # all-NaN channels: handled below
+            mu = np.nanmean(win, axis=1, keepdims=True)
+            sd = np.nanstd(win, axis=1, keepdims=True)
+        sd = np.where(np.isfinite(sd), np.maximum(sd, SIGMA_FLOOR), SIGMA_FLOOR)
+        z = (win - mu) / sd * w
     for i in np.flatnonzero(~np.isfinite(z).all(axis=(1, 2))):
-        z[i] = _fill_nan(z[i])
+        z[i] = fill_nan(z[i])
     paa = np.einsum("ms,ksc->kcm", paa_weights(size, segments), z)  # (k, c, segments)
     v = paa.reshape(len(offsets), -1)  # channel-major
     norm = np.linalg.norm(v, axis=1, keepdims=True)
     return (v / np.where(norm > 0, norm, 1.0)).astype(np.float32)
 
 
-def window_vector(raw: np.ndarray, weights: np.ndarray | list[float], segments: int) -> np.ndarray:
+def window_vector(
+    raw: np.ndarray,
+    weights: np.ndarray | list[float],
+    segments: int,
+    scales: np.ndarray | list[float] | None = None,
+) -> np.ndarray:
     """Raw channels ``(n, c)`` of one window -> ``(c * segments,)`` float32 unit vector."""
-    return window_vectors(np.asarray(raw, dtype=np.float64), len(raw), [0], weights, segments)[0]
+    raw = np.asarray(raw, dtype=np.float64)
+    return window_vectors(raw, len(raw), [0], weights, segments, scales)[0]
+
+
+def vector_scales(scoring: ScoringConfig) -> list[float] | None:
+    """The ``scales`` argument for ``scoring``: fixed units, or None for per-window z (D-068)."""
+    return scoring.features.channel_scales if scoring.windows.normalize == "fixed" else None
 
 
 @dataclass(frozen=True)
@@ -110,7 +134,7 @@ def iter_windows(features: pd.DataFrame, scoring: ScoringConfig) -> Iterator[Win
         if len(offs) == 0:
             continue
         vecs = window_vectors(raw, size, offs, scoring.features.channel_weights,
-                              scoring.windows.paa_segments)  # fmt: skip
+                              scoring.windows.paa_segments, vector_scales(scoring))  # fmt: skip
         for o, v in zip(offs, vecs, strict=True):
             yield Window(size, int(t_s[o]), v)
 
@@ -130,5 +154,6 @@ def query_vector(features: pd.DataFrame, scoring: ScoringConfig) -> tuple[np.nda
     size = query_window_size(len(features), scoring)
     tail = features.iloc[-size:]
     raw = channel_matrix(tail, scoring)
-    vec = window_vector(raw, scoring.features.channel_weights, scoring.windows.paa_segments)
+    vec = window_vector(raw, scoring.features.channel_weights, scoring.windows.paa_segments,
+                        vector_scales(scoring))  # fmt: skip
     return vec, size, len(tail)

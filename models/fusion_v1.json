@@ -1,0 +1,47 @@
+{
+ "version": "fusion-v1",
+ "features": [
+  "shape_sim",
+  "rf_match",
+  "bearing_sim",
+  "tod_sim",
+  "launch_sim",
+  "radius_sim",
+  "alt_sim"
+ ],
+ "coefficients": [
+  4.219489502904272,
+  18.663778457949412,
+  2.6460876017658577,
+  26.215196718136283,
+  9.785344299315136,
+  0.6537359248445229,
+  5.269097522505439
+ ],
+ "intercept": -51.96305211448551,
+ "tau": 1.6453307801744441,
+ "training_hash": "318e1b4cde4bb19f99235c3935525e6f1cd55272bdbd4185bde3ca5ae5ebb6fd",
+ "created_at": "2026-10-29T01:26:07",
+ "train_split": {
+  "train_first": "2025-03-01",
+  "train_last": "2026-02-28",
+  "valid_first": "2026-03-01",
+  "valid_last": "2026-08-31",
+  "t_grid": [
+   45,
+   60,
+   90,
+   120,
+   180
+  ]
+ },
+ "validation": {
+  "queries": 33,
+  "pairs": 82500,
+  "positives": 1379,
+  "roc_auc": 0.997624,
+  "log_loss": 0.055592,
+  "recall_at_5_t120_probers": 1.0,
+  "train_recall_at_5_t120_probers": 1.0
+ }
+}
