@@ -11,7 +11,7 @@
 | 6 | Case memory (Kairos-lite) | done (2026-10-29, autopilot gate passed) | `memory reseed && memory verify && pytest -k memory` exit 0 in 7.8 s: 4,681 rows seeded in 0.14 s, chain intact, 92 passed; DELTA at 10:00 local hobbyist, closed, no links; `memory demo --approve` known then 1 member → known now 3 (real top 3: DELTA, ALPHA-0303, CHARLIE; D-081); evidence verify PASS, then FAIL after one edited byte; 586 fast, 601 in all | 2026-10-28 |
 | 7 | Streaming API and Command Center foundation | done (2026-10-29, autopilot gate passed) | `make demo` serves API, stream and web app offline (T+90 match cached; all stream types by T+50 at 5×; D-010 resets through the API); `make e2e` 19/19 with axe clean on 7 routes; 8 screenshots reviewed, 9 fixes; median 59.9 fps (P5 59.9) at 1920 × 1080 with bloom, ANGLE Metal on an Apple M4 Max, macOS 26.5.2; 710 fast, 726 in all; Vitest 73 | 2026-10-29 |
 | 8 | Command Center: the memorable moments | done (2026-10-29, autopilot gate passed) | Director at 1× through every §1.2 row: T+0 21:40:06, T+15, T+45, loiter marker T+87 (T+80 row), T+90, T+105, T+120 21:42:06, then Case board and Evidence on →; median 59.9 fps (P5 59.9) on every Live watch beat at 1920 × 1080 with bloom, ANGLE Metal, Apple M4 Max, macOS 26.5.2; 18 beat + 12 page screenshots at both sizes reviewed, 17 fixes (D-146); `make e2e` 29/29 with axe clean on 9 routes and on Live watch at T+120; `make eval` + `check_targets.py 8` exit 0 (accepted `live_top3_incidents` WARN, D-081); 731 fast, 747 in all; Vitest 153 | 2026-10-29 |
-| 9 | Swarms, agent, MCP, hardening and runbook | not started | | |
+| 9 | Swarms, agent, MCP, hardening and runbook | not started | `make clean && make data index models eval` (7 min): 8 swarms indexed, swarm top-1 1.000 (4/4), every §19 target met (accepted `live_top3_incidents` WARN), `check_targets.py 9` exit 0; `make demo` serves the Swarm view and `/api/swarm` (S1-GOLF-260503 first); `make e2e` 31 passed; encore beat at 5× both sizes; `make mcp` lists 6 tools (8 with `--allow-proposals`); `docs/DEMO.md` complete; 795 fast, 18 slow; Vitest 168 | 2026-10-29 |
 | 10 | User guide, one-pager and rollback guide (docs/phases/PHASE_10.md) | not started | | |
 
 Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
@@ -25,6 +25,54 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Open issues: …
 - Next: …
 -->
+
+### 2026-10-29 · Phase 9 (single cloud session)
+- Built (one Claude Code cloud session, D-148; two forked helpers built the agent backend and the
+  web part in parallel, the main session built the swarm backend and integrated):
+  - Swarm encore (§14, §17.9, §17.10): `features/swarm_features.py` (permutation-invariant
+    descriptors, §14 detection, z-normalized series, 96-d PAA vectors, `load_swarm` up to T),
+    `swarm_features` (DuckDB, §7.2 columns) and `swarm_windows` (LanceDB) for history swarms
+    (D-149); `match/swarm.py` (prefilter on earlier swarms, prefix DTW over `swarm.pace_range`,
+    full-matrix alignment) (D-150); `eval/swarm.py` (`swarm_top1` over each query's whole observed
+    flight, per-T values report only, the demo row) (D-151); `GET /api/swarms`,
+    `GET /api/swarm/{id}?at=&match=`, `kairos-defense swarm` (D-152); the Swarm view (formation
+    edges, the DTW-aligned afterglow ghost, descriptor curves, playback from a store) (D-160) and
+    Director's ninth beat with its computed caption (D-161).
+  - Agent and MCP (§18): `agent/` (eight tools over the ports, a lock, the ledger per call, REST
+    fallback while the API holds the ledger) (D-158); the MCP server over mcp 2.x `MCPServer`,
+    read-only by default, `--allow-proposals` for the two proposal tools; `make mcp` silent; a
+    stdio probe (D-157); the optional chat (adapters none, anthropic, openai, ollama; read-only
+    tools; `/api/chat`; a slide-over only when a provider is enabled) (D-159, D-162).
+  - Hardening: performance pass, no pruning needed (D-153); two e2e specs wait for the state they
+    measure on a slow machine (D-154); CLI messages never hard-wrap (D-156); the LLM paraphrase
+    stays off (D-155); stale "phase 9" texts updated.
+  - Runbook: `docs/DEMO.md` (Appendix B with this build's commands, times, keys, fallbacks, MCP);
+    README run instructions and Status.
+- Exit check (`docs/phases/phase-09/EXIT_CHECK.md`), cloud container (4 vCPU, no GPU):
+  - `make clean && make data index models eval` (7 min 18 s): 1,878 incidents (9 swarms),
+    1,898 tracks and 8 history swarms indexed (all 8 detected); Recall@5 1.000, DTW lift +0.522,
+    copycat-first 0%, time to match 96%, report linkage 1.000, forecast median 341 m, swarm top-1
+    1.000 (4 of 4 answerable); `make eval` exits 1 on the accepted `live_top3_incidents` row only;
+    `check_targets.py 9` exit 0 (WARN: that row and the report-only prefilter p95 of 164 ms here).
+  - `make demo` (background, stopped): health ok with both live incidents; `/api/swarm/
+    DEMO-SWARM-ECHO-0614` ranks S1-GOLF-260503 first (similarity 0.476, pace 0.75); chat disabled
+    by default; every page route 200; port 8000 free afterwards.
+  - `make e2e`: 31 passed in 11.9 min (the Director spec reaches the encore at both sizes with
+    the computed caption and an unchanged ledger head; `swarm.spec.ts` 2; axe clean on every route,
+    `/swarm` included).
+  - MCP: the stdio probe lists 6 tools from `make mcp` and 8 with `--allow-proposals`.
+  - `docs/DEMO.md`: every Appendix B section; every command and target resolves.
+- Tests: `make check` 795 fast Python tests (731 at the start) and Vitest 168 (153); slow tests
+  18 (17 + `test_full_mcp.py`); e2e 31 (29 + `swarm.spec.ts`). No skip or xfail marker was added.
+- UI review (§17.13): the Swarm view and the encore beat at 1920 × 1080 and 1440 × 900; seven
+  findings fixed (D-160): a non-focusable scroll region (axe), a clipped direct label, unused chart
+  height, a jagged full centroid path (now a 60 s trail), a wrapping ghost chip, formations too
+  small (camera closer), a double Play on fast clicks. Left as is: the ghost is re-centered, not
+  rotated, so at the split its groups can appear mirrored.
+- Open issues: the accepted `live_top3_incidents` gap (phase 4 GAPS.md); the frame rate was not
+  re-measured (no GPU here; the laptop's 59.9 fps stands, D-148); the chat is tested against mock
+  transports only.
+- Decisions D-148 to D-162.
 
 ### 2026-10-29 · Phase 8 (autopilot build)
 - Built: the Command Center's memorable moments (SPEC §17.3, §17.7–§17.13).

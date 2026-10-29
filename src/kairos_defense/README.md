@@ -60,8 +60,10 @@ The top-level package: the CLI entry point and the four core modules every other
     - `swarm --incident ID [--at S] [--k 5]`: the earlier swarms ranked by choreography (§14,
       `cli_swarm.py`, D-152); exit 1 for an unknown incident, one that is not a swarm, or a
       missing swarm index;
-    - `mcp [--allow-proposals] [--config]`: the MCP server over stdio (`cli_agent.py`, §18.2):
-      the six read-only agent tools, plus the two proposal tools with `--allow-proposals`.
+    - `mcp [--allow-proposals] [--agent NAME] [--memory P] [--api URL] [--config]`: the MCP
+      server over stdio (`cli_agent.py`, §18.2, D-157): the six read-only agent tools, plus the
+      two proposal tools with `--allow-proposals`; proposals are signed `agent:<NAME>` (default
+      `mcp`); `--api` is where the ledger tools read while the API holds the ledger (D-158).
   - No stub is left in `STUBS` (every §20 command is real).
   - `--version`.
 - `ports`:

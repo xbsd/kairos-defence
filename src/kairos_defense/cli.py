@@ -193,8 +193,8 @@ def index(config: str = typer.Option("config", help="Folder with the five YAML f
     table.add_row("embedder", f"{r.embedder} ({r.dim} dims); full-text index on text")
     table.add_row("elapsed", f"{s.elapsed_s:.1f} s + reports {r.elapsed_s:.1f} s")
     console.print(table)
-    console.print(f"wrote track_features, track_signatures and report_clues to "
-                  f"{cfg.app.paths.duckdb}, flight_windows and reports to "
+    console.print(f"wrote track_features, track_signatures, report_clues and swarm_features to "
+                  f"{cfg.app.paths.duckdb}, flight_windows, swarm_windows and reports to "
                   f"{cfg.app.paths.lancedb}")  # fmt: skip
 
 

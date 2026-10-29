@@ -87,12 +87,25 @@ as a config key; the tool-level rule-3 test for `recall_reports`; the DEMO.md co
   `evalView.test.ts` (`swarm_top1` is a real tile; the pending branch is still tested with a
   synthetic target), `director.spec.ts` (the encore step), `pages.spec.ts` (the `/swarm` ready
   marker), and the two synchronization fixes of D-154 (`helpers.ts`, `lens.spec.ts`).
-- Counts: TEST-COUNTS
+- Counts:
+  - `make check`: 795 fast Python tests (731 at the start, +64), ruff clean; Vitest 168 in 38 files
+    (153 at the start, +15: `swarmMath` 7, `SwarmView` 4, `ChatPanel` 2, and new cases in the
+    updated files).
+  - Slow tests: 18 (17 earlier + `test_full_mcp.py`); `make test-all` = 795 + 18.
+  - Playwright: 31 tests (29 + `swarm.spec.ts` 2; `director.spec.ts` gained the encore step).
 - No skip or xfail marker was added.
 
 ## Exit check
 
-EXIT-TABLE
+| Criterion | Result | Evidence |
+|---|---|---|
+| `make clean && make data index models eval` | pass | 1,878 incidents (9 swarms), 1,898 tracks and 8 swarms indexed (8 detected), models, eval in 7 min 18 s |
+| `make demo` | pass | health ok; `/api/swarm/DEMO-SWARM-ECHO-0614` → S1-GOLF-260503 first; every page 200; stopped, port free |
+| `make e2e` | pass | 31 passed in 11.9 min; axe clean on every route including `/swarm` |
+| All §19 targets met (or approved gaps) | pass | `check_targets.py 9` exit 0: swarm top-1 1.000, time to match 96%, every other target PASS; WARN for the accepted `live_top3_incidents` (D-081) and report-only prefilter latency (D-060) |
+| The encore works | pass | Director at 5× reaches beat 9 at both sizes with `swarm-ghost` and the computed caption; the ledger head is unchanged; `swarm.spec.ts` passes |
+| An MCP client lists the tools (`make mcp`) | pass | the probe lists 6 tools from `make mcp` and 8 with `--allow-proposals`; `test_mcp.py` and `test_full_mcp.py` pass |
+| `docs/DEMO.md` complete | pass | every Appendix B section; every command and target resolves |
 
 Full output: [EXIT_CHECK.md](EXIT_CHECK.md).
 

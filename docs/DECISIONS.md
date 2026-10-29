@@ -2096,7 +2096,8 @@ Where this file and the SPEC ever disagree, this file wins.
   frame-rate target cannot be re-measured here; the laptop's 59.9 fps median (phase 7 and 8, Apple
   M4 Max) stands until re-measured there. The models retrained here differ slightly from the
   laptop's (training hash differs, coefficients within about 2%: cross-platform floating point);
-  every §19 number is unchanged at the reported precision.
+  every §19 number agrees with the laptop's within rounding (forecast median 340.5 m here, 340.4 m
+  there; the others identical).
 
 ## D-149 · Swarm descriptors, detection and tables (§14) · 2026-10-29
 - Decision: `features/swarm_features.py`. Each drone track is resampled with §9.1 `resample` and

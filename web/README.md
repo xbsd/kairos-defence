@@ -26,8 +26,9 @@ curves), Director's ninth beat (the swarm encore) and the optional chat slide-ov
 
 - Routes (`src/app/routes.ts`, `Link.tsx`, D-112, D-141): `/` opens Live watch for the first
   live single-track incident; `/live/:incidentId`; `/explainer?incident=&at=&track=`; `/cases`;
-  `/cases/:caseId?focus=`; `/evidence?case=`; `/delta?since=`; `/eval`; `/swarm` says phase 9
-  builds it. Every page is `React.lazy` (only Live watch loads the `vendor-3d` chunk).
+  `/cases/:caseId?focus=`; `/evidence?case=`; `/delta?since=`; `/eval`; `/swarm?incident=&match=`
+  (phase 9). Every page is `React.lazy` (Live watch and the Swarm view load the `vendor-3d`
+  chunk).
 - `src/app/CommandBar.tsx`: breadcrumb, replay clock (`T+mm:ss`, local time in
   `data-local-time`), status chip (Live, Paused, Connecting, Reconnecting, No replay loaded;
   `app/status.ts`), speed 1× 2× 5×, Play, Pause, Restart (seek 0), Reduce motion, Performance
