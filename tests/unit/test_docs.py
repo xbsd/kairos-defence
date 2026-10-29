@@ -58,9 +58,13 @@ def test_every_relative_link_and_image_resolves(root: Path, name: str) -> None:
             missing.append(t)
         if "#" in t and not re.match(r"^[a-z]+:", t):
             target_doc = doc if t.startswith("#") else path
-            if target_doc is not None and target_doc.suffix == ".md" and target_doc.exists():
-                if t.split("#", 1)[1] not in anchors(target_doc):
-                    missing.append(t)
+            if (
+                target_doc is not None
+                and target_doc.suffix == ".md"
+                and target_doc.exists()
+                and t.split("#", 1)[1] not in anchors(target_doc)
+            ):
+                missing.append(t)
     assert missing == [], f"{name} has broken links or anchors: {missing}"
 
 
