@@ -26,6 +26,36 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Next: …
 -->
 
+### 2026-10-29 · Summary of phases 8 to 10 (end of the cloud session)
+- Phase 8 (autopilot build on the laptop, gate passed): the Command Center's memorable moments:
+  the time-warp lens, afterglow ghosts, core beams, region constellation, forecast with the road
+  highlight, the recall overlay and beam, the Match explainer, Case board (Known then and Known
+  now), Evidence, Shift delta, Eval, Director mode and Performance mode (D-122 to D-147).
+- Phase 9 (this cloud session, gate passed on its first run): swarm matching and the Swarm view
+  encore, the eight agent tools and the MCP server (read-only by default), the optional chat
+  slide-over, a hardening pass and the presenter's runbook `docs/DEMO.md` (D-148 to D-162).
+- Phase 10 (this cloud session, gate passed on its first run): the user guide with 20 screenshots
+  captured from the running app by `web/e2e/guide.spec.ts`, the one-pager, the rollback guide, the
+  README rewritten around them, documentation tests, and five presentation fixes from the
+  screenshot review (D-163 to D-167).
+- Final §19 numbers (`reports/eval_2026-10-29.json`, `make eval` in the cloud container):
+  Recall@5 at T = 120 s 1.000 (target ≥ 0.80); MRR 1.000 (report only); time to match, top 3 by
+  T = 90 s, 95.7% (≥ 70%); copycat-first rate 0% (≤ 5%); DTW lift +0.522 over the Euclidean
+  baseline's 0.478 (≥ +0.10); report linkage 1.000, 65 of 65 (≥ 0.70); forecast median error at
+  T = 90 s 340.5 m, P80 494.7 m (≤ 400 m); swarm top-1 1.000, 4 of 4 answerable queries (≥ 0.80).
+  Latency p95, report only (D-060), on 4 virtual CPUs without a GPU: prefilter 162 ms (target 50),
+  DTW re-rank of 50 candidates 223 ms (800), end-to-end live update 592 ms (1,500), swarm match
+  343 ms. Demo assertions: every row passes except `live_top3_incidents`.
+- Every GAPS.md: only `docs/phases/phase-04/GAPS.md`: the demo assertion `live_top3_incidents`
+  (at T+90 the live top 3 is P1-DELTA-260419, P1-ALPHA-260303 and P1-CHARLIE-260710, all the same
+  synthetic actor; the expected P1-ALPHA-260502 ranks fifth), accepted on 2026-10-28 (D-063, D-081)
+  and reported as WARN by every later gate; `docs/phases/accepted_gaps.json` lists its two keys.
+  Phases 5 to 10 added no gap.
+- Open items for a human: recreate and push the tags `phase-09-done` and `phase-10-done`, which the
+  cloud remote refused (`docs/ROLLBACK.md`, D-167); merge `claude/cloud-phases-9-10` without
+  squashing; re-measure the frame rate on a GPU machine (the laptop's 59.9 fps from phase 8 stands;
+  this container has none, D-148).
+
 ### 2026-10-29 · Phase 10 (single cloud session)
 - Built (docs/phases/PHASE_10.md): `docs/USER_GUIDE.md` (twelve sections, about 6,100 words
   outside code blocks, 20 screenshots, real command-line output), `web/e2e/guide.spec.ts` (the

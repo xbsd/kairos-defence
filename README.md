@@ -59,7 +59,7 @@ tests), `make dev` (API and Vite with hot reload), `make e2e` (Playwright, scree
 | 7 | Streaming API and Command Center foundation | done | [report](docs/phases/phase-07/REPORT.md) |
 | 8 | Command Center: the memorable moments | done | [report](docs/phases/phase-08/REPORT.md) |
 | 9 | Swarms, agent, MCP, hardening and runbook | done | [report](docs/phases/phase-09/REPORT.md) |
-| 10 | User guide, one-pager and rollback guide | built; awaiting the gate | [report](docs/phases/phase-10/REPORT.md) |
+| 10 | User guide, one-pager and rollback guide | done | [report](docs/phases/phase-10/REPORT.md) |
 
 Latest evaluation (`make eval`): Recall@5 1.000, DTW lift +0.52, copycat-first 0%, time to match
 96%, report linkage 1.000, forecast median 341 m at T = 90 s, swarm top-1 1.000 (4 of 4). Every

@@ -1,6 +1,6 @@
 # Phase 10: User guide, one-pager and rollback guide, report
 
-Status: done (awaiting the gate, `scripts/cloud_gate.py`) · Date: 2026-10-29 · Commits: `5c16a7a`
+Status: done (gate passed, `scripts/cloud_gate.py gate 10`: see `gate-1.log`) · Date: 2026-10-29 · Commits: `5c16a7a`
 (plan and review), `phase 10: user guide, one-pager and rollback guide`, and the exit-check commit
 
 ## Summary

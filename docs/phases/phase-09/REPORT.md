@@ -1,6 +1,6 @@
 # Phase 9: Swarms, agent, MCP, hardening and runbook, report
 
-Status: done (awaiting the gate, `scripts/cloud_gate.py`) · Date: 2026-10-29 · Commits:
+Status: done (gate passed, `scripts/cloud_gate.py gate 9`: see `gate-1.log`) · Date: 2026-10-29 · Commits:
 `4e814f5` (plan and review), `28be4d7` and `b36d134` (checkpoints), `0d67400`
 (`phase 9: swarm encore, agent tools and MCP, hardening, runbook`)
 
