@@ -17,6 +17,7 @@ dtw:
   anchor_before: 0.5                # anchor segment = [start − 0.5W, start + 1.5W]
   anchor_after: 1.5
   tau: auto                         # calibrated in phase 4, saved to models/dtw_calibration.json
+  normalize: fixed                  # series | floored | fixed: shape-distance scaling (D-079)
 fusion:
   model: logistic
   features: [shape_sim, rf_match, bearing_sim, tod_sim, launch_sim, radius_sim, alt_sim]

@@ -80,6 +80,7 @@ class CandidateBuilder:
         live = channel_matrix(q.features.iloc[-q.rows_used :], sc)
         raw = self.raw_channels(ids)
         w, band = sc.features.channel_weights, sc.dtw.band_fraction
+        mode, scales = sc.dtw.normalize, sc.features.channel_scales
         before, after = sc.dtw.anchor_before, sc.dtw.anchor_after
         d_norm = np.empty(len(ids))
         for i, (tid, off, size) in enumerate(
@@ -87,7 +88,7 @@ class CandidateBuilder:
         ):
             series = raw[tid]
             lo, hi = dtw_rerank.anchor_bounds(int(off), int(size), len(series), before, after)
-            d_norm[i] = dtw_rerank.shape_distance(live, series[lo:hi], w, band)
+            d_norm[i] = dtw_rerank.shape_distance(live, series[lo:hi], w, band, mode, scales)
         t3 = time.perf_counter()
         csigs = sigs.loc[ids]
         ctx = context_frame(qsig, csigs).reset_index(drop=True)

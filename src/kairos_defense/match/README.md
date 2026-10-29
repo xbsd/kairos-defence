@@ -38,8 +38,11 @@ truth (training lives in `kairos_defense.eval.training`).
 - `dtw_rerank` (pure functions over raw `(n, 5)` channel arrays):
   - `require_c()` / `DtwUnavailable`; `band_window(n, m, band_fraction)`;
     `anchor_bounds(offset_s, window_s, n_rows, before, after) -> (lo, hi)`; `relaxation(n, m)`;
-  - `prepare(raw, weights) -> (n, c)`: §9.3 z-normalization, weights, NaN filled;
-  - `shape_distance(live, seg, weights, band_fraction) -> d_norm`; `shape_sim(d_norm, tau)`;
+  - `prepare(raw, weights, mode="series", scales=None) -> (n, c)`: `series` (§9.3 z over the
+    series), `floored` (σ floored at the unit) or `fixed` (raw / unit, no centering), weighted, NaN
+    filled (D-079);
+  - `shape_distance(live, seg, weights, band_fraction, mode="series", scales=None) -> d_norm`;
+    `shape_sim(d_norm, tau)`;
   - `warp_path(live, seg, weights) -> (p, 2) int`; `warp_ratio(live, seg, weights, speed_col=0)`
     (NaN outside `WARP_RANGE` 0.5–2.0); `warp_text(k) -> "flown X% slower" | "... faster" | None`;
   - `explain_alignment(live_dist, full_dist) -> (first row, last row, value)` (for phase 8).
@@ -79,9 +82,12 @@ truth (training lives in `kairos_defense.eval.training`).
 2. **Signature** (§10.5, D-071): `query_signature` runs §9.4 on the query's own features and its
    first and last points up to T, with RF and Remote ID heard up to T only (the adapter's `until`
    bound). Candidate signatures come from `tracks_before(q.start_ts)` (§11.3).
-3. **Anchored DTW** (§10.4, D-069): for each candidate, rows `[o − 0.5W, o + 1.5W]` around its
-   best window; both series z-normalized over themselves and weighted; banded C `dtw_ndim` with
-   the segment's two ends relaxed (psi); `d_norm = d / sqrt(n)`, `shape_sim = exp(−d_norm / τ)`.
+3. **Anchored DTW** (§10.4, D-069, D-079): for each candidate, rows `[o − 0.5W, o + 1.5W]`
+   around its best window; both series in fixed units (`dtw.normalize: fixed`: raw /
+   `channel_scales` × weight, the prefilter's recipe) rather than §9.3's per-series z, which turned
+   the radar noise of near-constant orbit channels into shape; banded C `dtw_ndim` with the
+   segment's two ends relaxed (psi); `d_norm = d / sqrt(n)`, `shape_sim = exp(−d_norm / τ)`. On the
+   training split this raised the shape's same-actor AUC from 0.58 to 0.80.
 4. **Fusion** (§10.5, §10.6): seven features in `scoring.fusion.features` order, `sigmoid(x · coef
    + b)` with the trained coefficients. Ties keep prefilter order.
 5. **Explain** (§10.7, D-074): for the top 20, the warp ratio (tonight's mean speed over the past
@@ -89,21 +95,23 @@ truth (training lives in `kairos_defense.eval.training`).
    three reasons by contribution.
 
 Measured on the dev laptop with the default dataset (eval, 165 searches): prefilter p95 30 ms,
-DTW of 500 candidates p95 82 ms, end to end p95 149 ms.
+DTW of 500 candidates p95 57 ms, end to end p95 124 ms.
 
 ## Configuration
 
 `scoring.yaml` (§6.5): `prefilter.k_windows` (10,000) and `candidate_tracks` (500);
 `windows.normalize` (`fixed`) and `features.channel_scales`; `features.channel_weights`;
 `dtw.band_fraction` (0.25), `anchor_before` (0.5), `anchor_after` (1.5), `tau` (`auto` reads the
-calibration, a number overrides it); `fusion.features` (the model's order is checked);
+calibration, a number overrides it), `normalize` (`fixed`; `series` and `floored` for comparison,
+D-079; retrain with `make models` after changing it); `fusion.features` (the model's order is checked);
 `live.min_track_s` (CLI warning). `app.paths.models` (where the model files live).
 
 ## Tests
 
 - `tests/unit/test_dtw_rerank.py`: C path required, self-distance 0, band, anchors, NaN, warped
-  copies (0.8–1.4 at W = 60 and 120) score above an unrelated flight and report their warp,
-  relaxed ends, credible range, C and Python agree, `explain_alignment`.
+  copies (0.8–1.4 at W = 60 and 120) score above an unrelated flight and report their warp, in
+  `series` and in the configured `fixed` mode; the three `prepare` modes' known answers; relaxed
+  ends, credible range, C and Python agree, `explain_alignment`.
 - `tests/unit/test_fusion.py`, `test_explain.py`, `test_live_signature.py`: §10.5 formulas,
   model round trip (equals scikit-learn to 1e-12), feature-order refusal, a copycat fuses below
   P1; §10.7 reasons; partial signatures ignore everything after T.
@@ -116,6 +124,9 @@ calibration, a number overrides it); `fusion.features` (the model's order is che
 
 ## Gotchas
 
+- **The shape distance is in fixed units now** (D-079): altitude and speed levels count, as
+  `alt_sim` and `radius_sim` do. A flight at the other end of its actor's altitude band scores a
+  lower shape, which is why ALPHA 2026-05-02 ranks fifth at T+90.
 - **`use_c=True` everywhere.** dtaidistance silently falls back to pure Python (500x slower)
   without it; `require_c()` runs when a matcher is built.
 - **dtaidistance 2.5.1's C `warping_paths` with a `window` returns a wrong paths matrix** near the
@@ -140,3 +151,4 @@ calibration, a number overrides it); `fusion.features` (the model's order is che
 - Phase 4: `dtw_rerank.py`, `live_signature.py`, `fusion.py`, `explain.py`, `candidates.py`,
   `matcher.py`; `Query.site`, `points`, `until`; `Match.to_dict`; 500 candidates on fixed-unit
   vectors; `match --method dtw` is the default (D-068 to D-076, D-078).
+- Phase 4 gate fix 1: `dtw.normalize` (`fixed` adopted on the training split, D-079).

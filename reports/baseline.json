@@ -2,8 +2,8 @@
  "method": "dtw",
  "model_version": "fusion-v1",
  "candidate_tracks": 500,
- "created_at": "2026-10-29T01:27:59",
- "elapsed_s": 38.9,
+ "created_at": "2026-10-29T01:47:20",
+ "elapsed_s": 34.9,
  "metrics": {
   "recall_at_5_t120": 1.0,
   "recall_at_5_t120_baseline": 0.4782608695652174,
@@ -13,14 +13,14 @@
   "copycat_first_t120": 0.0,
   "recall_at_5_t120_copycats": 1.0,
   "median_time_to_match_s": 45.0,
-  "latency_query_build_p50_ms": 3.880167001625523,
-  "latency_query_build_p95_ms": 4.3329087988240635,
-  "latency_prefilter_p50_ms": 27.261166003881954,
-  "latency_prefilter_p95_ms": 29.704507801216096,
-  "latency_dtw_p50_ms": 55.5380830046488,
-  "latency_dtw_p95_ms": 81.27820799709298,
-  "latency_end_to_end_p50_ms": 119.08995799603872,
-  "latency_end_to_end_p95_ms": 149.01748280099127
+  "latency_query_build_p50_ms": 3.8834590086480603,
+  "latency_query_build_p95_ms": 4.241241392446682,
+  "latency_prefilter_p50_ms": 27.174457994988188,
+  "latency_prefilter_p95_ms": 29.744999608374197,
+  "latency_dtw_p50_ms": 31.442792009329423,
+  "latency_dtw_p95_ms": 55.56106659932993,
+  "latency_end_to_end_p50_ms": 95.71433399105445,
+  "latency_end_to_end_p95_ms": 123.91017478948925
  },
  "counts": {
   "prober_queries": 23,
@@ -41,7 +41,7 @@
   "45": {
    "recall_at_5_probers": 0.8260869565217391,
    "top3_probers": 0.8260869565217391,
-   "recall_at_5_copycats": 0.8,
+   "recall_at_5_copycats": 0.7,
    "window_s": [
     60
    ],
@@ -156,7 +156,7 @@
   {
    "key": "live_top3_incidents",
    "expected": "P1-DELTA-260419, P1-ALPHA-260303, P1-ALPHA-260502 at T+90 s, with reasons",
-   "observed": "2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of night'); P1-ALPHA-260303 #2 (0.99, 'Same time of night'); P1-ALPHA-260502 #4 (0.98, 'Same time of night')",
+   "observed": "2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of night'); P1-ALPHA-260303 #2 (1.00, 'Same time of night'); P1-ALPHA-260502 #5 (0.99, 'Same time of night')",
    "status": "fail"
   },
   {

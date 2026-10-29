@@ -23,6 +23,10 @@ but CHARLIE-260710 (planted as "weaker match on purpose") is third, ahead of ALP
 0.80 in logit, mostly from a 20 m altitude difference. `check_targets.py 4` reports it as the
 only GAP.
 
+Gate fix attempt 1 (below, D-079) moved the DTW shape distance to fixed units. That raised the
+shape's same-actor AUC on the training split from 0.58 to 0.80 and cut DTW p95 from 81 to 57 ms,
+with every metric unchanged. The demo row is still short: ALPHA-0502 is now fifth.
+
 ## What was built
 
 | Module | Purpose | Key files |
@@ -272,4 +276,39 @@ training split only.
 
 ## Fix attempts
 
-None yet.
+### Fix attempt 1 (gate-1.log): the DTW shape distance in fixed units
+
+- **Gate result:** every command passed. `check_targets.py 4` had 8 PASS and 1 GAP,
+  `demo:live_top3_incidents` (2/3: CHARLIE #3, ALPHA-0502 #4).
+- **Cause investigated:** the shape term barely told actors apart. On the training pairs the
+  median `d_norm` was 1.645 for same-actor pairs against 1.689 for the rest (AUC 0.58).
+  §9.3's per-series z-normalization divides near-constant orbit channels (distance, altitude,
+  speed) by their tiny σ, so radar noise became shape. That left altitude (`alt_sim`) to decide
+  between two true P1 flights.
+- **Change (D-079, registered before evaluation):**
+  - `dtw.normalize` with three modes: `series` (§9.3), `floored` (σ floored at the fixed unit)
+    and `fixed` (raw / `channel_scales`, D-068's recipe).
+  - The pre-registered criterion: pair AUC of −`d_norm` on the held-out training nights
+    2026-01-01 to 02-28, at least +0.02 to qualify, and the fused held-out Recall@5 and MRR no
+    worse.
+  - Result: `series` 0.558, `floored` 0.565, `fixed` 0.786, fused held-out 1.000 / 1.000 for all
+    three. `fixed` is adopted. The warp alignment keeps `series`.
+- **Tests:** +12: `test_prepare_modes_known_answers`; `test_fixed_mode_scores_warped_copies_high`
+  (10 cases: a §8.5-warped copy is at least 40% closer than an unrelated flight); a `dtw.normalize`
+  config variant. Fast 443 passed (431 before); `make test-all`: 453 passed in 3 min 7 s.
+- **Evidence (full gate list, rerun):**
+  - `make check` exit 0, 443 passed.
+  - `make models` exit 0: τ 2.2265, `shape_sim` coefficient +6.81, validation AUC 0.998, hash
+    `418c5edfafd908e6` (identical on a second run).
+  - `make eval`: Recall@5 1.000, DTW lift +0.522, MRR 1.000, time to match 96%, copycat-first 0%.
+    p95: prefilter 30 ms, DTW 57 ms (was 81), end to end 124 ms (was 149). No regression against
+    `baseline.json`. Exit 1 on the demo row.
+  - `match --method dtw --incident DEMO-BRAVO-0828 --at 90` exit 0.
+  - `check_targets.py 4`: 8 PASS, 1 GAP, exit 1.
+  - `eval --baseline` rewrote `reports/baseline.json` for the new method.
+- **Demo row, as observed (not a criterion):** still 2/3. At T+90: DELTA #1 (shape 0.502),
+  ALPHA-0303 #2 (0.511), CHARLIE #3 (0.459), FOXTROT-251215 (P3) #4 (0.431), ALPHA-0502 #5
+  (0.418). ALPHA-0502 flew at 118 m against tonight's 90 m, at opposite ends of P1's 90 to 120 m
+  band (§8.5). With fixed units that gap now lowers its shape too, so it fell one place. The
+  remaining cause is within-actor altitude spread scored by `alt_sim`'s 30 m scale. That is a
+  §10.5 formula, which this attempt did not touch.

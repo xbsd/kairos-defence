@@ -66,3 +66,21 @@ p='README.md'
 s=open(p).read()
 s=s.replace('''`uv run kairos-d
 [2026-10-28 21:34:00]   … running 51 min. last tool: Write /Users/ndkx/work/kairos_defence/docs/phases/phase-04/REPORT.md
+[2026-10-28 21:37:01]   … running 54 min. last tool: Bash git add -A && git commit -q -F - <<'EOF'
+phase 4: DTW matcher and fusion model
+
+
+[2026-10-28 21:37:01] phase 4: gate attempt 1
+[2026-10-28 21:38:50] phase 4: everything else passed; 2 target gap(s): demo live_top3_incidents: fail; demo:live_top3_incidents: status 'fail', observed 2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of night'); P1-ALPHA-260303 #2 (0.99, 'Same time of night'); P1-ALPHA-260502 #4 (0.98, 'Same time of night')
+[2026-10-28 21:41:50]   … running 3 min. last tool: Bash cat > /tmp/kd4/fix1.py <<'EOF'
+import numpy as np, pickle
+from datetime import d
+[2026-10-28 21:44:51]   … running 6 min. last tool: Bash python3 - <<'EOF'
+p='tests/unit/test_dtw_rerank.py'
+s=open(p).read()
+s=s.replace
+[2026-10-28 21:47:51]   … running 9 min. last tool: Bash python3 - <<'EOF'
+p='src/kairos_defense/match/README.md'
+s=open(p).read()
+rep = 
+[2026-10-28 21:50:51]   … running 12 min. last tool: Bash until grep -qE "passed in|failed|error" /tmp/kd4/fix1/testall.txt; do sleep 5; d

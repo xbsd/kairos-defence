@@ -180,3 +180,44 @@ def test_explain_alignment_finds_the_window() -> None:
     slow = warped(flight, np.arange(0, 600), 1.2)[:, 2]  # past flight flown 1.2x as long
     start, end, _ = dr.explain_alignment(full[60:120], slow)
     assert abs(start - 72) <= 3 and abs(end - 143) <= 4
+
+
+SCALES = [5.0, 10.0, 200.0, 30.0, 1.0]  # scoring.yaml features.channel_scales
+
+
+def test_prepare_modes_known_answers() -> None:
+    """D-079: ``series`` is §9.3; ``floored`` keeps a near-constant channel near zero; ``fixed``
+    divides by the unit without centering."""
+    rng = np.random.default_rng(7)
+    x = np.c_[10 + rng.normal(0, 0.05, 50), np.linspace(0, 20, 50), np.linspace(0, 1000, 50),
+              100 + rng.normal(0, 0.5, 50), np.zeros(50)]  # fmt: skip
+    w = np.asarray(WEIGHTS)
+    series = dr.prepare(x, WEIGHTS)
+    assert np.allclose(series.std(axis=0)[[0, 1, 3]], w[[0, 1, 3]])  # noise blown up to 1σ
+    floored = dr.prepare(x, WEIGHTS, "floored", SCALES)
+    assert np.abs(floored[:, 0]).max() < 0.05 and np.abs(floored[:, 3]).max() < 0.06
+    assert np.allclose(floored[:, 1], (x[:, 1] - 10.0) / 10.0 * w[1])  # σ 5.9 < unit 10
+    assert np.allclose(floored[:, 2], (x[:, 2] - 500.0) / np.std(x[:, 2]) * w[2])  # σ 294 > 200
+    fixed = dr.prepare(x, WEIGHTS, "fixed", SCALES)
+    assert np.allclose(fixed, x / np.asarray(SCALES) * w)
+    with pytest.raises(ValueError, match="scales"):
+        dr.prepare(x, WEIGHTS, "fixed")
+    with pytest.raises(ValueError, match="unknown"):
+        dr.prepare(x, WEIGHTS, "global", SCALES)
+    holes = x.copy()
+    holes[:, 4] = np.nan
+    assert np.allclose(dr.prepare(holes, WEIGHTS, "floored", SCALES)[:, 4], 0.0)
+
+
+@pytest.mark.parametrize("w", [60, 120])
+@pytest.mark.parametrize("warp", [0.8, 0.95, 1.0, 1.22, 1.4])
+def test_fixed_mode_scores_warped_copies_high(warp: float, w: int) -> None:
+    """The configured shape scaling (D-079) keeps §20's test: a time-warped copy (§8.5 physics:
+    rates divided by the warp) is far closer than an unrelated flight."""
+    live, seg = live_and_segment(warp, w)
+    _, unrelated = live_and_segment(warp, w, f=other_flight)
+    d_copy = dr.shape_distance(live, seg, WEIGHTS, 0.25, "fixed", SCALES)
+    d_other = dr.shape_distance(live, unrelated, WEIGHTS, 0.25, "fixed", SCALES)
+    assert d_copy < 0.6 * d_other  # at least 40% closer (0.08 to 0.50 of it on these cases)
+    tau = 2.2  # about the calibrated τ of the shipped model
+    assert dr.shape_sim(d_copy, tau) > dr.shape_sim(d_other, tau)

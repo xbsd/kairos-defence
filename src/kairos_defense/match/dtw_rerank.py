@@ -66,10 +66,37 @@ def anchor_bounds(
     return max(0, lo), min(n_rows, max(hi, 0))
 
 
-def prepare(raw: np.ndarray, weights: np.ndarray | list[float]) -> np.ndarray:
-    """§9.3: z-normalize each channel over the series, weight it, fill NaN (a channel with no value
-    becomes 0); ``(n, c)`` C-contiguous float64."""
-    return np.ascontiguousarray(fill_nan(normalize(raw, weights)), dtype=np.float64)
+def prepare(
+    raw: np.ndarray,
+    weights: np.ndarray | list[float],
+    mode: str = "series",
+    scales: np.ndarray | list[float] | None = None,
+) -> np.ndarray:
+    """Scale each channel, weight it, fill NaN (a channel with no value becomes 0); ``(n, c)``
+    C-contiguous float64. ``mode`` (D-079): ``series`` z-normalizes over the series (§9.3);
+    ``floored`` centers on the series mean but divides by ``max(σ, scale)``, so a near-constant
+    channel stays near zero instead of becoming amplified noise; ``fixed`` divides by ``scales``
+    without centering. ``floored`` and ``fixed`` need ``scales`` (c,)."""
+    x = np.asarray(raw, dtype=np.float64)
+    w = np.asarray(weights, dtype=np.float64)
+    if mode == "series":
+        z = normalize(x, w)
+    elif mode in ("floored", "fixed"):
+        if scales is None:
+            raise ValueError(f"DTW normalize={mode!r} needs channel scales")
+        sc = np.asarray(scales, dtype=np.float64)
+        if mode == "fixed":
+            z = x / sc * w
+        else:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", RuntimeWarning)  # all-NaN channels: filled below
+                mu = np.nanmean(x, axis=0)
+                sd = np.nanstd(x, axis=0)
+            sd = np.where(np.isfinite(sd), np.maximum(sd, sc), sc)
+            z = (x - mu) / sd * w
+    else:
+        raise ValueError(f"unknown DTW normalize mode {mode!r}")
+    return np.ascontiguousarray(fill_nan(z), dtype=np.float64)
 
 
 def relaxation(n: int, m: int) -> tuple[int, int, int, int] | None:
@@ -79,11 +106,16 @@ def relaxation(n: int, m: int) -> tuple[int, int, int, int] | None:
 
 
 def shape_distance(
-    live: np.ndarray, seg: np.ndarray, weights: np.ndarray | list[float], band_fraction: float
+    live: np.ndarray,
+    seg: np.ndarray,
+    weights: np.ndarray | list[float],
+    band_fraction: float,
+    mode: str = "series",
+    scales: np.ndarray | list[float] | None = None,
 ) -> float:
     """``d_norm = DTW(L, S) / sqrt(len(L))`` with §9.3 normalization, the §10.4 band and the
     segment's ends relaxed."""
-    a, b = prepare(live, weights), prepare(seg, weights)
+    a, b = prepare(live, weights, mode, scales), prepare(seg, weights, mode, scales)
     n, m = len(a), len(b)
     d = dtw_ndim.distance(a, b, window=band_window(n, m, band_fraction), psi=relaxation(n, m),
                           use_c=True)  # fmt: skip

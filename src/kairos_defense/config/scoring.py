@@ -44,6 +44,9 @@ class DtwConfig(StrictModel):
     anchor_before: NonNeg
     anchor_after: Pos
     tau: Literal["auto"] | Pos
+    # series: z over each series (§9.3); floored: σ floored at features.channel_scales;
+    # fixed: raw / channel_scales, no centering (D-079)
+    normalize: Literal["series", "floored", "fixed"]
 
 
 class FusionConfig(StrictModel):

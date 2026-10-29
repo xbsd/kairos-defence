@@ -1118,3 +1118,45 @@ Where this file and the SPEC ever disagree, this file wins.
   T+90 (prefilter ranks 5, 7, 122 and 314 of 500), so neither can change their fused order.
   Tuning stops here. The demo row is a soft gap under D-063, and REPORT.md shows the contribution
   breakdown. Nothing is special-cased for an incident, an actor or the demo.
+
+## D-079 · Gate fix attempt 1: make the DTW shape informative; criterion registered first · 2026-10-28
+- Context: the phase 4 gate (`gate-1.log`) passed everything except `demo:live_top3_incidents`:
+  CHARLIE-260710 (#3) leads ALPHA-260502 (#4) at T+90, mainly on `alt_sim`. The shape term barely
+  separates actors on the training pairs: median `d_norm` is 1.645 for same-actor pairs against
+  1.689 for the rest. §9.3 z-normalizes each series over itself. In an orbit, distance to target,
+  altitude and speed are nearly constant, so dividing by their tiny σ turns radar noise into
+  shape. The prefilter had the same problem (D-058, fixed by D-068).
+- Proposed alternatives, registered before evaluation:
+  - `series`: the current §9.3 per-series z-normalization.
+  - `floored`: per-series centering with σ floored at the channel's fixed unit (D-068's
+    `channel_scales`), so a near-constant channel stays near zero instead of becoming noise.
+  - `fixed`: raw / `channel_scales` × weight with no centering, as for the prefilter.
+- Criterion (training split only; months 13 to 18 and the demo are not consulted):
+  - Primary: on the held-out training nights 2026-01-01 to 2026-02-28, the pair-level ROC AUC of
+    −`d_norm` (same actor against the rest) over prober and copycat queries at every training T.
+    The shape term alone is what this change is meant to improve.
+  - A variant is adopted only if it raises that AUC by at least 0.02 over `series`. It must also
+    keep the fused model, refit on 2025-03-01 to 2025-12-31, no worse on the held-out Recall@5 at
+    T = 120 s and MRR at T = 90 s (D-078's rule).
+  - Among the variants that qualify, the highest AUC wins; otherwise `series` stays.
+- This is a deviation from §9.3 for the DTW if adopted (D-069 kept §9.3 there).
+- Outcome on the held-out training nights (AUC of −`d_norm`; fused Recall@5 at T = 120 s / MRR at
+  T = 90 s): `series` 0.558 (1.000 / 1.000), `floored` 0.565 (1.000 / 1.000), `fixed` **0.786**
+  (1.000 / 1.000). Only `fixed` clears the +0.02 bar, so `dtw.normalize: fixed` is adopted.
+  Over all training pairs the AUC goes from 0.580 to 0.805, and the median `d_norm` is 2.23 for
+  same-actor pairs against 3.47 for the rest (1.645 against 1.689 before). `floored` barely helps,
+  which says the levels themselves (orbit radius, speed, altitude) carry the discrimination; this
+  is D-068's finding again.
+- Result on the full data (`make models && make eval`): Recall@5 1.000, DTW lift +0.522, MRR
+  1.000, time to match 96% and copycat-first 0%, all unchanged. τ 2.227, `shape_sim` coefficient
+  +6.81 (was +4.22), validation AUC 0.998. DTW p95 falls from 81 to 56 ms, end to end from 149 to
+  125 ms. The demo row is not fixed: at T+90 DELTA #1, ALPHA-0303 #2, CHARLIE #3, a P3 flight
+  (FOXTROT-251215) #4, ALPHA-0502 #5. ALPHA-0502 flew at 118 m against tonight's 90 m, and with
+  fixed units that altitude gap now also lowers its shape similarity (0.418 against CHARLIE's
+  0.459). The rule was registered first, so it decides; the demo is reported as observed, not
+  used to reverse the choice.
+- Consequences: deviates from §9.3 for the DTW shape distance. The warp alignment keeps
+  `series`, because D-069's estimator was chosen with it. The §20 synthetic test also holds in
+  `fixed` mode (`test_fixed_mode_scores_warped_copies_high`). `live_top3_incidents` stays a soft
+  gap. The remaining cause is within-actor altitude spread: P1 draws each flight's altitude
+  within 90 to 120 m (§8.5), and `alt_sim` uses a 30 m scale.

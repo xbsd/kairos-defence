@@ -122,6 +122,7 @@ BAD = [
     ("scoring", _set("windows.normalize", "global"), "normalize"),
     ("scoring", _set("dtw.band_fraction", 0.0), "band_fraction"),
     ("scoring", _set("dtw.tau", "manual"), "tau"),
+    ("scoring", _set("dtw.normalize", "window"), "normalize"),
 ]
 
 

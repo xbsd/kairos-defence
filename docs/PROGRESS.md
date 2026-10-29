@@ -26,6 +26,25 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Next: …
 -->
 
+### 2026-10-28 · Phase 4 (gate fix attempt 1, autopilot)
+- Gate 1: every command passed; one GAP, `demo:live_top3_incidents`.
+- Change (D-079, criterion registered before evaluation): `dtw.normalize: fixed`. The DTW shape
+  distance now uses the prefilter's fixed units instead of §9.3's per-series z, which turned
+  orbit noise into shape.
+  - Held-out training nights, pair AUC of −`d_norm`: `series` 0.558, `floored` 0.565, `fixed`
+    0.786.
+  - Fused held-out metrics are unchanged.
+- Full gate list rerun:
+  - `make check` 443 passed.
+  - `make models`: τ 2.227, hash `418c5edf`.
+  - `make eval`: Recall@5 1.000, lift +0.522, copycat-first 0%; p95 DTW 57 ms, end to end
+    124 ms.
+  - `match` exit 0.
+  - `check_targets.py 4`: 8 PASS, 1 GAP. The demo row is still 2/3: ALPHA-0502 is #5 behind a
+    P3 flight, because of its 118 m altitude against tonight's 90 m.
+  - `reports/baseline.json` refreshed.
+- Open: the same soft gap; two attempts remain.
+
 ### 2026-10-28 · Phase 4 (autopilot build)
 - Built: the DTW matcher and fusion model (SPEC §10.4 to §10.8).
   - Fixed-unit window vectors and 500 candidates (D-068, resolving D-058).
