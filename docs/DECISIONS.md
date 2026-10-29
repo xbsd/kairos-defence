@@ -1160,3 +1160,38 @@ Where this file and the SPEC ever disagree, this file wins.
   `fixed` mode (`test_fixed_mode_scores_warped_copies_high`). `live_top3_incidents` stays a soft
   gap. The remaining cause is within-actor altitude spread: P1 draws each flight's altitude
   within 90 to 120 m (§8.5), and `alt_sim` uses a 30 m scale.
+
+## D-080 · Gate fix attempt 2: a `target_match` fusion feature; criterion registered first · 2026-10-28
+- Context: after D-079 the only gap is still `demo:live_top3_incidents`. §10.5's seven features
+  never compare *what* a flight probed, yet the §9.4 signature stores `target_kind`, and it is very
+  consistent within an actor on the indexed history (truth read in a diagnostic only): P2 flight
+  line 12/12, P3 munitions 16/16, P5 HQ 12/12, P6 flight line 10/10, C1 fuel farm 15/15, P1 fuel
+  farm 4/5, P4 fence 10/10, C2 fence 12/15. The fence is the fallback target of hobbyists (1,800
+  of 1,898 tracks) and of a live track still inbound (D-046: the live P1 reads "fence" until
+  about T+90), so it says nothing about the actor.
+- Proposed alternative, registered before evaluation: an eighth feature, `target_match` = 1.0 when
+  both signatures name the same non-fence target kind, 0.0 when they name different non-fence
+  kinds, and 0.5 (unknown, as §10.5 treats unknowns) when either target is the fence. It is added
+  to `scoring.fusion.features`, so the model's feature order changes and `make models` must be
+  rerun. This deviates from §10.5's feature table.
+- Criterion (training split only; months 13 to 18 and the demo are not consulted): refit both
+  feature sets on nights 2025-03-01 to 2025-12-31 and score the held-out training nights
+  2026-01-01 to 2026-02-28 (answerable prober and copycat queries, every training T).
+  - Primary: mean average precision (MAP) of the same-actor candidates. It rewards ranking every
+    true match above impostors and, unlike Recall@5 at T = 120 s and MRR at T = 90 s, is not
+    already 1.000 there.
+  - Adopt if MAP rises by at least 0.01, with Recall@5 at T = 120 s and MRR at T = 90 s no worse;
+    otherwise the seven features stay.
+- Outcome: fitted on 95,904 pairs from nights to 2025-12-31 (τ 2.258) and scored on 27,500
+  held-out pairs (11 queries, 54 query-T groups with a same-actor candidate).
+  - Seven features: MAP 0.9603, Recall@5 at T = 120 s 1.000, MRR at T = 90 s 1.000.
+  - With `target_match`: MAP 0.9568, 1.000, 1.000. The feature's coefficient is **−0.91**.
+  - Among held-out same-actor pairs, 306 have an unknown target match, 36 a match and 18 a
+    mismatch. A partial query often still reads the fence, or a wrong asset, before its loiter
+    settles (D-046), so a target mismatch is weak evidence against a match.
+  - MAP falls, so the feature is **not adopted**. The seven §10.5 features stay; no code changes.
+- Consequences: the gap stands. CHARLIE-260710 is a true P1 flight, and it is closer to tonight's
+  flight on every measured dimension the training data supports: altitude 110 m against
+  ALPHA-0502's 118 m (tonight 90 m), shape 0.459 against 0.418. Its "weaker on purpose" trait is
+  its target (the flight line), which the training split says a partial-track matcher cannot use
+  reliably. Tuning stops for this attempt.

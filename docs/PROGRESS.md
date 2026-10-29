@@ -26,6 +26,16 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Next: …
 -->
 
+### 2026-10-28 · Phase 4 (gate fix attempt 2, autopilot)
+- Gate 2: every command passed; the same single GAP, `demo:live_top3_incidents` (ALPHA-0502 #5).
+- Tried (D-080, criterion registered first): a `target_match` fusion feature. On the held-out
+  training nights MAP fell from 0.9603 to 0.9568 with a coefficient of −0.91, because partial
+  tracks often read the fence or a wrong target. Not adopted; no code change.
+- Full gate list rerun: `make check` 443 passed; `make models` hash `418c5edf` (unchanged);
+  `make eval` unchanged, no regression; `match` exit 0; `check_targets.py 4` 8 PASS, 1 GAP.
+- Open: the soft gap. Recommendation: accept it in GAPS.md, since the top 4 are all P1 and CHARLIE
+  is genuinely closer to tonight's flight on the measured features.
+
 ### 2026-10-28 · Phase 4 (gate fix attempt 1, autopilot)
 - Gate 1: every command passed; one GAP, `demo:live_top3_incidents`.
 - Change (D-079, criterion registered before evaluation): `dtw.normalize: fixed`. The DTW shape

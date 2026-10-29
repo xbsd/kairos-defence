@@ -84,3 +84,7 @@ p='src/kairos_defense/match/README.md'
 s=open(p).read()
 rep = 
 [2026-10-28 21:50:51]   … running 12 min. last tool: Bash until grep -qE "passed in|failed|error" /tmp/kd4/fix1/testall.txt; do sleep 5; d
+[2026-10-28 21:51:21] phase 4: gate attempt 2
+[2026-10-28 21:52:58] phase 4: everything else passed; 2 target gap(s): demo live_top3_incidents: fail; demo:live_top3_incidents: status 'fail', observed 2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of night'); P1-ALPHA-260303 #2 (1.00, 'Same time of night'); P1-ALPHA-260502 #5 (0.99, 'Same time of night')
+[2026-10-28 21:55:58]   … running 3 min. last tool: Bash mkdir -p /tmp/kd4/fix2 && (make check > /tmp/kd4/fix2/check.txt 2>&1; echo "make
+[2026-10-28 21:58:58]   … running 6 min. last tool: Bash until grep -qE "passed in|failed|error" /tmp/kd4/fix2/testall.txt; do sleep 5; d

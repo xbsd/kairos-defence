@@ -312,3 +312,39 @@ training split only.
   band (§8.5). With fixed units that gap now lowers its shape too, so it fell one place. The
   remaining cause is within-actor altitude spread scored by `alt_sim`'s 30 m scale. That is a
   §10.5 formula, which this attempt did not touch.
+
+### Fix attempt 2 (gate-2.log): a `target_match` feature, tested and rejected
+
+- **Gate result:** the same as gate 1 after fix 1: every command passed, with one GAP,
+  `demo:live_top3_incidents` (2/3; ALPHA-0502 #5).
+- **Cause investigated:** CHARLIE-260710 was planted as "weaker on purpose" by orbiting the flight
+  line instead of the fuel farm, but no §10.5 feature compares targets. On the indexed history the
+  target kind is very consistent within an actor (P3 munitions 16/16, P2 flight line 12/12, C1
+  fuel farm 15/15, P1 fuel farm 4/5).
+- **Change tried (D-080, registered before evaluation):** an eighth feature, `target_match`: 1 for
+  the same non-fence target kind, 0 for different kinds, 0.5 when either side is the fence (a
+  hobbyist's fallback, or a live track still inbound).
+  - Criterion: on the held-out training nights, MAP of same-actor candidates at least +0.01, and
+    Recall@5 and MRR no worse.
+  - Seven features: MAP 0.9603. With `target_match`: MAP 0.9568, and its coefficient is −0.91.
+    A partial query often still names the fence or a wrong asset before its loiter settles; of the
+    informative same-actor pairs, 18 disagree on target and 36 agree.
+  - **Not adopted.** No code changed.
+- **Also considered, not pursued:** hiding the partial loiter radius until the orbit is
+  established. The live track's direction is not established until about T+200, so the radius
+  would stay unknown through the demo beats. It would also move only the P3 flight now #4, not
+  CHARLIE.
+- **Evidence (full gate list, rerun):**
+  - `make check` exit 0, 443 passed.
+  - `make models` exit 0, hash `418c5edfafd908e6` (unchanged).
+  - `make eval`: the same metrics, no regression against `baseline.json`.
+  - `match` exit 0.
+  - `check_targets.py 4`: 8 PASS, 1 GAP, exit 1.
+  - `make test-all`: 453 passed in 3 min 7 s.
+- **Conclusion:** two true P1 flights compete for third place, and the one the scenario expects is
+  further from tonight's flight on every dimension the training data supports (altitude 118 m
+  against 110 m, tonight 90 m; shape 0.418 against 0.459). Closing the gap would need a target
+  signal that partial tracks cannot provide reliably, or tuning toward the demo, which the rules
+  forbid. Recommendation for GAPS.md: accept the miss, since all of the top 4 are P1. Phase 8 can
+  add a target-aware re-rank once the live orbit is established, if the product owner wants
+  CHARLIE demoted.
