@@ -1,8 +1,8 @@
 # Phase 9: Swarms, agent, MCP, hardening and runbook, report
 
 Status: done (awaiting the gate, `scripts/cloud_gate.py`) · Date: 2026-10-29 · Commits:
-`4e814f5` (plan and review), `28be4d7` (checkpoint), the phase commit
-`phase 9: swarm encore, agent tools and MCP, hardening, runbook`
+`4e814f5` (plan and review), `28be4d7` and `b36d134` (checkpoints), `0d67400`
+(`phase 9: swarm encore, agent tools and MCP, hardening, runbook`)
 
 ## Summary
 
@@ -143,6 +143,8 @@ transit (D-150).
 - `director-1x.spec.ts` records the phase 8 rows; the encore is covered at 5× (D-161).
 - `web/tests/fixtures/swarm.json` is the largest fixture (179 kB, trimmed to 180 s of positions).
 - Live watch for the swarm incident itself has no swarm camera preset; the Swarm view is the place.
+- `web/src/swarm/DescriptorCurves.tsx` is 327 lines, above §21's ~250-line guideline for
+  components (as phase 8's `CaseBoard.tsx` is); split it in a follow-up.
 
 ## How to debug this phase
 

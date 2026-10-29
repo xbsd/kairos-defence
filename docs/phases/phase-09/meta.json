@@ -1,6 +1,6 @@
 {
   "phase": 9,
-  "status": "running",
+  "status": "done",
   "started": "2026-10-29 08:30:00",
   "sha_before": "951522b194d3d3df097fca69c839bb071d547a7b",
   "plan_approved": true,
@@ -17,6 +17,22 @@
       "ok": true,
       "approved": true,
       "blocking_issues": 0
+    },
+    {
+      "step": "gate-1",
+      "at": "2026-10-29 10:26:53",
+      "ok": true
     }
-  ]
+  ],
+  "gate_attempts": 1,
+  "last_gate": {
+    "attempt": 1,
+    "ok": true,
+    "reason": "",
+    "gaps": [],
+    "log": "docs/phases/phase-09/gate-1.log"
+  },
+  "tests_passed": 795,
+  "finished": "2026-10-29 10:27:10",
+  "sha_after": "0d67400d4f4cbb58f577a18fb7f1916d5c471e44"
 }
