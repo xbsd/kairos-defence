@@ -42,7 +42,29 @@ LIMIT_WORDS = (
     "limit reached",
     "overloaded",
     "try again later",
+    "usage_limit",
+    "limit_reached",
+    "hit your",
 )
+RESET_AT = re.compile(r"resets\s+(\d{1,2})(?::(\d{2}))?\s*([ap]m)", re.I)
+
+
+def limit_wait_s(text: str, default_min: int) -> int:
+    """Seconds to wait after a usage limit: until the reset time the message states ("resets 2:30am",
+    local clock) plus 2 minutes, or `default_min` minutes when it states none. Capped at 6 hours."""
+    m = RESET_AT.search(text)
+    if not m:
+        return default_min * 60
+    hour = int(m.group(1)) % 12 + (12 if m.group(3).lower() == "pm" else 0)
+    nowt = dt.datetime.now()
+    reset = nowt.replace(hour=hour, minute=int(m.group(2) or 0), second=0, microsecond=0)
+    if reset <= nowt:
+        if nowt - reset < dt.timedelta(hours=1):
+            return 120  # the reset just passed (message written moments before it)
+        reset += dt.timedelta(days=1)
+    return int(min((reset - nowt).total_seconds() + 120, 6 * 3600))
+
+
 REVIEW_SCHEMA = {
     "type": "object",
     "properties": {
@@ -325,10 +347,11 @@ def run_claude(
         blob = (r["result"] + r["raw_tail"]).lower()
         if any(w in blob for w in LIMIT_WORDS) and limit_waits < opts.limit_retries:
             limit_waits += 1
+            wait_s = limit_wait_s(r["result"] + r["raw_tail"], opts.limit_wait)
             log(
-                f"  usage/rate limit hit; waiting {opts.limit_wait} min (retry {limit_waits}/{opts.limit_retries})"
+                f"  usage/rate limit hit; waiting {wait_s // 60} min (retry {limit_waits}/{opts.limit_retries})"
             )
-            time.sleep(opts.limit_wait * 60)
+            time.sleep(wait_s)
         elif attempt <= len(waits):
             log(f"  session failed (exit {rc}); retrying in {waits[attempt - 1]} s")
             time.sleep(waits[attempt - 1])
