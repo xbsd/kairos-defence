@@ -166,3 +166,5 @@ from pathlib import Path
 g = Path("src/kairos_defense/st
 [2026-10-28 23:55:10]   … running 27 min. last tool: Write /Users/ndkx/work/kairos_defence/src/kairos_defense/memory/README.md
 [2026-10-28 23:58:11]   … running 30 min. last tool: Bash tail -8 data/cache/exit6/10_test_all.txt
+[2026-10-29 00:00:11] phase 6: gate attempt 1
+[2026-10-29 00:00:48] phase 6: gate passed

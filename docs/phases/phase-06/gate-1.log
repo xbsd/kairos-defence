@@ -1,0 +1,86 @@
+# Gate for phase 6, attempt 1, 2026-10-29 00:00:11
+
+$ make check
+uv run ruff check .
+All checks passed!
+uv run ruff format --check .
+159 files already formatted
+uv run pytest -m "not slow" -q
+........................................................................ [ 12%]
+........................................................................ [ 24%]
+........................................................................ [ 36%]
+........................................................................ [ 49%]
+........................................................................ [ 61%]
+........................................................................ [ 73%]
+........................................................................ [ 86%]
+........................................................................ [ 98%]
+..........                                                               [100%]
+586 passed, 15 deselected in 24.11s
+npm --prefix web run check
+
+> kairos-defense-web@0.0.1 check
+> npm run lint && npm run typecheck && npm run test
+
+
+> kairos-defense-web@0.0.1 lint
+> eslint . --max-warnings 0 && prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!
+
+> kairos-defense-web@0.0.1 typecheck
+> tsc --noEmit -p tsconfig.json
+
+
+> kairos-defense-web@0.0.1 test
+> vitest run
+
+
+ RUN  v5.0.5 /Users/ndkx/work/kairos_defence/web
+
+
+ Test Files  2 passed (2)
+      Tests  5 passed (5)
+   Start at  00:00:38
+   Duration  782ms (environment 79%, setup 14%, tests 5%, transform 1%)
+
+[exit 0 after 28 s]
+
+$ uv run kairos-defense memory reseed
+kairos-defense memory reseed → /Users/ndkx/work/kairos_defence/data/memory.duckdb (verified)                
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ item                        ┃                                                                      value ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ assessment_asserted         │                                                                      1,864 │
+│ case_opened                 │                                                                          1 │
+│ decision_recorded           │                                                                          1 │
+│ incident_recorded           │                                                                      1,866 │
+│ report_recorded             │                                                                        949 │
+│ rows                        │                                                                      4,681 │
+│ cutoff (live first contact) │                                                       2026-08-29 02:40:06Z │
+│ head                        │ seq 4,681 a361b4bfe3b24afcf93d5220040d3a162bd522edfe14ddbc2964d9475635e923 │
+│ elapsed                     │                                                                     0.15 s │
+└─────────────────────────────┴────────────────────────────────────────────────────────────────────────────┘
+[exit 0 after 1 s]
+
+$ uv run kairos-defense memory verify
+chain intact: 4,681 rows in /Users/ndkx/work/kairos_defence/data/memory.duckdb, head seq 4,681 hash 
+a361b4bfe3b24afcf93d5220040d3a162bd522edfe14ddbc2964d9475635e923 recorded 2026-08-29 00:33:38Z
+[exit 0 after 1 s]
+
+$ uv run pytest tests/unit -q -k memory
+........................................................................ [ 78%]
+....................                                                     [100%]
+92 passed, 494 deselected in 6.42s
+[exit 0 after 7 s]
+
+# Documentation check
+ok
+
+# Test count
+passed 586, minimum 497
+
+# Skip or xfail markers added this run (review them)
+none
+
+# Result: PASS
