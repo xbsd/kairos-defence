@@ -26,6 +26,31 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Next: …
 -->
 
+### 2026-10-28 · Phase 2 (documentation backfill, autopilot)
+- Built: no code. `docs/phases/phase-02/PLAN.md` (as built, from `06cc826`), `REPORT.md` and
+  `EXIT_CHECK.md`. `src/kairos_defense/sim/README.md` gained the `nights=` option and the phase 2
+  fixtures (`swarms`, `planted`, `world_names`). The root README's Status links the report. D-066.
+- Exit check rerun at `ba703ec` on the dev laptop, from `make clean`:
+  `make data && uv run pytest tests/unit -q -k "swarm or rf or rid or reports or assessments or planted"`
+  → exit 0 in 10.9 s.
+  - Data: identical to phase 2's run, because `sim/` and `config/` have not changed since
+    `06cc826`. Incidents 1,878 (9 swarms), tracks 1,904, RF 414,999, Remote ID 686,263, reports
+    956, assessments 1,876. Live first contact 21:40:06 and orbit T+79 s.
+  - `reports/data_card.md` and all nine figures are byte-identical to the committed ones.
+  - Planted items read back from both DuckDB files: the DELTA report with "white pickup",
+    "County Rd 12", "21:20" and "22:05" and four true clues; the `hobbyist` label with truth
+    `probing`; `S1-GOLF-260503` and `DEMO-SWARM-ECHO-0614` with 5 tracks each.
+  - 116 passed, against 109 at phase 2. The filter now also matches 7 phase 3 tests (2 in
+    `test_duck_store.py`, 5 in `test_index.py`); collecting it at `06cc826` gives 109 of 286.
+  - Phase 2's own files: 103 fast passed, plus 3 in phase 1 files and 4 slow. `make check`: 367
+    passed. `make test-all`: 374 passed in 44 s.
+  - `make index` and the web build then restored phase 3's working state, and the index counts
+    are identical to phase 3's exit check.
+  - Swarm figures reviewed by eye; they match the S1 and S2 choreographies.
+- Open issues: none new. Carried over: D-065 (pin the figure font in the next phase that touches
+  `sim/`), D-040 (case-insensitive clue extraction, phase 5), D-043 (paraphrase, phase 9).
+- Next: the phase 3 backfill (the `features/` and `match/` READMEs), then phase 4.
+
 ### 2026-10-28 · Phase 1 (documentation backfill, autopilot)
 - Built: no code. `docs/phases/phase-01/PLAN.md` (as built, from `1a13664`), `REPORT.md` and
   `EXIT_CHECK.md`, plus `src/kairos_defense/sim/README.md` (phases 1 and 2). The root README's Status

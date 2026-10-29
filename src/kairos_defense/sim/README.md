@@ -26,8 +26,10 @@ swarm, what the sensors saw, the paperwork, and the ground truth.
 ## Public API
 
 - `generate.generate(cfg, seed=None, window=None, nights=None) -> Generated`: builds everything in
-  memory. `window=(first_night, last_night)` flies only those nights (the tests use three weeks),
-  while scheduling still runs over the full calendar. `Generated` holds:
+  memory. `window=(first_night, last_night)` or `nights=[date, …]` flies only those nights (the
+  tests use three weeks, or the four planted nights), while scheduling still runs over the full
+  calendar, so a window holds exactly the flights the full run has on those nights. `Generated`
+  holds:
   - `world`, `calendar`, `incidents` and `paper`;
   - `results`: every drone flown, as a `FlightResult`;
   - `tables`: raw `DataFrame`s by §7.1 name; `truth`: §7.3 `DataFrame`s;
@@ -127,7 +129,10 @@ swarm, what the sensors saw, the paperwork, and the ground truth.
   - `world` and `cal` at seed 42;
   - `sample`: one flight per actor and base, plus 30 hobbyists;
   - `g42`: three weeks ending on the live night;
-  - `swarms`.
+  - `swarms`: every swarm event at seed 42, flown with its drones (phase 2);
+  - `planted`: the nights of the planted ALPHA and DELTA flights and both planted swarm events
+    (phase 2);
+  - `world_names`: road, park and installation names, which the guardrail scan allows (phase 2).
 - Slow: `tests/slow/test_full_generation.py`. It checks full volumes, every planted item, live
   timing, and that two full runs give identical hashes.
 - Run:
@@ -169,3 +174,5 @@ swarm, what the sensors saw, the paperwork, and the ground truth.
   - incidents now span all sensors;
   - `world.unjittered_assets` (D-033 (b)) (D-035 to D-045).
 - Backfill (2026-10-28): this README; D-065 notes the figures' font.
+- Phase 2 backfill (2026-10-28): checked against the code at `ba703ec`; added the `nights=` option
+  and the phase 2 fixtures (D-066). No code changes.

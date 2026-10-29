@@ -854,3 +854,23 @@ Where this file and the SPEC ever disagree, this file wins.
   byte-stable across machines and can join the determinism checks. The `sim` README now exists, so
   only the `features/` and `match/` READMEs remain for D-061's documentation check; phase 3's
   backfill writes them.
+
+## D-066 · Phase 2 documentation backfill · 2026-10-28
+- Context: `phase-auto backfill 2` reconstructs phase 2's documents (D-061 and D-065 did phases 0
+  and 1) and reruns its exit check on the dev laptop. Phase 2's exit-check filter (`-k "swarm or rf
+  or rid or reports or assessments or planted"`) now selects 116 tests, against 109 at `06cc826`.
+- Decision: `docs/phases/phase-02/PLAN.md` is marked "as built" and reconstructed from `06cc826`,
+  PROGRESS.md, D-033's resolution and D-035 to D-045. The exit check was rerun at HEAD (`ba703ec`)
+  from `make clean`, and today's output is recorded beside the original numbers. `make index` and
+  the web build then restored the working state. The 116 are phase 2's 109 plus 7 phase 3 tests whose
+  names match the filter: two in `test_duck_store.py` ("rf", "rid") and five
+  `test_index.py::test_p1_planted_signatures` cases ("planted"). This was confirmed by collecting the
+  same filter at `06cc826` in a temporary worktree (`109/286`). No new package README is needed,
+  because phase 2 added modules only to `sim/`, whose README already covered it. The backfill adds
+  the `nights=` option and the `planted` and `world_names` fixtures it left out. No code changes.
+- Why: the exit check must be run exactly as SPEC §20 states it, so the filter cannot be narrowed.
+  The extra tests pass and say nothing against phase 2. `sim/` and `config/` are byte-identical to
+  `06cc826`, so every count, the data card and all nine figures came out identical. The figures
+  match because phase 1's backfill committed the laptop renders (D-065).
+- Consequences: none for later phases. The phase 2 gate in `docs/phases/gates.json` will also report
+  116.
