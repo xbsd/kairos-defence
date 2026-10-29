@@ -1,0 +1,3941 @@
+{
+ "method": "euclidean",
+ "created_at": "2026-10-29T00:07:01",
+ "elapsed_s": 3.8,
+ "metrics": {
+  "recall_at_5_t120": 0.43478260869565216,
+  "mrr_t120": 0.3021199388846448,
+  "time_to_match_t90": 0.2608695652173913,
+  "copycat_first_t120": 0.5652173913043478,
+  "recall_at_5_t120_copycats": 0.5,
+  "median_time_to_match_s": 120.0,
+  "latency_query_build_p50_ms": 3.7037080037407577,
+  "latency_query_build_p95_ms": 3.9954839943675324,
+  "latency_prefilter_p50_ms": 13.20829099859111,
+  "latency_prefilter_p95_ms": 14.875908402609639,
+  "latency_end_to_end_p50_ms": 17.4200000037672,
+  "latency_end_to_end_p95_ms": 19.234541201149113
+ },
+ "counts": {
+  "prober_queries": 23,
+  "prober_unanswerable": 0,
+  "copycat_queries": 10,
+  "copycat_unanswerable": 0,
+  "swarm_incidents": 5,
+  "searches": 165
+ },
+ "recall_by_t": {
+  "30": {
+   "recall_at_5_probers": 0.0,
+   "top3_probers": 0.0,
+   "recall_at_5_copycats": 0.0,
+   "window_s": [],
+   "ran": false
+  },
+  "45": {
+   "recall_at_5_probers": 0.08695652173913043,
+   "top3_probers": 0.08695652173913043,
+   "recall_at_5_copycats": 0.5,
+   "window_s": [
+    60
+   ],
+   "ran": true
+  },
+  "60": {
+   "recall_at_5_probers": 0.30434782608695654,
+   "top3_probers": 0.21739130434782608,
+   "recall_at_5_copycats": 0.4,
+   "window_s": [
+    60
+   ],
+   "ran": true
+  },
+  "90": {
+   "recall_at_5_probers": 0.13043478260869565,
+   "top3_probers": 0.08695652173913043,
+   "recall_at_5_copycats": 0.1,
+   "window_s": [
+    60
+   ],
+   "ran": true
+  },
+  "120": {
+   "recall_at_5_probers": 0.43478260869565216,
+   "top3_probers": 0.34782608695652173,
+   "recall_at_5_copycats": 0.5,
+   "window_s": [
+    60,
+    120
+   ],
+   "ran": true
+  },
+  "180": {
+   "recall_at_5_probers": 0.2608695652173913,
+   "top3_probers": 0.21739130434782608,
+   "recall_at_5_copycats": 0.8,
+   "window_s": [
+    120
+   ],
+   "ran": true
+  }
+ },
+ "per_actor": {
+  "C1": {
+   "queries": 5,
+   "recall_at_5": 0.4,
+   "median_best_rank": 1.0,
+   "found_in_candidates": 2
+  },
+  "C2": {
+   "queries": 5,
+   "recall_at_5": 0.6,
+   "median_best_rank": 1.0,
+   "found_in_candidates": 5
+  },
+  "P1": {
+   "queries": 4,
+   "recall_at_5": 0.0,
+   "median_best_rank": 11.0,
+   "found_in_candidates": 1
+  },
+  "P2": {
+   "queries": 4,
+   "recall_at_5": 0.25,
+   "median_best_rank": 10.5,
+   "found_in_candidates": 2
+  },
+  "P3": {
+   "queries": 5,
+   "recall_at_5": 0.6,
+   "median_best_rank": 3.0,
+   "found_in_candidates": 5
+  },
+  "P4": {
+   "queries": 3,
+   "recall_at_5": 1.0,
+   "median_best_rank": 1.0,
+   "found_in_candidates": 3
+  },
+  "P5": {
+   "queries": 4,
+   "recall_at_5": 0.5,
+   "median_best_rank": 5.0,
+   "found_in_candidates": 4
+  },
+  "P6": {
+   "queries": 3,
+   "recall_at_5": 0.3333333333333333,
+   "median_best_rank": 35.0,
+   "found_in_candidates": 3
+  }
+ },
+ "pending": {
+  "dtw_lift": "phase 4 (needs DTW + fusion)",
+  "report_linkage": "phase 5",
+  "forecast_error_t90": "phase 5",
+  "swarm_top1": "phase 9",
+  "latency_dtw": "phase 4"
+ },
+ "demo": [
+  {
+   "key": "live_first_contact_local",
+   "expected": "21:39:30-21:40:30, <= 100 m from fence",
+   "observed": "21:40:06, 71 m",
+   "status": "pass"
+  },
+  {
+   "key": "live_orbit_established_s",
+   "expected": "T+65-100 s",
+   "observed": "T+79 s",
+   "status": "pass"
+  },
+  {
+   "key": "live_top3_incidents",
+   "expected": "P1-DELTA-260419, P1-ALPHA-260303, P1-ALPHA-260502 at T+90 s",
+   "observed": "0/3 in top 3; ranks P1-DELTA-260419 -, P1-ALPHA-260303 -, P1-ALPHA-260502 -",
+   "status": "info (target from phase 4)"
+  },
+  {
+   "key": "live_rank1_report_for",
+   "expected": "P1-DELTA-260419",
+   "observed": "-",
+   "status": "pending (phase 5)"
+  },
+  {
+   "key": "forecast_error_max_m",
+   "expected": "<= 400 m at T+105 s",
+   "observed": "-",
+   "status": "pending (phase 5)"
+  },
+  {
+   "key": "swarm_top1",
+   "expected": "S1-GOLF-260503",
+   "observed": "-",
+   "status": "pending (phase 9)"
+  }
+ ],
+ "outcomes": [
+  {
+   "track_id": "P1-ALPHA-260303-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "P1-ALPHA-260303-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 6,
+   "window_s": 60,
+   "query_ms": 4.612457996699959,
+   "prefilter_ms": 32.06566700828262,
+   "total_ms": 37.68054099055007,
+   "top": [
+    "HOTEL-251122-2058-T1",
+    "CHARLIE-250415-1919-T1",
+    "LIMA-251008-2019-T1",
+    "KILO-250315-2022-T1",
+    "KILO-251031-2006-T1"
+   ]
+  },
+  {
+   "track_id": "P1-ALPHA-260303-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 3,
+   "window_s": 60,
+   "query_ms": 4.273416998330504,
+   "prefilter_ms": 12.269375001778826,
+   "total_ms": 16.960791996098123,
+   "top": [
+    "KILO-250619-2218-T1",
+    "INDIA-250406-1937-T1",
+    "BRAVO-251030-2014-T1",
+    "HOTEL-250818-2126-T1",
+    "GOLF-260212-0152-T1"
+   ]
+  },
+  {
+   "track_id": "P1-ALPHA-260303-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 4,
+   "window_s": 60,
+   "query_ms": 3.7966250092722476,
+   "prefilter_ms": 11.595332995057106,
+   "total_ms": 15.80162500613369,
+   "top": [
+    "LIMA-251130-2157-T1",
+    "KILO-260204-1914-T1",
+    "LIMA-250426-2250-T1",
+    "INDIA-250319-1945-T1",
+    "DELTA-250717-2143-T1"
+   ]
+  },
+  {
+   "track_id": "P1-ALPHA-260303-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 20,
+   "window_s": 60,
+   "query_ms": 3.8031250005587935,
+   "prefilter_ms": 11.140125003294088,
+   "total_ms": 15.355791998445056,
+   "top": [
+    "INDIA-251225-2255-T1",
+    "CHARLIE-250420-2201-T1",
+    "INDIA-250506-1956-T1",
+    "KILO-250925-2258-T1",
+    "KILO-250420-1947-T1"
+   ]
+  },
+  {
+   "track_id": "P1-ALPHA-260303-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 7,
+   "window_s": 120,
+   "query_ms": 3.7635000044247136,
+   "prefilter_ms": 12.461958001949824,
+   "total_ms": 16.64349999919068,
+   "top": [
+    "ALPHA-250618-2054-T1",
+    "ALPHA-250902-2014-T1",
+    "ALPHA-250915-2242-T1",
+    "LIMA-250726-2017-T1",
+    "LIMA-250528-2002-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260322-2013-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "INDIA-260322-2013-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.807624991168268,
+   "prefilter_ms": 12.171250011306256,
+   "total_ms": 16.389165990403853,
+   "top": [
+    "FOXTROT-260310-2032-T1",
+    "CHARLIE-260308-2251-T1",
+    "INDIA-251218-2124-T1",
+    "FOXTROT-250428-1936-T1",
+    "HOTEL-250821-1949-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260322-2013-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 7,
+   "copycat_rank": 1,
+   "window_s": 60,
+   "query_ms": 3.9963339950190857,
+   "prefilter_ms": 12.010791993816383,
+   "total_ms": 16.405000002123415,
+   "top": [
+    "INDIA-250730-2013-T1",
+    "BRAVO-260322-1913-T1",
+    "BRAVO-251030-2014-T1",
+    "GOLF-260212-0152-T1",
+    "HOTEL-250314-2030-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260322-2013-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 16,
+   "copycat_rank": 3,
+   "window_s": 60,
+   "query_ms": 3.64045899186749,
+   "prefilter_ms": 11.828041999251582,
+   "total_ms": 15.879667000262998,
+   "top": [
+    "BRAVO-260202-2253-T1",
+    "HOTEL-250517-1951-T1",
+    "BRAVO-260322-1913-T1",
+    "DELTA-250927-1922-T1",
+    "ECHO-251015-2148-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260322-2013-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 3,
+   "window_s": 120,
+   "query_ms": 3.883583005517721,
+   "prefilter_ms": 12.559958006022498,
+   "total_ms": 16.837625007610768,
+   "top": [
+    "INDIA-250528-2000-T1",
+    "INDIA-260223-2005-T1",
+    "BRAVO-260322-1913-T1",
+    "BRAVO-251030-2014-T1",
+    "LIMA-251208-2020-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260322-2013-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.6724999954458326,
+   "prefilter_ms": 12.125624998589046,
+   "total_ms": 16.19416699395515,
+   "top": [
+    "JULIET-251005-1906-T1",
+    "DELTA-250617-2045-T1",
+    "CHARLIE-250319-1941-T1",
+    "ALPHA-250404-2200-T1",
+    "DELTA-260128-2224-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260323-2034-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "ECHO-260323-2034-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 2,
+   "copycat_rank": 4,
+   "window_s": 60,
+   "query_ms": 3.496459001326002,
+   "prefilter_ms": 11.853459000121802,
+   "total_ms": 15.859084000112489,
+   "top": [
+    "INDIA-250801-2029-T1",
+    "FOXTROT-250418-2022-T1",
+    "CHARLIE-251023-0249-T1",
+    "DELTA-250607-2023-T1",
+    "INDIA-250406-1937-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260323-2034-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 1,
+   "window_s": 60,
+   "query_ms": 3.6575410049408674,
+   "prefilter_ms": 11.753917002351955,
+   "total_ms": 15.879208003752865,
+   "top": [
+    "INDIA-250319-1945-T1",
+    "ALPHA-250404-2200-T1",
+    "LIMA-251130-2157-T1",
+    "GOLF-251213-2101-T1",
+    "LIMA-251208-2020-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260323-2034-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 10,
+   "copycat_rank": 1,
+   "window_s": 60,
+   "query_ms": 3.5547500010579824,
+   "prefilter_ms": 11.45258299948182,
+   "total_ms": 15.469459001906216,
+   "top": [
+    "DELTA-260207-1901-T1",
+    "BRAVO-250518-2104-T1",
+    "BRAVO-250317-1904-T1",
+    "INDIA-251018-2211-T1",
+    "INDIA-251217-1947-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260323-2034-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 7,
+   "copycat_rank": 11,
+   "window_s": 120,
+   "query_ms": 3.6627079971367493,
+   "prefilter_ms": 12.156500000855885,
+   "total_ms": 16.28787499794271,
+   "top": [
+    "CHARLIE-250726-2231-T1",
+    "KILO-251024-2233-T1",
+    "JULIET-250507-2018-T1",
+    "INDIA-250313-2145-T1",
+    "KILO-250309-2003-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260323-2034-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 9,
+   "copycat_rank": 39,
+   "window_s": 120,
+   "query_ms": 3.6033340002177283,
+   "prefilter_ms": 12.725792010314763,
+   "total_ms": 16.80320900049992,
+   "top": [
+    "ECHO-250403-2020-T1",
+    "JULIET-251208-2022-T1",
+    "HOTEL-251003-2244-T1",
+    "GOLF-251215-0125-T1",
+    "ECHO-250706-2217-T1"
+   ]
+  },
+  {
+   "track_id": "GOLF-260409-2248-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "GOLF-260409-2248-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 8,
+   "window_s": 60,
+   "query_ms": 3.7789170019095764,
+   "prefilter_ms": 12.503291000030003,
+   "total_ms": 16.75325000542216,
+   "top": [
+    "LIMA-251208-2020-T1",
+    "LIMA-260104-2034-T1",
+    "ALPHA-260118-2026-T1",
+    "GOLF-250922-2210-T1",
+    "HOTEL-250708-1952-T1"
+   ]
+  },
+  {
+   "track_id": "GOLF-260409-2248-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 5,
+   "window_s": 60,
+   "query_ms": 3.771249990677461,
+   "prefilter_ms": 11.97858298837673,
+   "total_ms": 16.213583992794156,
+   "top": [
+    "GOLF-251117-2305-T1",
+    "HOTEL-250708-1952-T1",
+    "DELTA-251031-2132-T1",
+    "ALPHA-260207-2248-T1",
+    "BRAVO-251223-2004-T1"
+   ]
+  },
+  {
+   "track_id": "GOLF-260409-2248-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 2,
+   "window_s": 60,
+   "query_ms": 3.7766659952467307,
+   "prefilter_ms": 12.210417000460438,
+   "total_ms": 16.472207993501797,
+   "top": [
+    "GOLF-250307-2250-T1",
+    "INDIA-251217-1947-T1",
+    "LIMA-250919-2114-T1",
+    "GOLF-250401-1924-T1",
+    "ALPHA-250404-2200-T1"
+   ]
+  },
+  {
+   "track_id": "GOLF-260409-2248-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 3,
+   "window_s": 120,
+   "query_ms": 3.926624995074235,
+   "prefilter_ms": 13.080999997328036,
+   "total_ms": 17.473165993578732,
+   "top": [
+    "GOLF-251117-2305-T1",
+    "JULIET-251227-2224-T1",
+    "INDIA-251027-2036-T1",
+    "ALPHA-260207-2248-T1",
+    "HOTEL-250708-1952-T1"
+   ]
+  },
+  {
+   "track_id": "GOLF-260409-2248-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 3,
+   "window_s": 120,
+   "query_ms": 4.008832998806611,
+   "prefilter_ms": 13.034707997576334,
+   "total_ms": 17.519208005978726,
+   "top": [
+    "JULIET-251227-2224-T1",
+    "INDIA-260128-1931-T1",
+    "BRAVO-250830-1907-T1",
+    "P1-ALPHA-260303-T1",
+    "ALPHA-250905-2130-T1"
+   ]
+  },
+  {
+   "track_id": "P1-DELTA-260419-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "P1-DELTA-260419-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 1,
+   "window_s": 60,
+   "query_ms": 3.665083000669256,
+   "prefilter_ms": 12.679250008659437,
+   "total_ms": 16.844166006194428,
+   "top": [
+    "INDIA-250730-2013-T1",
+    "LIMA-250610-1936-T1",
+    "GOLF-250526-2131-T1",
+    "INDIA-260322-2013-T1",
+    "BRAVO-260209-1903-T1"
+   ]
+  },
+  {
+   "track_id": "P1-DELTA-260419-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 3,
+   "window_s": 60,
+   "query_ms": 3.852541995001957,
+   "prefilter_ms": 11.914707996766083,
+   "total_ms": 16.228416992817074,
+   "top": [
+    "FOXTROT-251028-2042-T1",
+    "CHARLIE-250320-2054-T1",
+    "ECHO-250401-2027-T1",
+    "HOTEL-250327-2140-T1",
+    "DELTA-250401-2344-T1"
+   ]
+  },
+  {
+   "track_id": "P1-DELTA-260419-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 2,
+   "window_s": 60,
+   "query_ms": 3.765667002880946,
+   "prefilter_ms": 12.330249999649823,
+   "total_ms": 16.5711250010645,
+   "top": [
+    "ALPHA-260329-2137-T1",
+    "INDIA-260228-1955-T1",
+    "GOLF-250713-2000-T1",
+    "LIMA-250802-2007-T1",
+    "CHARLIE-251018-2130-T1"
+   ]
+  },
+  {
+   "track_id": "P1-DELTA-260419-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 11,
+   "window_s": 120,
+   "query_ms": 3.618874994572252,
+   "prefilter_ms": 13.0559999961406,
+   "total_ms": 17.148332990473136,
+   "top": [
+    "CHARLIE-250420-2201-T1",
+    "HOTEL-251030-1932-T1",
+    "INDIA-251111-1941-T1",
+    "ECHO-250812-2202-T1",
+    "ALPHA-251218-1951-T1"
+   ]
+  },
+  {
+   "track_id": "P1-DELTA-260419-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 8,
+   "window_s": 120,
+   "query_ms": 3.6305410030763596,
+   "prefilter_ms": 12.936416998854838,
+   "total_ms": 17.035124998074025,
+   "top": [
+    "INDIA-250525-1948-T1",
+    "GOLF-251207-2010-T1",
+    "HOTEL-250519-2135-T1",
+    "KILO-250912-1956-T1",
+    "DELTA-260411-2005-T1"
+   ]
+  },
+  {
+   "track_id": "KILO-260419-2014-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "KILO-260419-2014-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 11,
+   "window_s": 60,
+   "query_ms": 3.514665993861854,
+   "prefilter_ms": 12.206083003547974,
+   "total_ms": 16.193457995541394,
+   "top": [
+    "ALPHA-250916-1946-T1",
+    "BRAVO-250503-2135-T1",
+    "BRAVO-260106-2149-T1",
+    "GOLF-250307-2250-T1",
+    "DELTA-250825-2127-T1"
+   ]
+  },
+  {
+   "track_id": "KILO-260419-2014-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 3,
+   "copycat_rank": 12,
+   "window_s": 60,
+   "query_ms": 3.601125004934147,
+   "prefilter_ms": 12.202625002828427,
+   "total_ms": 16.28045800316613,
+   "top": [
+    "GOLF-251117-2305-T1",
+    "HOTEL-250603-2246-T1",
+    "LIMA-251008-2019-T1",
+    "FOXTROT-251002-1908-T1",
+    "HOTEL-251122-2058-T1"
+   ]
+  },
+  {
+   "track_id": "KILO-260419-2014-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 49,
+   "copycat_rank": 2,
+   "window_s": 60,
+   "query_ms": 3.6202500050421804,
+   "prefilter_ms": 11.874584000906907,
+   "total_ms": 15.960582997649908,
+   "top": [
+    "KILO-250927-2136-T1",
+    "INDIA-251027-2036-T1",
+    "INDIA-260321-2223-T1",
+    "GOLF-251215-0125-T1",
+    "KILO-250712-1918-T1"
+   ]
+  },
+  {
+   "track_id": "KILO-260419-2014-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 8,
+   "copycat_rank": 7,
+   "window_s": 120,
+   "query_ms": 3.617124995798804,
+   "prefilter_ms": 12.882333001471125,
+   "total_ms": 16.963124988251366,
+   "top": [
+    "JULIET-260120-2118-T1",
+    "ECHO-250403-2020-T1",
+    "FOXTROT-250305-2153-T1",
+    "HOTEL-260219-2206-T1",
+    "HOTEL-260408-2151-T1"
+   ]
+  },
+  {
+   "track_id": "KILO-260419-2014-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 44,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.5856250033248216,
+   "prefilter_ms": 12.842583004385233,
+   "total_ms": 16.90283400239423,
+   "top": [
+    "GOLF-250321-2031-T1",
+    "BRAVO-250423-0107-T1",
+    "DELTA-260315-2258-T1",
+    "FOXTROT-251226-2134-T1",
+    "CHARLIE-260414-1940-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260421-0217-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "BRAVO-260421-0217-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.7217920034890994,
+   "prefilter_ms": 12.295665990677662,
+   "total_ms": 16.485000000102445,
+   "top": [
+    "GOLF-251220-2234-T1",
+    "LIMA-250610-1936-T1",
+    "DELTA-250409-2246-T1",
+    "LIMA-250403-1918-T1",
+    "INDIA-260413-2206-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260421-0217-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 10,
+   "window_s": 60,
+   "query_ms": 3.7391670048236847,
+   "prefilter_ms": 12.20979099161923,
+   "total_ms": 16.416541999205947,
+   "top": [
+    "ALPHA-260310-1931-T1",
+    "LIMA-250802-2007-T1",
+    "FOXTROT-250617-2247-T1",
+    "KILO-251031-2006-T1",
+    "JULIET-250905-2037-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260421-0217-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 6,
+   "window_s": 60,
+   "query_ms": 3.5917499917559326,
+   "prefilter_ms": 11.97179099835921,
+   "total_ms": 16.02745799755212,
+   "top": [
+    "KILO-260305-2143-T1",
+    "ALPHA-251119-1940-T1",
+    "JULIET-260228-2244-T1",
+    "LIMA-260127-1913-T1",
+    "LIMA-250726-2017-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260421-0217-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.6682500067399815,
+   "prefilter_ms": 12.818167000659741,
+   "total_ms": 16.948415999650024,
+   "top": [
+    "CHARLIE-251023-0249-T1",
+    "GOLF-260212-0152-T1",
+    "BRAVO-250725-0208-T1",
+    "KILO-250621-2004-T1",
+    "ALPHA-260106-1904-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260421-0217-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 10,
+   "window_s": 120,
+   "query_ms": 3.7235839990898967,
+   "prefilter_ms": 12.870709004346281,
+   "total_ms": 17.0740419998765,
+   "top": [
+    "CHARLIE-251023-0249-T1",
+    "GOLF-260212-0152-T1",
+    "BRAVO-250725-0208-T1",
+    "BRAVO-250423-0107-T1",
+    "GOLF-250805-0109-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260427-0053-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "DELTA-260427-0053-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 28,
+   "window_s": 60,
+   "query_ms": 3.692458994919434,
+   "prefilter_ms": 12.31237499450799,
+   "total_ms": 16.46545900439378,
+   "top": [
+    "INDIA-251025-2123-T1",
+    "LIMA-250522-2251-T1",
+    "DELTA-260327-2147-T1",
+    "KILO-250603-0041-T3",
+    "ECHO-250602-1953-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260427-0053-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 12,
+   "window_s": 60,
+   "query_ms": 3.7194580072537065,
+   "prefilter_ms": 12.109083007089794,
+   "total_ms": 16.284583005472086,
+   "top": [
+    "BRAVO-250424-2056-T1",
+    "HOTEL-251003-2244-T1",
+    "KILO-250707-1945-T1",
+    "CHARLIE-251217-2221-T1",
+    "ECHO-250813-2034-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260427-0053-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 30,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.7825000035809353,
+   "prefilter_ms": 12.267209007404745,
+   "total_ms": 16.515583003638312,
+   "top": [
+    "JULIET-250528-2103-T1",
+    "JULIET-260124-1917-T1",
+    "ALPHA-260117-2112-T1",
+    "ALPHA-260407-2042-T1",
+    "LIMA-251130-1940-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260427-0053-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.8104999985080212,
+   "prefilter_ms": 12.047249998431653,
+   "total_ms": 16.32008299930021,
+   "top": [
+    "JULIET-260316-2209-T1",
+    "KILO-260419-2014-T1",
+    "CHARLIE-250528-1908-T1",
+    "INDIA-260414-2200-T1",
+    "JULIET-260310-2028-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260427-0053-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 8,
+   "copycat_rank": 11,
+   "window_s": 120,
+   "query_ms": 3.8131670007715,
+   "prefilter_ms": 12.951249998877756,
+   "total_ms": 17.22633300232701,
+   "top": [
+    "DELTA-250820-2052-T1",
+    "CHARLIE-250728-2045-T1",
+    "LIMA-251101-2244-T1",
+    "HOTEL-250903-2233-T1",
+    "HOTEL-250908-2253-T1"
+   ]
+  },
+  {
+   "track_id": "HOTEL-260428-2016-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "HOTEL-260428-2016-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 27,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.6125830083619803,
+   "prefilter_ms": 12.41108299291227,
+   "total_ms": 16.48408301116433,
+   "top": [
+    "CHARLIE-250509-0205-T1",
+    "ALPHA-251108-2255-T1",
+    "ALPHA-251212-2130-T1",
+    "LIMA-250719-1932-T1",
+    "ALPHA-260323-2210-T1"
+   ]
+  },
+  {
+   "track_id": "HOTEL-260428-2016-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 9,
+   "copycat_rank": 12,
+   "window_s": 60,
+   "query_ms": 3.7037080037407577,
+   "prefilter_ms": 11.973125001532026,
+   "total_ms": 16.125790993100964,
+   "top": [
+    "ECHO-251231-2037-T1",
+    "GOLF-250401-1924-T1",
+    "ALPHA-250418-2044-T1",
+    "HOTEL-260305-2009-T1",
+    "JULIET-250410-2034-T1"
+   ]
+  },
+  {
+   "track_id": "HOTEL-260428-2016-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 48,
+   "window_s": 60,
+   "query_ms": 3.6578749859472737,
+   "prefilter_ms": 12.52175000263378,
+   "total_ms": 16.650333986035548,
+   "top": [
+    "DELTA-251212-2133-T1",
+    "BRAVO-250828-2046-T1",
+    "DELTA-250820-2011-T1",
+    "ALPHA-250902-2014-T1",
+    "KILO-250603-0041-T1"
+   ]
+  },
+  {
+   "track_id": "HOTEL-260428-2016-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 2,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.7460000021383166,
+   "prefilter_ms": 12.9148330015596,
+   "total_ms": 17.123665995313786,
+   "top": [
+    "JULIET-250914-2008-T1",
+    "HOTEL-251122-2058-T1",
+    "BRAVO-250508-2134-T1",
+    "HOTEL-250314-2030-T1",
+    "DELTA-260327-2147-T1"
+   ]
+  },
+  {
+   "track_id": "HOTEL-260428-2016-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 9,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.708958000061102,
+   "prefilter_ms": 12.953915997059084,
+   "total_ms": 17.122375007602386,
+   "top": [
+    "DELTA-250717-2143-T1",
+    "INDIA-260322-2013-T1",
+    "ECHO-251112-2017-T1",
+    "BRAVO-251231-2120-T1",
+    "JULIET-251103-2239-T1"
+   ]
+  },
+  {
+   "track_id": "P1-ALPHA-260502-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "P1-ALPHA-260502-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 38,
+   "window_s": 60,
+   "query_ms": 3.5763339983532205,
+   "prefilter_ms": 12.79166700260248,
+   "total_ms": 16.833000001497567,
+   "top": [
+    "GOLF-250325-1904-T1",
+    "LIMA-260127-1913-T1",
+    "LIMA-250805-2026-T1",
+    "JULIET-250522-2229-T1",
+    "GOLF-260224-2233-T1"
+   ]
+  },
+  {
+   "track_id": "P1-ALPHA-260502-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 1,
+   "window_s": 60,
+   "query_ms": 3.589665997424163,
+   "prefilter_ms": 12.390417003189214,
+   "total_ms": 16.475207987241447,
+   "top": [
+    "INDIA-250730-2013-T1",
+    "INDIA-250528-2000-T1",
+    "KILO-250315-2022-T1",
+    "LIMA-250610-1936-T1",
+    "GOLF-260212-0152-T1"
+   ]
+  },
+  {
+   "track_id": "P1-ALPHA-260502-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 4,
+   "copycat_rank": 10,
+   "window_s": 60,
+   "query_ms": 3.4644999977899715,
+   "prefilter_ms": 12.345499999355525,
+   "total_ms": 16.280625000945292,
+   "top": [
+    "KILO-251130-2226-T1",
+    "ECHO-250612-1945-T1",
+    "DELTA-260216-1929-T1",
+    "P1-ALPHA-260303-T1",
+    "JULIET-250507-2018-T1"
+   ]
+  },
+  {
+   "track_id": "P1-ALPHA-260502-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 11,
+   "copycat_rank": 2,
+   "window_s": 120,
+   "query_ms": 3.621290990849957,
+   "prefilter_ms": 12.920041990582831,
+   "total_ms": 16.996582999126986,
+   "top": [
+    "INDIA-250528-2000-T1",
+    "BRAVO-251106-2017-T1",
+    "BRAVO-260322-1913-T1",
+    "DELTA-250723-1948-T1",
+    "INDIA-260322-2013-T1"
+   ]
+  },
+  {
+   "track_id": "P1-ALPHA-260502-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 10,
+   "window_s": 120,
+   "query_ms": 3.5474580072332174,
+   "prefilter_ms": 13.05112500267569,
+   "total_ms": 17.061749997083098,
+   "top": [
+    "BRAVO-250922-2020-T1",
+    "JULIET-260311-2011-T1",
+    "FOXTROT-260301-2126-T1",
+    "JULIET-250325-2314-T2",
+    "HOTEL-250808-2216-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260531-0005-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "DELTA-260531-0005-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 18,
+   "window_s": 60,
+   "query_ms": 3.6537910054903477,
+   "prefilter_ms": 12.849417005782016,
+   "total_ms": 16.9825830089394,
+   "top": [
+    "HOTEL-260221-1929-T1",
+    "DELTA-251110-2106-T1",
+    "BRAVO-251228-2114-T1",
+    "GOLF-250805-0109-T1",
+    "HOTEL-250526-2011-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260531-0005-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 9,
+   "window_s": 60,
+   "query_ms": 3.688374999910593,
+   "prefilter_ms": 12.982667001779191,
+   "total_ms": 17.135417001554742,
+   "top": [
+    "DELTA-251110-2106-T1",
+    "HOTEL-260329-2203-T1",
+    "KILO-250619-2218-T1",
+    "GOLF-251129-1954-T1",
+    "JULIET-250714-2141-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260531-0005-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.8055000040913,
+   "prefilter_ms": 13.647957995999604,
+   "total_ms": 17.932999995537102,
+   "top": [
+    "CHARLIE-251213-2118-T1",
+    "BRAVO-250518-2104-T1",
+    "GOLF-260524-2148-T1",
+    "INDIA-260123-2025-T1",
+    "INDIA-250801-2029-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260531-0005-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 17,
+   "copycat_rank": 3,
+   "window_s": 120,
+   "query_ms": 4.06587500765454,
+   "prefilter_ms": 14.091874996665865,
+   "total_ms": 18.62637500744313,
+   "top": [
+    "DELTA-260510-2157-T1",
+    "P1-ALPHA-260502-T1",
+    "BRAVO-251106-2017-T1",
+    "BRAVO-260413-2101-T1",
+    "KILO-250707-1945-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260531-0005-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 36,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.8080000085756183,
+   "prefilter_ms": 13.723500000196509,
+   "total_ms": 17.980750009883195,
+   "top": [
+    "JULIET-260316-2209-T1",
+    "INDIA-251025-2123-T1",
+    "FOXTROT-250723-2258-T1",
+    "JULIET-260228-2237-T1",
+    "FOXTROT-260310-2032-T1"
+   ]
+  },
+  {
+   "track_id": "KILO-260612-1950-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "KILO-260612-1950-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 8,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.576624993002042,
+   "prefilter_ms": 12.840208000852726,
+   "total_ms": 16.8861659913091,
+   "top": [
+    "KILO-260422-2015-T1",
+    "LIMA-250602-2005-T1",
+    "KILO-251128-2001-T1",
+    "KILO-260517-2240-T1",
+    "BRAVO-250423-0107-T1"
+   ]
+  },
+  {
+   "track_id": "KILO-260612-1950-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.588207997381687,
+   "prefilter_ms": 13.074208996840753,
+   "total_ms": 17.110457993112504,
+   "top": [
+    "GOLF-250629-1944-T1",
+    "FOXTROT-250826-2232-T1",
+    "GOLF-250905-1949-T1",
+    "CHARLIE-250509-0205-T1",
+    "DELTA-250912-2018-T1"
+   ]
+  },
+  {
+   "track_id": "KILO-260612-1950-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 35,
+   "copycat_rank": 4,
+   "window_s": 60,
+   "query_ms": 3.5673329985002056,
+   "prefilter_ms": 12.906042000395246,
+   "total_ms": 16.93774999876041,
+   "top": [
+    "KILO-260216-1907-T1",
+    "ECHO-260323-2034-T1",
+    "GOLF-250511-2045-T1",
+    "ECHO-260313-2032-T1",
+    "ALPHA-260310-1931-T1"
+   ]
+  },
+  {
+   "track_id": "KILO-260612-1950-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 2,
+   "copycat_rank": 5,
+   "window_s": 120,
+   "query_ms": 3.6827919975621626,
+   "prefilter_ms": 13.664833997609094,
+   "total_ms": 17.838957995991223,
+   "top": [
+    "DELTA-250304-2205-T1",
+    "LIMA-250802-2007-T1",
+    "INDIA-250528-2000-T1",
+    "P1-ALPHA-260502-T1",
+    "DELTA-250723-1948-T1"
+   ]
+  },
+  {
+   "track_id": "KILO-260612-1950-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.7543329963227734,
+   "prefilter_ms": 13.856125005986542,
+   "total_ms": 18.073291998007335,
+   "top": [
+    "BRAVO-250423-0107-T1",
+    "JULIET-250325-2314-T2",
+    "ALPHA-260601-2126-T1",
+    "CHARLIE-260404-1912-T1",
+    "HOTEL-250818-2126-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260623-2053-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "ECHO-260623-2053-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 12,
+   "copycat_rank": 1,
+   "window_s": 60,
+   "query_ms": 3.7955000007059425,
+   "prefilter_ms": 13.735250002355315,
+   "total_ms": 18.002165990765207,
+   "top": [
+    "ECHO-260313-2032-T1",
+    "GOLF-250918-2041-T1",
+    "INDIA-251027-2036-T1",
+    "BRAVO-260322-1913-T1",
+    "GOLF-250922-2210-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260623-2053-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 16,
+   "copycat_rank": 3,
+   "window_s": 60,
+   "query_ms": 3.6687920073745772,
+   "prefilter_ms": 13.092708002659492,
+   "total_ms": 17.221875008544885,
+   "top": [
+    "KILO-260511-2006-T1",
+    "LIMA-250608-2141-T1",
+    "INDIA-250526-1930-T1",
+    "ALPHA-260118-2026-T1",
+    "JULIET-260210-2107-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260623-2053-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 45,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.5751669929595664,
+   "prefilter_ms": 13.625166000565514,
+   "total_ms": 17.66566699370742,
+   "top": [
+    "JULIET-250624-2224-T1",
+    "FOXTROT-250519-2139-T1",
+    "HOTEL-260314-1940-T1",
+    "ALPHA-260619-2110-T1",
+    "FOXTROT-260324-2241-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260623-2053-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 22,
+   "copycat_rank": 7,
+   "window_s": 120,
+   "query_ms": 3.6880840052617714,
+   "prefilter_ms": 14.003292002598755,
+   "total_ms": 18.144542002119124,
+   "top": [
+    "KILO-260511-2006-T1",
+    "GOLF-251129-1954-T1",
+    "HOTEL-250330-1926-T1",
+    "LIMA-260503-2211-T1",
+    "INDIA-260223-2005-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260623-2053-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 12,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.6361249949550256,
+   "prefilter_ms": 14.0488750039367,
+   "total_ms": 18.14837499114219,
+   "top": [
+    "CHARLIE-260308-2251-2-T1",
+    "FOXTROT-251028-2042-T1",
+    "JULIET-250629-1949-T1",
+    "FOXTROT-250718-1908-T1",
+    "KILO-260517-2240-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260625-0136-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "BRAVO-260625-0136-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 46,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.669334008009173,
+   "prefilter_ms": 13.410041996394284,
+   "total_ms": 17.55258400226012,
+   "top": [
+    "ECHO-260317-1913-T1",
+    "ECHO-251004-2251-T1",
+    "FOXTROT-260106-2036-T1",
+    "DELTA-250425-2122-T1",
+    "INDIA-250623-1937-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260625-0136-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 4,
+   "copycat_rank": 28,
+   "window_s": 60,
+   "query_ms": 3.732209006557241,
+   "prefilter_ms": 13.1213750137249,
+   "total_ms": 17.33537499967497,
+   "top": [
+    "HOTEL-260108-1908-T1",
+    "JULIET-260316-2209-T3",
+    "JULIET-251214-2236-T1",
+    "GOLF-250805-0109-T1",
+    "GOLF-250331-2010-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260625-0136-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.7496250006370246,
+   "prefilter_ms": 12.93874999100808,
+   "total_ms": 17.15066601173021,
+   "top": [
+    "ECHO-260623-2053-T1",
+    "DELTA-260201-1939-T1",
+    "HOTEL-250603-2246-T1",
+    "DELTA-250907-2225-T1",
+    "ECHO-251026-2046-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260625-0136-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 35,
+   "copycat_rank": 16,
+   "window_s": 120,
+   "query_ms": 3.8215829990804195,
+   "prefilter_ms": 13.997207992360927,
+   "total_ms": 18.31716600281652,
+   "top": [
+    "CHARLIE-250314-1956-T1",
+    "INDIA-260128-1931-T1",
+    "CHARLIE-250603-2306-T1",
+    "FOXTROT-260407-2123-T1",
+    "DELTA-260201-1939-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260625-0136-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 36,
+   "window_s": 120,
+   "query_ms": 3.7008749932283536,
+   "prefilter_ms": 13.958875002572313,
+   "total_ms": 18.119416999979876,
+   "top": [
+    "CHARLIE-250509-0205-T1",
+    "GOLF-260212-0152-T1",
+    "BRAVO-260421-0217-T1",
+    "CHARLIE-251023-0249-T1",
+    "S1-GOLF-260503-T2"
+   ]
+  },
+  {
+   "track_id": "JULIET-260625-2308-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "JULIET-260625-2308-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 26,
+   "window_s": 60,
+   "query_ms": 3.783042004215531,
+   "prefilter_ms": 13.57899999129586,
+   "total_ms": 17.82612501119729,
+   "top": [
+    "ECHO-260623-2053-T1",
+    "FOXTROT-260224-2059-T1",
+    "LIMA-251208-2020-T1",
+    "INDIA-250406-1937-T1",
+    "JULIET-260601-2233-T1"
+   ]
+  },
+  {
+   "track_id": "JULIET-260625-2308-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 5,
+   "copycat_rank": 21,
+   "window_s": 60,
+   "query_ms": 3.5994580102851614,
+   "prefilter_ms": 12.943374997121282,
+   "total_ms": 17.012374999467283,
+   "top": [
+    "JULIET-260210-2107-T1",
+    "JULIET-260113-1959-T1",
+    "DELTA-260216-1929-T1",
+    "CHARLIE-250726-2231-T1",
+    "GOLF-260409-2248-T1"
+   ]
+  },
+  {
+   "track_id": "JULIET-260625-2308-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 7,
+   "copycat_rank": 35,
+   "window_s": 60,
+   "query_ms": 3.668374993139878,
+   "prefilter_ms": 13.286665998748504,
+   "total_ms": 17.4200000037672,
+   "top": [
+    "BRAVO-250327-2113-T1",
+    "JULIET-260530-2236-T1",
+    "GOLF-260302-2158-T1",
+    "ALPHA-251020-1949-T1",
+    "LIMA-250426-2250-T1"
+   ]
+  },
+  {
+   "track_id": "JULIET-260625-2308-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 4,
+   "copycat_rank": 1,
+   "window_s": 120,
+   "query_ms": 3.663832991151139,
+   "prefilter_ms": 14.06945800408721,
+   "total_ms": 18.20087499800138,
+   "top": [
+    "INDIA-250526-1930-T1",
+    "GOLF-250922-2210-T1",
+    "ALPHA-260107-2129-T1",
+    "GOLF-260409-2248-T1",
+    "HOTEL-250331-2251-T1"
+   ]
+  },
+  {
+   "track_id": "JULIET-260625-2308-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 2,
+   "copycat_rank": 28,
+   "window_s": 120,
+   "query_ms": 3.9017920062178746,
+   "prefilter_ms": 14.269541003159247,
+   "total_ms": 18.647792006959207,
+   "top": [
+    "KILO-250527-2207-T1",
+    "GOLF-250307-2250-T1",
+    "HOTEL-250818-2126-T1",
+    "BRAVO-250615-2051-T1",
+    "ALPHA-260207-1958-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260629-0045-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "DELTA-260629-0045-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 47,
+   "copycat_rank": 4,
+   "window_s": 60,
+   "query_ms": 3.77541700436268,
+   "prefilter_ms": 13.405208999756724,
+   "total_ms": 17.648167005972937,
+   "top": [
+    "CHARLIE-250907-2033-T1",
+    "GOLF-260120-2149-T1",
+    "KILO-260624-2139-T1",
+    "DELTA-250723-1948-T1",
+    "FOXTROT-250502-2119-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260629-0045-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 19,
+   "window_s": 60,
+   "query_ms": 3.644167009042576,
+   "prefilter_ms": 13.359624994336627,
+   "total_ms": 17.477750006946735,
+   "top": [
+    "ALPHA-251218-1951-T1",
+    "INDIA-250611-2232-T1",
+    "GOLF-250414-1939-T1",
+    "CHARLIE-250812-1902-T1",
+    "GOLF-260108-2035-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260629-0045-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 24,
+   "copycat_rank": 18,
+   "window_s": 60,
+   "query_ms": 3.7142090004635975,
+   "prefilter_ms": 13.327499997103587,
+   "total_ms": 17.5071670091711,
+   "top": [
+    "FOXTROT-250718-2029-T1",
+    "JULIET-260316-2209-T3",
+    "ECHO-260315-2123-T1",
+    "ALPHA-260201-2038-T1",
+    "ALPHA-250927-1943-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260629-0045-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 4,
+   "copycat_rank": 2,
+   "window_s": 120,
+   "query_ms": 3.787249996094033,
+   "prefilter_ms": 14.291291998233646,
+   "total_ms": 18.533875001594424,
+   "top": [
+    "ECHO-250813-2034-T1",
+    "DELTA-250723-1948-T1",
+    "INDIA-250528-2000-T1",
+    "DELTA-250401-2344-T1",
+    "DELTA-260211-2206-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260629-0045-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 25,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.884125006152317,
+   "prefilter_ms": 14.047874996322207,
+   "total_ms": 18.412457997328602,
+   "top": [
+    "HOTEL-260504-2118-T1",
+    "LIMA-260329-2110-T1",
+    "KILO-260612-1950-T1",
+    "KILO-251229-2004-T1",
+    "GOLF-250713-2220-T1"
+   ]
+  },
+  {
+   "track_id": "P1-CHARLIE-260710-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "P1-CHARLIE-260710-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 32,
+   "copycat_rank": 5,
+   "window_s": 60,
+   "query_ms": 3.453333003562875,
+   "prefilter_ms": 13.56191599916201,
+   "total_ms": 17.497583001386374,
+   "top": [
+    "INDIA-260322-2013-T1",
+    "JULIET-250325-2314-T3",
+    "KILO-250315-2022-T1",
+    "JULIET-251228-1940-T1",
+    "BRAVO-251030-2014-T1"
+   ]
+  },
+  {
+   "track_id": "P1-CHARLIE-260710-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 1,
+   "window_s": 60,
+   "query_ms": 3.5911250015487894,
+   "prefilter_ms": 13.497374995495193,
+   "total_ms": 17.56504199875053,
+   "top": [
+    "INDIA-260629-2035-T1",
+    "LIMA-250802-2007-T1",
+    "ECHO-250428-2138-T1",
+    "ECHO-260623-2053-T1",
+    "ECHO-260313-2032-T1"
+   ]
+  },
+  {
+   "track_id": "P1-CHARLIE-260710-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 17,
+   "window_s": 60,
+   "query_ms": 3.7457500002346933,
+   "prefilter_ms": 13.616833995911293,
+   "total_ms": 17.830583004979417,
+   "top": [
+    "DELTA-250912-2018-T1",
+    "ALPHA-250322-2244-T1",
+    "INDIA-251211-2201-T1",
+    "HOTEL-250330-1926-T1",
+    "HOTEL-251129-2138-T1"
+   ]
+  },
+  {
+   "track_id": "P1-CHARLIE-260710-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 2,
+   "window_s": 120,
+   "query_ms": 3.6431250046007335,
+   "prefilter_ms": 14.256040987675078,
+   "total_ms": 18.36337499844376,
+   "top": [
+    "FOXTROT-251028-2042-T1",
+    "INDIA-260629-2035-T1",
+    "INDIA-250526-1930-T1",
+    "INDIA-260412-2109-T1",
+    "HOTEL-250708-1952-T1"
+   ]
+  },
+  {
+   "track_id": "P1-CHARLIE-260710-T1",
+   "actor_id": "P1",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 18,
+   "copycat_rank": 6,
+   "window_s": 120,
+   "query_ms": 3.645749995484948,
+   "prefilter_ms": 14.515249989926815,
+   "total_ms": 18.619165988638997,
+   "top": [
+    "JULIET-260210-2107-T1",
+    "GOLF-260628-2010-T1",
+    "ALPHA-250812-1913-T1",
+    "GOLF-251102-1903-T1",
+    "JULIET-260314-2029-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260710-2048-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "ECHO-260710-2048-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 6,
+   "copycat_rank": 4,
+   "window_s": 60,
+   "query_ms": 3.5819579934468493,
+   "prefilter_ms": 13.4053330111783,
+   "total_ms": 17.4475829990115,
+   "top": [
+    "LIMA-251008-2019-T1",
+    "LIMA-250802-2007-T1",
+    "KILO-260612-1950-T1",
+    "BRAVO-251030-2014-T1",
+    "INDIA-260322-2013-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260710-2048-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 7,
+   "copycat_rank": 3,
+   "window_s": 60,
+   "query_ms": 3.6330000002635643,
+   "prefilter_ms": 13.807916999212466,
+   "total_ms": 17.9228330089245,
+   "top": [
+    "DELTA-260628-2022-T1",
+    "DELTA-260211-2206-T1",
+    "ECHO-260313-2032-T1",
+    "BRAVO-251030-2014-T1",
+    "LIMA-260104-2034-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260710-2048-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 50,
+   "copycat_rank": 1,
+   "window_s": 60,
+   "query_ms": 3.6876670055789873,
+   "prefilter_ms": 13.499209002475254,
+   "total_ms": 17.647583008510992,
+   "top": [
+    "INDIA-250319-1945-T1",
+    "FOXTROT-250805-1945-T1",
+    "DELTA-260219-2143-T1",
+    "P1-CHARLIE-260710-T1",
+    "BRAVO-250518-2104-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260710-2048-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 2,
+   "copycat_rank": 1,
+   "window_s": 120,
+   "query_ms": 3.7616249901475385,
+   "prefilter_ms": 14.445958993746899,
+   "total_ms": 18.673374986974522,
+   "top": [
+    "INDIA-251217-1947-T1",
+    "HOTEL-250818-2126-T1",
+    "KILO-260419-2014-T1",
+    "ECHO-250428-2138-T1",
+    "KILO-260612-1950-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260710-2048-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 6,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.7104169896338135,
+   "prefilter_ms": 14.365124996402301,
+   "total_ms": 18.53474999370519,
+   "top": [
+    "KILO-260102-2117-T1",
+    "JULIET-260616-2113-T1",
+    "LIMA-251130-1940-T1",
+    "INDIA-251225-2255-T1",
+    "CHARLIE-250603-2306-T1"
+   ]
+  },
+  {
+   "track_id": "GOLF-260714-0256-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "GOLF-260714-0256-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.639624992501922,
+   "prefilter_ms": 13.856667006621137,
+   "total_ms": 17.956541996682063,
+   "top": [
+    "DELTA-250920-2032-T1",
+    "KILO-251028-2133-T1",
+    "INDIA-250607-2039-T1",
+    "DELTA-251126-0018-T1",
+    "LIMA-250610-1936-T1"
+   ]
+  },
+  {
+   "track_id": "GOLF-260714-0256-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 45,
+   "copycat_rank": 2,
+   "window_s": 60,
+   "query_ms": 3.6703749938169494,
+   "prefilter_ms": 13.668375002453104,
+   "total_ms": 17.793124992749654,
+   "top": [
+    "DELTA-250927-1922-T1",
+    "ECHO-250909-2009-T1",
+    "ALPHA-250902-2245-T1",
+    "ECHO-251112-2017-T1",
+    "FOXTROT-260507-2249-T1"
+   ]
+  },
+  {
+   "track_id": "GOLF-260714-0256-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.7529999972321093,
+   "prefilter_ms": 13.785582996206358,
+   "total_ms": 18.009583989623934,
+   "top": [
+    "JULIET-260527-2121-T1",
+    "ECHO-250807-2249-T1",
+    "JULIET-250627-2048-T1",
+    "KILO-251001-2246-T1",
+    "HOTEL-260630-2259-T1"
+   ]
+  },
+  {
+   "track_id": "GOLF-260714-0256-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 42,
+   "copycat_rank": 29,
+   "window_s": 120,
+   "query_ms": 3.6672920105047524,
+   "prefilter_ms": 14.77395799884107,
+   "total_ms": 18.90841701242607,
+   "top": [
+    "JULIET-260123-2157-T2",
+    "ECHO-250807-2249-T1",
+    "JULIET-250507-2018-T1",
+    "LIMA-250717-2039-T1",
+    "KILO-251122-2018-T1"
+   ]
+  },
+  {
+   "track_id": "GOLF-260714-0256-T1",
+   "actor_id": "P6",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 44,
+   "window_s": 120,
+   "query_ms": 3.818166005657986,
+   "prefilter_ms": 14.296833003754728,
+   "total_ms": 18.600666007841937,
+   "top": [
+    "BRAVO-260421-0217-T1",
+    "CHARLIE-251023-0249-T1",
+    "GOLF-251215-0125-T1",
+    "GOLF-260212-0152-T1",
+    "GOLF-250805-0109-T1"
+   ]
+  },
+  {
+   "track_id": "GOLF-260718-2227-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "GOLF-260718-2227-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 3,
+   "window_s": 60,
+   "query_ms": 3.4888329973910004,
+   "prefilter_ms": 13.663334000739269,
+   "total_ms": 35.41012499772478,
+   "top": [
+    "GOLF-260409-2248-T1",
+    "GOLF-251117-2305-T1",
+    "INDIA-260629-2035-T1",
+    "GOLF-250430-2109-T1",
+    "DELTA-260216-1929-T1"
+   ]
+  },
+  {
+   "track_id": "GOLF-260718-2227-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 7,
+   "window_s": 60,
+   "query_ms": 3.8374169962480664,
+   "prefilter_ms": 14.213917005690746,
+   "total_ms": 18.44324999547098,
+   "top": [
+    "JULIET-251227-2224-T1",
+    "GOLF-251117-2305-T1",
+    "HOTEL-250708-1952-T1",
+    "ECHO-250813-2034-T1",
+    "JULIET-250815-2326-T1"
+   ]
+  },
+  {
+   "track_id": "GOLF-260718-2227-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 2,
+   "copycat_rank": 4,
+   "window_s": 60,
+   "query_ms": 3.6124999896856025,
+   "prefilter_ms": 13.80220901046414,
+   "total_ms": 17.81333399412688,
+   "top": [
+    "ECHO-251030-2052-T1",
+    "JULIET-250815-2326-T1",
+    "GOLF-250817-1932-T1",
+    "ECHO-260408-2055-T1",
+    "FOXTROT-251231-2117-T1"
+   ]
+  },
+  {
+   "track_id": "GOLF-260718-2227-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 4,
+   "window_s": 120,
+   "query_ms": 3.764791996218264,
+   "prefilter_ms": 14.852874999633059,
+   "total_ms": 19.023999993805774,
+   "top": [
+    "JULIET-251227-2224-T1",
+    "GOLF-251117-2305-T1",
+    "JULIET-250815-2326-T1",
+    "INDIA-260629-2035-T1",
+    "GOLF-260409-2248-T1"
+   ]
+  },
+  {
+   "track_id": "GOLF-260718-2227-T1",
+   "actor_id": "P4",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 1,
+   "window_s": 120,
+   "query_ms": 3.7533330032601953,
+   "prefilter_ms": 14.574207991245203,
+   "total_ms": 18.726833004620858,
+   "top": [
+    "DELTA-250723-1948-T1",
+    "ALPHA-260110-2123-T1",
+    "BRAVO-251106-2017-T1",
+    "LIMA-260206-2046-T1",
+    "FOXTROT-260615-2156-T1"
+   ]
+  },
+  {
+   "track_id": "FOXTROT-260802-2020-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "FOXTROT-260802-2020-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 23,
+   "copycat_rank": 2,
+   "window_s": 60,
+   "query_ms": 3.691459001856856,
+   "prefilter_ms": 14.190707996021956,
+   "total_ms": 18.34837500064168,
+   "top": [
+    "GOLF-260714-0256-T1",
+    "ECHO-260313-2032-T1",
+    "ECHO-250325-2128-T1",
+    "GOLF-251213-2101-T1",
+    "GOLF-251215-0125-T1"
+   ]
+  },
+  {
+   "track_id": "FOXTROT-260802-2020-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 2,
+   "copycat_rank": 7,
+   "window_s": 60,
+   "query_ms": 3.794625008595176,
+   "prefilter_ms": 14.529041000059806,
+   "total_ms": 18.742833999567665,
+   "top": [
+    "GOLF-260403-1933-T1",
+    "ECHO-260323-2034-T1",
+    "JULIET-251005-1906-T1",
+    "GOLF-250817-1932-T1",
+    "GOLF-250511-2045-T1"
+   ]
+  },
+  {
+   "track_id": "FOXTROT-260802-2020-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 17,
+   "copycat_rank": 20,
+   "window_s": 60,
+   "query_ms": 3.769292001379654,
+   "prefilter_ms": 13.859208003850654,
+   "total_ms": 18.04574999550823,
+   "top": [
+    "FOXTROT-260407-2123-T1",
+    "INDIA-250506-2234-T1",
+    "BRAVO-260618-2031-T1",
+    "INDIA-260412-2109-T1",
+    "BRAVO-251207-1921-T1"
+   ]
+  },
+  {
+   "track_id": "FOXTROT-260802-2020-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 3,
+   "copycat_rank": 18,
+   "window_s": 120,
+   "query_ms": 3.6360420053824782,
+   "prefilter_ms": 15.03283299098257,
+   "total_ms": 19.071667004027404,
+   "top": [
+    "LIMA-251208-2020-T1",
+    "KILO-260612-1950-T1",
+    "FOXTROT-251215-2125-T1",
+    "DELTA-260724-2237-T1",
+    "INDIA-250406-1937-T1"
+   ]
+  },
+  {
+   "track_id": "FOXTROT-260802-2020-T1",
+   "actor_id": "P3",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 5,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.921958996215835,
+   "prefilter_ms": 15.075125003932044,
+   "total_ms": 19.405750004807487,
+   "top": [
+    "BRAVO-250507-2031-T1",
+    "ECHO-260508-2059-T1",
+    "HOTEL-260221-1929-T1",
+    "JULIET-260413-2105-T1",
+    "HOTEL-260220-2126-T1"
+   ]
+  },
+  {
+   "track_id": "CHARLIE-260802-2316-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "CHARLIE-260802-2316-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 30,
+   "window_s": 60,
+   "query_ms": 3.7428340001497418,
+   "prefilter_ms": 14.422499996726401,
+   "total_ms": 18.560124997748062,
+   "top": [
+    "ALPHA-251003-2245-T1",
+    "FOXTROT-250828-2007-T1",
+    "JULIET-251224-2019-T1",
+    "CHARLIE-260511-1924-T1",
+    "CHARLIE-251221-2222-T1"
+   ]
+  },
+  {
+   "track_id": "CHARLIE-260802-2316-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 5,
+   "window_s": 60,
+   "query_ms": 3.6810000019613653,
+   "prefilter_ms": 13.881917009712197,
+   "total_ms": 18.0329170107143,
+   "top": [
+    "DELTA-250401-2344-T1",
+    "DELTA-260205-2131-T1",
+    "GOLF-250805-0109-T1",
+    "S1-GOLF-260503-T2",
+    "BRAVO-250830-1907-T1"
+   ]
+  },
+  {
+   "track_id": "CHARLIE-260802-2316-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 23,
+   "copycat_rank": 17,
+   "window_s": 60,
+   "query_ms": 3.770416005863808,
+   "prefilter_ms": 14.499249999062158,
+   "total_ms": 18.782541010295972,
+   "top": [
+    "GOLF-250930-1942-T1",
+    "ALPHA-251227-2058-T1",
+    "GOLF-251207-2010-T1",
+    "CHARLIE-251027-2223-T1",
+    "HOTEL-251013-1953-T1"
+   ]
+  },
+  {
+   "track_id": "CHARLIE-260802-2316-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 5,
+   "window_s": 120,
+   "query_ms": 3.911916006472893,
+   "prefilter_ms": 14.876125002047047,
+   "total_ms": 19.249666001996957,
+   "top": [
+    "ALPHA-250430-2209-T1",
+    "FOXTROT-260328-2006-T1",
+    "CHARLIE-250803-2052-T1",
+    "HOTEL-260123-2119-T1",
+    "INDIA-260629-2035-T1"
+   ]
+  },
+  {
+   "track_id": "CHARLIE-260802-2316-T1",
+   "actor_id": "P2",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 6,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 4.18570899637416,
+   "prefilter_ms": 15.184791991487145,
+   "total_ms": 19.830791992717423,
+   "top": [
+    "JULIET-260210-2107-T1",
+    "LIMA-250608-2239-T1",
+    "HOTEL-250723-1927-T1",
+    "DELTA-250617-2045-T1",
+    "JULIET-251208-2022-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260828-2021-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "INDIA-260828-2021-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 3,
+   "window_s": 60,
+   "query_ms": 3.6251660058042035,
+   "prefilter_ms": 14.764416991965845,
+   "total_ms": 18.860041003790684,
+   "top": [
+    "ECHO-260615-2249-T1",
+    "JULIET-250302-1922-T1",
+    "BRAVO-260704-1929-T1",
+    "GOLF-250807-1941-T1",
+    "ECHO-260720-1936-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260828-2021-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 18,
+   "window_s": 60,
+   "query_ms": 3.7210839946055785,
+   "prefilter_ms": 14.062791989999823,
+   "total_ms": 18.24016700265929,
+   "top": [
+    "KILO-250822-1905-T1",
+    "KILO-250817-2204-T1",
+    "ECHO-260825-2008-T1",
+    "LIMA-250403-1918-T1",
+    "GOLF-250805-0109-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260828-2021-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 25,
+   "copycat_rank": 6,
+   "window_s": 60,
+   "query_ms": 3.6705840029753745,
+   "prefilter_ms": 14.104457994108088,
+   "total_ms": 18.232125003123656,
+   "top": [
+    "DELTA-251218-2208-T1",
+    "CHARLIE-260409-2001-T1",
+    "JULIET-250519-2251-T1",
+    "DELTA-260327-2147-T1",
+    "GOLF-260725-2056-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260828-2021-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 10,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.7008330109529197,
+   "prefilter_ms": 14.406957998289727,
+   "total_ms": 18.575167006929405,
+   "top": [
+    "S1-GOLF-260503-T4",
+    "BRAVO-250507-2031-T1",
+    "ALPHA-260125-2251-T1",
+    "DELTA-250820-2011-T1",
+    "ECHO-260308-2000-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260828-2021-T1",
+   "actor_id": "P5",
+   "actor_type": "prober",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.7770419876324013,
+   "prefilter_ms": 15.485790994716808,
+   "total_ms": 19.72495899826754,
+   "top": [
+    "CHARLIE-250918-1951-T1",
+    "FOXTROT-260211-1936-T1",
+    "HOTEL-250519-2135-T1",
+    "CHARLIE-250908-2112-T1",
+    "FOXTROT-260130-2053-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260313-2032-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "ECHO-260313-2032-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 3,
+   "copycat_rank": 7,
+   "window_s": 60,
+   "query_ms": 3.728999989107251,
+   "prefilter_ms": 11.412709005526267,
+   "total_ms": 15.620958001818508,
+   "top": [
+    "GOLF-251215-0125-T1",
+    "LIMA-250802-2007-T1",
+    "INDIA-250730-2013-T1",
+    "BRAVO-250423-0107-T1",
+    "GOLF-260212-0152-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260313-2032-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 2,
+   "copycat_rank": 27,
+   "window_s": 60,
+   "query_ms": 3.605541991419159,
+   "prefilter_ms": 11.325250001391396,
+   "total_ms": 15.40333399316296,
+   "top": [
+    "BRAVO-250423-0107-T1",
+    "ECHO-250909-2009-T1",
+    "GOLF-251213-2101-T1",
+    "ALPHA-260130-1932-T1",
+    "INDIA-250319-1945-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260313-2032-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 2,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 4.281666988390498,
+   "prefilter_ms": 11.921457989956252,
+   "total_ms": 16.69433400093112,
+   "top": [
+    "ECHO-251106-1921-T1",
+    "INDIA-251027-2036-T1",
+    "JULIET-251224-2006-T1",
+    "ECHO-250505-2235-T1",
+    "HOTEL-250314-1930-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260313-2032-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 16,
+   "window_s": 120,
+   "query_ms": 3.94699999014847,
+   "prefilter_ms": 12.466542000765912,
+   "total_ms": 16.878958995221183,
+   "top": [
+    "INDIA-251217-1947-T1",
+    "ALPHA-250531-2119-T1",
+    "HOTEL-250818-2126-T1",
+    "ECHO-250428-2138-T1",
+    "DELTA-250509-2159-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260313-2032-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.9118330023484305,
+   "prefilter_ms": 12.433957992470823,
+   "total_ms": 16.855957990628667,
+   "top": [
+    "HOTEL-250302-2046-T1",
+    "JULIET-251103-2239-T1",
+    "DELTA-251106-1948-T1",
+    "KILO-250925-2258-T1",
+    "ALPHA-260306-2125-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260322-1913-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "BRAVO-260322-1913-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 29,
+   "copycat_rank": 26,
+   "window_s": 60,
+   "query_ms": 3.88399999064859,
+   "prefilter_ms": 11.625624989392236,
+   "total_ms": 15.983624994987622,
+   "top": [
+    "ALPHA-260221-2034-T1",
+    "HOTEL-251028-2002-T1",
+    "LIMA-250719-1932-T1",
+    "CHARLIE-250512-2003-T1",
+    "LIMA-251004-2234-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260322-1913-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 5,
+   "copycat_rank": 1,
+   "window_s": 60,
+   "query_ms": 3.8116250070743263,
+   "prefilter_ms": 11.655291003989987,
+   "total_ms": 15.930082998238504,
+   "top": [
+    "INDIA-250730-2013-T1",
+    "LIMA-250610-1936-T1",
+    "HOTEL-250314-2030-T1",
+    "GOLF-260212-0152-T1",
+    "BRAVO-251030-2014-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260322-1913-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 10,
+   "copycat_rank": 2,
+   "window_s": 60,
+   "query_ms": 3.590916996472515,
+   "prefilter_ms": 11.661874988931231,
+   "total_ms": 15.725958000984974,
+   "top": [
+    "ALPHA-250926-2243-T1",
+    "INDIA-250730-2013-T1",
+    "CHARLIE-250706-2203-T1",
+    "DELTA-260219-2143-T1",
+    "INDIA-250526-1930-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260322-1913-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 4,
+   "window_s": 60,
+   "query_ms": 4.0398330020252615,
+   "prefilter_ms": 11.882708000484854,
+   "total_ms": 16.409082993050106,
+   "top": [
+    "CHARLIE-250603-2306-T1",
+    "HOTEL-250908-2253-T1",
+    "KILO-260213-2228-T1",
+    "INDIA-250730-2013-T1",
+    "HOTEL-250731-2102-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260322-1913-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 4,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 4.143208003370091,
+   "prefilter_ms": 12.564749995362945,
+   "total_ms": 17.189040998346172,
+   "top": [
+    "P1-ALPHA-260303-T1",
+    "LIMA-251130-1940-T1",
+    "INDIA-260223-2005-T1",
+    "BRAVO-251030-2014-T1",
+    "DELTA-250723-1948-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260407-1940-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "BRAVO-260407-1940-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 11,
+   "copycat_rank": 3,
+   "window_s": 60,
+   "query_ms": 3.582082994398661,
+   "prefilter_ms": 12.307875003898516,
+   "total_ms": 16.352958002244122,
+   "top": [
+    "BRAVO-250830-2215-T1",
+    "GOLF-260212-0152-T1",
+    "ECHO-260105-2052-T1",
+    "GOLF-250805-0109-T1",
+    "JULIET-250924-1916-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260407-1940-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 9,
+   "copycat_rank": 6,
+   "window_s": 60,
+   "query_ms": 3.731375007191673,
+   "prefilter_ms": 12.175583993666805,
+   "total_ms": 16.37608400778845,
+   "top": [
+    "ALPHA-251002-2037-T1",
+    "BRAVO-250423-0107-T1",
+    "ECHO-250602-1953-T1",
+    "INDIA-250528-2000-T1",
+    "KILO-250712-1918-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260407-1940-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 14,
+   "window_s": 60,
+   "query_ms": 3.587666986277327,
+   "prefilter_ms": 12.051249999785796,
+   "total_ms": 16.11141698958818,
+   "top": [
+    "JULIET-250520-2121-T1",
+    "DELTA-260224-1903-T1",
+    "GOLF-250606-1901-T1",
+    "FOXTROT-250519-2139-T1",
+    "GOLF-251110-2145-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260407-1940-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 31,
+   "window_s": 60,
+   "query_ms": 3.792332994635217,
+   "prefilter_ms": 12.019499990856275,
+   "total_ms": 16.272167005809024,
+   "top": [
+    "DELTA-260207-1901-T1",
+    "ALPHA-260310-1931-T1",
+    "KILO-251024-2233-T1",
+    "CHARLIE-250603-2306-T1",
+    "BRAVO-250423-0107-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260407-1940-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.6911669885739684,
+   "prefilter_ms": 12.85562499833759,
+   "total_ms": 17.007957998430356,
+   "top": [
+    "BRAVO-251030-2014-T1",
+    "DELTA-260207-1901-T1",
+    "BRAVO-251106-2017-T1",
+    "CHARLIE-251217-2221-T1",
+    "GOLF-260212-0152-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260408-2055-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "ECHO-260408-2055-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 4,
+   "copycat_rank": 34,
+   "window_s": 60,
+   "query_ms": 3.734249999979511,
+   "prefilter_ms": 12.054792008711956,
+   "total_ms": 16.252582994638942,
+   "top": [
+    "ECHO-250813-2034-T1",
+    "ECHO-250602-1953-T1",
+    "ECHO-250517-2032-T1",
+    "INDIA-260228-1955-T1",
+    "BRAVO-250423-0107-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260408-2055-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 13,
+   "copycat_rank": 9,
+   "window_s": 60,
+   "query_ms": 3.6787919962080196,
+   "prefilter_ms": 11.91316700715106,
+   "total_ms": 16.054000006988645,
+   "top": [
+    "GOLF-250805-0109-T1",
+    "LIMA-250610-1936-T1",
+    "HOTEL-260329-2203-T1",
+    "GOLF-250817-1932-T1",
+    "JULIET-250624-2224-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260408-2055-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.5680410073837265,
+   "prefilter_ms": 12.119582999730483,
+   "total_ms": 16.151040996192023,
+   "top": [
+    "GOLF-250827-2157-T1",
+    "ALPHA-260216-2216-T1",
+    "ECHO-250801-1903-T1",
+    "CHARLIE-260404-1912-T1",
+    "INDIA-250925-2047-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260408-2055-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 9,
+   "copycat_rank": 48,
+   "window_s": 120,
+   "query_ms": 3.631999992649071,
+   "prefilter_ms": 12.602915987372398,
+   "total_ms": 16.688374991645105,
+   "top": [
+    "LIMA-251130-2157-T1",
+    "CHARLIE-250907-2033-T1",
+    "HOTEL-251224-2028-T1",
+    "DELTA-250801-2212-T1",
+    "BRAVO-260126-1904-T1"
+   ]
+  },
+  {
+   "track_id": "ECHO-260408-2055-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 3,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.6658329918282107,
+   "prefilter_ms": 12.58158301061485,
+   "total_ms": 16.711707998183556,
+   "top": [
+    "GOLF-250713-2000-T1",
+    "ECHO-250822-2255-T1",
+    "INDIA-250730-2013-T1",
+    "LIMA-250501-1924-T1",
+    "INDIA-260124-2220-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260517-2013-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "BRAVO-260517-2013-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 15,
+   "copycat_rank": 1,
+   "window_s": 60,
+   "query_ms": 3.660417001810856,
+   "prefilter_ms": 12.671332995523699,
+   "total_ms": 16.802458005258814,
+   "top": [
+    "INDIA-250526-1930-T1",
+    "JULIET-250714-2141-T1",
+    "INDIA-250730-2013-T1",
+    "HOTEL-250708-1952-T1",
+    "LIMA-251130-1940-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260517-2013-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 4,
+   "window_s": 60,
+   "query_ms": 3.6016250087413937,
+   "prefilter_ms": 12.504250000347383,
+   "total_ms": 16.577750007854775,
+   "top": [
+    "ECHO-251002-2242-T1",
+    "ECHO-260119-1904-T1",
+    "INDIA-260111-2100-T1",
+    "ECHO-260408-2055-T1",
+    "ECHO-250822-2255-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260517-2013-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 12,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.591958011384122,
+   "prefilter_ms": 12.491500005126,
+   "total_ms": 16.548583007534035,
+   "top": [
+    "BRAVO-260503-2208-T1",
+    "JULIET-250720-2141-T1",
+    "S1-GOLF-260503-T5",
+    "ALPHA-250915-2242-T1",
+    "LIMA-250925-2005-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260517-2013-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 3,
+   "window_s": 120,
+   "query_ms": 3.9490420022048056,
+   "prefilter_ms": 13.31449999997858,
+   "total_ms": 17.73770801082719,
+   "top": [
+    "DELTA-260207-1901-T1",
+    "DELTA-260510-2157-T1",
+    "INDIA-250526-1930-T1",
+    "HOTEL-250517-1951-T1",
+    "ALPHA-260424-2046-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260517-2013-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 40,
+   "window_s": 120,
+   "query_ms": 3.7806249893037602,
+   "prefilter_ms": 13.118709000991657,
+   "total_ms": 17.361041987896897,
+   "top": [
+    "DELTA-260207-1901-T1",
+    "LIMA-260129-2152-T1",
+    "CHARLIE-250422-2148-T1",
+    "BRAVO-260404-2212-T1",
+    "LIMA-250802-2007-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260629-2035-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "INDIA-260629-2035-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 8,
+   "copycat_rank": 4,
+   "window_s": 60,
+   "query_ms": 3.573666006559506,
+   "prefilter_ms": 13.20829099859111,
+   "total_ms": 17.26545800920576,
+   "top": [
+    "INDIA-260322-2013-T1",
+    "KILO-250315-2022-T1",
+    "INDIA-250528-2000-T1",
+    "BRAVO-260322-1913-T1",
+    "BRAVO-251030-2014-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260629-2035-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 18,
+   "window_s": 60,
+   "query_ms": 3.7750829942524433,
+   "prefilter_ms": 13.502750007319264,
+   "total_ms": 17.755249995389022,
+   "top": [
+    "ECHO-250909-2009-T1",
+    "INDIA-250526-1930-T1",
+    "BRAVO-251028-2104-T1",
+    "CHARLIE-251008-1949-T1",
+    "DELTA-250801-2212-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260629-2035-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.7199590005911887,
+   "prefilter_ms": 13.605750005808659,
+   "total_ms": 17.800250003347173,
+   "top": [
+    "GOLF-250307-2250-T1",
+    "DELTA-260427-0053-T1",
+    "GOLF-250707-2222-T1",
+    "KILO-250314-2012-T1",
+    "KILO-250922-2036-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260629-2035-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.711415993166156,
+   "prefilter_ms": 14.095374994212762,
+   "total_ms": 18.274707996170036,
+   "top": [
+    "INDIA-250526-1930-T1",
+    "ECHO-250325-2128-T1",
+    "ECHO-250909-2009-T1",
+    "HOTEL-250708-1952-T1",
+    "CHARLIE-251008-1949-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260629-2035-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 4,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.76437499653548,
+   "prefilter_ms": 14.12666600663215,
+   "total_ms": 18.358624991378747,
+   "top": [
+    "GOLF-251010-2143-T1",
+    "KILO-250603-0041-T3",
+    "CHARLIE-260212-0037-T1",
+    "ECHO-260105-2052-T1",
+    "DELTA-260629-0045-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260704-1929-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "BRAVO-260704-1929-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 7,
+   "copycat_rank": 2,
+   "window_s": 60,
+   "query_ms": 3.608333005104214,
+   "prefilter_ms": 13.394666006206535,
+   "total_ms": 17.45883299736306,
+   "top": [
+    "BRAVO-260421-0217-T1",
+    "INDIA-250730-2013-T1",
+    "INDIA-260629-2035-T1",
+    "INDIA-250801-2029-T1",
+    "INDIA-250526-1930-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260704-1929-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 17,
+   "copycat_rank": 4,
+   "window_s": 60,
+   "query_ms": 3.6037079989910126,
+   "prefilter_ms": 13.445750009850599,
+   "total_ms": 17.514582999865524,
+   "top": [
+    "ECHO-260623-2053-T1",
+    "DELTA-250927-1922-T1",
+    "HOTEL-250708-1952-T1",
+    "INDIA-260629-2035-T1",
+    "DELTA-260630-1936-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260704-1929-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.6667080130428076,
+   "prefilter_ms": 13.258124992717057,
+   "total_ms": 17.399792006472126,
+   "top": [
+    "GOLF-260303-2048-T1",
+    "FOXTROT-250603-2027-T1",
+    "HOTEL-250603-2246-T1",
+    "FOXTROT-260608-2151-T1",
+    "KILO-250410-2251-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260704-1929-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 2,
+   "window_s": 120,
+   "query_ms": 3.7543329963227734,
+   "prefilter_ms": 14.248457999201491,
+   "total_ms": 18.478500001947396,
+   "top": [
+    "ALPHA-250926-2243-T1",
+    "ECHO-260313-2032-T1",
+    "JULIET-260511-0024-T3",
+    "BRAVO-251028-2104-T1",
+    "FOXTROT-250804-1930-T1"
+   ]
+  },
+  {
+   "track_id": "BRAVO-260704-1929-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.850041000987403,
+   "prefilter_ms": 14.215375005733222,
+   "total_ms": 18.518124998081475,
+   "top": [
+    "BRAVO-251223-2004-T1",
+    "DELTA-260207-1901-T1",
+    "BRAVO-260517-2013-T1",
+    "DELTA-250723-1948-T1",
+    "LIMA-250802-2007-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260706-2032-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "INDIA-260706-2032-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 4,
+   "copycat_rank": 1,
+   "window_s": 60,
+   "query_ms": 3.5753330012084916,
+   "prefilter_ms": 13.417832989944145,
+   "total_ms": 17.467915997258388,
+   "top": [
+    "BRAVO-260322-1913-T1",
+    "KILO-250315-2022-T1",
+    "P1-ALPHA-260303-T1",
+    "INDIA-250730-2013-T1",
+    "KILO-250619-2218-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260706-2032-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 2,
+   "copycat_rank": 8,
+   "window_s": 60,
+   "query_ms": 3.5716250131372362,
+   "prefilter_ms": 13.376917006098665,
+   "total_ms": 17.426000005798414,
+   "top": [
+    "GOLF-260212-0152-T1",
+    "ECHO-250909-2009-T1",
+    "INDIA-250730-2013-T1",
+    "P1-ALPHA-260502-T1",
+    "ECHO-260323-2034-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260706-2032-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 31,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.7606669939123094,
+   "prefilter_ms": 13.238083003670909,
+   "total_ms": 17.45416699850466,
+   "top": [
+    "ALPHA-251004-2223-T1",
+    "DELTA-260417-2119-T1",
+    "ALPHA-250418-2240-T1",
+    "BRAVO-260325-1930-T1",
+    "ECHO-250316-2206-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260706-2032-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.6810419987887144,
+   "prefilter_ms": 14.268208004068583,
+   "total_ms": 18.41924998734612,
+   "top": [
+    "INDIA-250730-2013-T1",
+    "INDIA-251027-2036-T1",
+    "GOLF-250707-2222-T1",
+    "INDIA-260629-2035-T1",
+    "KILO-250302-2156-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260706-2032-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.958084009354934,
+   "prefilter_ms": 14.34999999764841,
+   "total_ms": 18.784625004627742,
+   "top": [
+    "CHARLIE-250319-1941-T1",
+    "KILO-250302-2120-T1",
+    "ECHO-250517-2032-T1",
+    "ECHO-250503-2005-T1",
+    "GOLF-250717-2204-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260808-2021-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "INDIA-260808-2021-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 5,
+   "copycat_rank": 1,
+   "window_s": 60,
+   "query_ms": 3.539790996001102,
+   "prefilter_ms": 14.038499997695908,
+   "total_ms": 18.065707990899682,
+   "top": [
+    "DELTA-250723-1948-T1",
+    "GOLF-260212-0152-T1",
+    "BRAVO-260625-0136-T1",
+    "GOLF-251215-0125-T1",
+    "INDIA-260706-2032-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260808-2021-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": 31,
+   "copycat_rank": 5,
+   "window_s": 60,
+   "query_ms": 3.729542004293762,
+   "prefilter_ms": 14.095708000240847,
+   "total_ms": 18.286874998011626,
+   "top": [
+    "CHARLIE-250320-2054-T1",
+    "CHARLIE-250302-2227-T1",
+    "KILO-250712-1918-T1",
+    "FOXTROT-250324-2015-T1",
+    "DELTA-250723-1948-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260808-2021-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": 35,
+   "copycat_rank": null,
+   "window_s": 60,
+   "query_ms": 3.5321670002304018,
+   "prefilter_ms": 14.011666993610561,
+   "total_ms": 18.005666992394254,
+   "top": [
+    "DELTA-260511-2028-T1",
+    "DELTA-250520-2021-T1",
+    "ECHO-250517-2032-T1",
+    "DELTA-260428-1929-T1",
+    "ALPHA-260306-2125-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260808-2021-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": 9,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.8495829940075055,
+   "prefilter_ms": 15.102042001672089,
+   "total_ms": 19.417832998442464,
+   "top": [
+    "BRAVO-260126-1904-T1",
+    "JULIET-250924-1916-T1",
+    "KILO-260508-1935-T1",
+    "CHARLIE-250420-2201-T1",
+    "ECHO-260427-2205-T1"
+   ]
+  },
+  {
+   "track_id": "INDIA-260808-2021-T1",
+   "actor_id": "C2",
+   "actor_type": "copycat",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.833874987321906,
+   "prefilter_ms": 14.875042004860006,
+   "total_ms": 19.17404199775774,
+   "top": [
+    "INDIA-250319-1945-T1",
+    "LIMA-250726-2017-T1",
+    "DELTA-260406-1937-T1",
+    "BRAVO-251220-2057-T1",
+    "ALPHA-250513-2256-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260828-1915-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 30,
+   "ran": false,
+   "true_rank": null,
+   "copycat_rank": null,
+   "window_s": null,
+   "query_ms": null,
+   "prefilter_ms": null,
+   "total_ms": null,
+   "top": []
+  },
+  {
+   "track_id": "DELTA-260828-1915-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 45,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": 22,
+   "window_s": 60,
+   "query_ms": 3.555084011168219,
+   "prefilter_ms": 14.409791998332366,
+   "total_ms": 18.440667001414113,
+   "top": [
+    "BRAVO-260322-1913-T1",
+    "KILO-260102-2134-T1",
+    "BRAVO-250524-2113-T1",
+    "CHARLIE-260702-1903-T1",
+    "KILO-260624-2139-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260828-1915-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 60,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 45,
+   "window_s": 60,
+   "query_ms": 3.7084580108057708,
+   "prefilter_ms": 14.653707999968901,
+   "total_ms": 18.82641600968782,
+   "top": [
+    "CHARLIE-260511-1924-T1",
+    "INDIA-260128-1931-T1",
+    "KILO-260308-2127-T1",
+    "INDIA-250719-2210-T1",
+    "ALPHA-260110-2123-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260828-1915-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 90,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 11,
+   "window_s": 60,
+   "query_ms": 3.783624997595325,
+   "prefilter_ms": 14.326999997138046,
+   "total_ms": 18.583791999844834,
+   "top": [
+    "CHARLIE-250810-0015-T1",
+    "CHARLIE-250528-0047-T1",
+    "ECHO-251223-1952-T1",
+    "DELTA-250523-2102-T1",
+    "ALPHA-260302-2233-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260828-1915-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 120,
+   "ran": true,
+   "true_rank": null,
+   "copycat_rank": 3,
+   "window_s": 120,
+   "query_ms": 3.692583995871246,
+   "prefilter_ms": 15.389624997624196,
+   "total_ms": 19.55387499765493,
+   "top": [
+    "BRAVO-260811-1952-T1",
+    "HOTEL-260221-1929-T1",
+    "INDIA-250730-2013-T1",
+    "JULIET-260123-2157-T2",
+    "BRAVO-251028-2104-T1"
+   ]
+  },
+  {
+   "track_id": "DELTA-260828-1915-T1",
+   "actor_id": "C1",
+   "actor_type": "copycat",
+   "at_s": 180,
+   "ran": true,
+   "true_rank": 1,
+   "copycat_rank": null,
+   "window_s": 120,
+   "query_ms": 3.9920839917613193,
+   "prefilter_ms": 15.092916990397498,
+   "total_ms": 19.546625000657514,
+   "top": [
+    "BRAVO-260322-1913-T1",
+    "BRAVO-260421-0217-T1",
+    "BRAVO-250725-0208-T1",
+    "CHARLIE-251023-0249-T1",
+    "S1-GOLF-260503-T1"
+   ]
+  }
+ ]
+}

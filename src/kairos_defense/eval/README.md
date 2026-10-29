@@ -90,6 +90,10 @@ rule 2).
 - `baseline.json` does not exist until phase 4's exit check writes it, so until then only demo
   failures fail the gate.
 - Copycat-first counts queries whose own actor is not among the candidates at all (D-055).
+- `eval_<date>` is the run's **UTC** date, so an evening run in America/New_York writes the next
+  day's file. A rerun on the same UTC day overwrites that day's report.
+- `plot_recall` sets no font family, so the figure's bytes depend on the machine's default
+  sans-serif (the same cause as D-065). The data does not.
 
 ## Changelog
 
@@ -97,3 +101,4 @@ rule 2).
 - Phase 3: `truth.py`, `harness.py`, `metrics.py`, `demo.py`, `report.py`, and the `eval [--baseline]`
   CLI (D-055, D-056).
 - Autopilot (`911aba1`): the latency regression tolerance became 1.5 × baseline + 2 ms (D-060).
+- Phase 3 backfill: no code change; the two gotchas on report dates and figure fonts (D-067).

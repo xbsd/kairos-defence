@@ -26,6 +26,34 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Next: …
 -->
 
+### 2026-10-28 · Phase 3 (documentation backfill, autopilot)
+- Built: no code. `docs/phases/phase-03/PLAN.md` (as built, from `e494995`), `REPORT.md` and
+  `EXIT_CHECK.md`, plus `src/kairos_defense/features/README.md` and `match/README.md`. Every
+  subpackage now has a README (D-061). The eval README gained two gotchas (UTC report dates,
+  figure fonts). The root README's Status links the report. D-067.
+- Exit check rerun at `53134b8` on the dev laptop, after `make clean && make data`:
+  `make index && make eval` → exit 0 in 13.8 s.
+  - Index: identical to phase 3. 1,898 history tracks indexed, 6 live skipped; 800,148 feature
+    rows; windows 57,462 / 51,297 / 27,507; targets, loiter directions, RF and Remote ID counts
+    unchanged. 7.2 s (55.0 s on the cloud sandbox).
+  - Eval: Recall@5 0.435, MRR 0.302, time to match 26%, copycat-first 57%, copycat Recall@5
+    0.500. All 198 outcomes, per-actor rows and demo rows are identical to the committed
+    `eval_2026-10-28.json`; only latencies differ. Prefilter p50/p95 13/15 ms (83 ms p95 at phase
+    3), end to end 17/19 ms. The report is `reports/eval_2026-10-29.*`, because file names use
+    the UTC date.
+  - `match --method euclidean --incident DEMO-BRAVO-0828 --at 90`: window 60 s, target fuel farm,
+    50 candidates, 28 ms.
+  - D-058 rechecked with the same ranks: at T+90 the three expected P1 flights rank 1,149 to
+    1,194 of 1,882.
+  - Phase 3's own tests: 81 + 3 fast and 3 slow passed. `make check`: 367 passed.
+    `make test-all`: 374 passed in 42.8 s.
+  - The web build restored `web/dist`. The recall figure was re-rendered in the laptop's font
+    (same data) and committed.
+- Open issues: D-058 (phase 4 must start here). D-057 does not apply on the laptop (prefilter p95
+  15 ms against the 50 ms budget). D-046 (P6, C2, swarm targets). D-056 (`baseline.json` from phase
+  4). Pin the figure fonts in `sim/figures.py` (D-065) and `eval/report.py` when they next change.
+- Next: phase 4 (DTW matcher and fusion model), starting with D-058.
+
 ### 2026-10-28 · Phase 2 (documentation backfill, autopilot)
 - Built: no code. `docs/phases/phase-02/PLAN.md` (as built, from `06cc826`), `REPORT.md` and
   `EXIT_CHECK.md`. `src/kairos_defense/sim/README.md` gained the `nights=` option and the phase 2

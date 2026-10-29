@@ -874,3 +874,33 @@ Where this file and the SPEC ever disagree, this file wins.
   match because phase 1's backfill committed the laptop renders (D-065).
 - Consequences: none for later phases. The phase 2 gate in `docs/phases/gates.json` will also report
   116.
+
+## D-067 · Phase 3 documentation backfill · 2026-10-28
+- Context: `phase-auto backfill 3` reconstructs phase 3's documents (D-061, D-065 and D-066 did
+  phases 0 to 2) and reruns its exit check on the dev laptop. Three things differ from phase 3's run
+  at `e494995`:
+  - the eval report is written as `reports/eval_2026-10-29.*`, because `write_reports` names it
+    after the run's UTC date (00:07 UTC);
+  - latency is much lower on the laptop (prefilter p95 15 ms against 83 ms);
+  - `eval_recall_by_t.png` renders in a different typeface.
+- Decision: `docs/phases/phase-03/PLAN.md` is marked "as built" and reconstructed from `e494995`,
+  PROGRESS.md and D-046 to D-058. The exit check was rerun at HEAD (`53134b8`) after `make clean &&
+  make data`, as phase 3's was, and today's output is recorded beside the original numbers. The new
+  `eval_2026-10-29.md` and `.json` and the laptop render of the figure are committed. The original
+  `eval_2026-10-28.*` files stay as phase 3's record. Every outcome in the new JSON except its
+  latency fields was compared with the original, and all are identical. `features/README.md` and
+  `match/README.md` are new, so every subpackage now has a README (D-061). The eval README gains two
+  gotchas: report file dates are UTC, and the figure sets no font. No code changes.
+- Why: the exit check must run as SPEC §20 states it. Committing its output keeps the tree clean for
+  the autopilot gate (D-059) and keeps the evidence next to EXIT_CHECK.md. The figure follows
+  D-065's precedent. Pinning a font is a code change, which a backfill may not make.
+- Consequences:
+  - D-057's prefilter shortfall was measured on the cloud sandbox. On the laptop where the
+    autopilot runs, the Euclidean prefilter p95 is 15 ms, inside §10.9's 50 ms. D-059's "phase 4
+    must speed it up" therefore does not apply there, though D-058's options may enlarge the
+    candidate list and change that.
+  - D-058 was rechecked with the same ranks, and phase 4 must still start there.
+  - Follow-up: pin the font in `eval/report.py` together with `sim/figures.py` (D-065).
+  - `scripts/check_targets.py` picks the newest eval JSON by modification time and requires it to
+    be newer than the gate's start, so the committed `eval_2026-10-29.json` cannot stand in for
+    phase 4's own run.

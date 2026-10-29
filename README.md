@@ -10,7 +10,7 @@ bitemporal, tamper-evident case memory, built on DuckDB and LanceDB. **Synthetic
 | 0 | Scaffold | done | [report](docs/phases/phase-00/REPORT.md) |
 | 1 | World, flights and radar | done | [report](docs/phases/phase-01/REPORT.md) |
 | 2 | Swarms, RF, Remote ID, reports and assessments | done | [report](docs/phases/phase-02/REPORT.md) |
-| 3 | Features, windows, Euclidean baseline and eval skeleton | done | see `docs/PROGRESS.md` |
+| 3 | Features, windows, Euclidean baseline and eval skeleton | done | [report](docs/phases/phase-03/REPORT.md) |
 | 4 to 10 | DTW and fusion through the user guide | not started | `docs/SPEC.md` §20, `docs/phases/PHASE_10.md` |
 
 Works today: `make check`, `make data` (seeded synthetic world, flights, swarms, sensors, paperwork
