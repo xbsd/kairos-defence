@@ -1,0 +1,1092 @@
+# Gate for phase 8, attempt 1, 2026-10-29 03:55:31
+
+$ make check
+uv run ruff check .
+All checks passed!
+uv run ruff format --check .
+206 files already formatted
+uv run pytest -m "not slow" -q
+........................................................................ [  9%]
+........................................................................ [ 19%]
+........................................................................ [ 29%]
+........................................................................ [ 39%]
+........................................................................ [ 49%]
+........................................................................ [ 59%]
+........................................................................ [ 68%]
+........................................................................ [ 78%]
+........................................................................ [ 88%]
+........................................................................ [ 98%]
+...........                                                              [100%]
+731 passed, 16 deselected in 33.63s
+npm --prefix web run check
+
+> kairos-defense-web@0.0.1 check
+> npm run lint && npm run typecheck && npm run check:types && npm run test
+
+
+> kairos-defense-web@0.0.1 lint
+> eslint . --max-warnings 0 && prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!
+
+> kairos-defense-web@0.0.1 typecheck
+> tsc --noEmit -p tsconfig.json
+
+
+> kairos-defense-web@0.0.1 check:types
+> node scripts/check-types.mjs
+
+src/api/types.gen.ts is current.
+
+> kairos-defense-web@0.0.1 test
+> vitest run
+
+
+ RUN  v5.0.5 /Users/ndkx/work/kairos_defence/web
+
+(node:89154) [THREE_CJS_DEPRECATED] DeprecationWarning: `require("three")` is deprecated and will be removed.
+Replace `const THREE = require("three")` with `import * as THREE from "three"`.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+ Test Files  35 passed (35)
+      Tests  153 passed (153)
+   Start at  03:56:13
+   Duration  4.68s (environment 61%, tests 23%, setup 12%, import 2%, transform 1%, worker 1%)
+
+Environment  jsdom was created 35 times · 26.65s total, 61% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+[exit 0 after 47 s]
+
+$ make eval || echo 'make eval exited non-zero; check_targets.py judges the targets'
+uv run kairos-defense eval
+kairos-defense eval · dtw                                                                                               
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Metric                                          ┃                                                              Value ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ prober queries (unanswerable)                   │                                                             23 (0) │
+│ copycat queries (unanswerable)                  │                                                             10 (0) │
+│ model · candidates per query                    │                                                    fusion-v1 · 500 │
+│ Recall@5 at T=120 s                             │                                                              1.000 │
+│ Recall@5 at T=120 s, Euclidean order (same run) │                                                              0.478 │
+│ DTW lift                                        │                                                              0.522 │
+│ MRR at T=120 s                                  │                                                              1.000 │
+│ time to match (top 3 by T=90 s)                 │                                                                96% │
+│ copycat-first at T=120 s                        │                                                                 0% │
+│ Recall@5 at T=120 s, copycats                   │                                                              1.000 │
+│ report linkage (T=120 s, top 3, k=5)            │                                                   1.000 (65 of 65) │
+│ forecast error T=90 s median / P80              │                                                        340 / 495 m │
+│ forecast error T=120 s median / P80             │                                                        346 / 532 m │
+│ latency query build p50 / p95                   │                                                           4 / 4 ms │
+│ latency prefilter p50 / p95                     │                                                         27 / 30 ms │
+│ latency dtw p50 / p95                           │                                                         32 / 56 ms │
+│ latency end to end p50 / p95                    │                                                        97 / 126 ms │
+│ latency forecast p50 / p95                      │                                                           8 / 9 ms │
+│ latency recall p50 / p95                        │                                                           5 / 6 ms │
+│ demo live_first_contact_local                   │                                               pass: 21:40:06, 71 m │
+│ demo live_orbit_established_s                   │                                                       pass: T+79 s │
+│ demo live_top3_incidents                        │        fail: 2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of │
+│                                                 │          night'); P1-ALPHA-260303 #2 (1.00, 'Same time of night'); │
+│                                                 │                    P1-ALPHA-260502 #5 (0.99, 'Same time of night') │
+│ demo live_rank1_report_for                      │   pass: R-P1-DELTA-260419-1 rank 1 of 1 for P1-DELTA-260419 (match │
+│                                                 │ #1, score 0.0328); clues: white pickup; County Rd 12 (County Rd 12 │
+│                                                 │                            runs through tonight's predicted zone.) │
+│ demo forecast_error_max_m                       │                pass: 139 m (radius 370 m; analogs P1-ALPHA-260303, │
+│                                                 │        HOTEL-250818-2126, FOXTROT-251215-2125; roads County Rd 12) │
+│ demo swarm_top1                                 │                                               pending (phase 9): - │
+│ elapsed                                         │                                                             36.3 s │
+└─────────────────────────────────────────────────┴────────────────────────────────────────────────────────────────────┘
+wrote /Users/ndkx/work/kairos_defence/reports/eval_2026-10-29.md and 
+/Users/ndkx/work/kairos_defence/reports/eval_2026-10-29.json
+demo assertion failed: live_top3_incidents (2/3 in top 3; P1-DELTA-260419 #1 (1.00, 'Same time of night'); 
+P1-ALPHA-260303 #2 (1.00, 'Same time of night'); P1-ALPHA-260502 #5 (0.99, 'Same time of night'))
+make: *** [eval] Error 1
+make eval exited non-zero; check_targets.py judges the targets
+[exit 0 after 39 s]
+
+$ python3 scripts/check_targets.py 8
+PASS  Recall@5 at T=120 s (§19.3): 1 (target >= 0.8)
+PASS  DTW lift over the Euclidean baseline (§19.3): 0.5217 (target >= 0.1)
+PASS  Copycat-first rate (§19.3): 0 (target <= 0.05)
+PASS  Prefilter p95 ms (§10.9): 30.48 (target <= 50)
+PASS  DTW re-rank of 50 candidates p95 ms (§10.9): 56.35 (target <= 800)
+PASS  End-to-end live update p95 ms (§10.9): 125.6 (target <= 1500)
+PASS  Report linkage (§19.3): 1 (target >= 0.7)
+PASS  Forecast median error at T=90 s, m (§19.3): 340.4 (target <= 400)
+PASS  demo forecast_error_max_m: pass
+PASS  demo live_first_contact_local: pass
+PASS  demo live_orbit_established_s: pass
+PASS  demo live_rank1_report_for: pass
+WARN  demo live_top3_incidents: fail
+
+All targets met (accepted gaps shown as WARN).
+[exit 0 after 0 s]
+
+$ npm --prefix web run build
+
+> kairos-defense-web@0.0.1 build
+> tsc --noEmit -p tsconfig.json && vite build
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 1253 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                            0.67 kB │ gzip:   0.37 kB
+dist/assets/b612-latin-700-normal-BinQrnoB.woff2          13.24 kB
+dist/assets/b612-mono-latin-400-normal-BMQz8jIs.woff      15.34 kB
+dist/assets/b612-latin-400-normal-JbZ7xwUX.woff           15.76 kB
+dist/assets/b612-latin-700-normal-B_Snq1wd.woff           16.20 kB
+dist/assets/b612-mono-latin-400-normal-BDgzQEaT.woff2     19.04 kB
+dist/assets/b612-latin-400-normal-CC98FVm_.woff2          21.16 kB
+dist/assets/index-BHB_H3Zx.css                            23.03 kB │ gzip:   5.68 kB
+dist/assets/time-CaFYV3xe.js                               0.12 kB │ gzip:   0.12 kB
+dist/assets/useWidth-CjW-CaaD.js                           0.61 kB │ gzip:   0.38 kB
+dist/assets/rolldown-runtime-XKyaHtl9.js                   0.72 kB │ gzip:   0.42 kB
+dist/assets/ShiftDelta-CHEM-Gdy.js                         3.82 kB │ gzip:   1.65 kB
+dist/assets/Evidence-uegS-z1L.js                           7.05 kB │ gzip:   2.32 kB
+dist/assets/MatchExplainer-BNMSH8F3.js                     9.95 kB │ gzip:   3.63 kB
+dist/assets/TimeWarpLens-Z5fzKE3v.js                      10.33 kB │ gzip:   4.41 kB
+dist/assets/Eval-UkcKpbAC.js                              13.49 kB │ gzip:   4.11 kB
+dist/assets/index-Dd_uOWCd.js                             44.12 kB │ gzip:  15.65 kB
+dist/assets/CaseBoard-D3Z2NRq7.js                         65.99 kB │ gzip:  22.47 kB
+dist/assets/LiveWatch-BoCXlcMP.js                         72.12 kB │ gzip:  23.86 kB
+dist/assets/vendor-D57rRULA.js                           220.89 kB │ gzip:  69.07 kB
+dist/assets/vendor-3d-Bf6Qj75-.js                      1,198.83 kB │ gzip: 328.49 kB
+
+✓ built in 947ms
+[exit 0 after 8 s]
+
+$ make e2e
+npm --prefix web run build
+
+> kairos-defense-web@0.0.1 build
+> tsc --noEmit -p tsconfig.json && vite build
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 1253 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                            0.67 kB │ gzip:   0.37 kB
+dist/assets/b612-latin-700-normal-BinQrnoB.woff2          13.24 kB
+dist/assets/b612-mono-latin-400-normal-BMQz8jIs.woff      15.34 kB
+dist/assets/b612-latin-400-normal-JbZ7xwUX.woff           15.76 kB
+dist/assets/b612-latin-700-normal-B_Snq1wd.woff           16.20 kB
+dist/assets/b612-mono-latin-400-normal-BDgzQEaT.woff2     19.04 kB
+dist/assets/b612-latin-400-normal-CC98FVm_.woff2          21.16 kB
+dist/assets/index-BHB_H3Zx.css                            23.03 kB │ gzip:   5.68 kB
+dist/assets/time-CaFYV3xe.js                               0.12 kB │ gzip:   0.12 kB
+dist/assets/useWidth-CjW-CaaD.js                           0.61 kB │ gzip:   0.38 kB
+dist/assets/rolldown-runtime-XKyaHtl9.js                   0.72 kB │ gzip:   0.42 kB
+dist/assets/ShiftDelta-CHEM-Gdy.js                         3.82 kB │ gzip:   1.65 kB
+dist/assets/Evidence-uegS-z1L.js                           7.05 kB │ gzip:   2.32 kB
+dist/assets/MatchExplainer-BNMSH8F3.js                     9.95 kB │ gzip:   3.63 kB
+dist/assets/TimeWarpLens-Z5fzKE3v.js                      10.33 kB │ gzip:   4.41 kB
+dist/assets/Eval-UkcKpbAC.js                              13.49 kB │ gzip:   4.11 kB
+dist/assets/index-Dd_uOWCd.js                             44.12 kB │ gzip:  15.65 kB
+dist/assets/CaseBoard-D3Z2NRq7.js                         65.99 kB │ gzip:  22.47 kB
+dist/assets/LiveWatch-BoCXlcMP.js                         72.12 kB │ gzip:  23.86 kB
+dist/assets/vendor-D57rRULA.js                           220.89 kB │ gzip:  69.07 kB
+dist/assets/vendor-3d-Bf6Qj75-.js                      1,198.83 kB │ gzip: 328.49 kB
+
+✓ built in 230ms
+uv run kairos-defense replay --precompute
+kairos-defense replay: live incidents                                                                                   
+┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Incident             ┃ Base  ┃ Duration ┃ Detections ┃ Reruns ┃      Cached ┃ Precompute                             ┃
+┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ DEMO-BRAVO-0828      │ BRAVO │    515 s │        696 │     95 │ 95/95 fresh │ 0 computed, 95 cached, 515 feature s,  │
+│                      │       │          │            │        │             │ 0.5 s                                  │
+│ DEMO-SWARM-ECHO-0614 │ ECHO  │    830 s │      5,311 │      - │           - │ detections only: swarm matching is     │
+│                      │       │          │            │        │             │ phase 9                                │
+└──────────────────────┴───────┴──────────┴────────────┴────────┴─────────────┴────────────────────────────────────────┘
+npm --prefix web run e2e
+
+> kairos-defense-web@0.0.1 e2e
+> playwright test
+
+[WebServer] Kairos Defense API on http://127.0.0.1:8765 serving web/dist
+[WebServer] INFO:     Started server process [89372]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:8765 (Press CTRL+C to quit)
+[WebServer] INFO:     127.0.0.1:55739 - "GET /api/health HTTP/1.1" 200 OK
+
+Running 29 tests using 1 worker
+
+[WebServer] INFO:     127.0.0.1:55745 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55745 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55746 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55746 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55747 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55748 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55749 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55746 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55748 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55747 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55749 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55746 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55749 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55749 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55746 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55754 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:55746 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55749 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55749 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55746 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55749 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55951 - "GET /api/history/P1-BRAVO-251114-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55952 - "GET /api/history/P1-DELTA-260419-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55953 - "GET /api/history/P1-ALPHA-260303-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:55953 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56104 - "GET /api/history/P1-CHARLIE-260710-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56104 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56317 - "GET /assets/time-CaFYV3xe.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56316 - "GET /assets/CaseBoard-D3Z2NRq7.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56316 - "GET /api/cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56317 - "GET /api/cases/CASE-P1-DELTA-260419/graph HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56318 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2025-01-01T00%3A00%3A00Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56318 - "GET /api/cases/CASE-P1-DELTA-260419?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56318 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56317 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2026-04-20T14%3A10%3A00.000Z&t2=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56317 - "GET /assets/Evidence-uegS-z1L.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56318 - "GET /api/evidence?case=CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56317 - "GET /api/cases HTTP/1.1" 200 OK
+  ✓   1 [chromium] › e2e/director-1x.spec.ts:48:1 › Director at 1x through every §1.2 row (2.1m)
+[WebServer] INFO:     127.0.0.1:56323 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56323 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56324 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56324 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56325 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56326 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56327 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56325 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56326 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56327 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56324 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56326 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56324 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56326 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56324 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56332 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:56327 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56324 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56325 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56326 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56326 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56389 - "GET /api/history/P1-BRAVO-251114-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56390 - "GET /api/history/P1-DELTA-260419-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56391 - "GET /api/history/P1-ALPHA-260303-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56391 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56428 - "GET /api/history/P1-CHARLIE-260710-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56428 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56495 - "GET /assets/CaseBoard-D3Z2NRq7.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56496 - "GET /assets/time-CaFYV3xe.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56496 - "GET /api/cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56495 - "GET /api/cases/CASE-P1-DELTA-260419/graph HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56497 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2025-01-01T00%3A00%3A00Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56497 - "GET /api/cases/CASE-P1-DELTA-260419?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56497 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56495 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2026-04-20T14%3A10%3A00.000Z&t2=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56495 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56495 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56497 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2026-04-20T14%3A10%3A00.000Z&t2=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56497 - "POST /api/cases/CASE-P1-DELTA-260419/links HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56497 - "GET /api/cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56496 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2025-01-01T00%3A00%3A00Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56495 - "GET /api/cases/CASE-P1-DELTA-260419/graph HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56495 - "GET /api/cases/CASE-P1-DELTA-260419?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56495 - "POST /api/cases/CASE-P1-DELTA-260419/links HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56495 - "GET /api/cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56497 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2025-01-01T00%3A00%3A00Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56496 - "GET /api/cases/CASE-P1-DELTA-260419/graph HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56496 - "GET /api/cases/CASE-P1-DELTA-260419?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56496 - "POST /api/cases/CASE-P1-DELTA-260419/links HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56496 - "GET /api/cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56495 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2025-01-01T00%3A00%3A00Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56497 - "GET /api/cases/CASE-P1-DELTA-260419/graph HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56497 - "GET /api/cases/CASE-P1-DELTA-260419?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56497 - "GET /assets/Evidence-uegS-z1L.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56497 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56495 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2026-04-20T14%3A10%3A00.000Z&t2=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56496 - "GET /api/evidence?case=CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56497 - "GET /api/cases HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56497 - "POST /api/cases/CASE-P1-DELTA-260419/evidence HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56496 - "GET /api/evidence?case=CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56497 - "GET /api/cases HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56497 - "POST /api/evidence/verify HTTP/1.1" 200 OK
+  ✓   2 [chromium] › e2e/director.spec.ts:39:3 › Director at 5x shows every beat's key element at 1440x900 (47.8s)
+[WebServer] INFO:     127.0.0.1:56542 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56542 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56544 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56544 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56547 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56546 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56545 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56547 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56544 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56546 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56545 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56547 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56544 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56544 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56547 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56549 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:56544 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56545 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56544 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56547 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56544 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56548 - "GET /api/history/P1-BRAVO-251114-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56612 - "GET /api/history/P1-DELTA-260419-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56613 - "GET /api/history/P1-ALPHA-260303-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56613 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56652 - "GET /api/history/P1-CHARLIE-260710-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56652 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56730 - "GET /assets/time-CaFYV3xe.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56729 - "GET /assets/CaseBoard-D3Z2NRq7.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56729 - "GET /api/cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56730 - "GET /api/cases/CASE-P1-DELTA-260419/graph HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56731 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2025-01-01T00%3A00%3A00Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56731 - "GET /api/cases/CASE-P1-DELTA-260419?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56731 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56730 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2026-04-20T14%3A10%3A00.000Z&t2=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56730 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56731 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2026-04-20T14%3A10%3A00.000Z&t2=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56730 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56730 - "POST /api/cases/CASE-P1-DELTA-260419/links HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56730 - "GET /api/cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56731 - "GET /api/cases/CASE-P1-DELTA-260419/graph HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56729 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2025-01-01T00%3A00%3A00Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56729 - "GET /api/cases/CASE-P1-DELTA-260419?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56729 - "POST /api/cases/CASE-P1-DELTA-260419/links HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56729 - "GET /api/cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56731 - "GET /api/cases/CASE-P1-DELTA-260419/graph HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56730 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2025-01-01T00%3A00%3A00Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56730 - "GET /api/cases/CASE-P1-DELTA-260419?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56730 - "POST /api/cases/CASE-P1-DELTA-260419/links HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56730 - "GET /api/cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56731 - "GET /api/cases/CASE-P1-DELTA-260419/graph HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56729 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2025-01-01T00%3A00%3A00Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56729 - "GET /api/cases/CASE-P1-DELTA-260419?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56729 - "GET /assets/Evidence-uegS-z1L.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56729 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56731 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2026-04-20T14%3A10%3A00.000Z&t2=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56730 - "GET /api/evidence?case=CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56729 - "GET /api/cases HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56729 - "POST /api/cases/CASE-P1-DELTA-260419/evidence HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56730 - "GET /api/evidence?case=CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56729 - "GET /api/cases HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56729 - "POST /api/evidence/verify HTTP/1.1" 200 OK
+  ✓   3 [chromium] › e2e/director.spec.ts:39:3 › Director at 5x shows every beat's key element at 1920x1080 (45.7s)
+[WebServer] INFO:     127.0.0.1:56764 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56764 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56769 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56769 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56771 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56770 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56772 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56772 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56771 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56770 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56769 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56771 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56769 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56771 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56769 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56773 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:56769 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56772 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56772 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56771 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56772 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56823 - "GET /api/history/P1-BRAVO-251114-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56825 - "GET /api/history/P1-ALPHA-260303-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56824 - "GET /api/history/P1-DELTA-260419-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56824 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56858 - "GET /api/history/P1-CHARLIE-260710-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56858 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56900 - "GET /assets/time-CaFYV3xe.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56899 - "GET /assets/CaseBoard-D3Z2NRq7.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56899 - "GET /assets/Evidence-uegS-z1L.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56900 - "GET /api/evidence?case=CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56899 - "GET /api/cases HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56909 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56909 - "GET /api/ledger/tail?n=8 HTTP/1.1" 200 OK
+  ✓   4 [chromium] › e2e/director.spec.ts:131:1 › Director never commits by itself (28.0s)
+[WebServer] INFO:     127.0.0.1:56910 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56910 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56911 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56911 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56912 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56913 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56914 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56912 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56911 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56913 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56914 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56912 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56911 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56912 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56911 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56919 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:56911 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56914 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56914 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56912 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56914 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56965 - "GET /api/history/P1-BRAVO-251114-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56967 - "GET /api/history/P1-ALPHA-260303-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56966 - "GET /api/history/P1-DELTA-260419-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56966 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56997 - "GET /api/history/P1-CHARLIE-260710-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:56997 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57046 - "GET /assets/time-CaFYV3xe.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57045 - "GET /assets/CaseBoard-D3Z2NRq7.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57048 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:57045 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57049 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57046 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57045 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57045 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57045 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57045 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57045 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57045 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57054 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+  ✓   5 [chromium] › e2e/director.spec.ts:149:1 › Director keys and modes: ←, Space, M, Performance mode, R (28.2s)
+[WebServer] INFO:     127.0.0.1:57055 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57055 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57060 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57060 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57061 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57062 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57063 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57061 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57063 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57060 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57062 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57061 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57061 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57061 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57060 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57065 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:57063 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57061 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57060 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57060 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57060 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57106 - "GET /api/history/P1-BRAVO-251114-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57107 - "GET /api/history/P1-DELTA-260419-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57108 - "GET /api/history/P1-ALPHA-260303-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57108 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57143 - "GET /api/history/P1-CHARLIE-260710-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57143 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57152 - "GET /api/dtw/DEMO-BRAVO-0828/P1-DELTA-260419-T1?at=90 HTTP/1.1" 200 OK
+  ✓   6 [chromium] › e2e/lens.spec.ts:8:1 › lens connectors follow the DTW path (27.0s)
+[WebServer] INFO:     127.0.0.1:57184 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57184 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57189 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57189 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57190 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57191 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57192 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57189 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57190 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57192 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57191 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57190 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57189 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57190 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57189 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57194 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:57190 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57192 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57192 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57189 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57192 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+  ✓   7 [chromium] › e2e/live.spec.ts:8:1 › streams real data at 5x (4.7s)
+[WebServer] INFO:     127.0.0.1:57213 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57213 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57214 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57214 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57215 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57217 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57216 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57217 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57214 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57215 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57216 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57215 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57214 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57214 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57215 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57219 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:57215 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57217 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57217 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57214 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57217 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57218 - "GET /api/history/P1-BRAVO-251114-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57263 - "GET /api/history/P1-ALPHA-260303-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57262 - "GET /api/history/P1-DELTA-260419-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57262 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57293 - "GET /api/history/P1-CHARLIE-260710-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57293 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+  ✓   8 [chromium] › e2e/live.spec.ts:25:1 › matches appear by T+90 and the ledger gains a block (19.5s)
+[WebServer] INFO:     127.0.0.1:57302 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57302 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57307 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57307 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57308 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57309 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57310 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57310 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57307 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57308 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57309 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57308 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57308 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57307 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57308 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57312 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:57308 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57310 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57307 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57310 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57310 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57311 - "GET /api/history/P1-BRAVO-251114-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57360 - "GET /api/history/P1-DELTA-260419-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57361 - "GET /api/history/P1-ALPHA-260303-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57361 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57366 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57361 - "POST /api/cases/CASE-P1-DELTA-260419/links HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57366 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+  ✓   9 [chromium] › e2e/live.spec.ts:49:1 › approve link adds a block and turns the ring verified (11.6s)
+[WebServer] INFO:     127.0.0.1:57367 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57367 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57368 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57368 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57369 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57370 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57371 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57368 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57370 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57369 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57371 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57369 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57368 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57368 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57369 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57372 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:57369 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57371 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57368 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57369 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57369 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+  ✓  10 [chromium] › e2e/live.spec.ts:71:3 › reduce motion › reduce motion keeps the data (3.8s)
+[WebServer] INFO:     127.0.0.1:57389 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57389 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57390 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57390 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57391 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57392 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57393 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57391 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57390 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57393 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57392 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57391 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57390 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57390 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57391 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57395 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:57391 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57393 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57393 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57390 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57393 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57394 - "GET /api/history/P1-BRAVO-251114-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57441 - "GET /api/history/P1-ALPHA-260303-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57440 - "GET /api/history/P1-DELTA-260419-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57440 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+  ✓  11 [chromium] › e2e/live.spec.ts:83:1 › no request leaves the origin (11.5s)
+[WebServer] INFO:     127.0.0.1:57447 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57447 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57448 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57448 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57449 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57450 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57451 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57449 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57448 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57451 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57450 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57449 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57448 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57448 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57449 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57457 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:57448 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57451 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57451 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57449 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57451 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+  ✓  12 [chromium] › e2e/pages.spec.ts:30:3 › axe and the command bar on /live/DEMO-BRAVO-0828 (1.5s)
+[WebServer] INFO:     127.0.0.1:57462 - "GET /explainer HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57462 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57463 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57464 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57465 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57465 - "GET /assets/MatchExplainer-BNMSH8F3.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57463 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57464 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57465 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57465 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57463 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57464 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57463 - "GET /api/incidents?status=live HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57463 - "GET /api/match/DEMO-BRAVO-0828?at=90 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57465 - "GET /api/dtw/DEMO-BRAVO-0828/P1-DELTA-260419-T1?at=90&channel=dist_target_m HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57463 - "GET /api/match/DEMO-BRAVO-0828?at=90 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57464 - "GET /api/explain/DEMO-BRAVO-0828/P1-DELTA-260419-T1?at=90 HTTP/1.1" 200 OK
+  ✓  13 [chromium] › e2e/pages.spec.ts:30:3 › axe and the command bar on /explainer (1.2s)
+[WebServer] INFO:     127.0.0.1:57470 - "GET /explainer?incident=DEMO-BRAVO-0828&at=90&track=P1-DELTA-260419-T1 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57470 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57471 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57472 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57473 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57471 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57472 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57473 - "GET /assets/MatchExplainer-BNMSH8F3.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57473 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57472 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57471 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57473 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57471 - "GET /api/dtw/DEMO-BRAVO-0828/P1-DELTA-260419-T1?at=90&channel=dist_target_m HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57472 - "GET /api/match/DEMO-BRAVO-0828?at=90 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57473 - "GET /api/explain/DEMO-BRAVO-0828/P1-DELTA-260419-T1?at=90 HTTP/1.1" 200 OK
+  ✓  14 [chromium] › e2e/pages.spec.ts:30:3 › axe and the command bar on /explainer?incident=DEMO-BRAVO-0828&at=90&track=P1-DELTA-260419-T1 (1.2s)
+[WebServer] INFO:     127.0.0.1:57479 - "GET /cases HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57479 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57480 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57481 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57482 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57481 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57482 - "GET /assets/CaseBoard-D3Z2NRq7.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57480 - "GET /assets/time-CaFYV3xe.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57482 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57482 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57481 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57480 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57480 - "GET /api/cases HTTP/1.1" 200 OK
+  ✓  15 [chromium] › e2e/pages.spec.ts:30:3 › axe and the command bar on /cases (1.1s)
+[WebServer] INFO:     127.0.0.1:57487 - "GET /cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57487 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57488 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57489 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57490 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57490 - "GET /assets/CaseBoard-D3Z2NRq7.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57489 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57488 - "GET /assets/time-CaFYV3xe.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57490 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57488 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57489 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57490 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57488 - "GET /api/cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57489 - "GET /api/cases/CASE-P1-DELTA-260419/graph HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57490 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2025-01-01T00%3A00%3A00Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57490 - "GET /api/cases/CASE-P1-DELTA-260419?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57490 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-08-29T00%3A33%3A38.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57489 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2026-04-20T14%3A10%3A00.000Z&t2=2026-08-29T00%3A33%3A38.000Z HTTP/1.1" 200 OK
+  ✓  16 [chromium] › e2e/pages.spec.ts:30:3 › axe and the command bar on /cases/CASE-P1-DELTA-260419 (1.1s)
+[WebServer] INFO:     127.0.0.1:57495 - "GET /swarm HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57495 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57496 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57497 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57498 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57498 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57498 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57497 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57496 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+  ✓  17 [chromium] › e2e/pages.spec.ts:30:3 › axe and the command bar on /swarm (278ms)
+[WebServer] INFO:     127.0.0.1:57504 - "GET /evidence HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57504 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57505 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57506 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57507 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57507 - "GET /assets/Evidence-uegS-z1L.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57507 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57505 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57506 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57507 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57507 - "GET /api/evidence HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57506 - "GET /api/cases HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57506 - "GET /api/evidence?case=CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57507 - "GET /api/cases HTTP/1.1" 200 OK
+  ✓  18 [chromium] › e2e/pages.spec.ts:30:3 › axe and the command bar on /evidence (1.1s)
+[WebServer] INFO:     127.0.0.1:57512 - "GET /delta HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57512 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57514 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57513 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57515 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57513 - "GET /assets/time-CaFYV3xe.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57515 - "GET /assets/ShiftDelta-CHEM-Gdy.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57515 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57515 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57513 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57514 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57513 - "GET /api/incidents?status=live HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57514 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57514 - "GET /api/ledger/4681 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57514 - "GET /api/delta?since=2026-08-28T00%3A33%3A38.000Z HTTP/1.1" 200 OK
+  ✓  19 [chromium] › e2e/pages.spec.ts:30:3 › axe and the command bar on /delta (1.1s)
+[WebServer] INFO:     127.0.0.1:57522 - "GET /eval HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57522 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57523 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57525 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57524 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57525 - "GET /assets/Eval-UkcKpbAC.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57525 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57525 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57523 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57524 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57524 - "GET /api/eval/latest HTTP/1.1" 200 OK
+  ✓  20 [chromium] › e2e/pages.spec.ts:30:3 › axe and the command bar on /eval (1.2s)
+[WebServer] INFO:     127.0.0.1:57530 - "GET / HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57530 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57531 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57532 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57533 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57533 - "GET /api/incidents?status=live HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57532 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57533 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57532 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57531 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57530 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57532 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57534 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57533 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+  ✓  21 [chromium] › e2e/pages.spec.ts:51:1 › the root opens Live watch for the live incident (61ms)
+[WebServer] INFO:     127.0.0.1:57536 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57536 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57537 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57537 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57538 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57540 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57539 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57537 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57540 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57538 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57539 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57538 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57537 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57537 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57538 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57545 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:57537 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57540 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57540 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57538 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57540 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+  ✓  22 [chromium] › e2e/pages.spec.ts:56:1 › layout holds at 1440 x 900 (1.2s)
+[WebServer] INFO:     127.0.0.1:57547 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57547 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57552 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57554 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57552 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57553 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57555 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57554 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57553 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57552 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57555 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57553 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57554 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57553 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57554 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57558 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:57554 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57555 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57553 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57554 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57554 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+  ✓  23 [chromium] › e2e/pages.spec.ts:69:1 › rails stack under the theater below 1280 px (1.1s)
+[WebServer] INFO:     127.0.0.1:57559 - "GET /cases HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57559 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57560 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57562 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57561 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57562 - "GET /assets/CaseBoard-D3Z2NRq7.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57561 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57560 - "GET /assets/time-CaFYV3xe.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57562 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57562 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57561 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57560 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+  ✓  24 [chromium] › e2e/pages.spec.ts:85:1 › shortcuts dialog lists M and closes with Escape (397ms)
+[WebServer] INFO:     127.0.0.1:57567 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57567 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57568 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57568 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57569 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57571 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57570 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57568 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57570 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57571 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57569 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57570 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57568 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57568 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57570 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57573 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:57570 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57571 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57568 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57568 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57568 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57618 - "GET /api/history/P1-BRAVO-251114-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57620 - "GET /api/history/P1-ALPHA-260303-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57619 - "GET /api/history/P1-DELTA-260419-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57619 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /api/history/P1-CHARLIE-260710-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /explainer?incident=DEMO-BRAVO-0828&at=90&track=P1-DELTA-260419-T1 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /assets/MatchExplainer-BNMSH8F3.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57666 - "GET /api/dtw/DEMO-BRAVO-0828/P1-DELTA-260419-T1?at=90&channel=dist_target_m HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /api/match/DEMO-BRAVO-0828?at=90 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /api/explain/DEMO-BRAVO-0828/P1-DELTA-260419-T1?at=90 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /assets/time-CaFYV3xe.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /assets/CaseBoard-D3Z2NRq7.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57666 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57666 - "GET /api/cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2025-01-01T00%3A00%3A00Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /api/cases/CASE-P1-DELTA-260419/graph HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /api/cases/CASE-P1-DELTA-260419?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2026-04-20T14%3A10%3A00.000Z&t2=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2026-04-20T14%3A10%3A00.000Z&t2=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /delta HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /assets/ShiftDelta-CHEM-Gdy.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /api/incidents?status=live HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /api/ledger/4689 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /api/delta?since=2026-08-28T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57652 - "GET /api/cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /api/cases/CASE-P1-DELTA-260419/graph HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57700 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2025-01-01T00%3A00%3A00Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57700 - "GET /api/cases/CASE-P1-DELTA-260419?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57700 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2026-04-20T14%3A10%3A00.000Z&t2=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /eval HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /assets/Eval-UkcKpbAC.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57700 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57700 - "GET /api/eval/latest HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57700 - "GET /evidence?case=CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57700 - "GET /assets/Evidence-uegS-z1L.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57700 - "GET /api/evidence?case=CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /api/cases HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "POST /api/cases/CASE-P1-DELTA-260419/evidence HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57700 - "GET /api/evidence?case=CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57665 - "GET /api/cases HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57718 - "GET /api/evidence?case=CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+  ✓  25 [chromium] › e2e/pages8.spec.ts:29:3 › phase 8 pages at 1920x1080 (31.7s)
+[WebServer] INFO:     127.0.0.1:57719 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57719 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57724 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57724 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57725 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57726 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57727 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57725 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57724 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57726 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57727 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57726 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57724 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57724 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57726 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57728 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:57724 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57727 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57727 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57726 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57727 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57776 - "GET /api/history/P1-BRAVO-251114-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57778 - "GET /api/history/P1-ALPHA-260303-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57777 - "GET /api/history/P1-DELTA-260419-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57777 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /api/history/P1-CHARLIE-260710-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /explainer?incident=DEMO-BRAVO-0828&at=90&track=P1-DELTA-260419-T1 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /assets/MatchExplainer-BNMSH8F3.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57819 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57821 - "GET /api/dtw/DEMO-BRAVO-0828/P1-DELTA-260419-T1?at=90&channel=dist_target_m HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57819 - "GET /api/match/DEMO-BRAVO-0828?at=90 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /api/explain/DEMO-BRAVO-0828/P1-DELTA-260419-T1?at=90 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57819 - "GET /assets/time-CaFYV3xe.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /assets/CaseBoard-D3Z2NRq7.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57821 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57821 - "GET /api/cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /api/cases/CASE-P1-DELTA-260419/graph HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57819 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2025-01-01T00%3A00%3A00Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57819 - "GET /api/cases/CASE-P1-DELTA-260419?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57819 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2026-04-20T14%3A10%3A00.000Z&t2=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57819 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2026-04-20T14%3A10%3A00.000Z&t2=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57819 - "GET /delta HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57819 - "GET /assets/ShiftDelta-CHEM-Gdy.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /api/incidents?status=live HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57819 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57819 - "GET /api/ledger/4689 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57819 - "GET /api/delta?since=2026-08-28T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57819 - "GET /api/cases/CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /api/cases/CASE-P1-DELTA-260419/graph HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57855 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2025-01-01T00%3A00%3A00Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57855 - "GET /api/cases/CASE-P1-DELTA-260419?as_of=2026-04-20T14%3A10%3A00.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57855 - "GET /api/cases/CASE-P1-DELTA-260419/graph?as_of=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /api/cases/CASE-P1-DELTA-260419/diff?t1=2026-04-20T14%3A10%3A00.000Z&t2=2026-08-29T02%3A41%3A26.000Z HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /eval HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /assets/Eval-UkcKpbAC.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57855 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57855 - "GET /api/eval/latest HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57855 - "GET /evidence?case=CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57855 - "GET /assets/Evidence-uegS-z1L.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57855 - "GET /api/evidence?case=CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /api/cases HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "POST /api/cases/CASE-P1-DELTA-260419/evidence HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57855 - "GET /api/evidence?case=CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57808 - "GET /api/cases HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57877 - "GET /api/evidence?case=CASE-P1-DELTA-260419 HTTP/1.1" 200 OK
+  ✓  26 [chromium] › e2e/pages8.spec.ts:29:3 › phase 8 pages at 1440x900 (31.5s)
+[WebServer] INFO:     127.0.0.1:57878 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57878 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57879 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57879 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57880 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57882 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57881 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57880 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57882 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57879 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57881 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57880 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57879 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57879 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57880 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57884 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:57882 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57879 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57881 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57880 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57880 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+  ✓  27 [chromium] › e2e/perf.spec.ts:10:1 › frame rate over 10 s of 1x playback (12.7s)
+[WebServer] INFO:     127.0.0.1:57942 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57942 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57947 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57947 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57948 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57949 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57950 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57949 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57948 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57947 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57950 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57949 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57947 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57949 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57947 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57951 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:57947 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57950 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57949 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57947 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:57947 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58010 - "GET /api/history/P1-BRAVO-251114-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58011 - "GET /api/history/P1-DELTA-260419-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58012 - "GET /api/history/P1-ALPHA-260303-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58012 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58052 - "GET /api/history/P1-CHARLIE-260710-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58052 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58052 - "POST /api/cases/CASE-P1-DELTA-260419/links HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58052 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+  ✓  28 [chromium] › e2e/screens.spec.ts:20:3 › screenshots at 1920x1080 (28.4s)
+[WebServer] INFO:     127.0.0.1:58079 - "POST /api/admin/reseed HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58079 - "POST /api/admin/reset HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58080 - "GET /live/DEMO-BRAVO-0828 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58080 - "GET /assets/index-Dd_uOWCd.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58081 - "GET /assets/index-BHB_H3Zx.css HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58082 - "GET /assets/rolldown-runtime-XKyaHtl9.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58083 - "GET /assets/vendor-D57rRULA.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58082 - "GET /assets/useWidth-CjW-CaaD.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58081 - "GET /assets/TimeWarpLens-Z5fzKE3v.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58083 - "GET /assets/LiveWatch-BoCXlcMP.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58080 - "GET /assets/vendor-3d-Bf6Qj75-.js HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58081 - "GET /api/installations HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58080 - "GET /assets/b612-latin-400-normal-CC98FVm_.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58081 - "GET /assets/b612-mono-latin-400-normal-BDgzQEaT.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58080 - "GET /assets/b612-latin-700-normal-BinQrnoB.woff2 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58085 - "WebSocket /ws/replay/DEMO-BRAVO-0828" [accepted]
+[WebServer] INFO:     connection open
+[WebServer] INFO:     127.0.0.1:58080 - "GET /api/ledger/tail?n=12 HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58083 - "GET /api/installations/BRAVO/scene HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58081 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58083 - "GET /assets/b612-latin-400-normal-JbZ7xwUX.woff HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58083 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58145 - "GET /api/history/P1-BRAVO-251114-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58146 - "GET /api/history/P1-DELTA-260419-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58147 - "GET /api/history/P1-ALPHA-260303-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58147 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58187 - "GET /api/history/P1-CHARLIE-260710-T1?frame=target HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58187 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58187 - "POST /api/cases/CASE-P1-DELTA-260419/links HTTP/1.1" 200 OK
+[WebServer] INFO:     127.0.0.1:58187 - "GET /api/ledger/verify HTTP/1.1" 200 OK
+  ✓  29 [chromium] › e2e/screens.spec.ts:20:3 › screenshots at 1440x900 (28.3s)
+
+  29 passed (8.4m)
+[exit 0 after 516 s]
+
+# Documentation check
+ok
+
+# Test count
+passed 731, minimum 710
+
+# Skip or xfail markers added this run (review them)
+none
+
+# Result: PASS

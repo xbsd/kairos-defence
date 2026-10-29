@@ -295,3 +295,5 @@ p=pathlib.Path("src/eval/Charts.tsx"); s=p.read
 [2026-10-29 03:48:20]   … running 69 min. last tool: Bash make check > /tmp/kd-p8/check.log 2>&1; echo "check exit=$?"; grep -E "All check
 [2026-10-29 03:51:20]   … running 72 min. last tool: Bash make test-all > /tmp/kd-p8/testall.log 2>&1; echo "test-all exit=$?"; tail -2 /t
 [2026-10-29 03:54:21]   … running 75 min. last tool: Edit /Users/ndkx/work/kairos_defence/docs/phases/phase-08/REPORT.md
+[2026-10-29 03:55:31] phase 8: gate attempt 1
+[2026-10-29 04:05:41] phase 8: gate passed
