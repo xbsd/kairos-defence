@@ -191,57 +191,18 @@ class LiveLoop:
         self._results[r] = doc
         return doc
 
-    def _local(self, m) -> str:
-        off = timedelta(hours=self.offsets.get(m.installation_id, 0))
-        return f"{m.start_ts + off:%Y-%m-%dT%H:%M}"
-
     def compute(self, r: int) -> dict:
         """Run the matcher, forecast, recall and the top match's lens at rerun second ``r``."""
         if not self.matching:
             raise ValueError(f"{self.incident.incident_id} has no single-track matching")
         with self.lock:
-            t0 = self._clock()
-            q = self.query(r)
-            res = self.matcher.match(q)
-            t1 = self._clock()
-            fc = forecast(self.store, q, res, self.scoring)
-            t2 = self._clock()
-            rc = None
-            if self.recall is not None:
-                rc = self.recall.for_matches(q, res, fc.roads if fc else (), n=RECALL_N)
-            t3 = self._clock()
-            lens = self._lens(q, res.matches[0].to_dict(), DEFAULT_CHANNEL) if res.matches else None
-            t4 = self._clock()
-        matches = []
-        for rank, m in enumerate(res.matches[:TOP_N], 1):
-            d = m.to_dict()
-            d.update(rank=rank, start_ts=iso_z(m.start_ts), local_start=self._local(m))
-            matches.append(d)
-        recall = rc.to_dict() if rc is not None else None
-        if recall is not None:
-            for mr in recall["matches"]:
-                for rep in mr["reports"]:
-                    rep["event_ts"] = iso_z(_ms_to_dt(rep["event_ts_ms"]))
-        timings = {**{k: float(v) for k, v in res.timings.items()},
-                   "forecast_ms": (t2 - t1) * 1e3, "recall_ms": (t3 - t2) * 1e3,
-                   "lens_ms": (t4 - t3) * 1e3}  # fmt: skip
-        return json_safe({
-            "t_s": int(r), "incident_id": self.incident.incident_id, "query_track": q.track_id,
-            "model_version": self.matcher.model_version, "window_s": int(q.window_s),
-            "rows_used": int(q.rows_used), "target_asset_id": q.target.asset_id,
-            "matches": matches, "forecast": fc.to_dict() if fc else None, "recall": recall,
-            "dtw": lens, "elapsed_ms": (t4 - t0) * 1e3, "timings": timings, "cached": False,
-        })  # fmt: skip
+            return compute_result(r, lambda: self.query(r), store=self.store,
+                                  matcher=self.matcher, recall=self.recall, scoring=self.scoring,
+                                  offsets=self.offsets, incident_id=self.incident.incident_id,
+                                  clock=self._clock)  # fmt: skip
 
     def _lens(self, q: Query, match: dict, channel: str) -> dict:
-        c = self.scoring.features.channels.index(channel)
-        live = channel_matrix(q.features.iloc[-q.rows_used :], self.scoring)[:, c]
-        seg = self.matcher.builder.segment(match["track_id"], int(match["window_offset_s"]),
-                                           int(match["features"]["window_s"]))  # fmt: skip
-        return lens_payload(live, seg[:, c], channel=channel,
-                            band_fraction=self.scoring.dtw.band_fraction,
-                            warp_ratio=match.get("warp_ratio"),
-                            match_track_id=match["track_id"])  # fmt: skip
+        return lens_for(q, match, channel, self.matcher, self.scoring)
 
     def lens(self, t_s: float, match_track_id: str, channel: str = DEFAULT_CHANNEL) -> dict:
         """The lens for one of the current result's matches; ``KeyError`` if it is not one."""
@@ -258,6 +219,65 @@ class LiveLoop:
             raise ValueError(f"unknown channel {channel!r}")
         with self.lock:
             return self._lens(self.query(res["t_s"]), m, channel)
+
+
+def local_start(m, offsets: dict) -> str:
+    """A match's start in its installation's local time, ``YYYY-MM-DDTHH:MM``."""
+    off = timedelta(hours=offsets.get(m.installation_id, 0))
+    return f"{m.start_ts + off:%Y-%m-%dT%H:%M}"
+
+
+def lens_for(q: Query, match: dict, channel: str, matcher, scoring: ScoringConfig) -> dict:
+    """The time-warp lens payload of one match on one channel (§17.4, D-117)."""
+    c = scoring.features.channels.index(channel)
+    live = channel_matrix(q.features.iloc[-q.rows_used :], scoring)[:, c]
+    seg = matcher.builder.segment(match["track_id"], int(match["window_offset_s"]),
+                                  int(match["features"]["window_s"]))  # fmt: skip
+    return lens_payload(live, seg[:, c], channel=channel, band_fraction=scoring.dtw.band_fraction,
+                        warp_ratio=match.get("warp_ratio"),
+                        match_track_id=match["track_id"])  # fmt: skip
+
+
+def compute_result(r: int, make_query: Callable[[], Query], *, store: TrackStore, matcher,
+                   recall, scoring: ScoringConfig, offsets: dict, incident_id: str,
+                   clock: Callable[[], float] = time.perf_counter) -> dict:  # fmt: skip
+    """One rerun at second ``r``: build the query (``make_query``, points up to ``r`` only), run
+    the matcher, the §13 forecast, §12 recall and the top match's lens, and return the JSON-ready
+    result (see the module docstring). Shared by replays and live mode (D-175); the caller holds
+    the store lock."""
+    t0 = clock()
+    q = make_query()
+    res = matcher.match(q)
+    t1 = clock()
+    fc = forecast(store, q, res, scoring)
+    t2 = clock()
+    rc = None
+    if recall is not None:
+        rc = recall.for_matches(q, res, fc.roads if fc else (), n=RECALL_N)
+    t3 = clock()
+    top = res.matches[0].to_dict() if res.matches else None
+    lens = lens_for(q, top, DEFAULT_CHANNEL, matcher, scoring) if top else None
+    t4 = clock()
+    matches = []
+    for rank, m in enumerate(res.matches[:TOP_N], 1):
+        d = m.to_dict()
+        d.update(rank=rank, start_ts=iso_z(m.start_ts), local_start=local_start(m, offsets))
+        matches.append(d)
+    recall_doc = rc.to_dict() if rc is not None else None
+    if recall_doc is not None:
+        for mr in recall_doc["matches"]:
+            for rep in mr["reports"]:
+                rep["event_ts"] = iso_z(_ms_to_dt(rep["event_ts_ms"]))
+    timings = {**{k: float(v) for k, v in res.timings.items()},
+               "forecast_ms": (t2 - t1) * 1e3, "recall_ms": (t3 - t2) * 1e3,
+               "lens_ms": (t4 - t3) * 1e3}  # fmt: skip
+    return json_safe({
+        "t_s": int(r), "incident_id": incident_id, "query_track": q.track_id,
+        "model_version": matcher.model_version, "window_s": int(q.window_s),
+        "rows_used": int(q.rows_used), "target_asset_id": q.target.asset_id,
+        "matches": matches, "forecast": fc.to_dict() if fc else None, "recall": recall_doc,
+        "dtw": lens, "elapsed_ms": (t4 - t0) * 1e3, "timings": timings, "cached": False,
+    })  # fmt: skip
 
 
 def _ms_to_dt(ms: int):

@@ -64,6 +64,17 @@ class CandidateBuilder:
                 self._raw[str(tid)] = channel_matrix(rows, self.scoring)
         return {t: self._raw[t] for t in track_ids if t in self._raw}
 
+    def forget(self, track_ids) -> int:
+        """Drop cached raw channels of these tracks (``live reset`` removes learned live tracks,
+        whose ids may be reused by a fresh live clock); returns how many were cached."""
+        n = 0
+        for t in track_ids:
+            n += self._raw.pop(str(t), None) is not None
+        return n
+
+    def cached_ids(self) -> list[str]:
+        return list(self._raw)
+
     def build(self, q: Query) -> Candidates:
         sc = self.scoring
         t0 = time.perf_counter()

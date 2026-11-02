@@ -37,6 +37,9 @@ def api_cmd(
     reseed: bool = typer.Option(False, "--reseed", help="Reseed the ledger before serving."),
     exports: str | None = typer.Option(None, "--exports",
                                        help="Evidence export folder (default: paths.exports)."),
+    live_mode: str | None = typer.Option(None, "--live-mode-dir",
+                                         help="Live-mode folder: feed, learned live history, "
+                                              "clock (default: paths.live_mode, D-172)."),
     time_scale: float = typer.Option(1.0, "--time-scale", min=0.05, max=1.0,
                                      help="Replay clock against wall time; below 1 replays run "
                                           "in slow motion for screen capture (make demo-video, "
@@ -66,7 +69,7 @@ def api_cmd(
     if reload:
         os.environ.update({"KD_CONFIG": config, "KD_STATIC": static or "",
                            "KD_MEMORY": memory or "", "KD_LIVE_DB": live_db or "",
-                           "KD_EXPORTS": exports or "",
+                           "KD_EXPORTS": exports or "", "KD_LIVE_MODE": live_mode or "",
                            "KD_TIME_SCALE": str(time_scale)})  # fmt: skip
         src = str(Path(__file__).parent)
         uvicorn.run("kairos_defense.api.app:factory", factory=True, host=host, port=port,
@@ -80,6 +83,8 @@ def api_cmd(
         reseed=reseed,
         exports_path=exports,
         time_scale=time_scale,
+        live_mode_path=live_mode,
+        config_dir=config,
     )
     cli.console.print(f"Kairos Defense API on http://{host}:{port}"
                       + (f" serving {static}" if static else "")

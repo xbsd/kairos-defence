@@ -122,7 +122,8 @@ export interface paths {
     /**
      * History
      * @description A past track's 1 Hz path (ghost trails, phase 8): target-relative or region meters. Live
-     *     tracks are refused (rule 3: tonight is not history).
+     *     tracks are refused (rule 3: tonight is not history) until their incident closes and live
+     *     mode learns them (D-176): then they are served from the live-mode store.
      */
     get: operations["history_api_history__track_id__get"];
     put?: never;
@@ -542,6 +543,150 @@ export interface paths {
     put?: never;
     /** Chat */
     post: operations["chat_api_chat_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/ingest": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Ingest Rest
+     * @description A batch of ingest messages for simple adapters (same contract as ``/ws/ingest``).
+     */
+    post: operations["ingest_rest_api_ingest_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/live/status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Live Status
+     * @description Feeds, every live incident since the last reset, the worker queue and the simulator.
+     */
+    get: operations["live_status_api_live_status_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/live/scenarios": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Live Scenarios
+     * @description The five scenarios with their actor or team choices and bases (for the launcher).
+     */
+    get: operations["live_scenarios_api_live_scenarios_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/live/reset": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Live Reset
+     * @description Remove every live-mode row (detections, incidents, learned history, results, vectors).
+     *     The 18-month history and the ledger are untouched (rule 7).
+     */
+    post: operations["live_reset_api_live_reset_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/sim/launch": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Sim Launch
+     * @description Start the simulator for one scenario as a separate process (D-182). The actor or team is
+     *     passed to it and not kept here.
+     */
+    post: operations["sim_launch_api_sim_launch_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/live/incidents/{incident_id}/reveal": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Live Reveal
+     * @description Who really flew a closed live incident and how the matcher did (D-170): computed by
+     *     ``kairos_defense.eval`` on request, never stored. 404 unknown, 409 while open.
+     */
+    get: operations["live_reveal_api_live_incidents__incident_id__reveal_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/schema/live-stream": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Schema Live Stream
+     * @description One ``LiveStreamMessage`` and one ingest message: exists so OpenAPI (and the generated
+     *     types) include every live type.
+     */
+    get: operations["schema_live_stream_api_schema_live_stream_get"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -1009,6 +1154,17 @@ export interface components {
        */
       phase: "approach" | "loiter" | "egress";
     };
+    /** FeedState */
+    FeedState: {
+      /** Installation Id */
+      installation_id: string;
+      /** Feed Ts */
+      feed_ts: string | null;
+      /** Rate */
+      rate: number;
+      /** Active */
+      active: boolean;
+    };
     /** ForecastMsg */
     ForecastMsg: {
       /**
@@ -1096,6 +1252,44 @@ export interface components {
       /** Utc Offset Hours */
       utc_offset_hours: number;
     };
+    /** IncidentClosedMsg */
+    IncidentClosedMsg: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "incident_closed";
+      /** Incident Id */
+      incident_id: string;
+      /** Installation Id */
+      installation_id: string;
+      /** End Ts */
+      end_ts: string;
+      /** Duration S */
+      duration_s: number;
+      /** N Tracks */
+      n_tracks: number;
+      /** Is Swarm */
+      is_swarm: boolean;
+      /** Reruns */
+      reruns: number;
+      /** Learned Tracks */
+      learned_tracks: number;
+    };
+    /** IncidentOpenedMsg */
+    IncidentOpenedMsg: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "incident_opened";
+      /** Incident Id */
+      incident_id: string;
+      /** Installation Id */
+      installation_id: string;
+      /** Start Ts */
+      start_ts: string;
+    };
     /** IncidentSummary */
     IncidentSummary: {
       /** Incident Id */
@@ -1117,6 +1311,72 @@ export interface components {
       /** Status */
       status: string;
     };
+    /** IngestAck */
+    IngestAck: {
+      /**
+       * Type
+       * @default ack
+       * @constant
+       */
+      type: "ack";
+      /**
+       * Accepted
+       * @description Messages accepted, heartbeats included.
+       */
+      accepted: number;
+      /**
+       * Detections
+       * @description Detections accepted (point, rf, rid).
+       */
+      detections: number;
+      /** Rejected */
+      rejected: components["schemas"]["Rejected"][];
+    };
+    /** IngestBatch */
+    IngestBatch: {
+      /**
+       * Messages
+       * @description Ingest messages, in time order.
+       */
+      messages: {
+        [key: string]: unknown;
+      }[];
+    };
+    /**
+     * IngestHeartbeat
+     * @description The adapter is alive and its clock reads ``ts``; advances the installation's feed time
+     *     (incidents close on it). ``rate``: feed seconds per wall second (1 for a real sensor).
+     */
+    IngestHeartbeat: {
+      /**
+       * V
+       * @description Contract version (only 1 exists).
+       * @default 1
+       * @constant
+       */
+      v: 1;
+      /**
+       * Installation Id
+       * @description The installation whose sensor saw this.
+       */
+      installation_id: string;
+      /**
+       * Ts
+       * Format: date-time
+       * @description When it was seen: ISO 8601 with Z or an offset.
+       */
+      ts: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "heartbeat";
+      /**
+       * Rate
+       * @default 1
+       */
+      rate: number;
+    };
     /** IngestMsg */
     IngestMsg: {
       /**
@@ -1137,6 +1397,134 @@ export interface components {
       write_ms: number;
       /** Statement */
       statement: string;
+    };
+    /**
+     * IngestPoint
+     * @description One radar detection of one sensor track (``track_points`` columns).
+     */
+    IngestPoint: {
+      /**
+       * V
+       * @description Contract version (only 1 exists).
+       * @default 1
+       * @constant
+       */
+      v: 1;
+      /**
+       * Installation Id
+       * @description The installation whose sensor saw this.
+       */
+      installation_id: string;
+      /**
+       * Ts
+       * Format: date-time
+       * @description When it was seen: ISO 8601 with Z or an offset.
+       */
+      ts: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "point";
+      /**
+       * Sensor Id
+       * @description The installation's radar sensor id.
+       */
+      sensor_id: string;
+      /**
+       * Sensor Track Id
+       * @description The radar's own track id (opaque, stable per track).
+       */
+      sensor_track_id: string;
+      /** X M */
+      x_m: number;
+      /** Y M */
+      y_m: number;
+      /** Alt M */
+      alt_m: number;
+      /** Quality */
+      quality: number;
+    };
+    /**
+     * IngestRf
+     * @description One RF detection of a control link (``rf_detections`` columns).
+     */
+    IngestRf: {
+      /**
+       * V
+       * @description Contract version (only 1 exists).
+       * @default 1
+       * @constant
+       */
+      v: 1;
+      /**
+       * Installation Id
+       * @description The installation whose sensor saw this.
+       */
+      installation_id: string;
+      /**
+       * Ts
+       * Format: date-time
+       * @description When it was seen: ISO 8601 with Z or an offset.
+       */
+      ts: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "rf";
+      /**
+       * Sensor Id
+       * @description The installation's RF sensor id.
+       */
+      sensor_id: string;
+      /** Band */
+      band: string;
+      /** Protocol Family */
+      protocol_family: string;
+      /** Bearing Deg */
+      bearing_deg: number;
+      /** Snr Db */
+      snr_db: number;
+    };
+    /**
+     * IngestRid
+     * @description One Remote ID broadcast received (``remote_id`` columns).
+     */
+    IngestRid: {
+      /**
+       * V
+       * @description Contract version (only 1 exists).
+       * @default 1
+       * @constant
+       */
+      v: 1;
+      /**
+       * Installation Id
+       * @description The installation whose sensor saw this.
+       */
+      installation_id: string;
+      /**
+       * Ts
+       * Format: date-time
+       * @description When it was seen: ISO 8601 with Z or an offset.
+       */
+      ts: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "rid";
+      /** Serial */
+      serial: string;
+      /** Drone X M */
+      drone_x_m: number;
+      /** Drone Y M */
+      drone_y_m: number;
+      /** Op X M */
+      op_x_m: number;
+      /** Op Y M */
+      op_y_m: number;
     };
     /** Installation */
     Installation: {
@@ -1284,6 +1672,84 @@ export interface components {
        */
       decision: "approve" | "reject";
       block: components["schemas"]["LedgerBlock"];
+    };
+    /** LiveIncidentRow */
+    LiveIncidentRow: {
+      /** Incident Id */
+      incident_id: string;
+      /** Installation Id */
+      installation_id: string;
+      /** Start Ts */
+      start_ts: string;
+      /** End Ts */
+      end_ts: string;
+      /** N Tracks */
+      n_tracks: number;
+      /** Is Swarm */
+      is_swarm: boolean;
+      /**
+       * State
+       * @enum {string}
+       */
+      state: "open" | "closing" | "closed";
+      /** Reruns */
+      reruns: number;
+    };
+    /** LiveResetResponse */
+    LiveResetResponse: {
+      /** Reset */
+      reset: {
+        [key: string]: number;
+      };
+      /** Vectors */
+      vectors: number;
+      /** Stopped Simulator */
+      stopped_simulator: boolean;
+    };
+    /** LiveStatus */
+    LiveStatus: {
+      /** Enabled */
+      enabled: boolean;
+      /** Matching */
+      matching: boolean;
+      /** Problems */
+      problems: string[];
+      /** Feeds */
+      feeds: components["schemas"]["FeedState"][];
+      /** Incidents */
+      incidents: components["schemas"]["LiveIncidentRow"][];
+      /** Pending */
+      pending: number;
+      /** Learned Tracks */
+      learned_tracks: number;
+      simulator: components["schemas"]["SimulatorState"];
+    };
+    /** LiveStreamSchema */
+    LiveStreamSchema: {
+      /** Message */
+      message:
+        | components["schemas"]["HelloMsg"]
+        | components["schemas"]["ClockMsg"]
+        | components["schemas"]["PointMsg"]
+        | components["schemas"]["RfMsg"]
+        | components["schemas"]["RidMsg"]
+        | components["schemas"]["FeaturesMsg"]
+        | components["schemas"]["IngestMsg"]
+        | components["schemas"]["MatchMsg"]
+        | components["schemas"]["DtwMsg"]
+        | components["schemas"]["ForecastMsg"]
+        | components["schemas"]["RecallMsg"]
+        | components["schemas"]["LedgerMsg"]
+        | components["schemas"]["ErrorMsg"]
+        | components["schemas"]["IncidentOpenedMsg"]
+        | components["schemas"]["IncidentClosedMsg"]
+        | components["schemas"]["SwarmMatchMsg"];
+      /** Ingest */
+      ingest:
+        | components["schemas"]["IngestPoint"]
+        | components["schemas"]["IngestRf"]
+        | components["schemas"]["IngestRid"]
+        | components["schemas"]["IngestHeartbeat"];
     };
     /**
      * MatchItem
@@ -1487,6 +1953,13 @@ export interface components {
       /** Clues */
       clues: components["schemas"]["Clue"][];
     };
+    /** Rejected */
+    Rejected: {
+      /** Index */
+      index: number;
+      /** Reason */
+      reason: string;
+    };
     /** ReseedResponse */
     ReseedResponse: {
       /** Rows */
@@ -1506,6 +1979,76 @@ export interface components {
       reset: {
         [key: string]: number;
       };
+    };
+    /** RevealExpectation */
+    RevealExpectation: {
+      /** Text */
+      text: string;
+      /** Met */
+      met: boolean | null;
+      /** Observed */
+      observed: string;
+    };
+    /** RevealRerun */
+    RevealRerun: {
+      /** T S */
+      t_s: number;
+      /** Kind */
+      kind: string;
+      /** First Same Rank */
+      first_same_rank: number | null;
+      /** Mimic Rank */
+      mimic_rank: number | null;
+      /** Top Incident */
+      top_incident: string | null;
+      /** Top Track */
+      top_track: string | null;
+      /** Top Actor */
+      top_actor: string | null;
+      /** Top Score */
+      top_score: number | null;
+    };
+    /**
+     * RevealResponse
+     * @description Who flew a closed live incident (D-170): served through ``kairos_defense.eval``, never
+     *     stored.
+     */
+    RevealResponse: {
+      /** Incident Id */
+      incident_id: string;
+      /** Installation Id */
+      installation_id: string;
+      /** Start Ts */
+      start_ts: string;
+      /** N Tracks */
+      n_tracks: number;
+      /** Is Swarm */
+      is_swarm: boolean;
+      /** Known */
+      known: boolean;
+      /** Actor Id */
+      actor_id: string | null;
+      /** Actor Type */
+      actor_type: string | null;
+      /** Nickname */
+      nickname: string | null;
+      /** Scenario */
+      scenario: string | null;
+      /** Seed */
+      seed: number | null;
+      /** Flight */
+      flight: number | null;
+      /** Base */
+      base: string | null;
+      /** Mimics */
+      mimics?: string | null;
+      /** Reruns */
+      reruns: components["schemas"]["RevealRerun"][];
+      /** Same Actor History */
+      same_actor_history: number;
+      expectation: components["schemas"]["RevealExpectation"];
+      /** Words */
+      words: string;
     };
     /** RfMsg */
     RfMsg: {
@@ -1553,6 +2096,36 @@ export interface components {
       name: string;
       /** Lines */
       lines: [number, number][][];
+    };
+    /** ScenarioActor */
+    ScenarioActor: {
+      /** Id */
+      id: string;
+      /** Nickname */
+      nickname: string;
+      /** Bases */
+      bases: string[];
+    };
+    /** ScenarioInfo */
+    ScenarioInfo: {
+      /** Name */
+      name: string;
+      /** Title */
+      title: string;
+      /** Actor Label */
+      actor_label: string | null;
+      /** Actors */
+      actors: components["schemas"]["ScenarioActor"][];
+      /** Default Actor */
+      default_actor: string | null;
+      /** Allow Random */
+      allow_random: boolean;
+      /** Bases */
+      bases: string[];
+      /** Second Base */
+      second_base: boolean;
+      /** Expectation */
+      expectation: string;
     };
     /**
      * Scene
@@ -1624,6 +2197,60 @@ export interface components {
       below_alt_m: number;
       /** Polygons */
       polygons: [number, number][][];
+    };
+    /** SimLaunchRequest */
+    SimLaunchRequest: {
+      /** Scenario */
+      scenario: string;
+      /** Actor */
+      actor?: string | null;
+      /** Base */
+      base?: string | null;
+      /** Second Base */
+      second_base?: string | null;
+      /**
+       * Speed
+       * @default 1
+       */
+      speed: number;
+      /** Seed */
+      seed?: number | null;
+    };
+    /** SimLaunchResponse */
+    SimLaunchResponse: {
+      /** Launched */
+      launched: boolean;
+      /** Scenario */
+      scenario: string;
+      /** Base */
+      base: string;
+      /** Second Base */
+      second_base: string | null;
+      /** Speed */
+      speed: number;
+      /** Seed */
+      seed: number;
+      /** Pid */
+      pid: number;
+    };
+    /** SimulatorState */
+    SimulatorState: {
+      /** Running */
+      running: boolean;
+      /** Scenario */
+      scenario: string | null;
+      /** Base */
+      base: string | null;
+      /** Second Base */
+      second_base: string | null;
+      /** Speed */
+      speed: number | null;
+      /** Seed */
+      seed: number | null;
+      /** Started At */
+      started_at: string | null;
+      /** Exit Code */
+      exit_code: number | null;
     };
     /** SpeedCmd */
     SpeedCmd: {
@@ -1733,6 +2360,56 @@ export interface components {
       n_tracks: number;
       /** Status */
       status: string;
+    };
+    /** SwarmMatchItem */
+    SwarmMatchItem: {
+      /** Rank */
+      rank: number;
+      /** Incident Id */
+      incident_id: string;
+      /** Installation Id */
+      installation_id: string;
+      /** Region Id */
+      region_id: string;
+      /** Start Ts */
+      start_ts: string;
+      /** N Drones */
+      n_drones: number;
+      /** Duration S */
+      duration_s: number;
+      /** Distance */
+      distance: number;
+      /** Similarity */
+      similarity: number;
+      /** Warp Ratio */
+      warp_ratio: number;
+      /** Matched S */
+      matched_s: number;
+    };
+    /**
+     * SwarmMatchMsg
+     * @description A live swarm's rerun: the §14 swarm matcher on the drones received so far.
+     */
+    SwarmMatchMsg: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "swarm_match";
+      /** T S */
+      t_s: number;
+      /** Incident Id */
+      incident_id: string;
+      /** Model Version */
+      model_version: string;
+      /** Elapsed Ms */
+      elapsed_ms: number;
+      /** N Drones */
+      n_drones: number;
+      /** Detected */
+      detected: boolean;
+      /** Matches */
+      matches: components["schemas"]["SwarmMatchItem"][];
     };
     /** SwarmMatchOut */
     SwarmMatchOut: {
@@ -2667,6 +3344,183 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ingest_rest_api_ingest_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["IngestBatch"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["IngestAck"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  live_status_api_live_status_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LiveStatus"];
+        };
+      };
+    };
+  };
+  live_scenarios_api_live_scenarios_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScenarioInfo"][];
+        };
+      };
+    };
+  };
+  live_reset_api_live_reset_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LiveResetResponse"];
+        };
+      };
+    };
+  };
+  sim_launch_api_sim_launch_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SimLaunchRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SimLaunchResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  live_reveal_api_live_incidents__incident_id__reveal_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        incident_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RevealResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schema_live_stream_api_schema_live_stream_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LiveStreamSchema"];
         };
       };
     };

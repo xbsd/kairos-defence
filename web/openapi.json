@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Kairos Defense API",
-  "description": "Synthetic data only. REST (SPEC \u00a716.4) and the replay stream /ws/replay/{incident_id} (\u00a716.3).",
+  "description": "Synthetic data only. REST (SPEC \u00a716.4), the replay stream /ws/replay/{incident_id} (\u00a716.3), live mode's ingest /ws/ingest and stream /ws/live/{installation_id} (D-169).",
   "version": "0.0.1"
  },
  "paths": {
@@ -264,7 +264,7 @@
   "/api/history/{track_id}": {
    "get": {
     "summary": "History",
-    "description": "A past track's 1 Hz path (ghost trails, phase 8): target-relative or region meters. Live\ntracks are refused (rule 3: tonight is not history).",
+    "description": "A past track's 1 Hz path (ghost trails, phase 8): target-relative or region meters. Live\ntracks are refused (rule 3: tonight is not history) until their incident closes and live\nmode learns them (D-176): then they are served from the live-mode store.",
     "operationId": "history_api_history__track_id__get",
     "parameters": [
      {
@@ -1263,6 +1263,204 @@
        "application/json": {
         "schema": {
          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/ingest": {
+   "post": {
+    "summary": "Ingest Rest",
+    "description": "A batch of ingest messages for simple adapters (same contract as ``/ws/ingest``).",
+    "operationId": "ingest_rest_api_ingest_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/IngestBatch"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/IngestAck"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/live/status": {
+   "get": {
+    "summary": "Live Status",
+    "description": "Feeds, every live incident since the last reset, the worker queue and the simulator.",
+    "operationId": "live_status_api_live_status_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LiveStatus"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/live/scenarios": {
+   "get": {
+    "summary": "Live Scenarios",
+    "description": "The five scenarios with their actor or team choices and bases (for the launcher).",
+    "operationId": "live_scenarios_api_live_scenarios_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/ScenarioInfo"
+         },
+         "type": "array",
+         "title": "Response Live Scenarios Api Live Scenarios Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/live/reset": {
+   "post": {
+    "summary": "Live Reset",
+    "description": "Remove every live-mode row (detections, incidents, learned history, results, vectors).\nThe 18-month history and the ledger are untouched (rule 7).",
+    "operationId": "live_reset_api_live_reset_post",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LiveResetResponse"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/sim/launch": {
+   "post": {
+    "summary": "Sim Launch",
+    "description": "Start the simulator for one scenario as a separate process (D-182). The actor or team is\npassed to it and not kept here.",
+    "operationId": "sim_launch_api_sim_launch_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SimLaunchRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SimLaunchResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/live/incidents/{incident_id}/reveal": {
+   "get": {
+    "summary": "Live Reveal",
+    "description": "Who really flew a closed live incident and how the matcher did (D-170): computed by\n``kairos_defense.eval`` on request, never stored. 404 unknown, 409 while open.",
+    "operationId": "live_reveal_api_live_incidents__incident_id__reveal_get",
+    "parameters": [
+     {
+      "name": "incident_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Incident Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RevealResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/schema/live-stream": {
+   "get": {
+    "summary": "Schema Live Stream",
+    "description": "One ``LiveStreamMessage`` and one ingest message: exists so OpenAPI (and the generated\ntypes) include every live type.",
+    "operationId": "schema_live_stream_api_schema_live_stream_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LiveStreamSchema"
         }
        }
       }
@@ -2549,6 +2747,42 @@
     ],
     "title": "FeaturesMsg"
    },
+   "FeedState": {
+    "properties": {
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "feed_ts": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Feed Ts"
+     },
+     "rate": {
+      "type": "number",
+      "title": "Rate"
+     },
+     "active": {
+      "type": "boolean",
+      "title": "Active"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "installation_id",
+     "feed_ts",
+     "rate",
+     "active"
+    ],
+    "title": "FeedState"
+   },
    "ForecastMsg": {
     "properties": {
      "type": {
@@ -2789,6 +3023,91 @@
     ],
     "title": "HelloMsg"
    },
+   "IncidentClosedMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "incident_closed",
+      "title": "Type"
+     },
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "end_ts": {
+      "type": "string",
+      "title": "End Ts"
+     },
+     "duration_s": {
+      "type": "number",
+      "title": "Duration S"
+     },
+     "n_tracks": {
+      "type": "integer",
+      "title": "N Tracks"
+     },
+     "is_swarm": {
+      "type": "boolean",
+      "title": "Is Swarm"
+     },
+     "reruns": {
+      "type": "integer",
+      "title": "Reruns"
+     },
+     "learned_tracks": {
+      "type": "integer",
+      "title": "Learned Tracks"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "incident_id",
+     "installation_id",
+     "end_ts",
+     "duration_s",
+     "n_tracks",
+     "is_swarm",
+     "reruns",
+     "learned_tracks"
+    ],
+    "title": "IncidentClosedMsg"
+   },
+   "IncidentOpenedMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "incident_opened",
+      "title": "Type"
+     },
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "start_ts": {
+      "type": "string",
+      "title": "Start Ts"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "incident_id",
+     "installation_id",
+     "start_ts"
+    ],
+    "title": "IncidentOpenedMsg"
+   },
    "IncidentSummary": {
     "properties": {
      "incident_id": {
@@ -2842,6 +3161,106 @@
     ],
     "title": "IncidentSummary"
    },
+   "IngestAck": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "ack",
+      "title": "Type",
+      "default": "ack"
+     },
+     "accepted": {
+      "type": "integer",
+      "title": "Accepted",
+      "description": "Messages accepted, heartbeats included."
+     },
+     "detections": {
+      "type": "integer",
+      "title": "Detections",
+      "description": "Detections accepted (point, rf, rid)."
+     },
+     "rejected": {
+      "items": {
+       "$ref": "#/components/schemas/Rejected"
+      },
+      "type": "array",
+      "title": "Rejected"
+     }
+    },
+    "type": "object",
+    "required": [
+     "accepted",
+     "detections",
+     "rejected"
+    ],
+    "title": "IngestAck"
+   },
+   "IngestBatch": {
+    "properties": {
+     "messages": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array",
+      "maxItems": 10000,
+      "title": "Messages",
+      "description": "Ingest messages, in time order."
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "messages"
+    ],
+    "title": "IngestBatch"
+   },
+   "IngestHeartbeat": {
+    "properties": {
+     "v": {
+      "type": "integer",
+      "const": 1,
+      "title": "V",
+      "description": "Contract version (only 1 exists).",
+      "default": 1
+     },
+     "installation_id": {
+      "type": "string",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "title": "Installation Id",
+      "description": "The installation whose sensor saw this."
+     },
+     "ts": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Ts",
+      "description": "When it was seen: ISO 8601 with Z or an offset."
+     },
+     "type": {
+      "type": "string",
+      "const": "heartbeat",
+      "title": "Type"
+     },
+     "rate": {
+      "type": "number",
+      "maximum": 100.0,
+      "exclusiveMinimum": 0.0,
+      "title": "Rate",
+      "default": 1.0
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "installation_id",
+     "ts",
+     "type"
+    ],
+    "title": "IngestHeartbeat",
+    "description": "The adapter is alive and its clock reads ``ts``; advances the installation's feed time\n(incidents close on it). ``rate``: feed seconds per wall second (1 for a real sensor)."
+   },
    "IngestMsg": {
     "properties": {
      "type": {
@@ -2886,6 +3305,241 @@
      "statement"
     ],
     "title": "IngestMsg"
+   },
+   "IngestPoint": {
+    "properties": {
+     "v": {
+      "type": "integer",
+      "const": 1,
+      "title": "V",
+      "description": "Contract version (only 1 exists).",
+      "default": 1
+     },
+     "installation_id": {
+      "type": "string",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "title": "Installation Id",
+      "description": "The installation whose sensor saw this."
+     },
+     "ts": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Ts",
+      "description": "When it was seen: ISO 8601 with Z or an offset."
+     },
+     "type": {
+      "type": "string",
+      "const": "point",
+      "title": "Type"
+     },
+     "sensor_id": {
+      "type": "string",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "title": "Sensor Id",
+      "description": "The installation's radar sensor id."
+     },
+     "sensor_track_id": {
+      "type": "string",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "title": "Sensor Track Id",
+      "description": "The radar's own track id (opaque, stable per track)."
+     },
+     "x_m": {
+      "type": "number",
+      "maximum": 1000000.0,
+      "minimum": -1000000.0,
+      "title": "X M"
+     },
+     "y_m": {
+      "type": "number",
+      "maximum": 1000000.0,
+      "minimum": -1000000.0,
+      "title": "Y M"
+     },
+     "alt_m": {
+      "type": "number",
+      "maximum": 20000.0,
+      "minimum": 0.0,
+      "title": "Alt M"
+     },
+     "quality": {
+      "type": "number",
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Quality"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "installation_id",
+     "ts",
+     "type",
+     "sensor_id",
+     "sensor_track_id",
+     "x_m",
+     "y_m",
+     "alt_m",
+     "quality"
+    ],
+    "title": "IngestPoint",
+    "description": "One radar detection of one sensor track (``track_points`` columns)."
+   },
+   "IngestRf": {
+    "properties": {
+     "v": {
+      "type": "integer",
+      "const": 1,
+      "title": "V",
+      "description": "Contract version (only 1 exists).",
+      "default": 1
+     },
+     "installation_id": {
+      "type": "string",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "title": "Installation Id",
+      "description": "The installation whose sensor saw this."
+     },
+     "ts": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Ts",
+      "description": "When it was seen: ISO 8601 with Z or an offset."
+     },
+     "type": {
+      "type": "string",
+      "const": "rf",
+      "title": "Type"
+     },
+     "sensor_id": {
+      "type": "string",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "title": "Sensor Id",
+      "description": "The installation's RF sensor id."
+     },
+     "band": {
+      "type": "string",
+      "maxLength": 16,
+      "minLength": 1,
+      "title": "Band"
+     },
+     "protocol_family": {
+      "type": "string",
+      "maxLength": 32,
+      "minLength": 1,
+      "title": "Protocol Family"
+     },
+     "bearing_deg": {
+      "type": "number",
+      "exclusiveMaximum": 360.0,
+      "minimum": 0.0,
+      "title": "Bearing Deg"
+     },
+     "snr_db": {
+      "type": "number",
+      "maximum": 150.0,
+      "minimum": -50.0,
+      "title": "Snr Db"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "installation_id",
+     "ts",
+     "type",
+     "sensor_id",
+     "band",
+     "protocol_family",
+     "bearing_deg",
+     "snr_db"
+    ],
+    "title": "IngestRf",
+    "description": "One RF detection of a control link (``rf_detections`` columns)."
+   },
+   "IngestRid": {
+    "properties": {
+     "v": {
+      "type": "integer",
+      "const": 1,
+      "title": "V",
+      "description": "Contract version (only 1 exists).",
+      "default": 1
+     },
+     "installation_id": {
+      "type": "string",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+      "title": "Installation Id",
+      "description": "The installation whose sensor saw this."
+     },
+     "ts": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Ts",
+      "description": "When it was seen: ISO 8601 with Z or an offset."
+     },
+     "type": {
+      "type": "string",
+      "const": "rid",
+      "title": "Type"
+     },
+     "serial": {
+      "type": "string",
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Serial"
+     },
+     "drone_x_m": {
+      "type": "number",
+      "maximum": 1000000.0,
+      "minimum": -1000000.0,
+      "title": "Drone X M"
+     },
+     "drone_y_m": {
+      "type": "number",
+      "maximum": 1000000.0,
+      "minimum": -1000000.0,
+      "title": "Drone Y M"
+     },
+     "op_x_m": {
+      "type": "number",
+      "maximum": 1000000.0,
+      "minimum": -1000000.0,
+      "title": "Op X M"
+     },
+     "op_y_m": {
+      "type": "number",
+      "maximum": 1000000.0,
+      "minimum": -1000000.0,
+      "title": "Op Y M"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "installation_id",
+     "ts",
+     "type",
+     "serial",
+     "drone_x_m",
+     "drone_y_m",
+     "op_x_m",
+     "op_y_m"
+    ],
+    "title": "IngestRid",
+    "description": "One Remote ID broadcast received (``remote_id`` columns)."
    },
    "Installation": {
     "properties": {
@@ -3360,6 +4014,255 @@
      "block"
     ],
     "title": "LinkResponse"
+   },
+   "LiveIncidentRow": {
+    "properties": {
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "start_ts": {
+      "type": "string",
+      "title": "Start Ts"
+     },
+     "end_ts": {
+      "type": "string",
+      "title": "End Ts"
+     },
+     "n_tracks": {
+      "type": "integer",
+      "title": "N Tracks"
+     },
+     "is_swarm": {
+      "type": "boolean",
+      "title": "Is Swarm"
+     },
+     "state": {
+      "type": "string",
+      "enum": [
+       "open",
+       "closing",
+       "closed"
+      ],
+      "title": "State"
+     },
+     "reruns": {
+      "type": "integer",
+      "title": "Reruns"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "incident_id",
+     "installation_id",
+     "start_ts",
+     "end_ts",
+     "n_tracks",
+     "is_swarm",
+     "state",
+     "reruns"
+    ],
+    "title": "LiveIncidentRow"
+   },
+   "LiveResetResponse": {
+    "properties": {
+     "reset": {
+      "additionalProperties": {
+       "type": "integer"
+      },
+      "type": "object",
+      "title": "Reset"
+     },
+     "vectors": {
+      "type": "integer",
+      "title": "Vectors"
+     },
+     "stopped_simulator": {
+      "type": "boolean",
+      "title": "Stopped Simulator"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "reset",
+     "vectors",
+     "stopped_simulator"
+    ],
+    "title": "LiveResetResponse"
+   },
+   "LiveStatus": {
+    "properties": {
+     "enabled": {
+      "type": "boolean",
+      "title": "Enabled"
+     },
+     "matching": {
+      "type": "boolean",
+      "title": "Matching"
+     },
+     "problems": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Problems"
+     },
+     "feeds": {
+      "items": {
+       "$ref": "#/components/schemas/FeedState"
+      },
+      "type": "array",
+      "title": "Feeds"
+     },
+     "incidents": {
+      "items": {
+       "$ref": "#/components/schemas/LiveIncidentRow"
+      },
+      "type": "array",
+      "title": "Incidents"
+     },
+     "pending": {
+      "type": "integer",
+      "title": "Pending"
+     },
+     "learned_tracks": {
+      "type": "integer",
+      "title": "Learned Tracks"
+     },
+     "simulator": {
+      "$ref": "#/components/schemas/SimulatorState"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "enabled",
+     "matching",
+     "problems",
+     "feeds",
+     "incidents",
+     "pending",
+     "learned_tracks",
+     "simulator"
+    ],
+    "title": "LiveStatus"
+   },
+   "LiveStreamSchema": {
+    "properties": {
+     "message": {
+      "oneOf": [
+       {
+        "$ref": "#/components/schemas/HelloMsg"
+       },
+       {
+        "$ref": "#/components/schemas/ClockMsg"
+       },
+       {
+        "$ref": "#/components/schemas/PointMsg"
+       },
+       {
+        "$ref": "#/components/schemas/RfMsg"
+       },
+       {
+        "$ref": "#/components/schemas/RidMsg"
+       },
+       {
+        "$ref": "#/components/schemas/FeaturesMsg"
+       },
+       {
+        "$ref": "#/components/schemas/IngestMsg"
+       },
+       {
+        "$ref": "#/components/schemas/MatchMsg"
+       },
+       {
+        "$ref": "#/components/schemas/DtwMsg"
+       },
+       {
+        "$ref": "#/components/schemas/ForecastMsg"
+       },
+       {
+        "$ref": "#/components/schemas/RecallMsg"
+       },
+       {
+        "$ref": "#/components/schemas/LedgerMsg"
+       },
+       {
+        "$ref": "#/components/schemas/ErrorMsg"
+       },
+       {
+        "$ref": "#/components/schemas/IncidentOpenedMsg"
+       },
+       {
+        "$ref": "#/components/schemas/IncidentClosedMsg"
+       },
+       {
+        "$ref": "#/components/schemas/SwarmMatchMsg"
+       }
+      ],
+      "title": "Message",
+      "discriminator": {
+       "propertyName": "type",
+       "mapping": {
+        "clock": "#/components/schemas/ClockMsg",
+        "dtw": "#/components/schemas/DtwMsg",
+        "error": "#/components/schemas/ErrorMsg",
+        "features": "#/components/schemas/FeaturesMsg",
+        "forecast": "#/components/schemas/ForecastMsg",
+        "hello": "#/components/schemas/HelloMsg",
+        "incident_closed": "#/components/schemas/IncidentClosedMsg",
+        "incident_opened": "#/components/schemas/IncidentOpenedMsg",
+        "ingest": "#/components/schemas/IngestMsg",
+        "ledger": "#/components/schemas/LedgerMsg",
+        "match": "#/components/schemas/MatchMsg",
+        "point": "#/components/schemas/PointMsg",
+        "recall": "#/components/schemas/RecallMsg",
+        "rf": "#/components/schemas/RfMsg",
+        "rid": "#/components/schemas/RidMsg",
+        "swarm_match": "#/components/schemas/SwarmMatchMsg"
+       }
+      }
+     },
+     "ingest": {
+      "oneOf": [
+       {
+        "$ref": "#/components/schemas/IngestPoint"
+       },
+       {
+        "$ref": "#/components/schemas/IngestRf"
+       },
+       {
+        "$ref": "#/components/schemas/IngestRid"
+       },
+       {
+        "$ref": "#/components/schemas/IngestHeartbeat"
+       }
+      ],
+      "title": "Ingest",
+      "discriminator": {
+       "propertyName": "type",
+       "mapping": {
+        "heartbeat": "#/components/schemas/IngestHeartbeat",
+        "point": "#/components/schemas/IngestPoint",
+        "rf": "#/components/schemas/IngestRf",
+        "rid": "#/components/schemas/IngestRid"
+       }
+      }
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "message",
+     "ingest"
+    ],
+    "title": "LiveStreamSchema"
    },
    "MatchItem": {
     "properties": {
@@ -3961,6 +4864,24 @@
     ],
     "title": "RecalledReport"
    },
+   "Rejected": {
+    "properties": {
+     "index": {
+      "type": "integer",
+      "title": "Index"
+     },
+     "reason": {
+      "type": "string",
+      "title": "Reason"
+     }
+    },
+    "type": "object",
+    "required": [
+     "index",
+     "reason"
+    ],
+    "title": "Rejected"
+   },
    "ReseedResponse": {
     "properties": {
      "rows": {
@@ -4021,6 +4942,285 @@
      "reset"
     ],
     "title": "ResetResponse"
+   },
+   "RevealExpectation": {
+    "properties": {
+     "text": {
+      "type": "string",
+      "title": "Text"
+     },
+     "met": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Met"
+     },
+     "observed": {
+      "type": "string",
+      "title": "Observed"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "text",
+     "met",
+     "observed"
+    ],
+    "title": "RevealExpectation"
+   },
+   "RevealRerun": {
+    "properties": {
+     "t_s": {
+      "type": "integer",
+      "title": "T S"
+     },
+     "kind": {
+      "type": "string",
+      "title": "Kind"
+     },
+     "first_same_rank": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "First Same Rank"
+     },
+     "mimic_rank": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mimic Rank"
+     },
+     "top_incident": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Top Incident"
+     },
+     "top_track": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Top Track"
+     },
+     "top_actor": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Top Actor"
+     },
+     "top_score": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Top Score"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "t_s",
+     "kind",
+     "first_same_rank",
+     "mimic_rank",
+     "top_incident",
+     "top_track",
+     "top_actor",
+     "top_score"
+    ],
+    "title": "RevealRerun"
+   },
+   "RevealResponse": {
+    "properties": {
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "start_ts": {
+      "type": "string",
+      "title": "Start Ts"
+     },
+     "n_tracks": {
+      "type": "integer",
+      "title": "N Tracks"
+     },
+     "is_swarm": {
+      "type": "boolean",
+      "title": "Is Swarm"
+     },
+     "known": {
+      "type": "boolean",
+      "title": "Known"
+     },
+     "actor_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Actor Id"
+     },
+     "actor_type": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Actor Type"
+     },
+     "nickname": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Nickname"
+     },
+     "scenario": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Scenario"
+     },
+     "seed": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Seed"
+     },
+     "flight": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Flight"
+     },
+     "base": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Base"
+     },
+     "mimics": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Mimics"
+     },
+     "reruns": {
+      "items": {
+       "$ref": "#/components/schemas/RevealRerun"
+      },
+      "type": "array",
+      "title": "Reruns"
+     },
+     "same_actor_history": {
+      "type": "integer",
+      "title": "Same Actor History"
+     },
+     "expectation": {
+      "$ref": "#/components/schemas/RevealExpectation"
+     },
+     "words": {
+      "type": "string",
+      "title": "Words"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "incident_id",
+     "installation_id",
+     "start_ts",
+     "n_tracks",
+     "is_swarm",
+     "known",
+     "actor_id",
+     "actor_type",
+     "nickname",
+     "scenario",
+     "seed",
+     "flight",
+     "base",
+     "reruns",
+     "same_actor_history",
+     "expectation",
+     "words"
+    ],
+    "title": "RevealResponse",
+    "description": "Who flew a closed live incident (D-170): served through ``kairos_defense.eval``, never\nstored."
    },
    "RfMsg": {
     "properties": {
@@ -4201,6 +5401,107 @@
      "lines"
     ],
     "title": "Road"
+   },
+   "ScenarioActor": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "nickname": {
+      "type": "string",
+      "title": "Nickname"
+     },
+     "bases": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Bases"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "id",
+     "nickname",
+     "bases"
+    ],
+    "title": "ScenarioActor"
+   },
+   "ScenarioInfo": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "actor_label": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Actor Label"
+     },
+     "actors": {
+      "items": {
+       "$ref": "#/components/schemas/ScenarioActor"
+      },
+      "type": "array",
+      "title": "Actors"
+     },
+     "default_actor": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Default Actor"
+     },
+     "allow_random": {
+      "type": "boolean",
+      "title": "Allow Random"
+     },
+     "bases": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Bases"
+     },
+     "second_base": {
+      "type": "boolean",
+      "title": "Second Base"
+     },
+     "expectation": {
+      "type": "string",
+      "title": "Expectation"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "name",
+     "title",
+     "actor_label",
+     "actors",
+     "default_actor",
+     "allow_random",
+     "bases",
+     "second_base",
+     "expectation"
+    ],
+    "title": "ScenarioInfo"
    },
    "Scene": {
     "properties": {
@@ -4435,6 +5736,222 @@
      "polygons"
     ],
     "title": "Shadow"
+   },
+   "SimLaunchRequest": {
+    "properties": {
+     "scenario": {
+      "type": "string",
+      "title": "Scenario"
+     },
+     "actor": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Actor"
+     },
+     "base": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Base"
+     },
+     "second_base": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Second Base"
+     },
+     "speed": {
+      "type": "number",
+      "maximum": 50.0,
+      "minimum": 1.0,
+      "title": "Speed",
+      "default": 1.0
+     },
+     "seed": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "exclusiveMaximum": 2147483648.0,
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Seed"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "scenario"
+    ],
+    "title": "SimLaunchRequest"
+   },
+   "SimLaunchResponse": {
+    "properties": {
+     "launched": {
+      "type": "boolean",
+      "title": "Launched"
+     },
+     "scenario": {
+      "type": "string",
+      "title": "Scenario"
+     },
+     "base": {
+      "type": "string",
+      "title": "Base"
+     },
+     "second_base": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Second Base"
+     },
+     "speed": {
+      "type": "number",
+      "title": "Speed"
+     },
+     "seed": {
+      "type": "integer",
+      "title": "Seed"
+     },
+     "pid": {
+      "type": "integer",
+      "title": "Pid"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "launched",
+     "scenario",
+     "base",
+     "second_base",
+     "speed",
+     "seed",
+     "pid"
+    ],
+    "title": "SimLaunchResponse"
+   },
+   "SimulatorState": {
+    "properties": {
+     "running": {
+      "type": "boolean",
+      "title": "Running"
+     },
+     "scenario": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Scenario"
+     },
+     "base": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Base"
+     },
+     "second_base": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Second Base"
+     },
+     "speed": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Speed"
+     },
+     "seed": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Seed"
+     },
+     "started_at": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Started At"
+     },
+     "exit_code": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Exit Code"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "running",
+     "scenario",
+     "base",
+     "second_base",
+     "speed",
+     "seed",
+     "started_at",
+     "exit_code"
+    ],
+    "title": "SimulatorState"
    },
    "SpeedCmd": {
     "properties": {
@@ -4854,6 +6371,124 @@
      "status"
     ],
     "title": "SwarmIncident"
+   },
+   "SwarmMatchItem": {
+    "properties": {
+     "rank": {
+      "type": "integer",
+      "title": "Rank"
+     },
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "region_id": {
+      "type": "string",
+      "title": "Region Id"
+     },
+     "start_ts": {
+      "type": "string",
+      "title": "Start Ts"
+     },
+     "n_drones": {
+      "type": "integer",
+      "title": "N Drones"
+     },
+     "duration_s": {
+      "type": "number",
+      "title": "Duration S"
+     },
+     "distance": {
+      "type": "number",
+      "title": "Distance"
+     },
+     "similarity": {
+      "type": "number",
+      "title": "Similarity"
+     },
+     "warp_ratio": {
+      "type": "number",
+      "title": "Warp Ratio"
+     },
+     "matched_s": {
+      "type": "integer",
+      "title": "Matched S"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "rank",
+     "incident_id",
+     "installation_id",
+     "region_id",
+     "start_ts",
+     "n_drones",
+     "duration_s",
+     "distance",
+     "similarity",
+     "warp_ratio",
+     "matched_s"
+    ],
+    "title": "SwarmMatchItem"
+   },
+   "SwarmMatchMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "swarm_match",
+      "title": "Type"
+     },
+     "t_s": {
+      "type": "number",
+      "title": "T S"
+     },
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "model_version": {
+      "type": "string",
+      "title": "Model Version"
+     },
+     "elapsed_ms": {
+      "type": "number",
+      "title": "Elapsed Ms"
+     },
+     "n_drones": {
+      "type": "integer",
+      "title": "N Drones"
+     },
+     "detected": {
+      "type": "boolean",
+      "title": "Detected"
+     },
+     "matches": {
+      "items": {
+       "$ref": "#/components/schemas/SwarmMatchItem"
+      },
+      "type": "array",
+      "title": "Matches"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "t_s",
+     "incident_id",
+     "model_version",
+     "elapsed_ms",
+     "n_drones",
+     "detected",
+     "matches"
+    ],
+    "title": "SwarmMatchMsg",
+    "description": "A live swarm's rerun: the \u00a714 swarm matcher on the drones received so far."
    },
    "SwarmMatchOut": {
     "properties": {

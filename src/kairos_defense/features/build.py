@@ -55,6 +55,41 @@ class IndexSummary:
     elapsed_s: float = 0.0
 
 
+@dataclass
+class TrackRows:
+    """What the index holds for one track: its ``track_features`` rows, its §9.4 signature, and
+    its ``flight_windows`` metadata rows with their ``(dim,)`` float32 vectors."""
+
+    features: pd.DataFrame
+    signature: dict
+    windows: list[dict]
+    vectors: list[np.ndarray]
+
+
+def track_rows(track_id: str, incident_id: str, points: pd.DataFrame, site, ctx: SensorContext,
+               scoring) -> TrackRows:  # fmt: skip
+    """§9 features, the signature and the PAA windows of one track from its raw radar points
+    (ordered by ``ts``). The index build and live learning share it (D-176). Raises
+    ``ValueError`` for a track too short to describe."""
+    f, target = track_features(points, site, scoring)
+    sig = signature(f, target, points.iloc[0], points.iloc[-1], site, ctx,
+                    {"track_id": track_id, "incident_id": incident_id})  # fmt: skip
+    f = f.assign(track_id=track_id, incident_id=incident_id,
+                 installation_id=site.installation_id)  # fmt: skip
+    start_ms = epoch_ms(sig["start_ts"])
+    wins, vecs = [], []
+    for w in iter_windows(f, scoring):
+        wins.append({
+            "window_id": f"{track_id}:{w.window_s}:{w.offset_s}", "track_id": track_id,
+            "incident_id": incident_id, "installation_id": site.installation_id,
+            "region_id": site.region_id, "window_s": w.window_s, "offset_s": w.offset_s,
+            "start_ts_ms": start_ms, "win_ts_ms": start_ms + 1000 * w.offset_s,
+            "rf_family": sig["rf_family"], "tod_minutes": sig["tod_minutes"],
+        })  # fmt: skip
+        vecs.append(w.vector)
+    return TrackRows(f[DERIVED_COLUMNS["track_features"]], sig, wins, vecs)
+
+
 def windows_table(rows: list[dict], vectors: list[np.ndarray], dim: int) -> pa.Table:
     """Arrow table for ``flight_windows`` (§7.5) from metadata rows and (dim,) float32 vectors."""
     meta = pd.DataFrame(rows)
@@ -164,27 +199,16 @@ def build_index(cfg: Config) -> IndexSummary:
             meta = hist.loc[tid]
             site = sites[meta["installation_id"]]
             try:
-                f, target = track_features(p, site, sc)
+                rows = track_rows(str(tid), str(meta["incident_id"]), p, site,
+                                  ctx.get(tid, SensorContext()), sc)  # fmt: skip
             except ValueError as exc:
                 log.warning("skipping %s: %s", tid, exc)
                 out.failed.append(str(tid))
                 continue
-            sig = signature(f, target, p.iloc[0], p.iloc[-1], site, ctx.get(tid, SensorContext()),
-                            {"track_id": tid, "incident_id": meta["incident_id"]})  # fmt: skip
-            sigs.append(sig)
-            f = f.assign(track_id=tid, incident_id=meta["incident_id"],
-                         installation_id=meta["installation_id"])  # fmt: skip
-            feat_frames.append(f[DERIVED_COLUMNS["track_features"]])
-            start_ms = epoch_ms(sig["start_ts"])
-            for w in iter_windows(f, sc):
-                win_rows.append({
-                    "window_id": f"{tid}:{w.window_s}:{w.offset_s}", "track_id": tid,
-                    "incident_id": meta["incident_id"], "installation_id": site.installation_id,
-                    "region_id": site.region_id, "window_s": w.window_s, "offset_s": w.offset_s,
-                    "start_ts_ms": start_ms, "win_ts_ms": start_ms + 1000 * w.offset_s,
-                    "rf_family": sig["rf_family"], "tod_minutes": sig["tod_minutes"],
-                })  # fmt: skip
-                vectors.append(w.vector)
+            sigs.append(rows.signature)
+            feat_frames.append(rows.features)
+            win_rows += rows.windows
+            vectors += rows.vectors
         features = pd.concat(feat_frames, ignore_index=True)
         signatures = pd.DataFrame(sigs, columns=SIGNATURE_COLUMNS)
         out.feature_rows = store.write_table("track_features", features)

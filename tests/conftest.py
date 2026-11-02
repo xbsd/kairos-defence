@@ -119,7 +119,7 @@ def tmp_config(cfg, folder: Path):
     paths = cfg.app.paths.model_copy(
         update={"duckdb": str(folder / "kd.duckdb"), "truth": str(folder / "gt.duckdb"),
                 "memory": str(folder / "mem.duckdb"), "live": str(folder / "live.duckdb"),
-                "lancedb": str(folder / "lancedb"),
+                "live_mode": str(folder / "live_mode"), "lancedb": str(folder / "lancedb"),
                 "reports": str(folder / "reports"), "models": str(folder / "models"),
                 "exports": str(folder / "exports"), "cache": str(folder / "cache")}
     )  # fmt: skip
@@ -132,7 +132,7 @@ def with_paths(cfg, folder: Path, *names: str):
     """``cfg`` with the named ``paths`` (and ``key`` for the signing key) moved under ``folder``,
     keeping the others (for example the data and models of ``p1_index``)."""
     moved = {"memory": "mem.duckdb", "exports": "exports", "cache": "cache", "reports": "reports",
-             "live": "live.duckdb"}  # fmt: skip
+             "live": "live.duckdb", "live_mode": "live_mode"}  # fmt: skip
     paths = cfg.app.paths.model_copy(update={n: str(folder / moved[n]) for n in names
                                              if n in moved})  # fmt: skip
     signing = cfg.app.signing
@@ -287,7 +287,9 @@ def api_config(base_cfg, seeded_path: Path, folder: Path):
     signing key under ``folder``."""
     import shutil
 
-    c = with_paths(base_cfg, folder, "memory", "live", "cache", "exports", "key", "reports")
+    c = with_paths(
+        base_cfg, folder, "memory", "live", "live_mode", "cache", "exports", "key", "reports"
+    )
     folder.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(seeded_path, c.app.paths.memory)
     return c
@@ -325,3 +327,17 @@ def swarm_index(cfg, tmp_path_factory):
     g = generate(cfg, 42, nights=SWARM_NIGHTS)
     write_all(c.app, g.tables, g.truth)
     return c, build_index(c)
+
+
+@pytest.fixture(scope="module")
+def live_services(toy_models, seeded_p1, tmp_path_factory):
+    """A ``Services`` with live mode over the P1 nights and the hand-set models: a copy of the
+    seeded ledger, a scratch live-mode folder, reruns every 20 s (fewer reruns, fast tests) and
+    the worker run on submit (``live_threaded=False``: no thread, no waiting)."""
+    from kairos_defense.api.services import Services
+    from tests.unit.live_kit import fast_scoring
+
+    c = api_config(fast_scoring(toy_models), seeded_p1.path, tmp_path_factory.mktemp("livemode"))
+    svc = Services(c, live_threaded=False)
+    yield svc
+    svc.close()

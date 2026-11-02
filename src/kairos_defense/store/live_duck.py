@@ -30,6 +30,21 @@ def statement(table: str, rows: int) -> str:
     return f"INSERT INTO {table} … {rows} row{'' if rows == 1 else 's'}"
 
 
+def append_rows(con, table: str, cols: Sequence[str], rows: Sequence[dict]) -> IngestStat:
+    """One timed ``INSERT … SELECT`` of ``rows`` into ``table`` on ``con`` (the caller holds its
+    lock); also used by the live-mode feed store (D-172)."""
+    ms = 0.0
+    if rows:
+        df = pd.DataFrame.from_records(list(rows), columns=list(cols))
+        con.register("rows_in", df)
+        t0 = time.perf_counter()
+        con.execute(f"INSERT INTO {table} SELECT {', '.join(cols)} FROM rows_in").fetchall()
+        ms = (time.perf_counter() - t0) * 1e3
+        con.unregister("rows_in")
+    total = int(con.execute(f"SELECT count(*) FROM {table}").fetchall()[0][0])
+    return IngestStat(table, len(rows), total, ms, statement(table, len(rows)))
+
+
 class DuckLiveSink:
     """``LiveSink`` over one DuckDB file (writable; tables created on open)."""
 
@@ -65,18 +80,7 @@ class DuckLiveSink:
         statement; the returned ``write_ms`` times that statement."""
         cols = self._table(table)
         with self._lock:
-            ms = 0.0
-            if rows:
-                df = pd.DataFrame.from_records(list(rows), columns=cols)
-                self.con.register("rows_in", df)
-                t0 = time.perf_counter()
-                self.con.execute(
-                    f"INSERT INTO {table} SELECT {', '.join(cols)} FROM rows_in"
-                ).fetchall()
-                ms = (time.perf_counter() - t0) * 1e3
-                self.con.unregister("rows_in")
-            total = int(self.con.execute(f"SELECT count(*) FROM {table}").fetchall()[0][0])
-        return IngestStat(table, len(rows), total, ms, statement(table, len(rows)))
+            return append_rows(self.con, table, cols, rows)
 
     def reset(self) -> dict[str, int]:
         """Empty every ``live_*`` table; returns the rows removed per table."""

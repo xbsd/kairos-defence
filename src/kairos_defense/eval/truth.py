@@ -5,14 +5,25 @@ It returns plain DataFrames; nothing outside ``kairos_defense.eval`` may call it
 
 from __future__ import annotations
 
+import time
+
 import duckdb
 import pandas as pd
 
 from kairos_defense.config import AppConfig
 
+RETRIES = 40  # x 0.25 s
+
 
 def _read(app: AppConfig, query: str, params: dict | None = None) -> pd.DataFrame:
-    con = duckdb.connect(str(app.paths.truth), read_only=True)
+    for attempt in range(RETRIES):  # the live simulator may be appending its flights (D-179)
+        try:
+            con = duckdb.connect(str(app.paths.truth), read_only=True)
+            break
+        except duckdb.IOException:
+            if attempt == RETRIES - 1:
+                raise
+            time.sleep(0.25)
     try:
         return con.execute(query, params or {}).df()
     finally:

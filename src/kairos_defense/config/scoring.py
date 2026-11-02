@@ -57,6 +57,9 @@ class FusionConfig(StrictModel):
 class LiveConfig(StrictModel):
     min_track_s: Pos
     rerun_every_s: Pos
+    idle_close_s: Pos = 30.0  # live mode: close an incident after this much feed time (D-174)
+    join_window_s: Pos = 10.0  # a new track joins an incident seen this recently (and near)
+    max_lateness_s: Pos = 10.0  # ingest rejects older messages (D-173)
 
 
 class RecallConfig(StrictModel):

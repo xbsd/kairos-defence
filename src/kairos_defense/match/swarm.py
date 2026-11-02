@@ -168,7 +168,14 @@ class SwarmMatcher:
         its first radar point (None: its whole observed flight)."""
         t0 = time.perf_counter()
         query = load_swarm(self.store, incident_id, self.scoring, until_s=at_s)
+        return self.match_flight(query, k, t0)
+
+    def match_flight(self, query: SwarmFlight, k: int = 5, t0: float | None = None) -> SwarmResult:
+        """Rank earlier history swarms against an already built ``SwarmFlight`` (its points cut
+        at the query second by the caller, rule 3): live mode builds it from received points
+        (D-175). ``t0``: when loading started (for ``load_ms``)."""
         t1 = time.perf_counter()
+        t0 = t1 if t0 is None else t0
         res = SwarmResult(query, [])
         if len(query.descriptors) < MIN_SECONDS:
             res.timings = {"load_ms": (t1 - t0) * 1000.0, "total_ms": (t1 - t0) * 1000.0}

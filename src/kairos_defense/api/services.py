@@ -40,7 +40,9 @@ class Services:
     def __init__(self, cfg, *, memory_path: Path | str | None = None,
                  live_path: Path | str | None = None, reseed: bool = False,
                  exports_path: Path | str | None = None,
-                 time_scale: float = 1.0) -> None:  # fmt: skip
+                 time_scale: float = 1.0, live_mode_path: Path | str | None = None,
+                 live_threaded: bool = True, sim_command=None,
+                 config_dir: Path | str | None = None) -> None:  # fmt: skip
         import duckdb
 
         from kairos_defense.store.duck import DuckTrackStore
@@ -78,6 +80,15 @@ class Services:
         self._loops: dict[str, LiveLoop] = {}
         self.swarm_matcher = None  # match.swarm.SwarmMatcher, built on first use (routes_swarm)
         self.swarm_cache: dict[tuple, dict] = {}
+        self.live = None  # live mode (phase 11, D-172): api.live_services.LiveServices
+        try:
+            from kairos_defense.api.live_services import LiveServices
+
+            self.live = LiveServices(self, live_mode_path, threaded=live_threaded,
+                                     sim_command=sim_command, config_dir=config_dir)  # fmt: skip
+        except duckdb.IOException as exc:
+            raise ServiceError(f"the live-mode folder is in use by another process: "
+                               f"{exc}") from exc  # fmt: skip
 
     # --- construction -----------------------------------------------------------------------
     def _matching(self):
@@ -130,7 +141,10 @@ class Services:
         return mem
 
     def close(self) -> None:
-        for closer in (self.memory.inner.close, self.sink.close, self.store.close):
+        closers = [self.memory.inner.close, self.sink.close, self.store.close]
+        if self.live is not None:
+            closers.insert(0, self.live.close)
+        for closer in closers:
             try:
                 closer()
             except Exception:  # closing everything matters more than the first error
@@ -184,5 +198,6 @@ class Services:
         head = self.memory.head()
         return {"status": "ok" if not self.problems else "degraded", "version": __version__,
                 "live_incidents": self.incident_ids, "matching": self.matcher is not None,
+                "live_mode": self.live is not None,
                 "problems": self.problems, "ledger_rows": self.memory.count(),
                 "ledger_head_seq": head.seq if head else None}  # fmt: skip

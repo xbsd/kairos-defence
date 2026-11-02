@@ -66,10 +66,12 @@ class LanceVectorStore:
         return tbl.count_rows()
 
     def upsert(self, table: str, rows: Sequence[dict]) -> None:
-        """Insert or update ``rows`` by the table's key column (``KEYS``); creates the table."""
+        """Insert or update ``rows`` by the table's key column (``KEYS``); creates the table.
+        A ``vector`` value (array of float) is stored as a fixed-size float32 list, so the
+        rows are searchable like an index build's (live learning, D-176)."""
         if not rows:
             return
-        data = pa.Table.from_pylist(list(rows))
+        data = _arrow_rows(list(rows))
         if not self.has(table):
             self.db.create_table(table, data)
             return
@@ -88,6 +90,14 @@ class LanceVectorStore:
         df = q.limit(k).to_pandas()
         return df.drop(columns=["vector"], errors="ignore").reset_index(drop=True)
 
+    def drop(self, table: str) -> int:
+        """Drop ``table`` if it exists; returns the rows it held (``live reset``, D-172)."""
+        if not self.has(table):
+            return 0
+        n = int(self.db.open_table(table).count_rows())
+        self.db.drop_table(table, ignore_missing=True)
+        return n
+
     def count(self, table: str, where: str | None = None) -> int:
         return int(self.db.open_table(table).count_rows(where))
 
@@ -95,6 +105,16 @@ class LanceVectorStore:
         """Whole table (tests and summaries)."""
         df = self.db.open_table(table).to_pandas()
         return df if columns is None else df[list(columns)]
+
+
+def _arrow_rows(rows: list[dict]) -> pa.Table:
+    """``rows`` as an Arrow table; a ``vector`` key becomes a ``FixedSizeList<float32>``."""
+    if "vector" not in rows[0]:
+        return pa.Table.from_pylist(rows)
+    vecs = np.stack([np.asarray(r["vector"], dtype=np.float32) for r in rows])
+    rest = pa.Table.from_pylist([{k: v for k, v in r.items() if k != "vector"} for r in rows])
+    flat = pa.array(vecs.ravel(), pa.float32())
+    return rest.append_column("vector", pa.FixedSizeListArray.from_arrays(flat, vecs.shape[1]))
 
 
 class ReportRRF(RRFReranker):

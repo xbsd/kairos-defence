@@ -346,11 +346,19 @@ def eval_(
         raise typer.Exit(1)
 
 
-from kairos_defense import cli_agent, cli_live, cli_memory, cli_recall, cli_swarm  # noqa: E402
+from kairos_defense import (  # noqa: E402
+    cli_agent,
+    cli_live,
+    cli_live_mode,
+    cli_memory,
+    cli_recall,
+    cli_swarm,
+)
 
 cli_recall.register(app)
 cli_memory.register(app)
 cli_live.register(app)
+cli_live_mode.register(app)
 cli_swarm.register(app)
 cli_agent.register(app)
 

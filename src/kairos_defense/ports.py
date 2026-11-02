@@ -136,3 +136,18 @@ class ResultCache(Protocol):
 
 class LLM(Protocol):
     def chat(self, messages: list[dict], tools: list[dict] | None = None) -> dict: ...
+
+
+class LiveFeed(Protocol):
+    """Live mode's own store (D-172): ingested detections, the app's live incidents and tracks,
+    learned live history and the matches each rerun showed. Separate from the history so
+    ``live reset`` removes all of it; the ledger is never part of it (rule 7)."""
+
+    def append(self, table: str, rows: Sequence[dict]) -> IngestStat: ...  # live_points, …
+    def put_incident(self, row: dict) -> None: ...  # insert or replace one live incident
+    def put_track(self, row: dict) -> None: ...  # app track id <-> the sensor's track id
+    # learned tracks' track_features and track_signatures rows (closed incidents only, D-176)
+    def learn(self, features: pd.DataFrame, signatures: pd.DataFrame) -> int: ...
+    def add_result(self, row: dict) -> None: ...  # one rerun's shown matches
+    def results(self, incident_id: str) -> list[dict]: ...
+    def reset(self) -> dict[str, int]: ...  # rows removed per table

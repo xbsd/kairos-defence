@@ -49,6 +49,15 @@ class DuckTrackStore:
         self.path = Path(path)
         self.con: duckdb.DuckDBPyConnection = connect_app_db(path, app, read_only=read_only)
 
+    @classmethod
+    def over(cls, con: duckdb.DuckDBPyConnection, path: Path | str) -> DuckTrackStore:
+        """A store on an existing connection (for example a ``cursor()`` of a database another
+        adapter opened through ``connect_app_db``), so a worker thread reads on its own
+        connection (D-172). ``close`` closes that connection only."""
+        store = cls.__new__(cls)
+        store.path, store.con = Path(path), con
+        return store
+
     def close(self) -> None:
         self.con.close()
 

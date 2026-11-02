@@ -1,4 +1,4 @@
-import { Component, type ReactNode } from "react";
+import { Component, Suspense, type ReactNode } from "react";
 
 import { CommandBar } from "../app/CommandBar";
 import { DirectorCaption } from "../director/DirectorOverlay";
@@ -36,6 +36,14 @@ class TheaterBoundary extends Component<{ children: ReactNode }, { error: string
   }
 }
 
+export function TheaterLoading() {
+  return (
+    <div className="grid h-full place-items-center p-8 text-center">
+      <p className="text-13 text-ink-mid">Starting the 3D theater</p>
+    </div>
+  );
+}
+
 /**
  * Live watch (SPEC §17.2): the theater is the hero, the memory rail docks on the right and the
  * instrument rail along the bottom. Below 1280 px the rails stack under the theater.
@@ -57,7 +65,11 @@ export function LiveWatch({ incidentId }: { incidentId: string }) {
           className="relative min-h-[28rem] overflow-hidden rounded-panel border border-hairline xl:col-start-1 xl:row-start-1 xl:min-h-0"
         >
           <TheaterBoundary>
-            <Theater scene={scene} />
+            {/* the theater's own boundary: its fonts and shaders suspend inside the canvas, which
+                must not blank the rails (D-185) */}
+            <Suspense fallback={<TheaterLoading />}>
+              <Theater scene={scene} />
+            </Suspense>
           </TheaterBoundary>
           {sceneError ? (
             <p role="alert" className="absolute top-3 left-3 text-13 text-alert">

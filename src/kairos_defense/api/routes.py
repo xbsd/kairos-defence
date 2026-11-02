@@ -25,6 +25,7 @@ from kairos_defense.live.replay import iso_z
 from kairos_defense.live.scene import installation_scene
 from kairos_defense.live.session import decorate, target_case
 from kairos_defense.memory.canonical import utc_naive
+from kairos_defense.store.composite import is_live_id
 
 router = APIRouter(prefix="/api")
 Svc = Depends(services)
@@ -111,12 +112,16 @@ def dtw(incident_id: str, match_track_id: str, at: float = Query(..., ge=0),
 def history(track_id: str, frame: str = Query("target", pattern="^(target|region)$"),
             svc: Services = Svc) -> dict:  # fmt: skip
     """A past track's 1 Hz path (ghost trails, phase 8): target-relative or region meters. Live
-    tracks are refused (rule 3: tonight is not history)."""
+    tracks are refused (rule 3: tonight is not history) until their incident closes and live
+    mode learns them (D-176): then they are served from the live-mode store."""
+    store = svc.store
+    if is_live_id(track_id) and svc.live is not None:
+        store = svc.live.feed  # learned live history: closed incidents only
     with svc.lock:
-        sig = svc.store.sql("SELECT * FROM track_signatures WHERE track_id = $t", {"t": track_id})
+        sig = store.sql("SELECT * FROM track_signatures WHERE track_id = $t", {"t": track_id})
         if sig.empty:
             raise HTTPException(404, f"no history track {track_id} (live tracks are not history)")
-        f = svc.store.features(track_id)
+        f = store.features(track_id)
     x, y = ("x_rel_m", "y_rel_m") if frame == "target" else ("x_m", "y_m")
     s = sig.iloc[0]
     pts = [[int(r.t_s), _r(getattr(r, x)), _r(getattr(r, y)), _r(r.alt_m)]

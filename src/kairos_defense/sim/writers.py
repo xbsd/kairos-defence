@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import time
+from collections.abc import Sequence
 from pathlib import Path
 
 import duckdb
@@ -82,3 +84,44 @@ def table_hashes(path: Path | str) -> dict[str, str]:
         return out
     finally:
         con.close()
+
+
+# Live mode (D-179): who flew each sensor track the simulator sent. Appended by the simulator,
+# keyed by the sensor's track id (writing a seed's flight again replaces its rows), read only by
+# ``kairos_defense.eval`` (the reveal and ``live check``). ``write_all`` recreates the file, so
+# ``make data`` also clears it.
+LIVE_TRUTH_DDL = """CREATE TABLE IF NOT EXISTS live_truth (
+  sensor_track_id VARCHAR PRIMARY KEY, actor_id VARCHAR, actor_type VARCHAR, nickname VARCHAR,
+  scenario VARCHAR, seed BIGINT, base VARCHAR, flight INTEGER, drone INTEGER,
+  launch_ts TIMESTAMP)"""
+LIVE_TRUTH_COLUMNS = ["sensor_track_id", "actor_id", "actor_type", "nickname", "scenario", "seed",
+                      "base", "flight", "drone", "launch_ts"]  # fmt: skip
+LOCK_RETRIES = 40  # x 0.25 s: another process (the API's reveal) may hold the file briefly
+
+
+def record_live_flights(app: AppConfig, rows: Sequence[dict]) -> int:
+    """Append live flights' ground truth (one row per sensor track) to the truth file; returns
+    the rows written. Retries while another process holds the file."""
+    df = pd.DataFrame(list(rows), columns=LIVE_TRUTH_COLUMNS)
+    path = Path(app.paths.truth)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    for attempt in range(LOCK_RETRIES):
+        try:
+            con = duckdb.connect(str(path))  # the one writer of truth (CLAUDE.md rule 2)
+            break
+        except duckdb.IOException:
+            if attempt == LOCK_RETRIES - 1:
+                raise
+            time.sleep(0.25)
+    try:
+        con.execute(LIVE_TRUTH_DDL)
+        if len(df):
+            con.execute("DELETE FROM live_truth WHERE list_contains($ids, sensor_track_id)",
+                        {"ids": df["sensor_track_id"].tolist()})  # fmt: skip
+            con.register("df_in", df)
+            con.execute("INSERT INTO live_truth SELECT * FROM df_in")
+            con.unregister("df_in")
+    finally:
+        con.close()
+    log.info("recorded %d live flight row(s) in %s", len(df), path)
+    return len(df)

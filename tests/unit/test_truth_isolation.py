@@ -9,7 +9,7 @@ import pytest
 
 from kairos_defense.store.guard import TruthAccessError, connect_app_db, is_truth_path
 
-FORBIDDEN = ("truth.duckdb", "paths.truth", "truth_path")
+FORBIDDEN = ("truth.duckdb", "paths.truth", "truth_path", "live_truth")  # D-170, D-179
 ALLOWED_DIRS = ("kairos_defense/eval/",)
 ALLOWED_FILES = ("kairos_defense/sim/writers.py", "kairos_defense/store/guard.py")  # D-008
 

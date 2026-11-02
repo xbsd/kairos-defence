@@ -3,6 +3,7 @@ paths:
   truth: data/truth.duckdb          # eval only (CLAUDE.md rule 2)
   memory: data/memory.duckdb
   live: data/live.duckdb            # live_* scratch tables of replays (D-103)
+  live_mode: data/live_mode         # live mode: ingested detections, learned live history, clock (D-172)
   lancedb: data/lancedb
   models: models
   reports: reports

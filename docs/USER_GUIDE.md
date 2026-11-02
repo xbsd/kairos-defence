@@ -420,6 +420,8 @@ with the command that fixes it ("no index: run `make index`").
 | `kairos-defense verify-evidence` | Verifies an evidence package | folder, `--ledger`, `--pubkey` |
 | `kairos-defense api` | Serves the REST API, the replay stream and (with `--static`) the web app | `--host`, `--port`, `--static`, `--reload`, `--dump-openapi`, `--memory`, `--live-db`, `--exports`, `--reseed`, `--time-scale` (slow-motion replays for screen capture) |
 | `kairos-defense replay` | Lists the live replays, precomputes their results, or resets the live tables | `--incident`, `--precompute`, `--force`, `--reset`, `--api` |
+| `kairos-defense simulate` | Live mode: flies one scenario and streams its sensor detections to the app (see [Live mode](#live-mode)) | `--scenario`, `--base`, `--actor`, `--second-base`, `--speed`, `--seed`, `--url`, `--dry-run`, `--show-actor` |
+| `kairos-defense live` | Live mode: `check`, `reset`, `status` | see below |
 | `kairos-defense mcp` | Runs the MCP server over stdio | `--allow-proposals`, `--agent`, `--memory`, `--api` |
 | `kairos-defense fetch-models` | Downloads the optional embedding model (the only command that downloads) | `--model` |
 
@@ -433,6 +435,14 @@ The `memory` subcommands:
 | `kairos-defense memory show` | A case as known at a time: `memory show CASE --as-of TS` |
 | `kairos-defense memory delta` | The shift delta: `memory delta --since TS [--until TS] [--installation ID]` |
 | `kairos-defense memory demo` | Known then and known now side by side, on a scratch copy (`--approve` links the top 3) |
+
+The `live` subcommands (live mode, phase 11):
+
+| Command | What it does |
+|---|---|
+| `kairos-defense live check` | Flies every scenario headless against an in-process API and scores it: one `PASS` or `GAP` line per scenario (`--scenarios`, `--speed`, `--timeout`) |
+| `kairos-defense live reset` | Removes every live-mode row (detections, live incidents, learned live history, vectors); the history and the ledger stay |
+| `kairos-defense live status` | Lists the live incidents since the last reset and the learned live tracks |
 
 ### Examples (real output, trimmed)
 
@@ -613,6 +623,18 @@ $ uv run kairos-defense fetch-models
 EmbedderUnavailable: the fastembed package is not installed: run `uv sync --extra fastembed`, then
 `kairos-defense fetch-models`, or set embeddings.provider: hashing
 ```
+
+### Live mode
+
+Besides the replay, Kairos Defense runs live: a separate simulator process flies new, never-seen
+flights on a live calendar after the 18-month history and streams only sensor detections into the
+app (`/ws/ingest`, the contract a real sensor adapter would implement). The app forms incidents
+itself, reruns the matcher, forecast and report recall every 5 s of feed time on what it has
+received, learns each closed incident so the next live flight can match it, and records incidents
+and proposals in the case memory. `make live` serves the web app for the Live page;
+`kairos-defense simulate --scenario returning-prober --speed 20` flies a known prober again, and
+`kairos-defense live check` scores all five scenarios (returning prober, copycat, hobbyist, swarm
+repeat, new operator twice). The full walkthrough, with screenshots, follows in phase 12.
 
 ## 7. Agent tools and the MCP server
 

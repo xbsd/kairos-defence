@@ -15,6 +15,7 @@ class PathsConfig(StrictModel):
     truth: Path
     memory: Path
     live: Path  # live_* scratch tables written by replays (D-103)
+    live_mode: Path  # live mode folder: feed.duckdb, vectors/, clock.json, sim/ (D-172)
     lancedb: Path
     models: Path
     reports: Path
@@ -25,6 +26,8 @@ class PathsConfig(StrictModel):
     def _distinct_dbs(self) -> PathsConfig:
         if len({self.duckdb, self.truth, self.memory, self.live}) != 4:
             raise ValueError("duckdb, truth, memory and live must be four different files")
+        if self.live_mode in {self.duckdb, self.truth, self.memory, self.live, self.lancedb}:
+            raise ValueError("live_mode must be a folder of its own")
         return self
 
 

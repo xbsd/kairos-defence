@@ -24,6 +24,9 @@ fusion:
 live:
   min_track_s: 45
   rerun_every_s: 5
+  idle_close_s: 30                  # live mode: an incident closes after this much feed time without radar points (D-174)
+  join_window_s: 10                 # a new track joins an open incident seen this recently, within swarm.max_spacing_m
+  max_lateness_s: 10                # ingest rejects messages older than the installation's feed time by more (D-173)
 recall:
   hours_window: 3
   radius_m: 5000

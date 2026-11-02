@@ -231,52 +231,62 @@ class Session:
         res = self.loop.result_at(r)
         if res is None:
             return []
-        at = self.incident.ts_at(r)
-        case_id, rows = self._propose(res, r, at)
-        matches = decorate(res["matches"], rows, case_id, self.incident.incident_id, at,
-                           self.loop.offsets)  # fmt: skip
-        out = [json_safe({"type": "match", "t_s": float(r),
-                          "model_version": res["model_version"],
-                          "elapsed_ms": res["elapsed_ms"], "cached": bool(res.get("cached")),
-                          "case_id": case_id, "query_track": res["query_track"],
-                          "target_asset_id": res["target_asset_id"],
-                          "matches": matches})]  # fmt: skip
-        if res.get("forecast"):
-            out.append({"type": "forecast", "t_s": float(r), **res["forecast"]})
-        for kind in ("dtw", "recall"):
-            doc = res.get(kind)
-            if doc is None:
-                continue
-            h = _digest(doc)
-            if self._hashes.get(kind) != h:
-                self._hashes[kind] = h
-                out.append({"type": kind, "t_s": float(r), **doc})
-        return out
-
-    def _propose(self, res: Mapping, r: int, at: datetime) -> tuple[str | None, list[dict]]:
-        if self.memory is None:
-            return None, []
-        rows = self.memory.events()
-        top = [m["incident_id"] for m in res["matches"][:3]]
-        case_id = target_case(rows, top, at)
-        if case_id is None or self.incident.is_swarm:
-            return case_id, rows
         inc = self.incident
-        recorded = any(row["event_type"] == "incident_recorded"
-                       and row["subject_id"] == inc.incident_id for row in rows)  # fmt: skip
-        if not recorded:  # checked on the rows, so it holds after a reseed
-            record_incident(self.memory, {"incident_id": inc.incident_id,
-                                          "installation_id": inc.installation_id,
-                                          "region_id": inc.region_id, "start_ts": inc.start_ts,
-                                          "n_tracks": inc.n_tracks, "is_swarm": inc.is_swarm},
-                            inc.start_ts)  # fmt: skip
-            if self.model is not None:
-                m = self.model
-                register_model(self.memory, m["version"], m["sha256"], at, m.get("file", ""),
-                               m.get("validation"))  # fmt: skip
-        seqs = propose_matches(self.memory, case_id, self.incident.incident_id,
-                               res["matches"][:3], at, query_track=res["query_track"], t_s=r,
-                               model_version=res["model_version"])  # fmt: skip
-        if seqs:
-            rows = self.memory.events()
+        meta = {"incident_id": inc.incident_id, "installation_id": inc.installation_id,
+                "region_id": inc.region_id, "start_ts": inc.start_ts, "n_tracks": inc.n_tracks,
+                "is_swarm": inc.is_swarm}  # fmt: skip
+        return result_messages(res, r, inc.ts_at(r), meta, memory=self.memory, model=self.model,
+                               offsets=self.loop.offsets, hashes=self._hashes)  # fmt: skip
+
+
+def propose(memory, model: Mapping | None, meta: Mapping, res: Mapping, r: int,
+            at: datetime) -> tuple[str | None, list[dict]]:  # fmt: skip
+    """Record the incident (once) and propose the result's top 3 to the case holding the
+    best-ranked top-3 incident (D-106, §15.6 dedup); returns that case (or None) and the ledger
+    rows. Swarm incidents propose nothing (D-010). Shared by replays and live mode (D-181)."""
+    if memory is None:
+        return None, []
+    rows = memory.events()
+    top = [m["incident_id"] for m in res["matches"][:3]]
+    case_id = target_case(rows, top, at)
+    if case_id is None or meta["is_swarm"]:
         return case_id, rows
+    iid = meta["incident_id"]
+    recorded = any(row["event_type"] == "incident_recorded"
+                   and row["subject_id"] == iid for row in rows)  # fmt: skip
+    if not recorded:  # checked on the rows, so it holds after a reseed
+        record_incident(memory, dict(meta), meta["start_ts"])
+        if model is not None:
+            register_model(memory, model["version"], model["sha256"], at, model.get("file", ""),
+                           model.get("validation"))  # fmt: skip
+    seqs = propose_matches(memory, case_id, iid, res["matches"][:3], at,
+                           query_track=res["query_track"], t_s=r,
+                           model_version=res["model_version"])  # fmt: skip
+    if seqs:
+        rows = memory.events()
+    return case_id, rows
+
+
+def result_messages(res: Mapping, r: int, at: datetime, meta: Mapping, *, memory,
+                    model: Mapping | None, offsets: Mapping[str, int],
+                    hashes: dict[str, str]) -> list[dict]:  # fmt: skip
+    """The stream messages of one rerun result: ``match`` (decorated with the memory, §17.8),
+    ``forecast``, and ``dtw`` / ``recall`` only when they changed since ``hashes``."""
+    case_id, rows = propose(memory, model, meta, res, r, at)
+    matches = decorate(res["matches"], rows, case_id, meta["incident_id"], at, offsets)
+    out = [json_safe({"type": "match", "t_s": float(r), "model_version": res["model_version"],
+                      "elapsed_ms": res["elapsed_ms"], "cached": bool(res.get("cached")),
+                      "case_id": case_id, "query_track": res["query_track"],
+                      "target_asset_id": res["target_asset_id"],
+                      "matches": matches})]  # fmt: skip
+    if res.get("forecast"):
+        out.append({"type": "forecast", "t_s": float(r), **res["forecast"]})
+    for kind in ("dtw", "recall"):
+        doc = res.get(kind)
+        if doc is None:
+            continue
+        h = _digest(doc)
+        if hashes.get(kind) != h:
+            hashes[kind] = h
+            out.append({"type": kind, "t_s": float(r), **doc})
+    return out
