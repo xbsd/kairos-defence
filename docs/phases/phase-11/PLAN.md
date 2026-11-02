@@ -111,9 +111,13 @@ Each is recorded in `docs/DECISIONS.md` during the build (numbers are provisiona
    copycat; 19:00 to 23:00 for hobbyists and the invented operator; the swarm start window), then
    reserves the clock up to the end of its last flight plus `idle_close_s` plus 60 s. The wind of a
    live flight is drawn from the scenario seed (not from the night), so the same seed flies the
-   same flight relative to its launch on any date. The seed is printed and recorded (status, the
-   simulator's log, the truth row); when omitted it comes from OS entropy, and every draw after
-   that is `rng_for(seed, "live", …)` (rule 4).
+   same flight relative to its launch on any date and launch time of night. The seed is printed
+   and recorded (status, the truth row). When omitted it is derived deterministically:
+   `rng_for(world_seed, "live", "seed", str(n))` with `n` the launch counter kept in `clock.json`
+   (`LiveClock.default_seed`, incremented by `reserve`), so successive launches differ and a run
+   stays reproducible; every draw after that is `rng_for(seed, "live", …)` or the flight's own
+   `rng_for(seed, "flight", key, …)` streams (rule 4). The API derives it the same way before
+   launching and passes it to the child explicitly.
 8. **D-178 Scenarios.** `sim/live_scenarios.py` builds them from the generator's functions:
    `returning-prober` (`actors.make_flight` with `prober_spec`, actors P1 to P6, default P1,
    `--base` among the actor's bases, default its first base, or `random` to let the seed choose the
@@ -121,12 +125,14 @@ Each is recorded in `docs/DECISIONS.md` during the build (numbers are provisiona
    hobbyist plan from the base's park); `swarm-repeat` (`swarm.swarm_plan`, `drone_paths`,
    `drone_plans`, team S1 or S2, default S1, the team's bases); `new-operator-twice` (an invented
    operator `N1`: an orbit around `hq`, radius 260 m clockwise, 2 laps, altitude 70 to 90 m, cruise
-   12 m/s, RF family `FAM-40` (used by no actor), Remote ID off, launch 1,400 m at bearing 45°; flown
+   12 m/s, RF family `FAM-24` (used by no actor), Remote ID off, launch 1,400 m at bearing 45°; flown
    at `--base`, then at `--second-base`, default the next installation of the same region, after
    the first incident has closed). Kinematics and sensing are `kinematics.build_reference`,
    `sample_reference`, `fly`, `sensors.radar_track`, `rf_track`, `rid_track`; a returning drone
    broadcasts its known Remote ID serial (`stable_serial` of the world seed). Sensor track ids are
-   opaque hashes of (seed, flight key, drone): unique, reproducible, and they carry no actor.
+   opaque hashes of (seed, flight key, drone, launch instant): unique per launch (relaunching a
+   seed on the forward-only clock gives new ids), reproducible, and they carry no actor; the
+   tracker also treats an id whose incident has closed as a new track.
 9. **D-179 Ground truth of live flights, and the reveal.** The simulator writes one row per sensor
    track it sends through `sim/writers.py` (the only truth writer) into a truth table `live_truth`
    (`sensor_track_id`, `actor_id`, `actor_type`, `nickname`, `scenario`, `seed`, `base`, `flight`,
@@ -136,14 +142,18 @@ Each is recorded in `docs/DECISIONS.md` during the build (numbers are provisiona
    learned live tracks), and returns the actor or team, nickname, scenario, seed, one verdict row
    per rerun (rank of the first same-actor flight among the shown matches, the top match and its
    actor) and the scenario expectation with plain words. `GET /api/live/incidents/{id}/reveal`
-   serves it (404 unknown, 409 unless closed); nothing revealed is stored. `live reset` does not
-   touch the truth file (the API never writes truth); rows of reset incidents are simply never
-   joined again.
+   serves it (404 unknown, 409 unless closed); nothing revealed is stored. `live_truth` is the
+   simulator's ground truth, not app data: `live reset` (API or CLI) does not touch the truth file,
+   because the API may reach truth only through `eval`'s read-only reveal (D-170) and only the
+   sim writer writes it; rows of reset incidents are never joined again (their sensor track ids
+   are unique per launch), and `make data` recreates the file.
 10. **D-180 Expectations (scored by the same `eval` function).** Times are seconds after the
     incident's first radar point. `returning-prober`: met when some rerun at or before T+120 shows
     a same-actor flight in the top 3 ("first recognized at T+x (rank r)"; "top match from T+y" is
-    the earliest rerun from which rank 1 stays same-actor). `copycat`: met when the rerun at or
-    before T+120 (the latest) shows a C1 flight in the top 5 above every P1 flight. `hobbyist`: no
+    the earliest rerun from which rank 1 stays same-actor): recognition is an event, so the first
+    time counts. `copycat`: met when the latest rerun at or before T+120 shows a C1 flight in the
+    top 5 above every flight of the actor it mimics (P1): this is a ranking relation that must
+    hold at the decision time, not by chance at one early rerun when few points are known. `hobbyist`: no
     expectation (always met); the top score is reported. `swarm-repeat`: met when the incident's
     final swarm rerun ranks a past event of the same team first. `new-operator-twice`: flight 1
     reports that no same-actor history existed (met when none did); flight 2 is met when its final
@@ -159,11 +169,19 @@ Each is recorded in `docs/DECISIONS.md` during the build (numbers are provisiona
     seed as before.
 12. **D-182 Launching the simulator.** `POST /api/sim/launch {scenario, actor?, base?,
     second_base?, speed, seed?}` validates against `GET /api/live/scenarios` and starts
-    `python -m kairos_defense.cli simulate … --url ws://127.0.0.1:<port>/ws/ingest --live-mode-dir …`
-    as a separate process (stdout to `live_mode/sim/<n>.log`, never read by the API). One simulator
-    at a time (409 while one runs). The actor or team chosen in the launcher is passed to the child
-    and not kept by the API (status shows scenario, base, speed and seed only). `POST /api/live/reset`
-    stops a running simulator first. The API stops its children on shutdown.
+    `python -m kairos_defense.cli simulate … --url ws://127.0.0.1:<port>/ws/ingest --live-mode-dir …
+    --parent-pid <api pid>` as a separate process. **Who flew is never written outside the truth
+    file**: the simulator prints the actor and nickname only when its stdout is an interactive
+    terminal (or with `--show-actor`, which the API never passes); a launched child's stdout and
+    stderr go to `live_mode/sim/<n>.log`, which therefore holds the seed, times and counts but
+    never the actor; the API never logs the child's argv (which carries `--actor`) and never
+    reads the log. One simulator at a time (409 while one runs). The actor or team chosen in the
+    launcher is passed to the child and not kept by the API (status shows scenario, base, speed and
+    seed only). `POST /api/live/reset` stops a running simulator first; the API stops its children
+    on shutdown; a child whose parent died stops (`--parent-pid`), and `FeedClient` gives up after
+    its bounded reconnects. When a launched simulator exits, the API flushes the installations it
+    fed (feed time moves past the last point by `idle_close_s`), so an incident closes even if the
+    feed died mid-flight.
 13. **D-183 `live check`.** `kairos-defense live check [--scenarios all|a,b] [--speed 50]
     [--timeout 900]` (in `eval/live_check.py`, run by `cli_live_mode.py`): scratch stores under
     `data/cache/live_check/` (live-mode folder, a reseeded ledger copy, exports), the API started
@@ -177,12 +195,19 @@ Each is recorded in `docs/DECISIONS.md` during the build (numbers are provisiona
     Live watch components understand (`hello` per incident, `clock` at up to 10 Hz on feed time with
     `speed` = the feed rate, `point`, `rf`, `rid`, `ingest`, `features`, `match`, `forecast`,
     `dtw`, `recall`, `ledger`, `error`) plus `incident_opened`, `incident_closed` and `swarm_match`.
-    They form `LiveStreamMessage` in `api/schemas_live.py`; the replay's `StreamMessage` (exactly
-    §16.3, contract test) is unchanged. On connect: `hello` for the open incident (or an empty one:
+    They form `LiveStreamMessage` in `api/schemas_live.py`, exported to OpenAPI through
+    `GET /api/schema/live-stream` (as `/api/schema/stream` exports the replay's) together with the
+    ingest union, so `types.gen.ts` covers them; the replay's `StreamMessage` (exactly §16.3,
+    contract test) is unchanged. On connect: `hello` for the open incident (or an empty one:
     `incident_id: ""` when nothing flies) and a catch-up of the last 120 s. The web Live page is
     route `/live` (Live watch stays `/live/:incidentId`), in the Pages menu and behind a Replay or
     Live switch in the command bar, whose live mode shows the feed's local time, the current
-    incident's T+ and a feed status chip instead of the replay controls.
+    incident's T+ and a feed status chip instead of the replay controls. The page has an
+    installation picker (the watched installation; launching follows the launch base), "Live
+    incidents this session" from `GET /api/live/status` (every incident since the last reset, so
+    the list survives a reload) updated by the stream, and Reset live data behind a confirm
+    dialog. `GET /api/history/{track_id}` reads through the composite store, so learned live tracks
+    have ghost trails too.
 
 ## Work breakdown
 
@@ -199,8 +224,9 @@ Each step ends with `make check` and a checkpoint commit (`phase 11: checkpoint 
    live clock × speed, heartbeats every tick and until `idle_close_s + 2` after the last detection,
    reconnect with backoff, clean stop on SIGINT/SIGTERM), `sim/writers.py`
    (`record_live_flights(app, rows)`), CLI `simulate` in `cli_live_mode.py`
-   (`--scenario --base --actor --second-base --speed --seed --url --live-mode-dir --dry-run`;
-   prints the seed, the launch time and, in its own terminal, the actor).
+   (`--scenario --base --actor --second-base --speed --seed --url --live-mode-dir --dry-run
+   --show-actor --parent-pid`; prints the seed, the launch time and the counts; the actor only on
+   an interactive terminal or with `--show-actor`, D-182).
 3. **App live core.** `live/incidents.py` (`IncidentTracker`, pure), `live/feed.py` (`LiveHub`:
    ingest, tracker, feed time, stream fan-out and catch-up per installation, status, reset),
    `live/runner.py` (the worker: reruns with `DtwMatcher`/forecast/recall/lens or `SwarmMatcher`,
@@ -238,12 +264,14 @@ Python (fast unless marked slow):
   - `test_detections_are_time_ordered_and_carry_no_actor`: sorted `ts`; no key or value names the
     actor, team, nickname or scenario; sensor track ids do not contain the actor id.
   - `test_new_operator_flies_twice_at_two_bases_after_close`: second launch ≥ first flight's last
-    detection + `idle_close_s`; distinct bases; `FAM-40` used by no configured actor.
+    detection + `idle_close_s`; distinct bases; `FAM-24` used by no configured actor.
   - `test_swarm_repeat_flies_the_team`: S1 gives 5 tracked drones at one base.
   - `test_bad_actor_or_base_is_refused`.
 - `tests/unit/test_live_clock.py`: default start is 2026-09-01 21:00 local at the base (after
   `calendar.end_local`); launch falls in the actor's window; the clock persists and only moves
-  forward; a second scenario starts after the first one's reservation.
+  forward; a second scenario starts after the first one's reservation; `default_seed` is a pure
+  function of the world seed and the launch counter (same state, same seed; the next launch
+  another).
 - `tests/unit/test_feed_client.py` (fake transport, fake clock): batches leave on the scaled clock
   (speed 1 and 50), heartbeats continue to `idle_close_s + 2` after the last detection, reconnect
   after a dropped connection resends the unacknowledged batch, `stop()` ends cleanly.
@@ -258,10 +286,13 @@ Python (fast unless marked slow):
 - `tests/unit/test_live_stores.py`: `DuckFeedStore` appends, views and `sensor_context_until` on
   live rows; composite unions and ordering; composite vector search merges by distance; reset
   empties every live table and vector; the feed store refuses the truth path.
-- `tests/unit/test_live_hub.py` (on `toy_models`, a scratch live-mode folder, a ledger copy):
-  feeding a simulated P1 flight at BRAVO opens an incident, reruns start at T+45 every 5 s with the
-  points up to each rerun only (`rows_used`, last point time ≤ start + t), results are identical
-  at speed 1 and 50, proposals land in the ledger once (dedup), close learns the track.
+- `tests/unit/test_live_hub.py` (on `toy_models`, a scratch live-mode folder, a ledger copy; the
+  detections are fed directly with feed timestamps and the worker drained synchronously, so no
+  test waits in real time): feeding a simulated P1 flight at BRAVO opens an incident, reruns start
+  at T+45 every 5 s with the points up to each rerun only (`rows_used`, last point time ≤ start +
+  t), results are identical whether the feed comes in 1 s or 50 s batches, proposals land in the
+  ledger once (dedup), close learns the track; relaunching the same seed later opens a new
+  incident with new tracks; `flush` closes an incident whose feed went silent.
 - `tests/unit/test_live_learning.py`: **no look-ahead**: a live query never sees a history or live
   track that started after it, and an open incident is never a candidate; after close, the learned
   track is searchable by a later query (prefilter, signatures, features) and absent for an earlier
@@ -280,9 +311,15 @@ Python (fast unless marked slow):
   team and both new-operator flights.
 - `tests/unit/test_truth_isolation.py`: `FORBIDDEN` gains `live_truth`, so no module outside
   `eval/` and `sim/writers.py` can name the table (the scan and the guard tests stay).
-- `tests/unit/test_cli_live_mode.py`: `simulate --dry-run` prints the plan without the actor in its
-  first line and without sending; `live reset` and `live status` on a scratch folder; `live check
-  --help`; argument errors.
+- `tests/unit/test_cli_live_mode.py`: `simulate --dry-run` (not a terminal) prints the plan and
+  never the actor id or nickname, and sends nothing; with `--show-actor` it names the actor;
+  `live reset` and `live status` on a scratch folder; `live check --help`; argument errors.
+- `tests/unit/test_api_live.py` (also): a launched child (the real `simulate --dry-run` through
+  the launcher) writes a log under `live_mode/sim/` that contains neither the actor id nor its
+  nickname, and the API's log records hold no `--actor`.
+- `tests/unit/test_api_live_contract.py`: one example of every `LiveStreamMessage` type and every
+  ingest message validates; the live union is exactly the 13 §16.3 types plus `incident_opened`,
+  `incident_closed` and `swarm_match`; `/api/schema/live-stream` is in the OpenAPI document.
 - `tests/unit/test_api_contract.py` and `test_docs.py` keep passing (the guide gains the new
   commands, see Documentation).
 - Slow: `tests/slow/test_full_live_mode.py`: `live check --scenarios returning-prober --speed 50`
@@ -290,16 +327,19 @@ Python (fast unless marked slow):
 
 Web:
 
-- Vitest: `liveStore.test.ts` (incident list from `incident_opened` and `incident_closed`, status,
-  reveal state), `liveDispatch.test.ts` (live messages reach the replay and match stores, a new
-  incident resets them), `LiveMode.test.tsx` (launcher options per scenario, "Nothing is flying",
-  open incidents show no Reveal button, the reveal card's words), `routes.test.ts` (the `/live`
+- Vitest (in `web/tests/`): `liveStore.test.ts` (incident list from status and from
+  `incident_opened` and `incident_closed`, reveal state), `liveDispatch.test.ts` (live messages
+  reach the replay and match stores, a new incident resets them), `LiveMode.test.tsx` (launcher
+  options per scenario, the installation picker, "Nothing is flying", open incidents show no Reveal
+  button, the reveal card's words, Reset asks for confirmation), `router.test.ts` (the `/live`
   route), `CommandBar.test.tsx` (live mode shows the feed clock and hides replay controls).
 - Playwright `e2e/livemode.spec.ts`: the Live page at 1440 × 900 launches `returning-prober` at
   speed 20 at BRAVO, sees an incident open and matches appear, waits for it to close, presses
   Reveal who flew and sees the operator (`P1`, `County Rd operator`) and a verdict; axe clean;
-  screenshots `phase11-live-*` to `reports/figures/ui/`; then resets live data and reseeds the
-  ledger. Existing replay, Director and guide specs unchanged.
+  screenshots `phase11-live-*` to `reports/figures/ui/`. `test.setTimeout(420_000)` (queued reruns
+  at speed 20 can trail the feed by a minute or two here); live reset and a ledger reseed run in
+  `afterAll`, so a failure cannot leak into the specs after it. Existing replay, Director and guide
+  specs unchanged.
 
 ## Exit-check mapping
 
@@ -320,7 +360,9 @@ also go into PROGRESS.md.
   ingest contract), `store/README.md`, `eval/README.md`, `match/README.md` (the extracted
   `match_flight` and `forget`), `config/README.md`, `src/kairos_defense/README.md` (the CLI
   modules), `web/README.md`.
-- `docs/DEMO.md`: a short "Live mode" section. `docs/USER_GUIDE.md`: a short "Live mode" stub
+- `docs/DEMO.md`: a short "Live mode" section, including: press R (reseed) before running the
+  replay demo after live use, because live ledger events are stamped on the live calendar and
+  push `recorded_at` forward (D-010). `docs/USER_GUIDE.md`: a short "Live mode" stub
   naming `kairos-defense simulate`, `live check`, `live reset` and `live status` (so the CLI
   coverage test passes; phase 12 writes the full section with screenshots).
 - Root `README.md` Status section; `docs/PROGRESS.md` session log and exit-check evidence (not
@@ -350,4 +392,22 @@ live-mode guide with screenshots (phase 12).
 
 ## Review changes
 
-<!-- filled in when a reviewer's blocking issues are resolved -->
+Review 1 (`PLAN_REVIEW-1.json`) found two blocking issues; both are resolved:
+
+1. **Who flew could reach a log under the app's data folder** (rule 2). D-182 now prints the
+   actor only on an interactive terminal or with `--show-actor` (never passed by the API), keeps
+   launched children's logs free of it, never logs the child's argv, and adds the test that a
+   launched child's log contains neither the actor id nor its nickname (`test_api_live.py`,
+   `test_cli_live_mode.py`).
+2. **Default seeds from OS entropy** (rule 4). D-177 now derives the seed from the world seed and
+   a launch counter kept in `clock.json` (`LiveClock.default_seed`), tested in
+   `test_live_clock.py`.
+
+Suggestions applied: the reason `live_truth` survives `live reset` (D-179); sensor track ids
+salted with the launch instant and closed ids treated as new tracks (D-178, hub test); flushing
+the installations a simulator fed when it exits, `--parent-pid`, bounded reconnects (D-182);
+the Playwright timeout and `afterAll` cleanup; `GET /api/schema/live-stream` and a live contract
+test; the installation picker, the confirm dialog and the reload-proof incident list (D-184); the
+composite store behind `/api/history` (D-184); why the returning-prober and copycat readings of
+"by T+120 s" differ (D-180); the R note in `DEMO.md`; the fake-clock note for `test_live_hub`;
+the Vitest file name and location.
