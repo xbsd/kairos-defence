@@ -6,6 +6,12 @@ import type {
   ChatResponse,
   ChatStatus,
   CaseSummary,
+  LiveResetResponse,
+  LiveStatus,
+  RevealResponse,
+  ScenarioInfo,
+  SimLaunchRequest,
+  SimLaunchResponse,
   DecisionResponse,
   DtwMsg,
   EvidenceLine,
@@ -132,6 +138,16 @@ export const api = {
   chatStatus: () => getJson<ChatStatus>("/api/chat/status"),
   chat: (messages: ChatMessage[]) => postJson<ChatResponse>("/api/chat", { messages }),
   adminReset: () => postJson<{ reset: Record<string, number> }>("/api/admin/reset", {}),
+  /** Live mode (D-184): feeds, incidents since the last reset, worker queue, simulator. */
+  liveStatus: () => getJson<LiveStatus>("/api/live/status"),
+  liveScenarios: () => getJson<ScenarioInfo[]>("/api/live/scenarios"),
+  /** Start the simulator for a scenario as a separate process (an explicit click only). */
+  simLaunch: (req: SimLaunchRequest) => postJson<SimLaunchResponse>("/api/sim/launch", req),
+  /** Remove every live-mode row (after a confirm); the history and the ledger stay. */
+  liveReset: () => postJson<LiveResetResponse>("/api/live/reset", {}),
+  /** Who flew a closed live incident (D-170): computed on request, never stored. */
+  reveal: (incidentId: string) =>
+    getJson<RevealResponse>(`/api/live/incidents/${enc(incidentId)}/reveal`),
   adminReseed: () => postJson<{ head_seq: number }>("/api/admin/reseed", {}),
   scene: (installationId: string) =>
     getJson<Scene>(`/api/installations/${encodeURIComponent(installationId)}/scene`),

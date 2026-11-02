@@ -61,6 +61,7 @@ class CloseTask:
 @dataclass
 class _Inst:
     feed_ms: int | None = None
+    heard_ms: int | None = None  # the last RF or Remote ID detection heard here
     rate: float = 1.0
     wall: float = 0.0  # wall time of the last message
     recent: deque = field(default_factory=deque)  # (ms, message) of the current incident
@@ -141,6 +142,8 @@ class LiveHub:
                     st.rate = float(m.get("rate") or 1.0)
                     continue
                 det += 1
+                if m["type"] != "point":
+                    st.heard_ms = ms if st.heard_ms is None else max(st.heard_ms, ms)
                 getattr(self, "_" + m["type"])(m, inst, ms, rows)
             for table, rs in rows.items():
                 stat = self.feed.append(table, rs)
@@ -241,7 +244,7 @@ class LiveHub:
                     continue  # nothing new since the previous rerun: same result
                 self._snap_n[inc.incident_id] = len(snap)
                 self.submit(RerunTask(self.meta(inc), float(t), snap))
-        for inc in self.tracker.idle(inst, st.feed_ms):
+        for inc in self.tracker.idle(inst, st.feed_ms, st.heard_ms):
             self._persist(inc)
             self.submit(CloseTask(self.meta(inc), self._snapshot(inc)))
         self._features(inst)
@@ -279,20 +282,22 @@ class LiveHub:
             for inst in installations:
                 st = self._inst[inst]
                 for inc in self.tracker.open_incidents(inst):
-                    st.feed_ms = max(st.feed_ms or 0, inc.last_ms + self.tracker.idle_ms + 1)
+                    last = max(inc.last_ms, st.heard_ms or 0)
+                    st.feed_ms = max(st.feed_ms or 0, last + self.tracker.idle_ms + 1)
                     n += 1
                 self._advance(inst)
         return n
 
     # --- from the worker ----------------------------------------------------------------------
     def result(self, incident_id: str, msgs: list[dict]) -> None:
-        """A rerun's messages: stream them if the incident is the installation's current one."""
+        """A rerun's messages: stream them if the incident is the installation's current one
+        (a backfilled rerun brings none)."""
         with self.lock:
             inc = self.tracker.incidents.get(incident_id)
             if inc is None:
                 return  # reset meanwhile
             inc.reruns += 1
-            if self.tracker.current(inc.installation_id) is inc:
+            if msgs and self.tracker.current(inc.installation_id) is inc:
                 self._inst[inc.installation_id].results = list(msgs)
                 for m in msgs:
                     self._emit(inc.installation_id, m, keep=False)
@@ -335,12 +340,11 @@ class LiveHub:
             site, st = self.sites[inst], self._inst[inst]
             inc = self.tracker.current(inst)
             start = inc.start_ms if inc else (st.feed_ms or epoch_ms(self.history_end))
-            now = st.feed_ms if st.feed_ms is not None else start
             live = self.scoring.live
             return {"type": "hello", "incident_id": inc.incident_id if inc else "",
                     "installation_id": inst, "region_id": site.region_id,
                     "start_ts": iso_z(_ms_to_dt(start)),
-                    "duration_s": max(0.0, (now - start) / 1000) if inc else 0.0,
+                    "duration_s": 0.0,  # open-ended: a live incident has no known end
                     "speed": st.rate, "playing": self._active(st),
                     "tracks": list(inc.tracks) if inc else [],
                     "is_swarm": bool(inc and inc.is_swarm), "matching": self.matching,
@@ -382,7 +386,7 @@ class LiveHub:
                 self._emit(inst, {"type": "clock", "t_s": 0.0,
                                   "ts": iso_z(_ms_to_dt(st.feed_ms or 0)), "speed": st.rate,
                                   "playing": False, "seeked": True}, keep=False)  # fmt: skip
-                st.feed_ms, st.wall = None, 0.0
+                st.feed_ms, st.heard_ms, st.wall = None, None, 0.0
                 self._emit(inst, self.hello(inst), keep=False)
 
     def feed_state(self) -> dict[str, dict]:

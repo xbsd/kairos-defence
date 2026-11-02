@@ -23,9 +23,9 @@ def played(live_services, world, tmp_path_factory):
     seen = []
     orig = live.compute.rerun
 
-    def spy(task):
+    def spy(task, fresh=True):
         seen.append((task.t_s, task.meta["start_ts"], task.points["ts"].max(), len(task.points)))
-        return orig(task)
+        return orig(task, fresh)
 
     live.compute.rerun = spy
     acks = feed(live.hub, sc, frame_s=1.0)
@@ -152,3 +152,24 @@ def test_the_hub_refuses_what_only_the_app_can_check(live_services) -> None:
                       "ts": "2026-09-10T02:10:00Z"}]))  # fmt: skip
     late = hub.ingest(rows([ok]))  # 10 min behind the feed time
     assert late["rejected"][0]["reason"].startswith("late")
+
+
+def test_the_worker_runs_the_newest_rerun_first_then_backfills() -> None:
+    from datetime import datetime
+
+    from kairos_defense.live.feed import CloseTask, RerunTask
+    from kairos_defense.live.runner import LiveWorker
+
+    done = []
+    w = LiveWorker(lambda t, fresh: done.append((type(t).__name__, getattr(t, "t_s", None),
+                                                 fresh)))  # fmt: skip
+    meta = {"incident_id": "LIVE-A", "start_ts": datetime(2026, 9, 2)}
+    for t in (45.0, 50.0, 55.0, 60.0):
+        w.submit(RerunTask(meta, t, None))
+    w.submit(CloseTask(meta, None))
+    w.start()
+    assert w.wait_idle(10)
+    w.stop()
+    assert done == [("RerunTask", 60.0, True), ("RerunTask", 45.0, False),
+                    ("RerunTask", 50.0, False), ("RerunTask", 55.0, False),
+                    ("CloseTask", None, False)]  # fmt: skip

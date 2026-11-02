@@ -1,5 +1,3 @@
-import { Component, Suspense, type ReactNode } from "react";
-
 import { CommandBar } from "../app/CommandBar";
 import { DirectorCaption } from "../director/DirectorOverlay";
 import { useThrottledStore } from "../lib/useThrottledStore";
@@ -12,37 +10,9 @@ import { RegionConstellation } from "../panels/RegionConstellation";
 import { Recorder } from "../panels/Recorder";
 import { Signals } from "../panels/Signals";
 import { StreamPanel } from "../panels/Stream";
-import { Theater } from "../three/Theater";
+import { TheaterFrame } from "../three/TheaterFrame";
 import { directorStore } from "../state/directorStore";
 import { useReplay } from "../state/useReplay";
-
-/** Keeps the DOM panels alive if WebGL fails (headless browsers, old GPUs). */
-class TheaterBoundary extends Component<{ children: ReactNode }, { error: string | null }> {
-  override state = { error: null as string | null };
-  static getDerivedStateFromError(e: unknown) {
-    return { error: e instanceof Error ? e.message : String(e) };
-  }
-  override render() {
-    if (this.state.error)
-      return (
-        <div role="alert" className="grid h-full place-items-center p-8 text-center">
-          <div>
-            <p className="text-15 text-ink-hi">The 3D theater could not start.</p>
-            <p className="mt-1 text-13 text-ink-mid">{this.state.error}</p>
-          </div>
-        </div>
-      );
-    return this.props.children;
-  }
-}
-
-export function TheaterLoading() {
-  return (
-    <div className="grid h-full place-items-center p-8 text-center">
-      <p className="text-13 text-ink-mid">Starting the 3D theater</p>
-    </div>
-  );
-}
 
 /**
  * Live watch (SPEC §17.2): the theater is the hero, the memory rail docks on the right and the
@@ -64,13 +34,7 @@ export function LiveWatch({ incidentId }: { incidentId: string }) {
           aria-label="Live theater"
           className="relative min-h-[28rem] overflow-hidden rounded-panel border border-hairline xl:col-start-1 xl:row-start-1 xl:min-h-0"
         >
-          <TheaterBoundary>
-            {/* the theater's own boundary: its fonts and shaders suspend inside the canvas, which
-                must not blank the rails (D-185) */}
-            <Suspense fallback={<TheaterLoading />}>
-              <Theater scene={scene} />
-            </Suspense>
-          </TheaterBoundary>
+          <TheaterFrame scene={scene} />
           {sceneError ? (
             <p role="alert" className="absolute top-3 left-3 text-13 text-alert">
               Scene: {sceneError}

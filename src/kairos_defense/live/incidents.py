@@ -7,8 +7,11 @@ Pure logic on feed time (the newest timestamp received at an installation, heart
   ``live.join_window_s`` seconds and ``swarm.max_spacing_m`` meters; otherwise it opens a new
   incident whose T+0 is that first point.
 - An incident with ``swarm.min_drones`` or more tracks is a swarm incident.
-- An incident closes when feed time passes its last radar point by ``live.idle_close_s``. A
-  sensor track seen again after its incident closed starts a new track.
+- An incident closes when feed time passes its last detection by ``live.idle_close_s``: its
+  tracks' radar points, or RF and Remote ID heard at the installation (they are not tied to a
+  track at ingest), so a radar dropout while the RF sensor still hears the drone does not split
+  the flight (incidents span every sensor's detections, as the generator's do, D-028). A sensor
+  track seen again after its incident closed starts a new track.
 
 Ids: ``LIVE-<BASE>-<YYMMDD>-<HHMMSS>`` of the first point in local time (``-2``, ``-3`` … on a
 clash), tracks ``<incident>-T<n>``; they never carry the actor. Times are UTC epoch ms.
@@ -141,12 +144,14 @@ class IncidentTracker:
                     return inc
         return None
 
-    def idle(self, installation_id: str, feed_ms: int) -> list[LiveIncidentState]:
-        """Open incidents at an installation whose last point is more than ``idle_close_s``
-        behind feed time; they become ``closing``."""
+    def idle(self, installation_id: str, feed_ms: int,
+             heard_ms: int | None = None) -> list[LiveIncidentState]:  # fmt: skip
+        """Open incidents at an installation with no detection for more than ``idle_close_s``
+        of feed time (their last radar point, or ``heard_ms``: the last RF or Remote ID heard
+        at the installation); they become ``closing``."""
         out = []
         for inc in self.open_incidents(installation_id):
-            if feed_ms - inc.last_ms > self.idle_ms:
+            if feed_ms - max(inc.last_ms, heard_ms or 0) > self.idle_ms:
                 inc.state = "closing"
                 out.append(inc)
         return out

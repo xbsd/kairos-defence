@@ -28,6 +28,7 @@ const ShiftDelta = lazy(() =>
 );
 const Eval = lazy(() => import("../pages/Eval").then((m) => ({ default: m.Eval })));
 const SwarmView = lazy(() => import("../pages/SwarmView").then((m) => ({ default: m.SwarmView })));
+const LiveMode = lazy(() => import("../pages/LiveMode").then((m) => ({ default: m.LiveMode })));
 
 function useOsReducedMotion(): void {
   useEffect(() => {
@@ -93,6 +94,7 @@ function Page({ route }: { route: Route }): ReactNode {
     case "notfound":
       return <NotFound path={route.path} />;
     case "live":
+    case "livemode":
       return null;
   }
 }
@@ -110,6 +112,10 @@ export function App() {
       {route.name === "live" ? (
         <Suspense fallback={<Loading />}>
           <LiveWatch incidentId={route.incidentId} />
+        </Suspense>
+      ) : route.name === "livemode" ? (
+        <Suspense fallback={<Loading />}>
+          <LiveMode />
         </Suspense>
       ) : (
         <>

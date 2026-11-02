@@ -12,14 +12,15 @@ running each task as it is submitted: the tests). ``LiveCompute.handle`` does th
   (``SwarmMatcher.match_flight``) and a ``swarm_match`` message; swarms propose nothing.
 - ``CloseTask``: learn the incident (``learn.learn_incident``), then tell the hub it is closed.
 
-Every result is computed whatever the feed speed, so results are identical at speed 1 and 50;
-at high speed they arrive after the theater (``pending`` says how many tasks wait).
+Every rerun is computed whatever the feed speed, so the recorded results are identical at speed 1
+and 50. At high speed the worker computes the newest rerun first (streamed and proposed: the
+screen stays current) and backfills the skipped ones afterwards (recorded only); ``pending`` says
+how many tasks wait.
 """
 
 from __future__ import annotations
 
 import logging
-import queue
 import threading
 import time
 from collections.abc import Callable
@@ -56,10 +57,12 @@ class LiveCompute:
         self.scoring, self.sites, self.offsets, self.lock = scoring, sites, offsets, lock
         self._hashes: dict[str, dict[str, str]] = {}
 
-    def handle(self, task) -> None:
+    def handle(self, task, fresh: bool = True) -> None:
+        """Run one task; a backfilled rerun (``fresh=False``) is recorded, not streamed or
+        proposed (its moment has passed on screen)."""
         try:
             if isinstance(task, RerunTask):
-                msgs = self.rerun(task)
+                msgs = self.rerun(task, fresh)
                 self.hub.result(task.meta["incident_id"], msgs)
             elif isinstance(task, CloseTask):
                 self.hub.closed(task.meta["incident_id"], self.close(task))
@@ -69,10 +72,11 @@ class LiveCompute:
                 self.hub.closed(task.meta["incident_id"], {"learned_tracks": 0})
 
     # --- reruns -------------------------------------------------------------------------------
-    def rerun(self, task: RerunTask) -> list[dict]:
+    def rerun(self, task: RerunTask, fresh: bool = True) -> list[dict]:
         meta, r = task.meta, round(task.t_s)
         if meta["is_swarm"]:
-            return self._swarm(task)
+            msgs = self._swarm(task)
+            return msgs if fresh else []
         if self.matcher is None:
             return []
         first = meta["tracks"][0]
@@ -96,6 +100,8 @@ class LiveCompute:
                               "model_version": res["model_version"],
                               "elapsed_ms": float(res["elapsed_ms"]),
                               "matches": compact(res["matches"])})  # fmt: skip
+        if not fresh:
+            return []
         record = {k: meta[k] for k in ("incident_id", "installation_id", "region_id", "start_ts",
                                        "n_tracks", "is_swarm")}  # fmt: skip
         hashes = self._hashes.setdefault(meta["incident_id"], {})
@@ -140,13 +146,20 @@ class LiveCompute:
 
 
 class LiveWorker:
-    """A FIFO of tasks on one thread (``threaded=False``: run on submit, for tests)."""
+    """The live work queue on one thread (``threaded=False``: run on submit, for tests).
 
-    def __init__(self, handle: Callable[[object], None], *, threaded: bool = True) -> None:
+    Fresh first, then backfill (D-175): the next task is the newest rerun of the newest incident
+    when it is newer than anything computed for that incident (``fresh``: its result is
+    streamed and proposed); otherwise the oldest skipped rerun (backfill: recorded only), and a
+    close once no rerun is pending. So the screen always shows the latest second's result, every
+    rerun is still computed and recorded whatever the feed speed, and learning comes last."""
+
+    def __init__(self, handle: Callable[[object, bool], None], *, threaded: bool = True) -> None:
         self.handle, self.threaded = handle, threaded
-        self._q: queue.Queue = queue.Queue()
+        self._pending: list = []
+        self._fresh: dict[str, float] = {}  # incident -> newest rerun second computed fresh
         self._busy = 0
-        self._lock = threading.Lock()
+        self._cond = threading.Condition()
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
 
@@ -157,39 +170,50 @@ class LiveWorker:
 
     def submit(self, task) -> None:
         if not self.threaded:
-            self.handle(task)
+            self.handle(task, True)
             return
-        self._q.put(task)
+        with self._cond:
+            self._pending.append(task)
+            self._cond.notify()
+
+    def _next(self):
+        reruns = [t for t in self._pending if isinstance(t, RerunTask)]
+        if reruns:
+            newest = max(reruns, key=lambda t: (t.meta["start_ts"], t.t_s))
+            iid = newest.meta["incident_id"]
+            if newest.t_s > self._fresh.get(iid, -1.0):
+                self._fresh[iid] = newest.t_s
+                self._pending.remove(newest)
+                return newest, True
+            self._pending.remove(reruns[0])
+            return reruns[0], False
+        return (self._pending.pop(0), False) if self._pending else None
 
     def _run(self) -> None:
         while not self._stop.is_set():
-            try:
-                task = self._q.get(timeout=0.2)
-            except queue.Empty:
-                continue
-            with self._lock:
+            with self._cond:
+                nxt = self._next()
+                if nxt is None:
+                    self._cond.wait(0.2)
+                    continue
                 self._busy += 1
             try:
-                self.handle(task)
+                self.handle(*nxt)
             finally:
-                with self._lock:
+                with self._cond:
                     self._busy -= 1
-                self._q.task_done()
 
     def pending(self) -> int:
-        with self._lock:
-            return self._q.qsize() + self._busy
+        with self._cond:
+            return len(self._pending) + self._busy
 
     def clear(self) -> int:
         """Drop the queued tasks (``live reset``); returns how many."""
-        n = 0
-        while True:
-            try:
-                self._q.get_nowait()
-            except queue.Empty:
-                return n
-            self._q.task_done()
-            n += 1
+        with self._cond:
+            n = len(self._pending)
+            self._pending.clear()
+            self._fresh.clear()
+            return n
 
     def wait_idle(self, timeout: float = 60.0) -> bool:
         end = time.monotonic() + timeout

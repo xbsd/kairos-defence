@@ -50,6 +50,7 @@ function Entry(props: {
   decision: Decision | null;
   busy: boolean;
   reduce: boolean;
+  explain: boolean;
 }) {
   const { m, decision, reduce } = props;
   const ref = useRef<HTMLLIElement>(null);
@@ -138,13 +139,15 @@ function Entry(props: {
           >
             Reject
           </button>
-          <Link
-            to={`/explainer?incident=${encodeURIComponent(m.query_incident_id)}&at=${props.at}&track=${encodeURIComponent(m.track_id)}`}
-            className="ml-auto rounded-button px-1.5 py-0.5 text-13 text-ink-mid underline-offset-2 hover:text-ink-hi hover:underline"
-          >
-            <span aria-hidden="true">Explain</span>
-            <span className="sr-only">Explain the match {name}</span>
-          </Link>
+          {props.explain ? (
+            <Link
+              to={`/explainer?incident=${encodeURIComponent(m.query_incident_id)}&at=${props.at}&track=${encodeURIComponent(m.track_id)}`}
+              className="ml-auto rounded-button px-1.5 py-0.5 text-13 text-ink-mid underline-offset-2 hover:text-ink-hi hover:underline"
+            >
+              <span aria-hidden="true">Explain</span>
+              <span className="sr-only">Explain the match {name}</span>
+            </Link>
+          ) : null}
           {decision ? (
             <span
               data-testid="match-decision"
@@ -159,8 +162,9 @@ function Entry(props: {
   );
 }
 
-/** The memory rail's match list (§17.8): three entries, best first, approve or reject each. */
-export function MatchList() {
+/** The memory rail's match list (§17.8): three entries, best first, approve or reject each.
+ * `live`: on the Live page (D-184): live incidents have no Match explainer yet. */
+export function MatchList({ live = false }: { live?: boolean }) {
   const s = useThrottledStore(matchStore, (st) => ({
     match: st.match,
     entrance: st.entrance,
@@ -173,9 +177,13 @@ export function MatchList() {
   const reduce = useThrottledStore(uiStore, reduceMotion);
   const m = s.match;
 
-  let waiting = "Waiting for the replay";
-  const swarm = hello?.matching === false ? hello.incident_id : null;
-  if (hello)
+  let waiting = live ? "Nothing is flying" : "Waiting for the replay";
+  const swarm = !live && hello?.matching === false ? hello.incident_id : null;
+  if (live && hello?.incident_id)
+    waiting = hello.matching
+      ? `The matcher starts at ${tPlus(hello.min_track_s)}`
+      : "No matching: the models or the index are missing";
+  else if (hello && !live)
     waiting = swarm
       ? "A swarm: single-flight matching does not apply. Its choreography match is in the"
       : `The matcher starts at ${tPlus(hello.min_track_s)}`;
@@ -218,6 +226,7 @@ export function MatchList() {
                   decision={decisionOf(s.state, x.proposal_seq, x.decision ?? null)}
                   busy={x.proposal_seq !== null && s.busy[x.proposal_seq] === true}
                   reduce={reduce}
+                  explain={!live}
                 />
               ))}
             </ol>

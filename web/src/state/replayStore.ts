@@ -310,7 +310,8 @@ export function clockNow(s: ReplayState, now: number = performance.now()): numbe
   if (!c) return 0;
   if (!c.playing) return c.t_s;
   const dt = Math.min(Math.max(0, (now - s.clockWall) / 1000), 0.25); // never run ahead > 1 tick
-  const end = s.hello?.duration_s ?? Number.POSITIVE_INFINITY;
+  // a live hello says 0: an open-ended incident (live mode, D-184)
+  const end = s.hello?.duration_s || Number.POSITIVE_INFINITY;
   return Math.min(c.t_s + c.speed * dt, end);
 }
 

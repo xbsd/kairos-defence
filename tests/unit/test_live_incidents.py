@@ -36,6 +36,16 @@ def test_idle_close_on_feed_time(cfg) -> None:
     assert t.idle("BRAVO", last + 90_000) == []  # once
 
 
+def test_rf_heard_at_the_installation_keeps_an_incident_open_through_a_radar_gap(cfg) -> None:
+    t = tracker(cfg)
+    t.point("BRAVO", "TRK-A", T0, 0.0, 0.0)
+    assert t.idle("BRAVO", T0 + 45_000, heard_ms=T0 + 20_000) == []  # RF 20 s in: still active
+    t.point("BRAVO", "TRK-A", T0 + 46_000, 5.0, 0.0)  # the radar reacquires: same track
+    assert len(t.incidents) == 1 and len(t.tracks) == 1
+    (inc,) = t.idle("BRAVO", T0 + 46_000 + 30_001, heard_ms=T0 + 40_000)
+    assert inc.state == "closing"
+
+
 def test_nearby_concurrent_tracks_form_one_swarm_incident(cfg) -> None:
     t = tracker(cfg)
     ids = set()

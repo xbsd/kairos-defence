@@ -49,7 +49,8 @@ class LiveServices:
         self.matcher, self.recall, self.swarm_matcher = self._matchers(svc)
         self._finalize_abandoned()
         sensor_map = {r.sensor_id: (r.installation_id, r.kind) for r in sensors.itertuples()}
-        self.worker = LiveWorker(lambda task: self.compute.handle(task), threaded=threaded)
+        self.worker = LiveWorker(lambda task, fresh: self.compute.handle(task, fresh),
+                                 threaded=threaded)  # fmt: skip
         self.hub = LiveHub(cfg.scoring, sites, sensor_map, self.feed,
                            pd.Timestamp(end).to_pydatetime(), submit=self.worker.submit,
                            used_ids=self.feed.incidents()["incident_id"].tolist(),

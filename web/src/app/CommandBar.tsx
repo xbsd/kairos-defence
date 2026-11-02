@@ -7,11 +7,12 @@ import { tPlus } from "../lib/format";
 import { useThrottledStore } from "../lib/useThrottledStore";
 import { controls } from "../state/controls";
 import { directorStore } from "../state/directorStore";
+import { feedOf, liveStore } from "../state/liveStore";
 import { replayStore } from "../state/replayStore";
 import { reduceMotion, uiStore } from "../state/uiStore";
 import { Link } from "./Link";
 import { PAGES, usePath } from "./routes";
-import { replayStatus } from "./status";
+import { liveStatus, replayStatus } from "./status";
 
 /** "21:41:36" local at the installation, from the replay clock (UTC), or null. */
 function localTime(ts: string | null, offset: number | null): string | null {
@@ -27,6 +28,8 @@ export interface CommandBarProps {
   trail: string[];
   /** True on a page with a replay (Live watch); elsewhere the controls are idle. */
   replay?: boolean;
+  /** "live" on the Live page (D-184): the feed's clock and status, no replay controls. */
+  mode?: "replay" | "live";
 }
 
 function IconButton(props: {
@@ -54,7 +57,7 @@ function IconButton(props: {
 const SPEEDS = [1, 2, 5] as const;
 
 /** The command bar shared by every page (SPEC §17.2), wired to the replay stream. */
-export function CommandBar({ trail, replay = false }: CommandBarProps) {
+export function CommandBar({ trail, replay = false, mode = "replay" }: CommandBarProps) {
   const r = useThrottledStore(replayStore, (s) => ({
     t: s.clock?.t_s ?? null,
     speed: s.clock?.speed ?? s.hello?.speed ?? 1,
@@ -65,11 +68,19 @@ export function CommandBar({ trail, replay = false }: CommandBarProps) {
   }));
   const ui = useThrottledStore(uiStore, (s) => ({ reduce: reduceMotion(s), perf: s.perfMode }));
   const director = useThrottledStore(directorStore, (s) => s.active);
+  const feed = useThrottledStore(liveStore, feedOf, 4);
+  const incident = useThrottledStore(replayStore, (s) => s.hello?.incident_id ?? "", 4);
   const path = usePath();
-  const status = replay ? replayStatus(r.status, r.hello, r.playing) : "No replay loaded";
+  const liveMode = mode === "live";
+  const status = liveMode
+    ? liveStatus(r.status, feed, incident !== "")
+    : replay
+      ? replayStatus(r.status, r.hello, r.playing)
+      : "No replay loaded";
   const idle = !replay || !r.hello || r.status !== "open";
-  const live = status === "Live";
-  const clock = replay && r.hello ? tPlus(r.t) : null;
+  const live = liveMode ? status.startsWith("Live feed") : status === "Live";
+  const clock = (replay || liveMode) && r.hello && (!liveMode || incident) ? tPlus(r.t) : null;
+  const timeLabel = liveMode ? "Incident time" : "Replay time";
   return (
     // relative z-30: the header (a stacking context, for its blur) paints above page panels, so
     // the Pages menu opens over them instead of behind them (D-168)
@@ -94,11 +105,11 @@ export function CommandBar({ trail, replay = false }: CommandBarProps) {
 
       <span
         role="timer"
-        aria-label={clock ? `Replay time ${clock}` : "Replay time: none"}
+        aria-label={clock ? `${timeLabel} ${clock}` : `${timeLabel}: none`}
         className="font-mono text-15 text-ink-hi"
         data-testid="replay-clock"
-        data-local-time={replay && r.local ? r.local : undefined}
-        title={replay && r.local ? `${r.local} local` : undefined}
+        data-local-time={(replay || liveMode) && r.local ? r.local : undefined}
+        title={(replay || liveMode) && r.local ? `${r.local} local` : undefined}
       >
         {clock ?? "T+--:--"}
       </span>
@@ -117,37 +128,45 @@ export function CommandBar({ trail, replay = false }: CommandBarProps) {
         {status}
       </span>
 
-      <div role="group" aria-label="Replay speed" className="flex items-center gap-1">
-        {SPEEDS.map((v) => (
-          <button
-            key={v}
-            type="button"
-            aria-pressed={!idle && r.speed === v}
-            aria-label={`Speed ${v} times`}
-            disabled={idle}
-            onClick={() => controls.speed(v)}
-            className={`rounded-button px-2 py-1 font-mono text-13 transition-colors duration-(--dur-micro) ease-(--ease-out) disabled:cursor-not-allowed disabled:text-ink-low ${
-              !idle && r.speed === v
-                ? "bg-hairline text-flash"
-                : "text-ink-mid hover:bg-hairline hover:text-ink-hi"
-            }`}
-          >
-            {v}×
-          </button>
-        ))}
-      </div>
+      {liveMode ? null : (
+        <>
+          <div role="group" aria-label="Replay speed" className="flex items-center gap-1">
+            {SPEEDS.map((v) => (
+              <button
+                key={v}
+                type="button"
+                aria-pressed={!idle && r.speed === v}
+                aria-label={`Speed ${v} times`}
+                disabled={idle}
+                onClick={() => controls.speed(v)}
+                className={`rounded-button px-2 py-1 font-mono text-13 transition-colors duration-(--dur-micro) ease-(--ease-out) disabled:cursor-not-allowed disabled:text-ink-low ${
+                  !idle && r.speed === v
+                    ? "bg-hairline text-flash"
+                    : "text-ink-mid hover:bg-hairline hover:text-ink-hi"
+                }`}
+              >
+                {v}×
+              </button>
+            ))}
+          </div>
 
-      <div role="group" aria-label="Replay controls" className="flex items-center gap-1">
-        <IconButton label="Play" disabled={idle || r.playing === true} onClick={controls.play}>
-          <path d="M4 2.5v11l9-5.5z" />
-        </IconButton>
-        <IconButton label="Pause" disabled={idle || r.playing !== true} onClick={controls.pause}>
-          <path d="M4 2.5h3v11H4zM9 2.5h3v11H9z" />
-        </IconButton>
-        <IconButton label="Restart" disabled={idle} onClick={controls.restart}>
-          <path d="M8 2.5a5.5 5.5 0 1 1-5.2 3.7l1.4.5A4 4 0 1 0 8 4v2L4.8 3.2 8 .5z" />
-        </IconButton>
-      </div>
+          <div role="group" aria-label="Replay controls" className="flex items-center gap-1">
+            <IconButton label="Play" disabled={idle || r.playing === true} onClick={controls.play}>
+              <path d="M4 2.5v11l9-5.5z" />
+            </IconButton>
+            <IconButton
+              label="Pause"
+              disabled={idle || r.playing !== true}
+              onClick={controls.pause}
+            >
+              <path d="M4 2.5h3v11H4zM9 2.5h3v11H9z" />
+            </IconButton>
+            <IconButton label="Restart" disabled={idle} onClick={controls.restart}>
+              <path d="M8 2.5a5.5 5.5 0 1 1-5.2 3.7l1.4.5A4 4 0 1 0 8 4v2L4.8 3.2 8 .5z" />
+            </IconButton>
+          </div>
+        </>
+      )}
 
       <button
         type="button"
@@ -207,17 +226,19 @@ export function CommandBar({ trail, replay = false }: CommandBarProps) {
 
       <AskButton />
 
-      <button
-        type="button"
-        aria-pressed={director}
-        onClick={() => void toggleDirector()}
-        title="Director mode (D): the demo, beat by beat, from T+0"
-        className={`rounded-button border px-3 py-1 text-13 transition-colors duration-(--dur-micro) ease-(--ease-out) ${
-          director ? "border-flash text-flash" : "border-hairline text-ink-mid hover:text-ink-hi"
-        }`}
-      >
-        Director
-      </button>
+      {liveMode ? null : (
+        <button
+          type="button"
+          aria-pressed={director}
+          onClick={() => void toggleDirector()}
+          title="Director mode (D): the demo, beat by beat, from T+0"
+          className={`rounded-button border px-3 py-1 text-13 transition-colors duration-(--dur-micro) ease-(--ease-out) ${
+            director ? "border-flash text-flash" : "border-hairline text-ink-mid hover:text-ink-hi"
+          }`}
+        >
+          Director
+        </button>
+      )}
     </header>
   );
 }

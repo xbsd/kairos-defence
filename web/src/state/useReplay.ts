@@ -12,7 +12,7 @@ import { replayStore } from "./replayStore";
 import { sceneStore } from "./sceneStore";
 
 /** Re-check the chain whenever the head moves (debounced: a batch of 3 proposals is one check). */
-function watchVerify(): () => void {
+export function watchVerify(): () => void {
   let timer: ReturnType<typeof setTimeout> | null = null;
   let head = -1;
   const check = () =>

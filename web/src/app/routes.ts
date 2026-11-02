@@ -5,6 +5,7 @@ import { useSyncExternalStore } from "react";
 export type Route =
   | { name: "home" }
   | { name: "live"; incidentId: string }
+  | { name: "livemode" }
   | { name: "explainer"; incident: string | null; at: number | null; track: string | null }
   | { name: "cases" }
   | { name: "case"; caseId: string; focus: string | null }
@@ -16,6 +17,7 @@ export type Route =
 
 /** The Pages menu, in §17.2 order. */
 export const PAGES: { path: string; title: string }[] = [
+  { path: "/live", title: "Live" },
   { path: "/explainer", title: "Match explainer" },
   { path: "/cases", title: "Case board" },
   { path: "/swarm", title: "Swarm view" },
@@ -40,6 +42,8 @@ export function matchRoute(path: string, search = ""): Route {
   const kase = /^\/cases\/([A-Za-z0-9._-]+)$/.exec(p);
   if (kase?.[1]) return { name: "case", caseId: kase[1], focus: param(q, "focus") };
   switch (p) {
+    case "/live":
+      return { name: "livemode" };
     case "/explainer": {
       const at = Number(q.get("at"));
       const incident = param(q, "incident");
@@ -112,6 +116,8 @@ export function routeTitle(r: Route): string {
     case "home":
     case "live":
       return "Live watch";
+    case "livemode":
+      return "Live";
     case "explainer":
       return "Match explainer";
     case "cases":

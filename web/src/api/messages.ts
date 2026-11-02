@@ -102,6 +102,28 @@ export type SwarmMatch = S["SwarmMatchOut"];
 export type SwarmCurves = S["SwarmCurves"];
 export type SwarmIncident = S["SwarmIncident"];
 
+// Phase 11: live mode (D-169, D-184). The live stream sends the §16.3 types plus three.
+export type IncidentOpenedMsg = S["IncidentOpenedMsg"];
+export type IncidentClosedMsg = S["IncidentClosedMsg"];
+export type SwarmMatchMsg = S["SwarmMatchMsg"];
+export type SwarmMatchItem = S["SwarmMatchItem"];
+export type LiveStreamMessage =
+  StreamMessage | IncidentOpenedMsg | IncidentClosedMsg | SwarmMatchMsg;
+export const LIVE_TYPES: readonly LiveStreamMessage["type"][] = [
+  ...STREAM_TYPES,
+  "incident_opened",
+  "incident_closed",
+  "swarm_match",
+];
+export type LiveStatus = S["LiveStatus"];
+export type LiveIncidentRow = S["LiveIncidentRow"];
+export type ScenarioInfo = S["ScenarioInfo"];
+export type SimLaunchRequest = S["SimLaunchRequest"];
+export type SimLaunchResponse = S["SimLaunchResponse"];
+export type LiveResetResponse = S["LiveResetResponse"];
+export type RevealResponse = S["RevealResponse"];
+export type RevealRerun = S["RevealRerun"];
+
 // Phase 9: the optional chat (§18.3, D-162).
 export type ChatStatus = S["ChatStatus"];
 export type ChatMessage = S["ChatMessage"];

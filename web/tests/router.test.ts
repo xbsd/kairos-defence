@@ -13,6 +13,9 @@ describe("router", () => {
     expect(matchRoute("/cases/")).toEqual({ name: "cases" });
     expect(matchRoute("/eval")).toEqual({ name: "eval" });
     expect(matchRoute("/swarm")).toEqual({ name: "swarm", incident: null, match: null }); // phase 9
+    expect(matchRoute("/live")).toEqual({ name: "livemode" }); // phase 11: the Live page
+    expect(matchRoute("/live/")).toEqual({ name: "livemode" });
+    expect(routeTitle({ name: "livemode" })).toBe("Live");
     expect(matchRoute("/nope")).toEqual({ name: "notfound", path: "/nope" });
     expect(matchRoute("/live/<script>")).toEqual({ name: "notfound", path: "/live/<script>" });
   });
