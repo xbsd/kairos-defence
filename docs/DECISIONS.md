@@ -2395,3 +2395,24 @@ Where this file and the SPEC ever disagree, this file wins.
   requestAnimationFrame timestamps, so the time shim gives every frame callback the slowed
   `performance.now()` instead; code that mixes the two clocks (the report's text resolve) otherwise
   stalled at its first frame.
+
+## D-169 · Live mode MVP and the DTW workbench (phases 11 and 12) · 2026-11-02
+- Context: the user asked for a live version, not only the replay demo, built MVP style: no user
+  accounts, no retraining, past patterns assumed to exist (or generated), and scenarios such as a
+  swarm repeating a past formation, demonstrable in a short time in real time. They also asked to
+  watch the matcher do DTW.
+- Decision: two new phases with blocks in `docs/phases/PHASE_11.md` and `PHASE_12.md`, built and
+  gated by the autopilot like phases 4 to 10. Phase 11: a separate simulator process streams only
+  sensor detections through a documented ingest interface (the seam for real sensor adapters); the
+  app forms incidents, matches unseen flights live with the existing models, learns closed incidents
+  into history, and records them in the case memory; five scenarios, scored by `live check` in
+  `eval/`. Phase 12: an optional matcher trace streamed per rerun and a workbench that replays it in
+  labelled slow motion; live-mode documentation and screenshots.
+- Why: the matcher only needs the points seen so far, so live data can drive the existing pipeline
+  unchanged; the simulator-as-sensor split keeps truth isolation and gives a real ingest seam. Live
+  flights are stamped after the last history night so no look-ahead holds. Rejected: in-process
+  generation (the app would hold the actor), retraining on live data (not needed for synthetic
+  flights from the same generator).
+- Consequences: live rows are separable and `live reset` removes them; the 18-month history,
+  evaluation and replay demo are unchanged. `scripts/autopilot.py` reads blocks for N >= 10 from
+  `docs/phases/PHASE_N.md` (LAST_PHASE = 12). Scenario expectations are soft (D-063).

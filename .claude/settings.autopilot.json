@@ -34,7 +34,11 @@
       "Edit(docs/phases/PHASE_10.md)",
       "Write(docs/phases/PHASE_10.md)",
       "Edit(docs/phases/accepted_gaps.json)",
-      "Write(docs/phases/accepted_gaps.json)"
+      "Write(docs/phases/accepted_gaps.json)",
+      "Edit(docs/phases/PHASE_11.md)",
+      "Write(docs/phases/PHASE_11.md)",
+      "Edit(docs/phases/PHASE_12.md)",
+      "Write(docs/phases/PHASE_12.md)"
     ]
   }
 }

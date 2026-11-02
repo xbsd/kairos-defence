@@ -78,13 +78,15 @@ REVIEW_SCHEMA = {
 REQUIRED_DOCS = ("PLAN.md", "REPORT.md", "EXIT_CHECK.md")
 CLAUDE_MD_MARKER = "## Autopilot and documentation"
 SETTINGS_REL = ".claude/settings.autopilot.json"
-LAST_PHASE = 10  # phase 10 (docs/phases/PHASE_10.md): user guide, one-pager, rollback guide
+LAST_PHASE = 12  # phases 10+ have their block in docs/phases/PHASE_N.md (10 docs, 11 live mode, 12 DTW workbench)
 # Files only a human may change. The gate blocks the run if any of them differs from the run's start.
 PROTECTED = (
     "scripts/autopilot.py",
     "scripts/check_targets.py",
     "scripts/check_docs.py",
     "docs/phases/PHASE_10.md",
+    "docs/phases/PHASE_11.md",
+    "docs/phases/PHASE_12.md",
     "docs/phases/gates.json",
     ".claude/settings.autopilot.json",
     ".claude/skills/phase-auto/SKILL.md",
@@ -614,8 +616,8 @@ def block(n: int, m: dict, reason: str) -> bool:
 
 def review_prompt(n: int) -> str:
     block = (
-        "docs/phases/PHASE_10.md (the phase block for phase 10)"
-        if n == LAST_PHASE
+        f"docs/phases/PHASE_{n}.md (the phase block for phase {n})"
+        if n >= 10
         else f"the Phase {n} block in docs/SPEC.md §20"
     )
     return (

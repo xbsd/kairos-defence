@@ -61,6 +61,16 @@
       "npm --prefix web run build",
       "make e2e",
       "python3 scripts/check_docs.py"
+    ],
+    "11": [
+      "soft: uv run kairos-defense live check --scenarios all --speed 50",
+      "npm --prefix web run build",
+      "make e2e"
+    ],
+    "12": [
+      "npm --prefix web run build",
+      "make e2e",
+      "python3 scripts/check_docs.py"
     ]
   }
 }

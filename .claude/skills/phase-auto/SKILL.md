@@ -15,7 +15,7 @@ approval, do not enter plan mode, and do not stop to wait. When something is amb
 
 ## Every step
 
-- Read `CLAUDE.md`, `docs/PROGRESS.md`, the Phase N block in `docs/SPEC.md` §20 (for N = 10: `docs/phases/PHASE_10.md`) and every section it lists
+- Read `CLAUDE.md`, `docs/PROGRESS.md`, the Phase N block in `docs/SPEC.md` §20 (for N ≥ 10: `docs/phases/PHASE_N.md`) and every section it lists
   under "Read first", `docs/phases/TEMPLATES.md`, and the previous phase's `docs/phases/phase-(N-1)/REPORT.md`
   if it exists.
 - Work only inside this repository. Never push. Never rewrite git history (no `reset --hard`, rebase or
