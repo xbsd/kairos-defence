@@ -33,9 +33,11 @@ way the work survives the session. Never force-push.
   `docs/phases/accepted_gaps.json` or `.claude/`. Never weaken, skip or delete tests; never change the
   SPEC §19 protocol, query sets, truth handling, metric definitions or a scenario's expectation to
   make a check pass.
-- All CLAUDE.md rules hold, especially truth isolation (the app never learns who flew a live flight;
-  only `eval/` reads truth), no look-ahead (live flights are stamped after the last history night),
-  truthful animation and humans approve.
+- All CLAUDE.md rules hold, especially truth isolation (while a live flight is open the app never
+  learns who flew it; only `eval/` reads truth; the one exception is the on-screen reveal of a
+  **closed** incident, D-170, served through `eval` and never stored), no look-ahead (live flights are
+  stamped after the last history night), truthful animation and humans approve.
+- The on-screen reveal is a required phase 11 feature: the user asked for it for the demo.
 - Target shortfalls are soft (D-063): `live check` prints `GAP` lines for missed scenario
   expectations; after three honest gap-only gates, accept them and move on. Latency never blocks
   (D-060). Anything broken (tests, crashes, e2e, docs) is hard and must be fixed.

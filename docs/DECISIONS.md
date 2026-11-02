@@ -2416,3 +2416,21 @@ Where this file and the SPEC ever disagree, this file wins.
 - Consequences: live rows are separable and `live reset` removes them; the 18-month history,
   evaluation and replay demo are unchanged. `scripts/autopilot.py` reads blocks for N >= 10 from
   `docs/phases/PHASE_N.md` (LAST_PHASE = 12). Scenario expectations are soft (D-063).
+
+## D-170 · On-screen reveal of who flew a closed live incident · 2026-11-02
+- Context: in live mode (D-169) the app only receives sensor data, so it cannot know who flew a live
+  flight. The user decided that showing who really flew, after the flight, matters for the demo.
+- Decision: after a live incident closes, and only when the user presses "Reveal who flew", the API
+  serves `kairos_defense.eval.reveal(incident)` from one read-only route
+  (`GET /api/live/incidents/{id}/reveal`, 409 while open). `eval` joins the incident's sensor track ids
+  to `live_truth` (written by the simulator through the sim writer) and returns the operator or team,
+  the scenario and seed, and the matcher's verdict per rerun. The matcher, forecast, recall, case
+  memory, learned history and agent tools never read it, and nothing revealed is stored in any app
+  store or the ledger. CLAUDE.md rule 2 carries this one exception.
+- Why: the reveal is a scoring statement ("the system said P1's past flights; it was P1"), which is
+  exactly what `eval` exists for; routing it through `eval` keeps a single reader of truth and a
+  testable boundary. Rejected: the simulator posting the actor to the app (the app would hold the
+  answer while the flight is live); reveal only in the simulator's terminal (invisible when the
+  simulator is launched from the web page).
+- Consequences: a new API route and a reveal card on the Live page; the truth-isolation scan is
+  extended to `live_truth`; `live check` and the reveal share one scoring function.

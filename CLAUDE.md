@@ -43,7 +43,8 @@ bitemporal, tamper-evident case memory ("Kairos-lite"). **All data is synthetic.
 1. **Synthetic only.** No real people, names, plates, addresses, real installations or real coordinates.
 2. **Truth isolation.** Ground truth lives only in `data/truth.duckdb`. Only `src/kairos_defense/eval/` may
    read it (the generator's writer may write it). The matcher, recall, memory, UI and agent must never
-   open it. A test enforces this.
+   open it. A test enforces this. One exception (D-170): after a live incident closes, on an explicit
+   user action, the API may serve `eval`'s reveal of who flew it; nothing revealed is stored or used.
 3. **No look-ahead.** Any search for "past" flights or reports must filter to records that started before
    the query flight started. Tests enforce this.
 4. **Determinism.** Every random draw uses a seeded `numpy.random.Generator` passed in explicitly,

@@ -21,9 +21,20 @@ completeness: no user accounts, no auth, one installation watched at a time is e
   it plans and flies flights with the existing `sim` functions (`actors.make_flight`, `kinematics.fly`,
   `sensors.radar_track`, `rf_track`, `rid_track`, the swarm choreography) and streams **only sensor
   detections** (the columns of `track_points`, `rf_detections`, `remote_id`, plus a sensor track id)
-  to the app. It never sends the actor. The app never learns who flew (rule 2). The simulator writes
-  ground truth for its flights only through the sim writer path into `data/truth.duckdb` (a
-  `live_truth` table), and prints the actor in its own terminal so a presenter can reveal it.
+  to the app. It never sends the actor: while a flight is live, the app does not know who flew it
+  (rule 2). The simulator writes ground truth for its flights only through the sim writer path into
+  `data/truth.duckdb` (a `live_truth` table keyed by the sensor track ids it sent, with the actor or
+  team, scenario, seed and base) and also prints the actor in its own terminal.
+- **On-screen reveal (D-170).** After a live incident has **closed**, and only on an explicit user
+  action ("Reveal who flew"), the app shows who really flew it and how the matcher did. The answer
+  comes from `kairos_defense.eval` (a `reveal(incident)` function that joins the incident's track ids
+  to `live_truth` and to the history's truth), served by one read-only API route,
+  `GET /api/live/incidents/{incident_id}/reveal` (409 while the incident is open). It returns the
+  actor or team id and nickname, the scenario and seed, and the verdict: for each rerun, the rank of
+  the first same-actor (or same-team) history flight in the matches the app showed, and whether the
+  scenario's expectation was met. The matcher, forecast, recall, case memory, learned history and
+  agent tools never read the reveal or `live_truth`; nothing revealed is stored in any app store or
+  the ledger. The same `reveal` function scores `live check`.
 - **Ingest interface (the sensor adapter contract).** A documented, versioned message schema
   (pydantic, in `api/schemas*.py`): `point`, `rf`, `rid` and `heartbeat`, accepted on a WebSocket
   `/ws/ingest` (and a REST `POST /api/ingest` batch for simple adapters). Validate and reject bad
@@ -74,14 +85,20 @@ recorded; the same seed flies the same flight.
   history, recording into the `live_*` tables and the case memory. Keep modules under ~400 lines.
 - [ ] API: `/ws/ingest`, `POST /api/ingest`, a live stream `/ws/live/{installation_id}` that sends the
   §16.3 message types the Live watch components already understand (plus `incident_opened` and
-  `incident_closed`), `GET /api/live/status`, `POST /api/live/reset`, and `POST /api/sim/launch`,
-  which starts the simulator **as a separate process** for a scenario (the API never imports truth).
+  `incident_closed`), `GET /api/live/status`, `POST /api/live/reset`, `POST /api/sim/launch`,
+  which starts the simulator **as a separate process** for a scenario, and the reveal route above
+  (the only route that touches truth, and only through `kairos_defense.eval`).
   Regenerate the OpenAPI types (§16.5).
 - [ ] Web: a **Live** page (in the Pages menu and the command bar's mode): pick the installation,
   a scenario launcher (scenario, actor or team where it applies, base, speed, Launch), the theater and
   instrument rail fed by the live stream, the match list, forecast and recall as on Live watch, a
   "Live incidents this session" list, and Reset live data (with a confirm). When nothing is flying it
-  says so. Everything shown comes from the live stream (rule 10).
+  says so. Everything shown comes from the live stream (rule 10). Each closed incident gets a
+  **Reveal who flew** button that opens a reveal card: the operator (or swarm team) and nickname, the
+  scenario, and the verdict in plain words, for example "P1, County Rd operator. First recognized at
+  T+45 s (rank 2); top match from T+60 s." For `new-operator-twice` it says the first flight had no
+  earlier flights to find and names the live flight the second one matched. Open incidents show no
+  button.
 - [ ] `kairos-defense live check [--scenarios all] [--speed 50]`: starts the API in-process (or a
   test server), runs each scenario headless at speed, waits for each incident to close, then scores
   the outcomes in `kairos_defense.eval` (the only code that may read `live_truth`). Prints one line
@@ -97,9 +114,12 @@ Simulator determinism (same seed, same detections; different seeds differ); inge
 incident formation and closing (single track, swarm, idle close); no look-ahead (a live query never
 sees history that started after it, and live history only enters once closed); learning a closed
 incident makes it searchable; `live reset` removes every live row and leaves history and the ledger
-chain intact (`memory verify`); the truth-isolation scan still passes; a Playwright test that
-launches `returning-prober` at speed 20 on the Live page and sees an incident open and matches
-appear; existing replay and Director tests unchanged.
+chain intact (`memory verify`); the truth-isolation scan still passes; the reveal route returns 409
+for an open incident and the right actor and verdict for a closed one, and no module outside `eval/`
+reads `live_truth` (extend the truth-isolation scan); a Playwright test that launches
+`returning-prober` at speed 20 on the Live page, sees an incident open and matches appear, waits for
+it to close, presses Reveal who flew and sees the operator and verdict; existing replay and Director
+tests unchanged.
 
 ## Exit check
 
