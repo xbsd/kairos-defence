@@ -20,11 +20,12 @@ def played(live_services, world, tmp_path_factory):
                       svc.cfg.world.calendar.end_local)  # fmt: skip
     sc = ls.build(svc.cfg, world, clock, "returning-prober", seed=7, base="BRAVO")
     sub = live.hub.subscribe("BRAVO")
-    seen = []
+    seen, tasks = [], []
     orig = live.compute.rerun
 
     def spy(task, fresh=True):
         seen.append((task.t_s, task.meta["start_ts"], task.points["ts"].max(), len(task.points)))
+        tasks.append(task)
         return orig(task, fresh)
 
     live.compute.rerun = spy
@@ -33,7 +34,15 @@ def played(live_services, world, tmp_path_factory):
     msgs = sub.drain()
     sub.close()
     (inc,) = live.feed.incidents().to_dict("records")
-    return {"sc": sc, "acks": acks, "msgs": msgs, "inc": inc, "seen": seen, "clock": clock}
+    return {
+        "sc": sc,
+        "acks": acks,
+        "msgs": msgs,
+        "inc": inc,
+        "seen": seen,
+        "clock": clock,
+        "tasks": tasks,
+    }
 
 
 def test_every_detection_is_accepted(played) -> None:
@@ -76,6 +85,30 @@ def test_fresh_reruns_stream_a_matcher_trace(played, live_services) -> None:
     assert traces[-1]["trace"]["query"]["track_id"].endswith("-T1")
     latest = live_services.live.hub.trace("BRAVO")
     assert latest is not None and latest["t_s"] == traces[-1]["t_s"]
+
+
+def test_backfilled_reruns_stream_no_matcher_trace(played, live_services, monkeypatch) -> None:
+    """A backfilled rerun (D-175) is computed untraced and recorded, never streamed (D-188)."""
+    from kairos_defense.live import runner
+
+    live = live_services.live
+    traced, recorded = [], []
+    orig = runner.compute_result
+
+    def spy(*a, **k):
+        traced.append(k["trace"])
+        return orig(*a, **k)
+
+    monkeypatch.setattr(runner, "compute_result", spy)
+    monkeypatch.setattr(live.compute.feed, "add_result", recorded.append)  # keep the feed as is
+    before = live.hub.trace("BRAVO")
+    sub = live.hub.subscribe("BRAVO")
+    live.compute.handle(played["tasks"][-1], fresh=False)
+    msgs = sub.drain()
+    sub.close()
+    assert traced == [False] and len(recorded) == 1
+    assert not [m for m in msgs if m["type"] in ("matcher_trace", "match")]
+    assert live.hub.trace("BRAVO") == before
 
 
 def test_results_are_recorded_and_streamed(played, live_services) -> None:

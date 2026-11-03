@@ -18,6 +18,9 @@ export type ForecastMsg = S["ForecastMsg"];
 export type RecallMsg = S["RecallMsg"];
 export type LedgerMsg = S["LedgerMsg"];
 export type ErrorMsg = S["ErrorMsg"];
+export type MatcherTraceMsg = S["MatcherTraceMsg"];
+export type MatcherTrace = S["MatcherTrace"];
+export type TraceDetail = S["TraceDetail"];
 
 export type StreamMessage =
   | HelloMsg
@@ -32,7 +35,8 @@ export type StreamMessage =
   | ForecastMsg
   | RecallMsg
   | LedgerMsg
-  | ErrorMsg;
+  | ErrorMsg
+  | MatcherTraceMsg;
 
 export type StreamType = StreamMessage["type"];
 
@@ -50,6 +54,7 @@ export const STREAM_TYPES: readonly StreamType[] = [
   "recall",
   "ledger",
   "error",
+  "matcher_trace",
 ];
 
 export type ClientMessage =

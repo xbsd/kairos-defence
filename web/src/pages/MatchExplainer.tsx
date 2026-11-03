@@ -10,6 +10,7 @@ import { useThrottledStore } from "../lib/useThrottledStore";
 import { TimeWarpLens } from "../lens/TimeWarpLens";
 import { DEFAULT_CHANNEL, type LensMode } from "../state/matchStore";
 import { reduceMotion, uiStore } from "../state/uiStore";
+import { workbenchStore } from "../workbench/workbenchStore";
 
 /** The demo's time-warp moment, used when the URL names no replay second. */
 const DEFAULT_AT = 90;
@@ -166,6 +167,21 @@ export function MatchExplainer(props: {
               className="rounded-button border border-hairline px-3 py-1 text-13 text-ink-hi hover:border-flash"
             >
               Show
+            </button>
+            <button
+              type="button"
+              disabled={!incident}
+              onClick={() => {
+                if (!incident) return;
+                api
+                  .trace(incident, at)
+                  .then((t) => workbenchStore.getState().openWith(t, "fetch", reduce))
+                  .catch((e: unknown) => setError(errText(e)));
+              }}
+              title="Replay this rerun's matcher computation in slow motion (DTW workbench)"
+              className="rounded-button border border-hairline px-3 py-1 text-13 text-ink-hi hover:border-flash disabled:cursor-not-allowed disabled:text-ink-low"
+            >
+              Watch the matcher work
             </button>
           </form>
         </header>

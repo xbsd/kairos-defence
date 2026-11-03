@@ -14,6 +14,7 @@ export function resetStores(): void {
     forecast: null,
     recall: null,
     dtw: null,
+    trace: null,
     entrance: 0,
     top3: "",
     decisions: {},

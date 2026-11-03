@@ -25,6 +25,7 @@ import type {
   LedgerRecord,
   LedgerVerify,
   LinkResponse,
+  MatcherTraceMsg,
   MatchResponse,
   Scene,
   SwarmIncident,
@@ -106,6 +107,12 @@ export const api = {
     getJson<DtwMsg>(`/api/dtw/${enc(incidentId)}/${enc(trackId)}${qs({ at, channel })}`),
   match: (incidentId: string, at: number) =>
     getJson<MatchResponse>(`/api/match/${enc(incidentId)}${qs({ at })}`),
+  /** The matcher trace of a replay rerun: the latest at or before `at` (D-187, D-188). */
+  trace: (incidentId: string, at: number) =>
+    getJson<MatcherTraceMsg>(`/api/trace/${enc(incidentId)}${qs({ at })}`),
+  /** The latest live rerun's matcher trace at an installation. */
+  liveTrace: (installationId: string) =>
+    getJson<MatcherTraceMsg>(`/api/live/trace${qs({ installation: installationId })}`),
   explain: (incidentId: string, trackId: string, at: number) =>
     getJson<ExplainResponse>(`/api/explain/${enc(incidentId)}/${enc(trackId)}${qs({ at })}`),
   cases: (asOf?: string) => getJson<CaseSummary[]>(`/api/cases${qs({ as_of: asOf })}`),

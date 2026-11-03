@@ -14,6 +14,7 @@ import { CommandBar } from "./CommandBar";
 import { routeTitle, useRoute, type Route } from "./routes";
 import { ShortcutsDialog } from "./Shortcuts";
 import { useShortcuts } from "./keys";
+import { WorkbenchDialog } from "../workbench/WorkbenchDialog";
 
 // Pages load on demand (D-141): only Live watch pulls in the 3D chunk.
 const LiveWatch = lazy(() => import("../pages/LiveWatch").then((m) => ({ default: m.LiveWatch })));
@@ -129,6 +130,7 @@ export function App() {
       <DirectorRail />
       <ChatPanel />
       <ShortcutsDialog />
+      <WorkbenchDialog />
     </div>
   );
 }

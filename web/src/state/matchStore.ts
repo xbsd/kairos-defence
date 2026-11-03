@@ -1,7 +1,7 @@
 // Matcher results from the stream (SPEC §16.3): match, forecast, recall and the lens.
 import { createStore } from "zustand/vanilla";
 
-import type { DtwMsg, ForecastMsg, MatchMsg, RecallMsg } from "../api/messages";
+import type { DtwMsg, ForecastMsg, MatchMsg, MatcherTraceMsg, RecallMsg } from "../api/messages";
 
 export type Decision = "approved" | "rejected";
 export type LensMode = "same" | "warped";
@@ -39,10 +39,12 @@ export interface MatchState {
   decisions: Record<number, Decision>;
   busy: Record<number, boolean>;
   error: string | null;
+  /** The latest rerun's matcher trace (the DTW workbench, D-188). */
+  trace: MatcherTraceMsg | null;
 }
 
 export interface MatchActions {
-  apply: (m: MatchMsg | ForecastMsg | RecallMsg | DtwMsg, now?: number) => void;
+  apply: (m: MatchMsg | ForecastMsg | RecallMsg | DtwMsg | MatcherTraceMsg, now?: number) => void;
   clear: () => void;
   setBusy: (seq: number, busy: boolean) => void;
   decide: (seq: number, d: Decision) => void;
@@ -77,6 +79,7 @@ export const matchStore = createStore<MatchState & MatchActions>()((set, get) =>
   decisions: {},
   busy: {},
   error: null,
+  trace: null,
   apply: (m, now = performance.now()) => {
     switch (m.type) {
       case "match": {
@@ -95,6 +98,9 @@ export const matchStore = createStore<MatchState & MatchActions>()((set, get) =>
         return;
       case "recall":
         set({ recall: m });
+        return;
+      case "matcher_trace":
+        set({ trace: m });
         return;
       case "dtw": {
         const s = get();
@@ -117,6 +123,7 @@ export const matchStore = createStore<MatchState & MatchActions>()((set, get) =>
       dtwBy: {},
       top3: "",
       matchWall: 0,
+      trace: null,
     }),
   setBusy: (seq, busy) => set({ busy: { ...get().busy, [seq]: busy } }),
   decide: (seq, d) => set({ decisions: { ...get().decisions, [seq]: d } }),

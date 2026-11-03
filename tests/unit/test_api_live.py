@@ -10,6 +10,7 @@ import time
 import pytest
 from pydantic import TypeAdapter
 
+from kairos_defense.api.schemas import MatcherTraceMsg
 from kairos_defense.api.schemas_live import LiveStreamMessage
 from kairos_defense.sim import live_scenarios as ls
 from kairos_defense.sim import writers
@@ -143,6 +144,16 @@ def test_live_stream_from_open_to_close_and_reveal(lclient, flight) -> None:
         assert "County Rd" not in text and '"P1"' not in text
     hist = lclient.get(f"/api/history/{iid}-T1?frame=target")
     assert hist.status_code == 200 and hist.json()["points"]  # learned: a ghost trail too
+    # the latest live rerun's matcher trace (D-188): the one streamed with the last match
+    r = lclient.get("/api/live/trace", params={"installation": "BRAVO"})
+    assert r.status_code == 200
+    tr = MatcherTraceMsg.model_validate(r.json())
+    last = [m for m in got if m["type"] == "match"][-1]
+    assert tr.incident_id == iid and tr.t_s == last["t_s"]
+    top3 = [m["track_id"] for m in last["matches"][:3]]
+    assert [x.track_id for x in tr.trace.ranking[:3]] == top3
+    streamed = [m for m in got if m["type"] == "matcher_trace"]
+    assert streamed and streamed[-1]["t_s"] == tr.t_s
 
 
 def test_launch_one_at_a_time_and_validation(lclient) -> None:

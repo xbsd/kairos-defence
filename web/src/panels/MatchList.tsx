@@ -9,6 +9,7 @@ import { caseStore } from "../state/caseStore";
 import { decisionOf, matchStore, type Decision } from "../state/matchStore";
 import { replayStore } from "../state/replayStore";
 import { reduceMotion, uiStore } from "../state/uiStore";
+import { WorkbenchButton } from "../workbench/WorkbenchDialog";
 import { animate, EASE_OUT } from "./anim";
 import { Panel } from "./Panel";
 import { ScoreRing } from "./ScoreRing";
@@ -242,11 +243,14 @@ export function MatchList({ live = false }: { live?: boolean }) {
                 {s.error}
               </p>
             ) : null}
-            <p data-testid="match-model" className="mt-auto px-3 py-2 text-12 text-ink-mid">
-              Model {m.model_version}, computed in {ms(m.elapsed_ms)}
-              {m.cached ? " (cached)" : ""}
-              {m.case_id ? `; proposals go to ${m.case_id}` : "; no case to propose links to"}
-            </p>
+            <div className="mt-auto flex items-end justify-between gap-2 px-3 py-2">
+              <p data-testid="match-model" className="text-12 text-ink-mid">
+                Model {m.model_version}, computed in {ms(m.elapsed_ms)}
+                {m.cached ? " (cached)" : ""}
+                {m.case_id ? `; proposals go to ${m.case_id}` : "; no case to propose links to"}
+              </p>
+              <WorkbenchButton />
+            </div>
           </>
         )}
       </div>
