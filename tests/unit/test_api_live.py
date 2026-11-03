@@ -57,7 +57,7 @@ def flight(lclient, world, tmp_path_factory):
     return ls.build(lclient.cfg, world, clock, "returning-prober", seed=7, base="BRAVO")
 
 
-def frames(sc, frame_s=50.0):
+def frames(sc, frame_s=50.0, installation="BRAVO"):
     det = sc.detections()
     end = det[-1][0] + 32_000
     t, i = sc.start_ms, 0
@@ -67,7 +67,7 @@ def frames(sc, frame_s=50.0):
         while j < len(det) and det[j][0] <= t:
             j += 1
         yield [m for _, m in det[i:j]] + [
-            {"v": 1, "type": "heartbeat", "installation_id": "BRAVO", "ts": ls.iso_ms(t)}
+            {"v": 1, "type": "heartbeat", "installation_id": installation, "ts": ls.iso_ms(t)}
         ]
         i = j
 
@@ -194,6 +194,43 @@ def test_a_launched_child_log_never_names_the_actor(lclient, caplog) -> None:
     for word in ("P3", "Munitions figure-eight"):
         assert word not in text
     assert "--actor" not in caplog.text and "P3" not in caplog.text
+
+
+def test_stop_closes_the_incident_it_fed_and_keeps_it(lclient, world, tmp_path) -> None:
+    """D-192: Stop ends a running simulator and keeps every live row; the exit hook closes the
+    incidents it was feeding, so they stay listed (and can be revealed). Stopping twice is a
+    no-op."""
+    clock = LiveClock(tmp_path / "clock.json", lclient.cfg.world.calendar.end_local)
+    sc = ls.build(lclient.cfg, world, clock, "returning-prober", seed=8, actor="P1", base="ALPHA")
+    for frame in list(frames(sc, installation="ALPHA"))[:2]:  # the flight is still in the air
+        assert lclient.post("/api/ingest", json={"messages": frame}).json()["rejected"] == []
+    (row,) = [r for r in lclient.get("/api/live/status").json()["incidents"]
+              if r["installation_id"] == "ALPHA"]  # fmt: skip
+    assert row["state"] == "open"
+    launcher = lclient.app.state.services.live.launcher
+    before = launcher.command
+    launcher.command = lambda a: [sys.executable, "-c", "import time; time.sleep(30)"]
+    try:
+        body = {"scenario": "returning-prober", "actor": "P1", "base": "ALPHA"}
+        assert lclient.post("/api/sim/launch", json=body).status_code == 200
+        doc = lclient.post("/api/sim/stop").json()
+        assert doc["stopped"] is True and doc["simulator"]["running"] is False
+        assert doc["simulator"]["scenario"] == "returning-prober"
+        # The status the UI polls agrees at once, before the exit watcher has run (D-192).
+        assert lclient.get("/api/live/status").json()["simulator"]["running"] is False
+        deadline = time.monotonic() + 10
+        while time.monotonic() < deadline:  # the exit watcher runs on its own thread
+            rows = {
+                r["incident_id"]: r for r in lclient.get("/api/live/status").json()["incidents"]
+            }
+            if rows.get(row["incident_id"], {}).get("state") == "closed":
+                break
+            time.sleep(0.1)
+        assert rows[row["incident_id"]]["state"] == "closed"  # closed, and still listed
+        again = lclient.post("/api/sim/stop").json()
+        assert again["stopped"] is False and again["simulator"]["running"] is False
+    finally:
+        launcher.command = before
 
 
 def test_reset_through_the_api(lclient) -> None:

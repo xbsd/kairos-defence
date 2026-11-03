@@ -129,7 +129,8 @@ curves), Director's ninth beat (the swarm encore) and the optional chat slide-ov
 - Phase 11, live mode (D-184):
   - Route `/live` (`livemode`), first in the Pages menu; `pages/LiveMode.tsx` (lazy): the Live
     watch grid with `live/Launcher.tsx` (watched installation, scenario, actor or team, base,
-    second base, speed 1 to 50, seed, Launch; the simulator line never names the actor),
+    second base, speed 1 to 50, seed, Launch, and Stop while a simulator runs (D-192: keeps the
+    session's incidents); the simulator line never names the actor),
     `MatchList live` (no Explain link) or `live/SwarmMatchList.tsx`, `live/IncidentList.tsx`
     (newest first; Reveal who flew on closed incidents only; Reset live data behind an inline
     confirm), `live/RevealCard.tsx` (a native dialog: the words, who flew, scenario and seed, the

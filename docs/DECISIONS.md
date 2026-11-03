@@ -2687,3 +2687,15 @@ Where this file and the SPEC ever disagree, this file wins.
   fades (the floor keeps a radar dropout from bringing the fade back mid-flight, which the
   second guide run showed). Every row and number stays; the replay at 1×, 2× and 5× is
   unchanged.
+
+## D-192 · Stop a running simulator without resetting live data · 2026-11-03
+- Context: the only way to end a running scenario early was Reset live data, which also deletes the
+  session's live incidents, so a flight cut short could not be revealed. The user asked for a Stop.
+- Decision: `POST /api/sim/stop` stops the simulator process (SIGTERM, then SIGKILL after 5 s) and
+  returns `{stopped, simulator}`; nothing live is deleted. The launcher's existing exit hook
+  (`hub.flush`) moves feed time past the idle limit at the bases it fed, so their open incidents
+  close and are learned as usual. A **Stop** button next to Launch calls it while a simulator runs.
+- Why: the pieces already existed (`SimLauncher.stop`, the exit hook); the simulator writes its
+  ground truth before its first detection, so a stopped flight can still be revealed.
+- Consequences: a stopped flight is shorter than its scenario intends, so its reveal verdict may say
+  the expectation was not met; that is the honest result for a partial flight.

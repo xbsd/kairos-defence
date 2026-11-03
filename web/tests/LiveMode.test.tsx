@@ -117,6 +117,49 @@ describe("Launcher", () => {
     );
     expect(screen.getByRole("button", { name: "Launch" })).toBeDisabled(); // one at a time
   });
+
+  it("stops a running simulator and keeps the session's incidents (D-192)", async () => {
+    const sim = (running: boolean) => ({
+      running,
+      scenario: "returning-prober",
+      base: "BRAVO",
+      second_base: null,
+      speed: 20,
+      seed: 7,
+      started_at: null,
+      exit_code: running ? null : -15,
+    });
+    const status = (running: boolean) => ({
+      enabled: true,
+      matching: true,
+      problems: [],
+      feeds: [],
+      incidents: [],
+      pending: 0,
+      learned_tracks: 0,
+      simulator: sim(running),
+    });
+    liveStore.getState().setStatus(status(false)); // an earlier test may leave one running
+    render(<Launcher installations={["ALPHA", "BRAVO"]} />);
+    await flush();
+    expect(screen.getByRole("button", { name: "Stop" })).toBeDisabled(); // nothing is flying
+    act(() => liveStore.getState().setStatus(status(true)));
+    await flush();
+    expect(screen.getByRole("button", { name: "Stop" })).toBeEnabled();
+    const f = routeFetch([
+      [/\/api\/sim\/stop/, () => ({ stopped: true, simulator: sim(false) })],
+      [/\/api\/live\/status/, () => status(false)],
+    ]);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Stop" }));
+      await new Promise((r) => setTimeout(r, 20));
+    });
+    expect(calls(f).some(([u]) => u.includes("/api/sim/stop"))).toBe(true);
+    expect(calls(f).some(([u]) => u.includes("/api/live/reset"))).toBe(false); // Stop is not Reset
+    await flush();
+    expect(screen.getByRole("button", { name: "Stop" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Launch" })).toBeEnabled();
+  });
 });
 
 describe("IncidentList", () => {

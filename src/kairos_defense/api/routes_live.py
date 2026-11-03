@@ -8,6 +8,7 @@
   the ledger appends and a ``clock`` on feed time.
 - ``GET /api/live/status``, ``GET /api/live/scenarios``, ``POST /api/live/reset``,
   ``POST /api/sim/launch`` (the simulator as a separate process, one at a time),
+  ``POST /api/sim/stop`` (stops it and keeps every live row; its open incidents close, D-192),
   ``GET /api/live/incidents/{id}/reveal`` (the one route that touches ground truth, and only
   through ``kairos_defense.eval``, once the incident has closed, D-170), and
   ``GET /api/schema/live-stream``.
@@ -37,6 +38,7 @@ from kairos_defense.api.schemas_live import (
     ScenarioInfo,
     SimLaunchRequest,
     SimLaunchResponse,
+    SimStopResponse,
 )
 from kairos_defense.api.services import Services
 from kairos_defense.live.session import ledger_message
@@ -223,6 +225,16 @@ def sim_launch(req: SimLaunchRequest, request: Request, svc: Services = Svc) -> 
         raise HTTPException(409, str(exc)) from exc
     return {"launched": True, "scenario": req.scenario, "base": base or "", "second_base": second,
             "speed": float(req.speed), "seed": int(seed), "pid": int(out["pid"])}  # fmt: skip
+
+
+@router.post("/api/sim/stop", response_model=SimStopResponse)
+def sim_stop(svc: Services = Svc) -> dict:
+    """Stop the running simulator (SIGTERM, then SIGKILL) and keep everything live mode has
+    recorded (D-192). Its exit hook closes the incidents it was feeding, so they can be revealed;
+    the simulator wrote its ground truth before its first detection."""
+    live = _live(svc)
+    stopped = live.launcher.stop()
+    return {"stopped": stopped, "simulator": live.launcher.state()}
 
 
 @router.get("/api/live/incidents/{incident_id}/reveal", response_model=RevealResponse)

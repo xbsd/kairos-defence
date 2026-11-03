@@ -63,8 +63,11 @@ class SimLauncher:
             return self._proc is not None and self._proc.poll() is None
 
     def state(self) -> dict:
+        """The last launch's state; ``running`` is read from the process itself, so it is right
+        the moment a child exits, before the exit watcher has updated the rest (D-192)."""
         with self._lock:
-            return dict(self._state)
+            alive = self._proc is not None and self._proc.poll() is None
+            return {**self._state, "running": alive}
 
     def launch(self, args: dict) -> dict:
         """Start the child; ``args``: scenario, actor, base, second_base, speed, seed, url.

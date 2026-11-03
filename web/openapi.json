@@ -1459,6 +1459,25 @@
     }
    }
   },
+  "/api/sim/stop": {
+   "post": {
+    "summary": "Sim Stop",
+    "description": "Stop the running simulator (SIGTERM, then SIGKILL) and keep everything live mode has\nrecorded (D-192). Its exit hook closes the incidents it was feeding, so they can be revealed;\nthe simulator wrote its ground truth before its first detection.",
+    "operationId": "sim_stop_api_sim_stop_post",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SimStopResponse"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
   "/api/live/incidents/{incident_id}/reveal": {
    "get": {
     "summary": "Live Reveal",
@@ -6068,6 +6087,24 @@
      "pid"
     ],
     "title": "SimLaunchResponse"
+   },
+   "SimStopResponse": {
+    "properties": {
+     "stopped": {
+      "type": "boolean",
+      "title": "Stopped"
+     },
+     "simulator": {
+      "$ref": "#/components/schemas/SimulatorState"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "stopped",
+     "simulator"
+    ],
+    "title": "SimStopResponse"
    },
    "SimulatorState": {
     "properties": {

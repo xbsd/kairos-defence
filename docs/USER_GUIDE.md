@@ -804,6 +804,9 @@ metric worsens by more than 5% (latency by more than 50%) or a demo assertion fa
 
 ## 12. Glossary
 
+Military, security and counter-drone terms (recovery zone, BDOC, source grades, egress …) are in
+the [glossary of military and security terms](GLOSSARY.md). The technical terms are below.
+
 | Term | Meaning |
 |---|---|
 | Afterglow | The amber color of memory: past flights, matches and history |
@@ -886,6 +889,9 @@ What you see as the flight comes in:
 - When the feed has been quiet for 30 seconds of feed time, the incident **closes**: its remaining
   reruns run, its flights are learned (they appear in later matches as `LIVE-…` flights with their
   own ghosts), and **Reveal who flew** appears on its row.
+- **Stop** (next to Launch, while a simulator runs) ends the flight early and keeps everything:
+  the incident closes at once (its last reruns run and it is learned), and **Reveal who flew** works
+  on it as on any closed incident. Use it to cut a scenario short without losing it.
 - **Reset live data** (in Incidents, behind a confirm) removes every live incident, detection and
   learned flight and stops the simulator. The history and the case memory stay.
 

@@ -12,6 +12,7 @@ import type {
   ScenarioInfo,
   SimLaunchRequest,
   SimLaunchResponse,
+  SimStopResponse,
   DecisionResponse,
   DtwMsg,
   EvidenceLine,
@@ -150,6 +151,7 @@ export const api = {
   liveScenarios: () => getJson<ScenarioInfo[]>("/api/live/scenarios"),
   /** Start the simulator for a scenario as a separate process (an explicit click only). */
   simLaunch: (req: SimLaunchRequest) => postJson<SimLaunchResponse>("/api/sim/launch", req),
+  simStop: () => postJson<SimStopResponse>("/api/sim/stop", {}),
   /** Remove every live-mode row (after a confirm); the history and the ledger stay. */
   liveReset: () => postJson<LiveResetResponse>("/api/live/reset", {}),
   /** Who flew a closed live incident (D-170): computed on request, never stored. */

@@ -12,8 +12,9 @@ import { basesFor, defaultBase, nextBase, RANDOM, simulatorLine, SPEED_CHOICES }
 const FIELD =
   "min-w-0 rounded-button border border-hairline bg-scope px-1 py-1 text-13 text-ink-hi disabled:text-ink-low";
 
-/** The scenario launcher (D-184): scenario, actor or team, base, speed, seed, Launch. The
- * simulator runs as a separate process; the app keeps the scenario, never who flies (D-182). */
+/** The scenario launcher (D-184): scenario, actor or team, base, speed, seed, Launch, and Stop
+ * (D-192: ends the simulator, keeps the session's incidents). The simulator runs as a separate
+ * process; the app keeps the scenario, never who flies (D-182). */
 export function Launcher({ installations }: { installations: string[] }) {
   const s = useThrottledStore(liveStore, (st) => ({
     scenarios: st.scenarios,
@@ -28,6 +29,7 @@ export function Launcher({ installations }: { installations: string[] }) {
   const [second, setSecond] = useState("CHARLIE");
   const [speed, setSpeed] = useState<number>(20);
   const [seed, setSeed] = useState("");
+  const [stopping, setStopping] = useState(false);
   const sc: ScenarioInfo | undefined = s.scenarios.find((x) => x.name === name);
   const bases = basesFor(sc, actor);
   const running = s.sim?.running === true;
@@ -64,6 +66,17 @@ export function Launcher({ installations }: { installations: string[] }) {
     } catch (e) {
       st.setLaunch(false, e instanceof Error ? e.message : String(e));
     }
+    await refreshStatus();
+  };
+  const stop = async () => {
+    setStopping(true);
+    try {
+      await api.simStop();
+      liveStore.getState().setLaunch(false);
+    } catch (e) {
+      liveStore.getState().setLaunch(false, e instanceof Error ? e.message : String(e));
+    }
+    setStopping(false);
     await refreshStatus();
   };
 
@@ -196,6 +209,15 @@ export function Launcher({ installations }: { installations: string[] }) {
             className="rounded-button border border-flash px-3 py-1 text-13 text-flash transition-colors duration-(--dur-micro) ease-(--ease-out) hover:bg-hairline disabled:cursor-not-allowed disabled:border-hairline disabled:text-ink-low"
           >
             Launch
+          </button>
+          <button
+            type="button"
+            onClick={() => void stop()}
+            disabled={!running || stopping}
+            title="Stop the simulator; this session's incidents are kept"
+            className="rounded-button border border-hairline px-3 py-1 text-13 text-ink-hi transition-colors duration-(--dur-micro) ease-(--ease-out) hover:bg-hairline disabled:cursor-not-allowed disabled:text-ink-low"
+          >
+            {stopping ? "Stopping" : "Stop"}
           </button>
           <span data-testid="simulator-state" className="min-w-0 truncate text-12 text-ink-mid">
             {simulatorLine(s.sim)}

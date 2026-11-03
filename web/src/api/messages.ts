@@ -125,6 +125,7 @@ export type LiveIncidentRow = S["LiveIncidentRow"];
 export type ScenarioInfo = S["ScenarioInfo"];
 export type SimLaunchRequest = S["SimLaunchRequest"];
 export type SimLaunchResponse = S["SimLaunchResponse"];
+export type SimStopResponse = S["SimStopResponse"];
 export type LiveResetResponse = S["LiveResetResponse"];
 export type RevealResponse = S["RevealResponse"];
 export type RevealRerun = S["RevealRerun"];

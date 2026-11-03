@@ -93,7 +93,9 @@ origin.
     `learned_tracks`, the simulator without the actor), `GET /api/live/scenarios`
     (`ScenarioInfo` list), `POST /api/live/reset` (`LiveResetResponse`; stops a running simulator),
     `POST /api/sim/launch` (`SimLaunchRequest` → `SimLaunchResponse`; 409 while one runs, 422 for a
-    bad scenario, actor, base or speed), `GET /api/live/incidents/{id}/reveal` (`RevealResponse`
+    bad scenario, actor, base or speed), `POST /api/sim/stop` (`SimStopResponse`: `stopped` and the
+    simulator state; keeps every live row, and the launcher's exit hook closes the incidents it fed,
+    D-192), `GET /api/live/incidents/{id}/reveal` (`RevealResponse`
     through `kairos_defense.eval.reveal`; 404 unknown, 409 until closed; never stored, D-170),
     `GET /api/live/trace?installation=` (`MatcherTraceMsg`: the latest fresh live rerun's trace;
     404 before any, D-188), `GET /api/schema/live-stream`.

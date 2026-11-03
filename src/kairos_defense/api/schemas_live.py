@@ -187,6 +187,11 @@ class SimLaunchResponse(Strict):
     pid: int
 
 
+class SimStopResponse(Strict):
+    stopped: bool  # False when no simulator was running
+    simulator: SimulatorState
+
+
 class LiveResetResponse(Strict):
     reset: dict[str, int]
     vectors: int

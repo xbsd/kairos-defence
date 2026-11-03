@@ -673,6 +673,28 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/sim/stop": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Sim Stop
+     * @description Stop the running simulator (SIGTERM, then SIGKILL) and keep everything live mode has
+     *     recorded (D-192). Its exit hook closes the incidents it was feeding, so they can be revealed;
+     *     the simulator wrote its ground truth before its first detection.
+     */
+    post: operations["sim_stop_api_sim_stop_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/live/incidents/{incident_id}/reveal": {
     parameters: {
       query?: never;
@@ -2315,6 +2337,12 @@ export interface components {
       /** Pid */
       pid: number;
     };
+    /** SimStopResponse */
+    SimStopResponse: {
+      /** Stopped */
+      stopped: boolean;
+      simulator: components["schemas"]["SimulatorState"];
+    };
     /** SimulatorState */
     SimulatorState: {
       /** Running */
@@ -3708,6 +3736,26 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  sim_stop_api_sim_stop_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SimStopResponse"];
         };
       };
     };
