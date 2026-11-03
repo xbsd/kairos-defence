@@ -307,3 +307,4 @@ p=pathlib.Path("src/eval/Charts.tsx"); s=p.read
 [2026-10-29 10:27:10] === Phase 9: done (cloud), tagged phase-09-done ===
 [2026-10-29 11:36:31] phase 10: cloud gate attempt 1: PASS
 [2026-10-29 11:36:56] === Phase 10: done (cloud), tagged phase-10-done ===
+[2026-11-03 00:56:32] phase 11: cloud gate attempt 1: PASS
