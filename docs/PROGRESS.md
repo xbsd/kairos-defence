@@ -14,7 +14,7 @@
 | 9 | Swarms, agent, MCP, hardening and runbook | done (2026-10-29, gate passed in a single cloud session) | `make clean && make data index models eval` (7 min): 8 swarms indexed, swarm top-1 1.000 (4/4), every §19 target met (accepted `live_top3_incidents` WARN), `check_targets.py 9` exit 0; `make demo` serves the Swarm view and `/api/swarm` (S1-GOLF-260503 first); `make e2e` 31 passed; encore beat at 5× both sizes; `make mcp` lists 6 tools (8 with `--allow-proposals`); `docs/DEMO.md` complete; 795 fast, 18 slow; Vitest 168 | 2026-10-29 |
 | 10 | User guide, one-pager and rollback guide (docs/phases/PHASE_10.md) | done (2026-10-29, gate passed in a single cloud session) | `make check` (801 fast, Vitest 169) && `npm --prefix web run build` && `make e2e` (34 passed, the 3 guide tests writing 20 screenshots to `docs/guide/img/`) && `check_docs.py` ("Documentation complete": guide 6,098 words and 20 images, one-pager 508 words); every image reviewed against §17, five presentation fixes (D-166) | 2026-10-29 |
 | 11 | Live mode MVP: simulated sensor feed, live matching, scenarios (docs/phases/PHASE_11.md) | done (2026-11-03, gate passed in a single cloud session) | | |
-| 12 | DTW workbench and live-mode documentation (docs/phases/PHASE_12.md) | not started | | |
+| 12 | DTW workbench and live-mode documentation (docs/phases/PHASE_12.md) | done (2026-11-03, gate passed in a single cloud session) | | |
 
 Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 

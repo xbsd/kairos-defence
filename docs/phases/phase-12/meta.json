@@ -1,0 +1,24 @@
+{
+  "phase": 12,
+  "status": "done",
+  "steps": [
+    {
+      "step": "gate-1",
+      "at": "2026-11-03 03:27:47",
+      "ok": true
+    }
+  ],
+  "started": "2026-11-03 03:04:21",
+  "sha_before": "fd81b85d8d89c4587a56fcbdf46a2d45d7038ef3",
+  "gate_attempts": 1,
+  "last_gate": {
+    "attempt": 1,
+    "ok": true,
+    "reason": "",
+    "gaps": [],
+    "log": "docs/phases/phase-12/gate-1.log"
+  },
+  "tests_passed": 929,
+  "finished": "2026-11-03 03:27:55",
+  "sha_after": "fd81b85d8d89c4587a56fcbdf46a2d45d7038ef3"
+}
