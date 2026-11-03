@@ -12,9 +12,19 @@ from kairos_defense.live.precompute import fingerprint, precompute
 from kairos_defense.store.live_cache import FileResultCache
 from tests.conftest import make_loop
 
+# wall-clock measurements inside the matcher trace (D-187), left out like the result's own
+TRACE_TIMINGS = {"prefilter": ("ms",), "dtw": ("ms", "ms_each"), "fusion": ("ms",)}
+
 
 def _strip(doc: dict) -> dict:
-    return {k: v for k, v in doc.items() if k not in ("elapsed_ms", "timings", "cached")}
+    out = {k: v for k, v in doc.items() if k not in ("elapsed_ms", "timings", "cached")}
+    if out.get("trace"):  # every other trace field (paths, distances, scores) is compared
+        t = {k: v for k, v in out["trace"].items()
+             if k not in ("explain_ms", "total_ms", "trace_ms")}  # fmt: skip
+        for part, keys in TRACE_TIMINGS.items():
+            t[part] = {k: v for k, v in t[part].items() if k not in keys}
+        out["trace"] = t
+    return out
 
 
 def test_round_trip(tmp_path) -> None:
