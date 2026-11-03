@@ -2699,3 +2699,16 @@ Where this file and the SPEC ever disagree, this file wins.
   ground truth before its first detection, so a stopped flight can still be revealed.
 - Consequences: a stopped flight is shorter than its scenario intends, so its reveal verdict may say
   the expectation was not met; that is the honest result for a partial flight.
+
+## D-193 · Themed dropdowns · 2026-11-03
+- Context: the open list of every `<select>` was drawn by the operating system (a light macOS menu
+  with a blue highlight), out of place in the dark Command Center. The user asked for themed ones.
+- Decision: keep native `<select>` elements and style them in `web/src/index.css`: `color-scheme:
+  dark` everywhere, and, where the browser supports the customizable select (`appearance:
+  base-select`, Chromium), the open list (`::picker(select)`), options, checkmark and arrow drawn
+  with the tokens: scope background, hairline border, flash for the selected option.
+- Why: one stylesheet rule themes all ten dropdowns while keeping native keyboard, screen-reader
+  and test behavior (`selectOption`, `fireEvent.change`). Rejected: a custom listbox component
+  (re-implements accessibility, rewrites every dropdown and its tests).
+- Consequences: Safari and Firefox show their native list in dark mode until they support the
+  customizable select.

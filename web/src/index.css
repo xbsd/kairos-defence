@@ -5,3 +5,80 @@
 body[data-director="page"] main {
   padding-bottom: 11rem;
 }
+
+/* Themed dropdowns (D-193). Native form controls follow the dark theme everywhere; where the browser
+   supports the customizable select (Chromium), the open list is drawn with the tokens too, instead
+   of the operating system's light menu. Keyboard and screen-reader behavior stay native. */
+:root {
+  color-scheme: dark;
+}
+
+@supports (appearance: base-select) {
+  select,
+  ::picker(select) {
+    appearance: base-select;
+  }
+
+  select {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+
+  select:disabled {
+    cursor: not-allowed;
+  }
+
+  select::picker-icon {
+    color: var(--ink-mid);
+    transition: rotate var(--dur-micro) var(--ease-out);
+  }
+
+  select:open::picker-icon {
+    rotate: 180deg;
+  }
+
+  ::picker(select) {
+    margin-block: 4px;
+    padding: 4px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-panel);
+    background: var(--scope);
+    color: var(--ink-hi);
+    font: inherit;
+  }
+
+  option {
+    padding: 4px 8px;
+    border-radius: var(--radius-button);
+    color: var(--ink-hi);
+    transition: background-color var(--dur-micro) var(--ease-out);
+  }
+
+  option:hover,
+  option:focus-visible {
+    background: var(--hairline);
+    outline: none;
+  }
+
+  option:checked {
+    color: var(--flash);
+  }
+
+  option::checkmark {
+    color: var(--flash);
+  }
+
+  option:disabled {
+    color: var(--ink-low);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  select::picker-icon,
+  option {
+    transition: none;
+  }
+}
