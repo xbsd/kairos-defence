@@ -38,6 +38,11 @@ the matcher, forecast, report recall and lens on that clock, and one client's se
   `result_at(t)` (memory, cache, or computed and stored; None before `min_track_s` or without
   single-track matching), `compute(r)`, `features_at(s)`, `features_range(s0, s1)`,
   `save_features()`, `lens(t, match_track_id, channel)`, `cache_state()`, `offsets`.
+- `loop.compute_result(r, query, *, ..., trace=False)`: with `trace=True` the result holds
+  `"trace"` (the matcher trace, D-187, with `t_s`); `LiveLoop.compute` always traces and the cache
+  stores it (`CACHE_FORMAT` 2). `session.result_messages` appends a `matcher_trace` message after
+  each `match` when the result has a trace (D-188). `feed.LiveHub.trace(installation)`: the latest
+  fresh live trace (cleared by `reset`).
   `loop.rerun_seconds(duration, min_track_s, every_s)`.
 - `precompute.fingerprint(store, scoring, app, incident_id) -> str` (SHA-256 hex);
   `precompute.precompute(loop, force=False) -> PrecomputeSummary`.
@@ -130,7 +135,8 @@ Fixtures `live_kit`, `live_loop` and `make_loop` in `tests/conftest.py` (module 
 read-only connection must close before other modules write the P1 file).
 Live mode: `test_live_incidents.py`, `test_live_hub.py` (a simulated P1 flight end to end; the
 worker's fresh-first order), `test_live_learning.py` (no look-ahead, learned rows equal the index
-build's), `test_live_reset.py`; fixture `live_services` and `tests/unit/live_kit.py` (reruns every
+build's; fresh reruns stream a `matcher_trace`, backfilled ones are traced and streamed not at
+all), `test_live_reset.py`; fixture `live_services` and `tests/unit/live_kit.py` (reruns every
 20 s, frames of feed time, the worker on submit: nothing waits in real time).
 
 ## Gotchas
@@ -147,6 +153,8 @@ build's), `test_live_reset.py`; fixture `live_services` and `tests/unit/live_kit
   live incident (open-ended); `clockNow` in the web app treats 0 as unbounded.
 - `LiveWorker` with `threaded=False` runs each task on submit (tests): the order is then FIFO
   and every rerun is fresh.
+- `CACHE_FORMAT` 2 (phase 12) clears every cache written before the trace: run
+  `replay --precompute` (`make demo` and `make e2e` do) once after updating.
 
 ## Changelog
 
@@ -161,3 +169,5 @@ build's), `test_live_reset.py`; fixture `live_services` and `tests/unit/live_kit
 - Phase 11: live mode (`incidents.py`, `feed.py`, `runner.py`, `learn.py`); `LiveLoop.compute`
   became the shared `loop.compute_result` and `Session._results` the shared
   `session.result_messages` (replay results unchanged), D-172 to D-176.
+- Phase 12: the matcher trace in each result and its `matcher_trace` message (replay cache
+  `CACHE_FORMAT` 2; live: fresh reruns only), `LiveHub.trace` (D-187, D-188).

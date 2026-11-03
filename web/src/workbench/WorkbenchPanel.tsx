@@ -41,7 +41,8 @@ function Shortlist({ msg, landed }: { msg: MatcherTraceMsg; landed: number }) {
   );
 }
 
-function Current({ msg, cur }: { msg: MatcherTraceMsg; cur: Aligned | null }) {
+function Current(props: { msg: MatcherTraceMsg; cur: Aligned | null; fused: number | null }) {
+  const { msg, cur } = props;
   const q = msg.trace.query;
   if (!cur)
     return (
@@ -53,7 +54,9 @@ function Current({ msg, cur }: { msg: MatcherTraceMsg; cur: Aligned | null }) {
       </section>
     );
   const m = cur.m ?? cur.detail.curve.length;
-  const what = `${cur.incident} (vector rank ${cur.order + 1})`;
+  const what =
+    `${cur.incident} (vector rank ${cur.order + 1}` +
+    (props.fused ? `, fused rank ${props.fused})` : ")");
   return (
     <section aria-labelledby="wb-align" className="min-w-0" data-track={cur.track}>
       <h3 id="wb-align" className="text-13 font-bold text-ink-mid">
@@ -153,7 +156,9 @@ function Fusion({ msg }: { msg: MatcherTraceMsg }) {
               <span className="text-afterglow">{num(r.score, 3)}</span>
             </span>
             {r.reasons.length ? (
-              <span className="block truncate text-12 text-ink-mid">{r.reasons.join("; ")}</span>
+              <span className="line-clamp-2 block text-12 text-ink-mid">
+                {r.reasons.join("; ")}
+              </span>
             ) : null}
           </li>
         ))}
@@ -176,13 +181,17 @@ export function WorkbenchPanel(props: {
 }) {
   const st = stateAt(props.items, props.elapsed, props.rate);
   const t = props.msg.trace;
+  // once fused, the alignment shown is the fused #1's (it is always among the traced paths)
+  const fused = st.stage === "fusion" || st.stage === "done";
+  const top = fused ? props.items.find((a) => a.track === t.ranking[0]?.track_id) : undefined;
+  const cur = top ?? st.current;
   return (
     <div
       data-testid="workbench"
       data-stage={st.stage}
       data-step={st.step}
       data-t={t.t_s}
-      data-track={st.current?.track ?? ""}
+      data-track={cur?.track ?? ""}
       className="flex flex-col gap-3"
     >
       <p className="text-13 text-ink-hi" data-testid="workbench-headline">
@@ -241,7 +250,7 @@ export function WorkbenchPanel(props: {
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.4fr)_minmax(0,1fr)]">
         <Shortlist msg={props.msg} landed={st.step} />
-        <Current msg={props.msg} cur={st.current} />
+        <Current msg={props.msg} cur={cur} fused={top ? 1 : null} />
         {st.stage === "fusion" || st.stage === "done" ? (
           <Fusion msg={props.msg} />
         ) : (

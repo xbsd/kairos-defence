@@ -58,7 +58,7 @@ describe("WorkbenchPanel", () => {
   it("says what it shows from the trace's numbers", () => {
     panel(0);
     expect(screen.getByTestId("workbench-headline")).toHaveTextContent(
-      "Slow-motion replay of rerun T+90: 8 alignments computed in 23 ms; the first 4 and 1 more " +
+      "Slow-motion replay of rerun T+01:30: 8 alignments computed in 23 ms; the first 4 and 1 more " +
         "of the final top 10 replayed at 6 per second",
     );
     expect(screen.getByTestId("workbench")).toHaveAttribute("data-stage", "shortlist");
@@ -91,6 +91,11 @@ describe("WorkbenchPanel", () => {
     expect(screen.getByTestId("workbench")).toHaveAttribute("data-stage", "done");
     expect(rows("workbench-fusion")).toEqual(msg.trace.ranking.slice(0, 5).map((r) => r.track_id));
     expect(screen.getByText("same RF family (6)")).toBeInTheDocument();
+    // the alignment shown once fused is the fused #1's
+    expect(screen.getByTestId("workbench")).toHaveAttribute("data-track", "T6");
+    expect(
+      screen.getByText(/2\. DTW alignment: INC-T6 \(vector rank 7, fused rank 1\)/),
+    ).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Done");
   });
 

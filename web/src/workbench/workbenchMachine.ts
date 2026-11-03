@@ -4,6 +4,7 @@
 // second: the shortlist, then one aligned candidate landing every 1 / rate s, then the fusion,
 // then done. Reduced motion jumps straight to done.
 import type { MatcherTrace, TraceDetail } from "../api/messages";
+import { tPlus } from "../lib/format";
 
 export type Stage = "shortlist" | "align" | "fusion" | "done";
 
@@ -147,7 +148,21 @@ export function headline(t: MatcherTrace, rate: number): string {
   const extra = n > t.trace_paths ? ` and ${n - t.trace_paths} more of the final top 10` : "";
   const first = Math.min(t.trace_paths, total);
   return (
-    `Slow-motion replay of rerun T+${t.t_s}: ${total} alignments computed in ${ms}; ` +
+    `Slow-motion replay of rerun ${tPlus(t.t_s)}: ${total} alignments computed in ${ms}; ` +
     `the first ${first}${extra} replayed at ${rate} per second`
   );
+}
+
+/** A curve's value at fraction `f` of its length (linear between samples; null if a neighbor
+ * is missing). The curves are PAA views of the full series, so a path index `i` of `n` samples
+ * sits at fraction i / (n − 1). */
+export function valueAt(curve: (number | null)[], f: number): number | null {
+  if (!curve.length) return null;
+  const x = Math.min(1, Math.max(0, f)) * (curve.length - 1);
+  const a = Math.floor(x);
+  const b = Math.min(curve.length - 1, a + 1);
+  const va = curve[a];
+  const vb = curve[b];
+  if (va === null || va === undefined || vb === null || vb === undefined) return null;
+  return va + (vb - va) * (x - a);
 }

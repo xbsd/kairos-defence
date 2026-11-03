@@ -1,13 +1,15 @@
 import { render, screen, within } from "@testing-library/react";
 import { act } from "react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { StreamPanel } from "../src/panels/Stream";
 import { replayStore } from "../src/state/replayStore";
+import { uiStore } from "../src/state/uiStore";
 import { clock, HELLO, point, rf } from "./fixtures";
 import { flush, nth, resetStores } from "./panelKit";
 
 beforeEach(resetStores);
+afterEach(() => vi.restoreAllMocks());
 
 describe("StreamPanel", () => {
   it("says so before any detection", () => {
@@ -61,5 +63,36 @@ describe("StreamPanel", () => {
     fireEvent.mouseLeave(scroller);
     await flush();
     expect(screen.getAllByTestId("stream-row")[0]).toHaveTextContent("T+05:00");
+  });
+
+  it("fades new rows in, except when they arrive faster than 10 a second (D-191)", async () => {
+    uiStore.setState({ userReduce: false, osReduce: false });
+    const proto = HTMLElement.prototype as unknown as { animate?: unknown };
+    const had = proto.animate;
+    const anim = vi.fn();
+    proto.animate = anim;
+    try {
+      render(<StreamPanel />);
+      act(() => {
+        const s = replayStore.getState();
+        s.apply(HELLO);
+        s.apply(clock(10, true, 1));
+        for (let t = 0; t <= 10; t++) s.apply(point(t, 21680 + t, -4880, 90));
+      });
+      await flush();
+      expect(anim).toHaveBeenCalledTimes(2 * 11); // fade and left edge per row at 1x
+      anim.mockClear();
+      act(() => {
+        const s = replayStore.getState();
+        s.apply(clock(20, true, 20)); // a live feed at 20x: 2 rows per feed second, 40 a second
+        for (let t = 11; t <= 20; t++) s.apply(point(t, 21680 + t, -4880, 90));
+        for (let t = 11; t <= 20; t++) s.apply(rf(t, 335));
+      });
+      await flush();
+      expect(screen.getAllByTestId("stream-row")).toHaveLength(31); // every row is there
+      expect(anim).not.toHaveBeenCalled(); // and none waits on a fade to be seen
+    } finally {
+      proto.animate = had;
+    }
   });
 });

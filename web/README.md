@@ -50,6 +50,16 @@ curves), Director's ninth beat (the swarm encore) and the optional chat slide-ov
   `warpedConnectors`, `morphConnectors`, `connectorAt`, `paceWords`, `pathCells`), `ramp.ts`
   (OKLab scope → afterglow), `LensCurves.tsx` (curves, connectors, 1.2 s morph), `CostMatrix.tsx`
   (band, path drawn on), `TimeWarpLens.tsx` (compact and full variants, selectors, readouts).
+- `src/workbench/` (phase 12, D-189): `workbenchMachine.ts` (pure replay of a matcher trace:
+  `aligned`, `stateAt`, `landingMs`, `stepAt`, `nextStepMs`, `rescale`, `rankLanded`,
+  `finalState`, `headline`; `RATES` 3, 6, 10 per second), `workbenchStore.ts` (the pinned trace
+  and the replay clock: `openWith`, `pin`, `close`, `tick`, `setPlaying`, `step`, `replay`,
+  `setRate`; `startWorkbenchClock` on requestAnimationFrame), `WorkbenchPanel.tsx` (shortlist,
+  alignment with `TraceCurves` and `CostThumb` from `TraceViews.tsx`, readout, ranking, fusion;
+  `data-stage`, `data-step`, `data-t`, `data-track`), `WorkbenchDialog.tsx` (the modal, mounted
+  once in `App.tsx`, and `WorkbenchButton` under the Matches panel). `matchStore.trace` holds the
+  stream's latest `matcher_trace`; the Match explainer's "Watch the matcher work" fetches
+  `api.trace(incident, at)`; `api.liveTrace(installation)` serves the latest live one.
 - `src/overlay/` (D-131): `clues.ts` (report choice, spans, zone note), `scramble.ts`,
   `RecallOverlay.tsx`, `RecallBeam.tsx`.
 - `src/explainer/` (`Contributions.tsx`, `FlightPair.tsx`), `src/case/` (`graphModel.ts`,
@@ -209,6 +219,16 @@ computed from the same stores. The lens shows the stream's `dtw` or a chosen mat
   Reveal who flew names P1 and a verdict; axe; screenshots `phase11-live-*`; live data reset
   before and after, the ledger reseeded after).
 
+- Phase 12: Vitest `workbenchMachine.test.ts` (stages over time, one landing per 1 / rate s, the
+  ranking re-sorting with ties, speed changes, Step, the store's pinning, pause and reduced
+  motion), `WorkbenchPanel.test.tsx` (the header from the trace's numbers, the candidate view and
+  readout at a step, the fused top 5, the controls, the dialog pinned against a newer trace,
+  reduced motion, at most 10 renders per second; fixture `workbenchFixtures.ts`); Playwright
+  `e2e/workbench.spec.ts` (a returning prober at 20×: the workbench aligns candidates under the
+  rerun it opened with, then after the close settles on the Matches panel's rerun and top 3;
+  from the Match explainer at T+90 with Pause and Step; axe; screenshots `phase12-workbench-*` at
+  1440 × 900 and 1920 × 1080) and a `guide.spec.ts` test for the guide's four live-mode shots.
+
 ## Gotchas
 
 - Change `src/kairos_defense/api/schemas.py`, then `uv run kairos-defense api --dump-openapi
@@ -259,3 +279,6 @@ time). It is not part of `make e2e`.
   stream client and store; the command bar's live mode; `TheaterFrame` (the theater's own Suspense
   boundary, which fixed a page-wide "Loading" flash on slow machines, D-185); `playwright.config.ts`
   passes `--live-mode-dir data/cache/e2e/live_mode` (D-184).
+- Phase 12: the DTW workbench (`src/workbench/`), `matcher_trace` in the stream types and
+  `matchStore`, "DTW workbench" under the Matches panel, "Watch the matcher work" on the Match
+  explainer, `api.trace` and `api.liveTrace` (D-187 to D-189).

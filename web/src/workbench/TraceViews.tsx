@@ -1,5 +1,6 @@
 import type { TraceDetail } from "../api/messages";
 import { lensRamp } from "../lens/ramp";
+import { valueAt } from "./workbenchMachine";
 
 const W = 320;
 const H = 132;
@@ -19,8 +20,8 @@ function points(curve: (number | null)[], lo: number, hi: number, y0: number, h:
     .join(" ");
 }
 
-/** Tonight's curve above the candidate's, joined along the warping path (§17.7's connectors,
- * from the trace's path: indices into the full n × m matrix). */
+/** Tonight's curve above the candidate's, each aligned pair of samples joined along the warping
+ * path (§17.7's connectors, from the trace's path: indices into the full n × m matrix). */
 export function TraceCurves(props: {
   query: (number | null)[];
   detail: TraceDetail;
@@ -34,8 +35,17 @@ export function TraceCurves(props: {
   const top = PAD;
   const band = (H - 4 * PAD) / 2;
   const bottom = top + band + 2 * PAD;
-  const qx = (i: number) => PAD + (props.n > 1 ? (i / (props.n - 1)) * (W - 2 * PAD) : 0);
-  const cx = (j: number) => PAD + (props.m > 1 ? (j / (props.m - 1)) * (W - 2 * PAD) : 0);
+  const qf = (i: number) => (props.n > 1 ? i / (props.n - 1) : 0);
+  const cf = (j: number) => (props.m > 1 ? j / (props.m - 1) : 0);
+  const X = (f: number) => PAD + f * (W - 2 * PAD);
+  const span = hi - lo || 1;
+  const Y = (v: number, y0: number) => y0 + band - ((v - lo) / span) * band;
+  const links = props.detail.path.flatMap(([i = 0, j = 0], k) => {
+    const vq = valueAt(props.query, qf(i));
+    const vc = valueAt(props.detail.curve, cf(j));
+    if (vq === null || vc === null) return [];
+    return [{ k, x1: X(qf(i)), y1: Y(vq, top), x2: X(cf(j)), y2: Y(vc, bottom) }];
+  });
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
@@ -44,13 +54,13 @@ export function TraceCurves(props: {
       aria-label={props.label}
       data-testid="workbench-curves"
     >
-      {props.detail.path.map(([i, j], k) => (
+      {links.map((l) => (
         <line
-          key={k}
-          x1={qx(i ?? 0)}
-          y1={top + band}
-          x2={cx(j ?? 0)}
-          y2={bottom}
+          key={l.k}
+          x1={l.x1}
+          y1={l.y1}
+          x2={l.x2}
+          y2={l.y2}
           className="stroke-ink-low"
           strokeWidth={0.6}
         />

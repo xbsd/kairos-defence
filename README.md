@@ -39,6 +39,14 @@ make demo                # then open http://localhost:8000 and press D for Direc
 `make eval` exits with status 1 because of the one known demo gap described under Results; the
 report is still written. Everything runs offline.
 
+**Live mode.** `make live`, then open <http://127.0.0.1:8000/live>, pick a scenario (for example
+*Returning prober*, P1, Bravo, 20×) and press **Launch**: a separate simulator flies a new flight
+and streams only its sensor detections; the app forms the incident, matches it every 5 s, learns
+it when it closes, and **Reveal who flew** says afterwards whether it was recognized. **DTW
+workbench** under the matches replays the matcher's real computation in slow motion.
+`uv run kairos-defense live check` scores all five scenarios headless. See
+[the user guide's section 13](docs/USER_GUIDE.md#13-live-mode).
+
 | Command | What it does |
 |---|---|
 | `make check` | Lint, type checks and the fast tests (Python and web) |
@@ -127,7 +135,7 @@ Code on the web session with the same gate.
 | 9 | Swarms, agent, MCP, hardening and runbook | [done](docs/phases/phase-09/REPORT.md) |
 | 10 | User guide, one-pager and rollback guide | [done](docs/phases/phase-10/REPORT.md) |
 | 11 | Live mode MVP: simulated sensor feed, live matching, scenarios | [done](docs/phases/phase-11/REPORT.md) |
-| 12 | DTW workbench and live-mode documentation | not started |
+| 12 | DTW workbench and live-mode documentation | in progress |
 
 </details>
 

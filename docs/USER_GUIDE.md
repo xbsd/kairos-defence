@@ -3,7 +3,9 @@
 This guide is for operators, analysts, investigators and presenters who have never seen Kairos
 Defense. It explains what the product does, how to install and run it, what every screen shows and
 what you can do there, how to run the demo, and how to work with the command line, the agent tools,
-the configuration and the evaluation. You do not need to read the specification to use it.
+the configuration and the evaluation. You do not need to read the specification to use it. Besides the
+recorded replay, the app runs **live**: a simulator flies new flights and the app recognizes them
+as they arrive; section [13. Live mode](#13-live-mode) shows how.
 
 Every screenshot in this guide was captured from the running app by an automated script
 (`web/e2e/guide.spec.ts`, run by `make e2e`), never mocked up or edited.
@@ -155,7 +157,8 @@ Director is off.
   on Apr 20", or "Open, unattributed"), **Approve link** and **Reject** buttons, and **Explain**,
   which opens the Match explainer for that match at the current second. Hovering an entry brightens
   its ghost. A line at the bottom names the model, how long the run took and the case the
-  proposals go to.
+  proposals go to, beside the **DTW workbench** button, which replays that rerun's computation in
+  slow motion (see [The DTW workbench](#the-dtw-workbench) in section 13).
 - **Region constellation**: the bases of tonight's region as points, with arcs from tonight's base
   to the bases of the matched flights: the cross-installation view in one glance.
 - **Time-warp lens**: tonight's flight and a matched flight as two curves (choose the match and the
@@ -197,7 +200,8 @@ then one sentence that adds them up, for example "Intercept −52.71 and contrib
 logit of +7.86; the score is sigmoid(7.86) = 1.000". Screen readers get the same numbers as a table
 with each feature's value, coefficient and contribution. Use it to answer "why did this flight rank
 first?". Open it from a match's **Explain** link, or from Pages, then type a replay second and press
-**Show**.
+**Show**. **Watch the matcher work** opens the DTW workbench on the matcher run at that second
+(section 13).
 
 ### Case board
 
@@ -371,6 +375,9 @@ uv run kairos-defense memory reseed      # regenerates the case memory from seed
 Both go through the running API (DuckDB allows one writing process per file). The full presenter's
 script, with what to say at each beat, fallbacks and likely questions, is in `docs/DEMO.md`.
 
+After the replay, the presenter can fly a new flight live and let the app recognize it: see
+[13. Live mode](#13-live-mode).
+
 ## 5. Approving links and building an evidence package
 
 1. On Live watch, let the replay pass T+90 (or press → to the Time-warp beat). The matcher proposes
@@ -420,7 +427,7 @@ with the command that fixes it ("no index: run `make index`").
 | `kairos-defense verify-evidence` | Verifies an evidence package | folder, `--ledger`, `--pubkey` |
 | `kairos-defense api` | Serves the REST API, the replay stream and (with `--static`) the web app | `--host`, `--port`, `--static`, `--reload`, `--dump-openapi`, `--memory`, `--live-db`, `--exports`, `--reseed`, `--time-scale` (slow-motion replays for screen capture) |
 | `kairos-defense replay` | Lists the live replays, precomputes their results, or resets the live tables | `--incident`, `--precompute`, `--force`, `--reset`, `--api` |
-| `kairos-defense simulate` | Live mode: flies one scenario and streams its sensor detections to the app (see [Live mode](#live-mode)) | `--scenario`, `--base`, `--actor`, `--second-base`, `--speed`, `--seed`, `--url`, `--dry-run`, `--show-actor` |
+| `kairos-defense simulate` | Live mode: flies one scenario and streams its sensor detections to the app (see [13. Live mode](#13-live-mode)) | `--scenario`, `--base`, `--actor`, `--second-base`, `--speed`, `--seed`, `--url`, `--dry-run`, `--show-actor` |
 | `kairos-defense live` | Live mode: `check`, `reset`, `status` | see below |
 | `kairos-defense mcp` | Runs the MCP server over stdio | `--allow-proposals`, `--agent`, `--memory`, `--api` |
 | `kairos-defense fetch-models` | Downloads the optional embedding model (the only command that downloads) | `--model` |
@@ -624,7 +631,7 @@ EmbedderUnavailable: the fastembed package is not installed: run `uv sync --extr
 `kairos-defense fetch-models`, or set embeddings.provider: hashing
 ```
 
-### Live mode
+### Live-mode commands
 
 Besides the replay, Kairos Defense runs live: a separate simulator process flies new, never-seen
 flights on a live calendar after the 18-month history and streams only sensor detections into the
@@ -634,7 +641,8 @@ received, learns each closed incident so the next live flight can match it, and 
 and proposals in the case memory. `make live` serves the web app for the Live page;
 `kairos-defense simulate --scenario returning-prober --speed 20` flies a known prober again, and
 `kairos-defense live check` scores all five scenarios (returning prober, copycat, hobbyist, swarm
-repeat, new operator twice). The full walkthrough, with screenshots, follows in phase 12.
+repeat, new operator twice). The walkthrough, with screenshots, the ingest contract and the DTW
+workbench, is section [13. Live mode](#13-live-mode).
 
 ## 7. Agent tools and the MCP server
 
@@ -822,3 +830,169 @@ metric worsens by more than 5% (latency by more than 50%) or a demo assertion fa
 | Sakoe-Chiba band | A limit on how far DTW may warp |
 | Swarm | Several drones flown together as one incident |
 | Warp ratio, pace | How fast a matched flight was flown relative to tonight's |
+
+## 13. Live mode
+
+The replay in section 4 plays a recorded night. **Live mode** flies new ones. A separate simulator
+process flies a never-seen flight on a live calendar that starts after the 18-month history, and
+streams only what sensors would report (radar points, radio detections, Remote ID broadcasts) into
+the app. The app knows nothing else: it forms incidents from the detections itself, reruns the
+matcher, the forecast and the report recall every 5 seconds of feed time on what it has received so
+far, writes incidents and proposed links to the case memory, and, when an incident closes, learns
+its flights so the next live flight can match them. Who flew each flight is recorded only in the
+ground truth, which the app never reads; after an incident closes you can ask for a reveal
+(below). Everything is synthetic, like the rest of the product.
+
+### Start it
+
+```bash
+make live          # builds the web app and serves it on :8000
+```
+
+Open <http://127.0.0.1:8000/live> (or **Live** under Pages in the command bar). `make demo` serves
+the same page next to the replay. Nothing is flying until you launch a scenario.
+
+### The Live page
+
+![The Live page at 1920 × 1080 with the scenario launcher set for "New operator, twice": a scenario, a base, a second base, the speed and the seed](guide/img/live-mode-launcher.png)
+
+The Live page has the same layout as Live watch: the 3D theater, the memory rail on the right and
+the instrument rail at the bottom. The memory rail starts with **Launch a scenario**:
+
+- **Watched installation**: the base whose stream the page shows.
+- **Scenario**: one of the five below. Its expectation is printed under the form.
+- **Prober**, **Copycat** or **Swarm team** (for the scenarios that have one), **Base** and, for
+  "New operator, twice", **Second base** (where flight 2 flies).
+- **Speed**: feed seconds per wall second, from 1× (real time) to 50×. 20× flies a 13-minute flight
+  in under a minute.
+- **Seed**: empty means automatic (derived from the world seed and a launch counter, so the same
+  launches give the same flights); type one to repeat a flight.
+
+**Launch** starts the simulator process. The panel then says "Simulator running: returning-prober at
+Bravo, 20×, seed …"; the actor is never shown while the flight is live.
+
+![The Live page during a returning prober's flight at 20×: the live drone over BRAVO, the matches with their scores, this session's incident (open), and the stream, signals, writes and ledger](guide/img/live-mode-incident.png)
+
+What you see as the flight comes in:
+
+- The first detection opens an **incident** (`LIVE-BRAVO-260901-2100…`): a row in **Incidents** with
+  its tracks, its reruns so far and its state (open, closing, closed). The status in the command
+  bar reads "Live feed, 20×".
+- The theater, the Stream, Signals, Recorder and Ledger chain behave exactly as on Live watch,
+  driven by the live stream.
+- From 45 seconds of track the **Matches** panel fills, and it updates every 5 seconds of feed
+  time. The forecast and the linked report appear as on Live watch. A swarm shows its choreography
+  matches instead (the Swarm view's matcher).
+- When the feed has been quiet for 30 seconds of feed time, the incident **closes**: its remaining
+  reruns run, its flights are learned (they appear in later matches as `LIVE-…` flights with their
+  own ghosts), and **Reveal who flew** appears on its row.
+- **Reset live data** (in Incidents, behind a confirm) removes every live incident, detection and
+  learned flight and stops the simulator. The history and the case memory stay.
+
+### The scenarios and what to expect
+
+| Scenario | Who flies | What the app should do (the expectation) |
+|---|---|---|
+| Returning prober | A known prober (P1 to P6, or random) at one of its bases | A flight by the same prober in the top 3 by T+120 s |
+| Copycat | A copycat (C1, C2) that copies another actor's shape with its own radio and launch habits | A flight by the same copycat in the top 5 by T+120 s, above every flight of the actor it copies |
+| Hobbyist | A one-off flyer with no history | No identity to find; the top score is reported |
+| Swarm repeat | A known swarm team (S1, S2) | The same team's earlier swarm ranked first |
+| New operator, twice | An invented operator with no history flies twice, the second time at the second base | Flight 1: nothing of theirs to find. Flight 2: flight 1, learned live, ranked first |
+
+### Reveal who flew
+
+![The reveal card for a closed incident: who flew it, the scenario and seed, the expectation met or missed, and where the actor's own flights ranked at each rerun](guide/img/live-mode-reveal.png)
+
+After an incident has closed, **Reveal who flew** shows a card with the actor (for example "P1,
+County Rd operator"), the scenario and seed, how many earlier flights by the same actor the history
+holds, whether the expectation was met and why, and, for the first reruns, where that actor's own
+flights ranked among the matches shown. The reveal is computed
+on request by the evaluation code, the only code allowed to read the ground truth; nothing it
+shows is stored, and the matcher, the memory and the agents never see it. It is refused while the
+incident is still open.
+
+### The DTW workbench
+
+![The DTW workbench held at its 8th aligned candidate: the shortlist by vector distance, tonight's curve aligned to a past flight with the cost matrix and the warping path, the readout, and the ranking so far](guide/img/live-mode-workbench.png)
+
+Each matcher run takes a fraction of a second: a vector search shortlists 500 past tracks, dynamic
+time warping (DTW) aligns tonight's track with each of them, and a fusion model scores the
+shortlist with the other features. The **DTW workbench** replays one run in slow motion from a
+record the matcher made while it ran, so every number on it is real. Its header says which run it
+replays and how long that run took, for example "Slow-motion replay of rerun T+01:20: 500 alignments
+computed in 202 ms; the first 50 and 6 more of the final top 10 replayed at 6 per second" (the
+first 50 in the order computed, plus any final top-10 track computed later).
+
+1. **Shortlist**: the past tracks nearest to tonight's in the vector index, with their distances.
+2. **DTW alignment**: one candidate at a time, tonight's distance to the target (blue) above the
+   candidate's (amber), joined along the warping path; the cost matrix with the path drawn on
+   ("the full-matrix alignment with the segment's ends relaxed"; the distance itself is computed
+   within the band); and a readout: DTW distance, similarity, normalized distance, the time that
+   alignment took, the matrix size and band, and the path length.
+3. **Ranking**: the aligned candidates by shape similarity, re-sorting as each one lands.
+4. **Fusion**: the final top 5 after fusion, with their scores and reasons; they are the Matches
+   panel's entries for that run.
+
+Controls: **Pause** or **Play**, **Step** (one candidate), **Replay**, and the speed (3, 6 or 10
+candidates per second). With reduced motion (M) it opens on the final state. The workbench keeps
+the run it opened with: when a newer run arrives, a **Newer rerun available: replay it** button
+appears and nothing changes until you press it.
+
+Open it from **DTW workbench** under the Matches panel (on the Live page and on Live watch: the
+latest run) or from **Watch the matcher work** on the Match explainer (the run at that replay
+second).
+
+### From the command line
+
+The simulator can also be run by hand against a running app (`make live` or `make demo`):
+
+```bash
+uv run kairos-defense simulate --scenario returning-prober --base BRAVO --speed 20
+```
+
+`--dry-run` plans and flies the scenario without sending anything (real output):
+
+```text
+$ uv run kairos-defense simulate --scenario returning-prober --base BRAVO --seed 7 --dry-run
+live scenario returning-prober at BRAVO: seed 7, launch 2026-09-01 21:00:00 local (2026-09-02T02:00:00.000Z), speed 1x; 1 flight(s), 859 detections over 768 s of feed time
+dry run: nothing sent, no ground truth written, the clock not moved
+```
+
+`kairos-defense live check` flies every scenario headless against its own in-process app and scores
+each one (real output, speed 50):
+
+```text
+PASS returning-prober: P1 at BRAVO (LIVE-BRAVO-260901-210136, 111 reruns): rank 1 at T+45 s; seed 1101, 83 s
+PASS copycat: C1 at BRAVO (LIVE-BRAVO-260902-190008, 91 reruns): at T+120 s: C1 rank 1, P1 rank none; seed 1102, 61 s
+PASS hobbyist: H-LIVE-1103 at BRAVO (LIVE-BRAVO-260902-191013, 79 reruns): top match BRAVO-250721-2030 at score 1.0 at T+475 s; seed 1103, 55 s
+PASS swarm-repeat: S1 at GOLF (LIVE-GOLF-260902-200005, 97 reruns): final rerun T+525 s: first ECHO-260806-2049 (S1); seed 1104, 26 s
+PASS new-operator-twice: flight 1: N1 at BRAVO (LIVE-BRAVO-260902-221029, 99 reruns): 0 earlier flight(s) of N1; top match INDIA-260413-2206 at T+605 s; flight 2: N1 at CHARLIE (LIVE-CHARLIE-260902-222217, 64 reruns): final rerun T+385 s: first LIVE-BRAVO-260902-221029-T1; seed 1105, 108 s
+live check: 5 of 5 scenario(s) pass at speed 50 in 335 s
+```
+
+`kairos-defense live status` lists this session's live incidents and learned flights;
+`kairos-defense live reset` removes every live-mode row (through the running app when one is up),
+like **Reset live data**.
+
+### The ingest contract (for real sensor adapters)
+
+The simulator is the first adapter of a contract a real radar, radio or Remote ID adapter would
+implement. Send JSON messages on the WebSocket `/ws/ingest` (one object or an array per frame) or
+`POST /api/ingest` with `{"messages": [...]}`; each frame or request is answered with an
+acknowledgement (`accepted`, `detections`, and `rejected` with each refused message's index and
+reason). Every message carries `v: 1`, `type`, `installation_id` and `ts` (ISO 8601 with `Z` or an
+offset). Positions are the region's local east-north-up meters, bearings degrees clockwise from
+north.
+
+| `type` | Fields | Meaning |
+|---|---|---|
+| `point` | `sensor_id`, `sensor_track_id`, `x_m`, `y_m`, `alt_m`, `quality` | One radar detection of one radar track |
+| `rf` | `sensor_id`, `band`, `protocol_family`, `bearing_deg`, `snr_db` | One radio detection of a control link |
+| `rid` | `serial`, `drone_x_m`, `drone_y_m`, `op_x_m`, `op_y_m` | One Remote ID broadcast |
+| `heartbeat` | `rate` (feed seconds per wall second, 1 for a real sensor) | The adapter is alive; advances the installation's feed time |
+
+No message names a person, an operator or an incident. The app refuses unknown installations, a
+sensor that is not that installation's sensor of that kind, times inside the history, and messages
+more than 10 seconds behind the installation's feed time (`live.max_lateness_s`). The full schema
+is in the API's OpenAPI document (`/docs`; the models `IngestPoint`, `IngestRf`, `IngestRid`,
+`IngestHeartbeat` and `IngestAck`).

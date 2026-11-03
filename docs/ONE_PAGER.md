@@ -26,6 +26,9 @@ before, and what happened then?*
   who decided what, and every change signed and chained so it can be verified.
 - **Formations.** It recognizes the choreography of drone swarms seen before.
 
+It also runs live: a simulator flies new flights that the app recognizes as their detections
+arrive, and a slow-motion "DTW workbench" shows the matcher's real computation step by step.
+
 People stay in charge: the system only proposes links and exports; an analyst approves them.
 
 ## The demo story in five beats

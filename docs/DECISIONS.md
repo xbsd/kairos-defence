@@ -2618,3 +2618,70 @@ Where this file and the SPEC ever disagree, this file wins.
   models, reruns every 20 s (`tests/unit/live_kit.fast_scoring`), the worker run on submit, and
   detections fed in frames of feed time, so no test waits in real time. The real speed-50 run is
   `live check` (and the slow `test_full_live_mode.py`).
+
+## D-187 · The matcher trace · 2026-11-03
+- Decision: `DtwMatcher.match(q, trace=True)` returns, in `MatchResult.trace`, a JSON-safe record
+  of that call (`match/trace.py`, `TraceRecorder`); without it the matcher runs exactly as before,
+  and with it the matches, scores, features, reasons and warp ratios are identical (tested at
+  T = 60, 120 and 180 on two queries). The record is columnar, in computation order: `query`
+  (track, incident, `at_s`, window, rows used, `n`, its `dist_target_m` curve as at most 48 PAA
+  points); `prefilter` (time, `k_windows`, one entry per candidate track in prefilter order:
+  track, incident, start, squared-L2 vector distance, best window size and offset); `dtw` (time,
+  band fraction, normalization, and for every candidate in the same order: distance, `d_norm`,
+  band, `m`, its own time `ms_each`, the calibrated `shape_sim`); `detail` for the first
+  `TRACE_PATHS` = 50 candidates plus any final top-10 track beyond them (the warping path from
+  `dtw_rerank.alignment`, the matcher's full-matrix alignment with the segment's ends relaxed,
+  down-sampled to 48 points, its full length, the candidate's curve, a 12 × 12 block-minimum
+  thumbnail of the accumulated cost at 3 significant digits); `fusion` (time, features,
+  coefficients, intercept, every candidate's feature values and score); `ranking` (the top 10
+  with reasons); `total_ms` (the matcher's own stages, the trace's work excluded) and `trace_ms`
+  (the extra time the trace took, measured). With 50 paths the record is about 185 kB per
+  rerun (measured; the paths, curves and thumbnails are most of the `dtw` part's 113 kB); a path
+  for each of the 500 candidates (D-068) would multiply that part about tenfold.
+
+## D-188 · The trace on the streams and routes · 2026-11-03
+- Decision: a `matcher_trace` message (`api/schemas_trace.py`, `MatcherTraceMsg`: `t_s`,
+  `incident_id`, `trace`) follows each `match` on the replay stream and on the live stream. The
+  replay cache stores each rerun's trace (`CACHE_FORMAT` 2, so `replay --precompute`, run by
+  `make demo` and `make e2e`, refreshes it); live reruns are traced only when fresh, and a
+  backfilled rerun (D-175) is computed untraced and streams nothing. `GET /api/trace/{incident}
+  ?at=` serves a replay incident's trace at the latest rerun at or before `at` (422 before the
+  first rerun, 404 unknown); `GET /api/live/trace?installation=` the latest live one (404 before
+  any). Both stream unions gain the type; the contract tests' type sets are extended to it.
+
+## D-189 · The DTW workbench · 2026-11-03
+- Decision: `web/src/workbench/`: a pure replay machine (`workbenchMachine.ts`: shortlist 1.5 s,
+  then one traced candidate landing every 1 / rate s at 3, 6 or 10 per second, then the fusion
+  1.5 s, then done; the landed candidates ranked by shape similarity, ties in computed order;
+  changing the speed keeps the step), a store advanced by `requestAnimationFrame` and read by
+  React at most 10 times per second (§17.11, tested), and a native modal dialog with Play/Pause,
+  Step, Replay and the speed (WCAG 2.2.2). It shows the shortlist with vector distances, the
+  current candidate's two curves joined along the path, the cost thumbnail with the path
+  (labelled as the full-matrix alignment; no band drawn, D-069), a readout, the ranking
+  re-sorting, then the fused top 5 with reasons. The header says what is shown in the app's own
+  time format: "Slow-motion replay of rerun T+01:30: 500 alignments computed in 202 ms; the first
+  50 and 6 more of the final top 10 replayed at 6 per second". It pins the trace it opened with: a
+  newer one only enables "Newer rerun available (T+…): replay it". Reduced motion opens on the
+  final state. Opened from "DTW workbench" under the Matches panel (Live page and Live watch: the
+  stream's latest trace) and from "Watch the matcher work" on the Match explainer
+  (`GET /api/trace`).
+
+## D-190 · Live mode in the user guide · 2026-11-03
+- Decision: a new `## 13. Live mode` after the glossary (no section renumbered, no anchor broken):
+  starting it, the Live page, the five scenarios and their expectations, the reveal, the DTW
+  workbench, the CLI (`simulate`, `live check`, `live status`, `live reset`, real output) and the
+  ingest contract for real adapters. Its four screenshots (`live-mode-launcher`, `-incident`,
+  `-workbench`, `-reveal`) are taken at 1920 × 1080 by a new `guide.spec.ts` test from a real
+  20× flight. The CLI reference's subsection becomes `### Live-mode commands` and links to
+  section 13, as do the introduction, section 4 and the Live watch and Match explainer tours.
+
+## D-191 · Stream rows skip the fade when they arrive fast · 2026-11-03
+- Context: the guide's live-mode screenshot showed the Stream panel's rows blank at 20×: the
+  container's browser draws about 8 frames a second with the 3D theater on software WebGL, about
+  30 rows arrive a second, and every visible row was still waiting for its 120 ms fade-in (§17.4)
+  to start, so it sat at opacity 0 (measured with `getAnimations()`: running, start time null).
+  Phase 11's Live page screenshot had the same blank panel.
+- Decision: a row fades in (and flashes its left edge) only while rows arrive at most 10 per wall
+  second (the detection rate over the last 5 s times the clock's speed), the panel's own redraw
+  rate (§17.11); faster than that, rows appear at once. Every row and number stays; the replay at
+  1×, 2× and 5× is unchanged.

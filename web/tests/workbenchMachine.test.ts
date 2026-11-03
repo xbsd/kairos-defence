@@ -13,6 +13,7 @@ import {
   rescale,
   SHORTLIST_MS,
   stateAt,
+  valueAt,
 } from "../src/workbench/workbenchMachine";
 import { workbenchStore } from "../src/workbench/workbenchStore";
 import { makeTrace, SIMS } from "./workbenchFixtures";
@@ -114,9 +115,17 @@ describe("the workbench replay machine (D-189)", () => {
     ]);
   });
 
+  it("reads a curve between its samples for the connectors", () => {
+    expect(valueAt([0, 10, 20], 0)).toBe(0);
+    expect(valueAt([0, 10, 20], 0.25)).toBe(5);
+    expect(valueAt([0, 10, 20], 1)).toBe(20);
+    expect(valueAt([0, null, 20], 0.25)).toBeNull();
+    expect(valueAt([], 0.5)).toBeNull();
+  });
+
   it("says what it replays, from the trace's own numbers", () => {
     expect(headline(msg.trace, 6)).toBe(
-      "Slow-motion replay of rerun T+90: 8 alignments computed in 23 ms; " +
+      "Slow-motion replay of rerun T+01:30: 8 alignments computed in 23 ms; " +
         "the first 4 and 1 more of the final top 10 replayed at 6 per second",
     );
   });

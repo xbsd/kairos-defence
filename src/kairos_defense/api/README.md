@@ -31,17 +31,21 @@ origin.
   `exports` (the evidence root, `paths.exports` unless overridden, D-137), `incident(id)`,
   `loop(id)`, `session(id)`, `reset_live()`, `reseed()`, `health()`, `close()`; raises
   `ServiceError` with the fix when data is missing or a file is locked.
-- `schemas.StreamMessage` (13 types), `schemas.MESSAGE_MODELS`, `schemas.ClientMessage`, and the
+- `schemas.StreamMessage` (14 types: §16.3's 13 and `matcher_trace`, D-188), `schemas.MESSAGE_MODELS`, `schemas.ClientMessage`, and the
   REST models (`Scene`, `MatchResponse`, `LedgerBlock`, `LedgerRecord`, `LinkRequest`,
   `EvidenceLine` …); `schemas_pages` (`ExplainResponse`, `ContributionRow`, `ExplainFlight`,
   `CaseSummary`, `DecisionRequest`, `DecisionResponse`, `EvidencePackage`,
   `EvidenceVerifyRequest`, `EvidenceVerifyResponse`).
+- `schemas_trace` (phase 12): `MatcherTraceMsg`, `MatcherTrace`, `TraceQuery`, `TracePrefilter`,
+  `TraceDtw`, `TraceDetail`, `TraceFusion`, `TraceRank` (D-187).
 - `stream.encode(msg, validate=False) -> str` (NaN-free JSON).
 - Routes (all JSON unless noted):
   - `GET /api/health`, `/api/installations`, `/api/installations/{id}/scene`,
     `/api/incidents?status=live|history&limit=`, `/api/match/{incident}?at=`,
     `/api/dtw/{incident}/{match_track}?at=&channel=`, `/api/history/{track}?frame=target|region`,
     `/api/eval/latest` (the newest eval JSON, with `targets` from phase 8), `/api/schema/stream`,
+    `/api/trace/{incident}?at=` (`MatcherTraceMsg`: the matcher trace of the latest rerun at or
+    before `at`; 422 before the first rerun, 404 unknown; D-188),
     `/api/explain/{incident}/{track}?at=` (`ExplainResponse`: the decorated match, the fusion
     contributions, intercept, logit and score, tonight's path to the rerun second, the past
     flight, its window and the §10.4 step 6 alignment; 404 as `/api/dtw`).
@@ -91,7 +95,8 @@ origin.
     `POST /api/sim/launch` (`SimLaunchRequest` → `SimLaunchResponse`; 409 while one runs, 422 for a
     bad scenario, actor, base or speed), `GET /api/live/incidents/{id}/reveal` (`RevealResponse`
     through `kairos_defense.eval.reveal`; 404 unknown, 409 until closed; never stored, D-170),
-    `GET /api/schema/live-stream`.
+    `GET /api/live/trace?installation=` (`MatcherTraceMsg`: the latest fresh live rerun's trace;
+    404 before any, D-188), `GET /api/schema/live-stream`.
   - `launcher.SimLauncher(folder, config_dir, *, on_exit, command)`: `launch(args) -> {pid}`
     (`SimulatorBusy`), `state()`, `running()`, `wait(timeout)`, `stop()`.
   - `live_services.LiveServices(svc, folder, *, threaded, sim_command, config_dir)`: `feed`,
@@ -140,6 +145,10 @@ Phase 11: `test_api_live.py` (ingest WS and REST acks, the live stream from open
 validated against `LiveStreamMessage`, 409 then the reveal, nothing revealed stored, learned
 history in `/api/history`, launch one at a time and validation, a launched child's log never
 names the actor, reset), `test_api_live_contract.py`, `test_ingest_schema.py`.
+Phase 12: `test_api_trace.py` (a `matcher_trace` after each replay `match` with the same top 3,
+`GET /api/trace` at the latest rerun at or before `at`, 404 and 422, `GET /api/live/trace` 404
+before a rerun), `test_api_live.py` (the live trace after a flight equals the last streamed one),
+and the contract tests' type sets with `matcher_trace`.
 
 ## Gotchas
 
@@ -168,3 +177,5 @@ names the actor, reset), `test_api_live_contract.py`, `test_ingest_schema.py`.
   `live_services.py`; `/api/history` reads learned live tracks; `create_app` and `Services` take
   the live-mode folder, the worker mode, a launcher command and the config folder (D-172 to
   D-184).
+- Phase 12: `schemas_trace.py`; `matcher_trace` on the replay and live streams; `GET
+  /api/trace/{incident_id}?at=` and `GET /api/live/trace?installation=` (D-188).

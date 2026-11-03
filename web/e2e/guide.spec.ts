@@ -205,3 +205,62 @@ test("guide: the pages at 1920x1080, Eval at 1440x900", async ({ page, request }
   await expect(page.getByTestId("eval-tile").first()).toBeVisible({ timeout: 30_000 });
   await snap(page, "eval-1440x900");
 });
+
+test("guide: live mode at 1920x1080 (launcher, incident, workbench, reveal)", async ({
+  page,
+  request,
+}) => {
+  // a live flight at 20×; reruns can trail the feed on a slow machine and the close waits
+  test.setTimeout(480_000);
+  expect((await request.post("/api/live/reset")).ok()).toBeTruthy();
+  try {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto("/live");
+    await expect(page.getByTestId("live-mode")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId("live-idle")).toContainText("Nothing is flying");
+    await page.getByLabel("Scenario", { exact: true }).selectOption("new-operator-twice");
+    await expect(page.getByLabel("Second base", { exact: true })).toBeVisible();
+    await snap(page, "live-mode-launcher", 800);
+
+    await page.getByLabel("Scenario", { exact: true }).selectOption("returning-prober");
+    await expect(page.getByLabel("Prober", { exact: true })).toHaveValue("P1");
+    await page.getByLabel("Base", { exact: true }).selectOption("BRAVO");
+    await page.getByLabel("Speed", { exact: true }).selectOption("20");
+    await page.getByRole("button", { name: "Launch" }).click();
+    const row = page.getByTestId("live-incident").first();
+    await expect(row).toHaveAttribute("data-state", "open", { timeout: 90_000 });
+    await expect(page.getByTestId("match-entry")).toHaveCount(3, { timeout: 120_000 });
+    await expect(page.getByTestId("panel-matchlist")).toContainText(/At T\+0[1-9]:\d\d/, {
+      timeout: 60_000,
+    });
+    await snap(page, "live-mode-incident");
+
+    // the workbench held at its 8th aligned candidate (Pause, then Step)
+    await page.getByRole("button", { name: "DTW workbench" }).click();
+    const wb = page.getByTestId("workbench");
+    const dialog = page.getByTestId("workbench-dialog");
+    await expect(wb).toBeVisible();
+    await dialog.getByRole("button", { name: "Pause" }).click();
+    if (Number(await wb.getAttribute("data-step")) > 8) {
+      await dialog.getByRole("button", { name: "Replay" }).click();
+      await dialog.getByRole("button", { name: "Pause" }).click();
+    }
+    for (let k = 0; k < 12 && Number(await wb.getAttribute("data-step")) < 8; k++)
+      await dialog.getByRole("button", { name: "Step" }).click();
+    await expect(wb).toHaveAttribute("data-step", "8");
+    await expect(page.getByTestId("workbench-path")).toBeVisible();
+    await snap(page, "live-mode-workbench", 1200);
+    await dialog.getByRole("button", { name: "Close" }).click();
+
+    await expect(row).toHaveAttribute("data-state", "closed", { timeout: 300_000 });
+    await row.getByRole("button", { name: /Reveal who flew/ }).click();
+    await expect(page.getByTestId("reveal-actor")).toHaveText("P1, County Rd operator", {
+      timeout: 30_000,
+    });
+    await expect(page.getByTestId("reveal-verdict")).toContainText(/Expectation (met|missed)/);
+    await snap(page, "live-mode-reveal");
+  } finally {
+    expect((await request.post("/api/live/reset")).ok()).toBeTruthy();
+    await reseed(request);
+  }
+});

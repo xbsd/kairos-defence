@@ -99,7 +99,7 @@ swarm `DEMO-SWARM-ECHO-0614` (ECHO, 14 Jun 2026) with every earlier swarm; `S1-G
 - **Port 8000 busy:** stop the other server (`lsof -i :8000`), or run
   `uv run kairos-defense api --static web/dist --port 8001` after `make demo`'s build step.
 
-## Live mode (phase 11)
+## Live mode (phases 11 and 12)
 
 The replay is the scripted demo. Live mode shows the same system on flights nobody has seen: a
 separate simulator process flies a scenario on a live calendar after the 18-month history and
@@ -109,15 +109,22 @@ all on what it has received so far.
 
 1. `make live` (builds the web app and serves it on :8000), then open
    `http://127.0.0.1:8000/live` (or **Pages → Live**).
-2. In **Launch a scenario** pick *Returning prober*, P1, Bravo and 20× (a 9-minute flight takes
-   about 30 s), then **Launch**. The command bar reads "Live feed, 20×"; an incident appears under
+2. In **Launch a scenario** pick *Returning prober*, P1, Bravo and 20× (a flight of about 13
+   minutes takes under a minute), then **Launch**. The command bar reads "Live feed, 20×"; an incident appears under
    "Live incidents this session"; matches arrive from T+45 s and stay current (at high speed the
    app computes the newest rerun first and fills in the skipped ones afterwards, D-175).
-3. When the incident shows **Closed**, press **Reveal who flew**: the card names the operator
+3. While it flies, press **DTW workbench** under the matches: the matcher's last run, replayed in
+   slow motion from its own record. Say: "That took about 200 milliseconds; here it is at six
+   candidates a second." The shortlist from the vector index, then each DTW alignment (the two
+   curves joined along the warping path, the cost matrix, the distance), the ranking re-sorting
+   as each lands, and the fused top 5 with reasons, which are the Matches panel's entries. It
+   keeps that run while new ones arrive ("Newer rerun available: replay it"); **Pause** and
+   **Step** hold any candidate on screen. Close it to get back to the flight.
+4. When the incident shows **Closed**, press **Reveal who flew**: the card names the operator
    ("P1, County Rd operator") and how the matcher did ("First recognized at T+45 s"). The app did
    not know who flew while the drone was in the air; the answer comes from the evaluation's ground
    truth, after the fact (D-170).
-4. Encore: *New operator, twice*. Flight 1 has nothing to find; flight 2, at the next base, is
+5. Encore: *New operator, twice*. Flight 1 has nothing to find; flight 2, at the next base, is
    matched to flight 1, which the app learned live minutes earlier.
 
 Say: "Nothing was precomputed and nothing was retrained: the same models, on detections arriving
@@ -126,7 +133,8 @@ ledger. **Before running the replay demo after live use, press R** (reseed): liv
 stamped on the live calendar in September 2026, after the replay's clock (D-181).
 
 `uv run kairos-defense live check` flies all five scenarios headless at 50× and prints PASS or GAP
-for each (about six minutes). Run `uv run kairos-defense simulate --scenario returning-prober
+for each (about six minutes). The replay has the workbench too: **Watch the matcher work** on the Match
+explainer replays the run at that second. Run `uv run kairos-defense simulate --scenario returning-prober
 --speed 20` in a terminal of your own and it names the actor there too, for a presenter who wants
 to say it out loud; the app still receives only detections.
 

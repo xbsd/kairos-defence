@@ -112,7 +112,7 @@ export function WorkbenchButton() {
       disabled={trace === null}
       onClick={() => trace && workbenchStore.getState().openWith(trace, "stream", reduce)}
       title="Replay this rerun's matcher computation in slow motion"
-      className="rounded-button border border-hairline px-2 py-0.5 text-12 text-ink-mid hover:border-flash hover:text-ink-hi disabled:cursor-not-allowed disabled:text-ink-low"
+      className="shrink-0 rounded-button border border-hairline px-2 py-0.5 text-12 whitespace-nowrap text-ink-mid hover:border-flash hover:text-ink-hi disabled:cursor-not-allowed disabled:text-ink-low"
     >
       DTW workbench
     </button>

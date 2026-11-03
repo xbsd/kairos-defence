@@ -2,7 +2,8 @@
 
 The matching engine (SPEC §10, §14). Phase 3 built the query, the no-look-ahead prefilter and the
 Euclidean baseline. Phase 4 added the DTW re-rank, the partial live signature, fusion,
-explanations and the `DtwMatcher`. Phase 9 added swarm choreography matching (`swarm.py`).
+explanations and the `DtwMatcher`. Phase 9 added swarm choreography matching (`swarm.py`). Phase 12
+added the matcher trace (`trace.py`) that the DTW workbench replays.
 
 ## Responsibilities
 
@@ -18,6 +19,8 @@ explanations and the `DtwMatcher`. Phase 9 added swarm choreography matching (`s
   (`matcher.py`, `explain.py`).
 - Refuse a stale index, missing models and a missing C extension (`candidates.check_index`,
   `fusion.ModelError`, `dtw_rerank.require_c`; D-075, D-013).
+- Record, on request, what one match call computed, for the DTW workbench (`trace.py`, D-187),
+  without changing any result.
 - Rank earlier swarms against a swarm incident by choreography (`swarm.py`, §14, D-150): the
   `swarm_windows` prefilter (started before the query), then multichannel DTW on the descriptor
   series against candidate prefixes over `swarm.pace_range`.
@@ -38,6 +41,13 @@ truth (training lives in `kairos_defense.eval.training`).
   `_distance`, squared L2), `window_filter`, `best_per_track`, `LookAheadError`, `WINDOWS_TABLE`.
 - `baseline.euclidean_matches(q, store, scoring)`, `baseline.rank_candidates(q, candidates)`;
   `MODEL_VERSION = "euclidean-v1"`.
+- `matcher.DtwMatcher.match(q, trace=False) -> MatchResult`: with `trace=True`,
+  `MatchResult.trace` is the D-187 record (a JSON-safe dict); otherwise `None`.
+- `trace.TraceRecorder(scoring, paths=TRACE_PATHS)` (called by `CandidateBuilder.build` and
+  `DtwMatcher.match`), `trace.downsample_path`, `trace.thumbnail`, `trace.curve`; constants
+  `TRACE_PATHS` 50, `MAX_POINTS` 48, `THUMB` 12, `TRACE_CHANNEL` `dist_target_m`, `TOP` 10.
+- `dtw_rerank.alignment(live, seg, weights, mode, scales) -> (path, cost)`: the full-matrix
+  alignment with relaxed segment ends and its accumulated cost; `warp_path` returns its path.
 - `dtw_rerank` (pure functions over raw `(n, 5)` channel arrays):
   - `require_c()` / `DtwUnavailable`; `band_window(n, m, band_fraction)`;
     `anchor_bounds(offset_s, window_s, n_rows, before, after) -> (lo, hi)`; `relaxation(n, m)`;
@@ -167,6 +177,9 @@ D-079; retrain with `make models` after changing it); `fusion.features` (the mod
   `S1-GOLF-260503` (§20), no look-ahead (earlier incidents only; points up to `at_s`), the path is
   monotone, covers both ends and costs exactly the full DTW distance, an S1 event ranks S1 first,
   short queries, unknown incidents and a missing index.
+- `tests/unit/test_matcher_trace.py` (phase 12): results identical with and without the trace
+  (two queries at T = 60, 120, 180), its order, counts and fields, the 50-path cutoff plus the
+  final top 10, down-sampling and thumbnails, and the measured overhead (printed).
 - `tests/slow/test_full_models.py`: full-data copycat check and DTW eval.
 - Run: `uv run pytest tests/unit -q -k "dtw or fusion or explain or matcher or signature or
   lookahead"`.
@@ -197,6 +210,9 @@ D-079; retrain with `make models` after changing it); `fusion.features` (the mod
   still flying contributes all its windows (rule 3 filters on start; D-050, D-071).
 - `_distance` is squared L2, not cosine; ranking by it is right only because vectors are unit
   length.
+- The trace's path is the unbanded full-matrix alignment (`warp_path`'s recipe, D-069) while the
+  distance is banded: the workbench labels it so and draws no band. `total_ms` and `dtw.ms`
+  exclude the trace's own work; `trace_ms` is that work.
 
 ## Changelog
 
@@ -213,3 +229,5 @@ D-079; retrain with `make models` after changing it); `fusion.features` (the mod
   `series_path`. The single-track matcher is unchanged.
 - Phase 11: `SwarmMatcher.match_flight` and `CandidateBuilder.forget` for live mode; a second
   `DtwMatcher` over the composite ports serves live mode (D-175, D-176).
+- Phase 12: `trace.py` and `DtwMatcher.match(trace=True)` (D-187); `dtw_rerank.alignment`;
+  `CandidateBuilder.build(q, recorder=None)` times each candidate when recording.
