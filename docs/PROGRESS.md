@@ -28,6 +28,32 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Next: …
 -->
 
+### 2026-11-03 · Phases 11 and 12 (one cloud session, summary)
+- Both phases passed `scripts/cloud_gate.py` on the first gate attempt and were closed by it
+  (tags `phase-11-done` and `phase-12-done` exist locally; the remote refused the tag pushes, so
+  only the branch is pushed). No GAPS.md: no target gap in either phase; no test was skipped or
+  weakened.
+- What a presenter can do live now: `make live` (or `make demo`), open `/live`, pick a scenario,
+  actor, base and speed, press **Launch**. A separate simulator flies a flight nobody has seen and
+  sends only sensor detections; the app opens the incident, matches it every 5 s of feed time,
+  forecasts and recalls as in the replay, writes to the case memory, learns the flight when it
+  closes, and **Reveal who flew** then says who it was and whether the matcher's expectation was
+  met. **DTW workbench** under the matches (also on Live watch, and "Watch the matcher work" on
+  the Match explainer) replays the matcher's last run in slow motion from its own record: the
+  shortlist, each DTW alignment, the ranking re-sorting, the fused top 5. "New operator, twice"
+  shows learning: flight 2 matches flight 1, learned live minutes earlier. The user guide's
+  section 13 and `docs/DEMO.md` walk through it.
+- `live check --scenarios all --speed 50` after phase 12 (339 s, exit 0; the same outcomes as at
+  the end of phase 11):
+
+  | Scenario | Result | Outcome (seed) |
+  |---|---|---|
+  | returning-prober | PASS | P1 at Bravo: a P1 history flight rank 1 from the first rerun, T+45 s (1101) |
+  | copycat | PASS | C1 at Bravo: at T+120 s a C1 flight ranks 1, no P1 flight in the top 10 (1102) |
+  | hobbyist | PASS | a one-off flyer at Bravo: top match `BRAVO-250721-2030`, score 1.0, T+475 s (1103) |
+  | swarm-repeat | PASS | S1 at Golf: the final swarm rerun ranks S1's `ECHO-260806-2049` first (1104) |
+  | new-operator-twice | PASS | N1 at Bravo then Charlie: flight 1 has no N1 history; flight 2 ranks flight 1's learned track first (1105) |
+
 ### 2026-11-03 · Phase 12 (same cloud session)
 - Built (docs/phases/PHASE_12.md; decisions D-187 to D-191): the matcher trace
   (`DtwMatcher.match(q, trace=True)`: the shortlist, every candidate's DTW distance, similarity,
