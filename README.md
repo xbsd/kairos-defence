@@ -84,6 +84,7 @@ target is not yet reliable evidence, so the matcher was not tuned to the demo to
 | [User guide](docs/USER_GUIDE.md) | New users, operators, analysts | Install, every screen with screenshots, the demo, evidence, CLI, MCP, configuration, troubleshooting |
 | [One-pager](docs/ONE_PAGER.md) | Non-technical readers | The problem, what it does, the demo in five beats |
 | [Product overview (Word)](docs/Kairos-Defense-Overview.docx) | Stakeholders | An 8-page illustrated overview |
+| [Glossary](docs/GLOSSARY.md) | Everyone | Military, security and counter-drone terms in plain language (recovery zone, BDOC, source grades …) |
 | [Demo runbook](docs/DEMO.md) | Presenters | Preparation, the four-minute script, keys, fallbacks, likely questions |
 | [Rollback guide](docs/ROLLBACK.md) | Maintainers | How the history and tags are organized; how to inspect or roll back a phase |
 | [Specification](docs/SPEC.md) | Builders | The full product and build specification |
