@@ -173,3 +173,27 @@ def test_the_worker_runs_the_newest_rerun_first_then_backfills() -> None:
     assert done == [("RerunTask", 60.0, True), ("RerunTask", 45.0, False),
                     ("RerunTask", 50.0, False), ("RerunTask", 55.0, False),
                     ("CloseTask", None, False)]  # fmt: skip
+
+
+def test_a_closing_incident_is_finished_and_learned_before_newer_reruns() -> None:
+    from datetime import datetime
+
+    from kairos_defense.live.feed import CloseTask, RerunTask
+    from kairos_defense.live.runner import LiveWorker
+
+    done = []
+    w = LiveWorker(lambda t, fresh: done.append((t.meta["incident_id"], type(t).__name__,
+                                                 getattr(t, "t_s", None), fresh)))  # fmt: skip
+    a = {"incident_id": "LIVE-A", "start_ts": datetime(2026, 9, 2, 2)}
+    b = {"incident_id": "LIVE-B", "start_ts": datetime(2026, 9, 2, 3)}
+    for t in (45.0, 50.0):
+        w.submit(RerunTask(a, t, None))
+    w.submit(CloseTask(a, None))
+    for t in (45.0, 50.0):
+        w.submit(RerunTask(b, t, None))
+    w.start()
+    assert w.wait_idle(10)
+    w.stop()
+    assert done == [("LIVE-A", "RerunTask", 50.0, True), ("LIVE-A", "RerunTask", 45.0, False),
+                    ("LIVE-A", "CloseTask", None, False), ("LIVE-B", "RerunTask", 50.0, True),
+                    ("LIVE-B", "RerunTask", 45.0, False)]  # fmt: skip

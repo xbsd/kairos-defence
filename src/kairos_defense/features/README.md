@@ -83,6 +83,9 @@ through the `TrackStore` port.
     `descriptors`, `is_swarm`, `together_s`; `n_drones`, `relative_positions()`), built by
     `build_flight(meta, points, site, scoring)` or `load_swarm(store, incident_id, scoring,
     until_s=None)` (raw points through the port, only up to `until_s`).
+- Phase 11: `build.track_rows(track_id, incident_id, points, site, ctx, scoring) -> TrackRows`
+  (`features`, `signature`, `windows`, `vectors`): one track's index rows, shared by `build_index`
+  and live learning (D-176).
 
 ## Data in and out
 
@@ -200,3 +203,4 @@ through the `TrackStore` port.
 - Phase 9: `swarm_features.py` (§14 descriptors, detection, series, vectors, `load_swarm`);
   `build.py` writes `swarm_features` and `swarm_windows` (D-149). The single-track tables are
   unchanged.
+- Phase 11: `build.track_rows` extracted from `build_index` (output unchanged).

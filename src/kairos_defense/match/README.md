@@ -95,6 +95,9 @@ truth (training lives in `kairos_defense.eval.training`).
   (`dtw.best_path`), `cost` (the accumulated `warping_paths` matrix without padding, float32 LE
   base64) with `shape`, `band`, `dtw_distance`, `euclid_distance` (first `overlap` samples),
   `warp_ratio`, `warp_text`. `lens.paa`, `lens.band`, `lens.encode_f32`, `lens.decode_f32`.
+- Phase 11: `swarm.SwarmMatcher.match_flight(query, k=5, t0=None)` (the ranking of an already
+  built `SwarmFlight`; `match` calls it, results unchanged) and
+  `candidates.CandidateBuilder.forget(ids)` / `cached_ids()` (live reset).
 
 ## Data in and out
 
@@ -208,3 +211,5 @@ D-079; retrain with `make models` after changing it); `fusion.features` (the mod
 - Phase 8: `explain.contribution_table` for the Match explainer (D-135).
 - Phase 9: `swarm.py` (§14 swarm matching, D-150); `dtw_rerank.series_distance` and
   `series_path`. The single-track matcher is unchanged.
+- Phase 11: `SwarmMatcher.match_flight` and `CandidateBuilder.forget` for live mode; a second
+  `DtwMatcher` over the composite ports serves live mode (D-175, D-176).

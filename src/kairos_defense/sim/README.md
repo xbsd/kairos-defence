@@ -22,6 +22,9 @@ swarm, what the sensors saw, the paperwork, and the ground truth.
 - Write `reports/data_card.md` and its figures (§8.11, D-034).
 - Draw every random value from `rng_for(seed, …)` streams named by stable keys, so the same seed
   gives identical table hashes and adding an actor changes no other flight (rule 4, §8.9).
+- Live mode (phase 11, D-169, D-177 to D-179): fly new scenarios on the live calendar
+  (`live_scenarios.py`, `live_clock.py`), stream only their sensor detections to the app's ingest
+  WebSocket (`live_feed.py`), and record who flew through `writers.record_live_flights`.
 
 ## Public API
 
@@ -73,6 +76,19 @@ swarm, what the sensors saw, the paperwork, and the ground truth.
   - `reports.make_reports`, `assessments.assess`, `facts.incident_facts`.
   - `lexicon.find_clues(text, roads, parks)` reads clues back out of report text, case-insensitive.
   - `lexicon.forbidden(text, allowed)` is the guardrail scan (§23, D-045).
+- Live mode (phase 11):
+  - `live_scenarios.SCENARIOS`, `catalog(cfg)`, `resolve(cfg, name, actor, base, second_base,
+    seed) -> (actor, base, second_base)` (`ScenarioError`), `build(cfg, world, clock, name, *,
+    seed, actor, base, second_base) -> Scenario` (`flights`, `start_ms`, `end_ms`,
+    `detections() -> [(utc ms, ingest message)]`, `truth_rows()`), `reserve_until(sc, cfg)`,
+    `sensor_track_id(seed, key, launch_ms)`, `live_calendar(cfg, world, nights, seed)`,
+    `NEW_OPERATOR`.
+  - `live_clock.LiveClock(path, calendar_end)`: `next_ms(offset)`, `launch_local(offset,
+    window)`, `reserve(until_ms)`, `default_seed(world_seed)`, `launches()`;
+    `live_clock.launch_at(after_local, window)`, `window_on(night, window)`.
+  - `live_feed.FeedClient(url, messages, *, start_ms, installations, idle_close_s, speed,
+    connect, now, sleep)`: `run() -> FeedSummary`, `stop()`, `heartbeats(feed_ms)`; `FeedError`.
+  - `writers.record_live_flights(app, rows)`: one truth row per sensor track sent (D-179).
 
 ## Data in and out
 
@@ -89,6 +105,9 @@ swarm, what the sensors saw, the paperwork, and the ground truth.
 - At seed 42 (`gen` output): 1,878 incidents (9 swarms), 1,904 tracks, 560,884 track points,
   414,999 RF detections, 686,263 Remote ID rows, 956 reports and 1,876 assessments. Live first
   contact is 21:40:06 and the orbit is established at T+79 s.
+- Live mode: `<live_mode>/clock.json` (the live clock); the truth file's `live_truth` table
+  (written by `record_live_flights`, keyed by sensor track id; read by `eval` only); detections
+  sent to `/ws/ingest` (nothing else leaves the simulator).
 
 ## How it works
 
@@ -107,6 +126,12 @@ swarm, what the sensors saw, the paperwork, and the ground truth.
 7. `paperwork` writes reports, clues and assessments from what was observed. The truth goes to
    `clue_truth` and `assessment_truth`. Live incidents get no paperwork (D-041).
 8. `build_tables`, then `write_all`, then `write_data_card`.
+**Live mode (phase 11).** `kairos-defense simulate` (`cli_live_mode.py`) builds a scenario with
+the generator's own functions and the scenario seed (`rng_for(seed, "live", …)` and the flight's
+`rng_for(seed, "flight", key, …)` streams; wind from the seed, D-177), launches it at the clock's
+next free time inside the actor's window, reserves the clock, records the truth rows, then
+`FeedClient` sends one frame per 0.1 s of wall time: the detections that became due on the live
+clock × speed plus a heartbeat per base, until the last detection plus `idle_close_s` + 2 s.
 
 ## Configuration
 
@@ -143,6 +168,9 @@ swarm, what the sensors saw, the paperwork, and the ground truth.
   - `uv run pytest tests/unit -q -k "swarm or rf or rid or reports or assessments or planted"`
     (phase 2's);
   - `make test-all`.
+- Phase 11: `test_sim_live.py` (catalog, defaults and refusals, determinism, no actor in what is
+  sent, windows, the invented operator, swarms, unique ids), `test_live_clock.py`,
+  `test_feed_client.py` (fake transport and clock), `test_cli_live_mode.py`.
 
 ## Gotchas
 
@@ -160,6 +188,9 @@ swarm, what the sensors saw, the paperwork, and the ground truth.
   not (D-065).
 - Track points (≈0.56 M) and RF detections (≈0.41 M) come in below §8.11 by design (D-030, D-044).
 - Keep modules under about 400 lines. `world.py` (391) and `kinematics.py` (374) are near the limit.
+- Live mode: the same seed flies the same flight relative to its launch only at the same
+  launch time of night (the wind is drawn per hour of the night). `FAM-4x` is not a band the RF
+  model knows; the invented operator uses `FAM-24` (D-178).
 
 ## Changelog
 
@@ -181,3 +212,5 @@ swarm, what the sensors saw, the paperwork, and the ground truth.
 - Phase 9: `paperwork.py` refuses `reports_llm_paraphrase: true` with a message naming D-155 (the
   paraphrase stays off in v1); no change to the generated data.
 - Phase 10: this README brought current (the paraphrase setting).
+- Phase 11: `live_scenarios.py`, `live_clock.py`, `live_feed.py`; `writers.record_live_flights`
+  and `LIVE_TRUTH_DDL` (D-177 to D-179). History generation unchanged.

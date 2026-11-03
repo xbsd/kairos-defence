@@ -14,6 +14,8 @@ The top-level package: the CLI entry point and the four core modules every other
 - `ports.py`: the §4.1 Protocols business logic depends on, instead of DuckDB or LanceDB (rule 6).
 - `rng.py`: per-component random streams derived from the global seed (rule 4, §8.9).
 - `geo.py`: geometry in local ENU meters. Bearings are clockwise from north in [0, 360) (D-007).
+- `cli_live_mode.py` holds the phase 11 commands: `simulate` (the separate simulator process)
+  and `live check | reset | status` (D-182, D-183).
 
 ## Public API
 
@@ -187,3 +189,5 @@ Phase 5 added `paths.cache` (the FastEmbed cache, `app.yaml`) and `forecast.anch
   swarm counts; `eval` prints swarm top-1 and its latency; CLI messages soft-wrap (D-156).
 - Phase 10: no code change; every command is documented in `docs/USER_GUIDE.md` (checked by
   `tests/unit/test_docs.py`, D-164).
+- Phase 11: `cli_live_mode.py` (`simulate`, `live check`, `live reset`, `live status`);
+  `ports.LiveFeed`.

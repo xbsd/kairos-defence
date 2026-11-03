@@ -18,6 +18,9 @@ origin.
   the page models in `schemas_pages.py`, the Swarm view's in `schemas_swarm.py`, the chat's in
   `schemas_chat.py`.
 - Serve `web/dist` with a client-route fallback (`static.py`, D-112).
+- Phase 11, live mode (D-169, D-172 to D-184): the sensor-adapter ingest contract
+  (`schemas_ingest.py`), the live stream and routes (`routes_live.py`, `schemas_live.py`), the
+  simulator launcher (`launcher.py`) and live mode's composition root (`live_services.py`).
 
 ## Public API
 
@@ -60,12 +63,51 @@ origin.
     nothing). `GET /api/chat/status` (enabled, provider, model, tools) and `POST /api/chat`
     (messages → reply and the tool calls made; 409 while `llm.provider` is `none`, §18.3).
   - `WS /ws/replay/{incident}`.
+- Phase 11, live mode:
+  - **The ingest contract v1** (`schemas_ingest.py`, D-173): what a real radar, RF or Remote ID
+    adapter sends. JSON objects with `v: 1`, `type`, `installation_id` and `ts` (ISO 8601 with `Z`
+    or an offset); region-frame meters; bearings clockwise from north. Extra fields are refused,
+    so no message can carry an operator, a name or an incident (the app forms incidents).
+
+    | `type` | Fields |
+    |---|---|
+    | `point` | `sensor_id` (the installation's radar), `sensor_track_id` (the radar's own id, stable per track), `x_m`, `y_m`, `alt_m` (0 to 20,000), `quality` (0 to 1) |
+    | `rf` | `sensor_id` (the installation's RF sensor), `band`, `protocol_family`, `bearing_deg` [0, 360), `snr_db` |
+    | `rid` | `serial`, `drone_x_m`, `drone_y_m`, `op_x_m`, `op_y_m` |
+    | `heartbeat` | `rate` (feed seconds per wall second, default 1): advances the installation's feed time, on which incidents close |
+
+    Send on `WS /ws/ingest` (one object or an array per frame) or `POST /api/ingest`
+    (`{"messages": [...]}`, at most 10,000). Each frame or batch gets an `IngestAck`:
+    `{"type": "ack", "accepted": n, "detections": n, "rejected": [{"index": i, "reason": "…"}]}`.
+    Besides schema errors the app rejects unknown installations, a sensor that is not that
+    installation's sensor of that kind, timestamps at or before the end of the history (rule 3)
+    and messages more than `live.max_lateness_s` behind the installation's feed time.
+  - `WS /ws/live/{installation}`: `LiveStreamMessage` (the §16.3 types, a `hello` per incident with
+    `duration_s` 0, plus `incident_opened`, `incident_closed`, `swarm_match`); a 120 s catch-up on
+    connect; 4404 for an unknown installation.
+  - `GET /api/live/status` (`LiveStatus`: feeds, incidents since the last reset, `pending`,
+    `learned_tracks`, the simulator without the actor), `GET /api/live/scenarios`
+    (`ScenarioInfo` list), `POST /api/live/reset` (`LiveResetResponse`; stops a running simulator),
+    `POST /api/sim/launch` (`SimLaunchRequest` → `SimLaunchResponse`; 409 while one runs, 422 for a
+    bad scenario, actor, base or speed), `GET /api/live/incidents/{id}/reveal` (`RevealResponse`
+    through `kairos_defense.eval.reveal`; 404 unknown, 409 until closed; never stored, D-170),
+    `GET /api/schema/live-stream`.
+  - `launcher.SimLauncher(folder, config_dir, *, on_exit, command)`: `launch(args) -> {pid}`
+    (`SimulatorBusy`), `state()`, `running()`, `wait(timeout)`, `stop()`.
+  - `live_services.LiveServices(svc, folder, *, threaded, sim_command, config_dir)`: `feed`,
+    `vectors`, `store` / `rest_store` (composite), `matcher`, `recall`, `swarm_matcher`, `hub`,
+    `worker`, `compute`, `launcher`; `status()`, `reset()`, `close()`.
+  - `create_app(..., live_mode_path=, live_threaded=, sim_command=, config_dir=)`;
+    `Services.live` (None when live mode cannot start; `/api/live/*` then answer 503). CLI
+    `api --live-mode-dir`, env `KD_LIVE_MODE`.
 
 ## Data in and out
 
 Reads the main database read-only, LanceDB, `models/`, `reports/eval_*.json`; writes
 `data/live.duckdb`, `data/memory.duckdb` (appends only), `data/cache/live/`, `exports/` (or the
 `--exports` folder).
+Live mode writes only under `paths.live_mode` (D-172) and the ledger (proposals); the reveal
+reads the truth file through `kairos_defense.eval` and stores nothing.
 
 ## How it works
 
@@ -94,6 +136,10 @@ one byte, path traversal refused). Phase 9: `test_api_swarm.py` (the demo swarm'
 alignment and position lengths, `at`, another match, errors, the cache, no ledger write) on the
 `swarm_index` fixture; `test_api_chat.py` (disabled by default, a fake LLM's reply and tool
 calls).
+Phase 11: `test_api_live.py` (ingest WS and REST acks, the live stream from open to close
+validated against `LiveStreamMessage`, 409 then the reveal, nothing revealed stored, learned
+history in `/api/history`, launch one at a time and validation, a launched child's log never
+names the actor, reset), `test_api_live_contract.py`, `test_ingest_schema.py`.
 
 ## Gotchas
 
@@ -104,6 +150,9 @@ calls).
 - Lock order: the store lock before the memory lock.
 - `POST /api/evidence/verify` takes a folder name from `GET /api/evidence`, never a path: anything
   that resolves outside the exports root is a 400.
+- The launcher passes the actor on the child's command line only: never log the argv, never read
+  the child's log (D-182). A `random` prober is resolved in the child.
+- `GET /api/history/{track}` serves a `LIVE-` track only once its incident is closed and learned.
 
 ## Changelog
 
@@ -115,3 +164,7 @@ calls).
 - Demo video (D-168): `create_app(..., time_scale=)` and `Services(time_scale=)`: below 1 the replay
   WebSocket's sessions run on `live.replay.scaled_clock` (slow motion for frame-perfect screen
   capture, `api --time-scale`); `KD_TIME_SCALE` under `--reload`.
+- Phase 11: `schemas_ingest.py`, `schemas_live.py`, `routes_live.py`, `launcher.py`,
+  `live_services.py`; `/api/history` reads learned live tracks; `create_app` and `Services` take
+  the live-mode folder, the worker mode, a launcher command and the config folder (D-172 to
+  D-184).

@@ -18,6 +18,9 @@ allowed to read ground truth (CLAUDE.md rule 2).
 - Check the demo assertions from `scenario_demo.yaml`, as far as the current phase can (`demo.py`).
 - Write `reports/eval_<date>.md` (`report_md.py`), `.json` and the recall figure, and gate
   regressions against `reports/baseline.json` (`report.py`, §19.4).
+- Phase 11: reveal who flew a closed live incident and score its scenario (`reveal.py`, D-170,
+  D-180), and fly every live scenario headless and score it (`live_check.py`, D-183). The only
+  readers of the simulator's `live_truth` rows.
 
 ## Public API
 
@@ -79,6 +82,13 @@ allowed to read ground truth (CLAUDE.md rule 2).
   `met(v)`, `text()`), `TARGETS` (§19.3 and §10.9, the same numbers as
   `scripts/check_targets.py`), `BY_KEY`, `target_text(key)`, `targets_json()` (written into the
   eval JSON as `targets`; the Eval page reads them).
+- `reveal.reveal(cfg, feed, incident_id) -> dict` (`KeyError` unknown, `NotClosed` while open):
+  actor or team, nickname, scenario, seed, flight, per-rerun verdict rows (`first_same_rank`,
+  `mimic_rank`, top match and its actor), `same_actor_history`, `expectation` (`text`, `met`,
+  `observed`) and `words`. `reveal.expectation(...)`, `reveal.words(...)`, `reveal.top_from(...)`,
+  `reveal.live_truth(cfg)`.
+- `live_check.run_live_check(cfg, config_dir, scenarios, speed, timeout_s, out=print) -> 0|1|2`,
+  `live_check.score(name, seed, docs, elapsed_s)`, `SCENARIOS`, `SEEDS` (1101 to 1105, fixed).
 
 ## Data in and out
 
@@ -166,6 +176,9 @@ allowed to read ground truth (CLAUDE.md rule 2).
 - `tests/slow/test_full_index.py` and `tests/slow/test_full_models.py`: full data.
 - Run: `uv run pytest tests/unit -q -k "eval or training"`. End to end: `make data index models
   eval`.
+Phase 11: `test_eval_reveal.py` (each scenario's expectation met and missed, the words),
+`test_api_live.py` (the reveal route), slow `test_full_live_mode.py` (`live check` on the full
+data).
 
 ## Gotchas
 
@@ -204,3 +217,5 @@ allowed to read ground truth (CLAUDE.md rule 2).
 - Phase 9: `swarm.py`: the swarm query set, team labels (truth, here only), answerability,
   `swarm_top1` over each query's whole observed flight and `swarm_top1_by_t` (report only); the
   `swarm_top1` demo row; `swarm_top1` joins `GATED`; no target is pending any more (D-151).
+- Phase 11: `reveal.py`, `live_check.py`; `truth._read` retries while the simulator writes the
+  truth file (D-179, D-180, D-183).

@@ -195,7 +195,14 @@ export function MatchList({ live = false }: { live?: boolean }) {
       className="min-h-[10rem] flex-[1.6_1_0]"
       meta={m ? `At ${tPlus(m.t_s)}` : undefined}
     >
-      <div className="absolute inset-0 flex flex-col overflow-y-auto">
+      {/* a scroll region keyboard users can reach even when its entries hold no enabled
+          control (axe scrollable-region-focusable) */}
+      <div
+        tabIndex={0}
+        role="region"
+        aria-label="Matches, scrollable"
+        className="absolute inset-0 flex flex-col overflow-y-auto"
+      >
         {!m || m.matches.length === 0 ? (
           <p data-testid="match-waiting" className="px-3 py-2 text-13 text-ink-mid">
             {m ? "No earlier flight to match" : waiting}

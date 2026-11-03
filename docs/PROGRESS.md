@@ -28,6 +28,37 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Next: …
 -->
 
+### 2026-11-02 · Phase 11 (single cloud session)
+- Built (docs/phases/PHASE_11.md, D-169, D-170; decisions D-171 to D-186): live mode. A separate
+  simulator process (`kairos-defense simulate`) flies five scenarios with the generator's own
+  code on a live calendar after the history (persisted clock, deterministic seeds) and streams
+  only sensor detections through the ingest contract v1 (`/ws/ingest`, `POST /api/ingest`); the
+  app forms incidents itself (join within 10 s and 300 m, swarms at three tracks, close after 30 s
+  without a detection), reruns the existing matcher, forecast and recall every 5 s of feed time on
+  what it received (newest first, the rest backfilled: every rerun recorded at any speed), learns
+  closed incidents through the ports, proposes as the replay does, and reveals who flew a closed
+  incident through `eval` (never stored). The Live page: launcher, the theater and rails on the
+  live stream, matches or swarm matches, "Live incidents this session" with Reveal who flew and
+  Reset live data. `kairos-defense live check|reset|status`, `make live`, `make live-check`.
+- Exit check (`make check && uv run kairos-defense live check --scenarios all --speed 50 &&
+  make e2e`, 26 min, exit 0): 914 fast Python tests (803 at the start), Vitest 184 (169);
+  `live check` 5 of 5 PASS in 335 s: returning-prober P1 rank 1 from T+45 s (seed 1101), copycat
+  C1 rank 1 above every P1 at T+120 s (1102), hobbyist top score 1.0 (1103), swarm-repeat S1's
+  past event first (1104), new-operator-twice flight 2 ranks flight 1 (learned live) first (1105);
+  `make e2e` 35 passed (the new `livemode.spec.ts`: launch at 20×, incident, matches, close,
+  reveal "P1, County Rd operator", axe clean).
+- Found and fixed while building: a radar dropout split one P1 flight in two (RF and Remote ID now
+  count as activity, D-174); at 20× the Matches panel stayed empty behind a queue (fresh-first
+  worker, D-175); the first full `live check` with that worker missed new-operator-twice (flight 2
+  ran before flight 1 was learned: closing incidents now finish first); a page-wide "Loading"
+  flash from the theater's fonts, which failed one e2e test in this container's baseline (the
+  theater's own Suspense boundary, D-185); axe on the Live page's scroll lists.
+- Reviews: plan review 1 found two blocking issues (who flew could reach a launched simulator's
+  log; seeds from OS entropy), both fixed; review 2 approved.
+- Open issues: RF heard at an installation keeps every open incident there alive (D-174); live
+  swarms are matched but not learned as choreography (D-176).
+- Next: phase 12 (DTW workbench and live-mode documentation).
+
 ### 2026-10-29 · The narrated demo video (after phase 10, same cloud session)
 - Built (D-168): `make demo-video` records `docs/demo/kairos-defense-demo.mp4` (1 min 45 s,
   1920 × 1080, 30 fps, about 19 MB) from the running app: Director mode at 5× with a narration layer

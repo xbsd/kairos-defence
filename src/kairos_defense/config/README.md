@@ -92,6 +92,8 @@ Phase 9 addition:
 - `scoring.yaml` `swarm.pace_range` (`[0.7, 1.4]`, default when absent): the candidate seconds per
   query second the §14 swarm DTW tries (prefixes of the candidate's descriptor series; ±40%, the
   same pace band one operator shows across flights, D-150). `low <= high` is checked.
+- Phase 11: `app.paths.live_mode` (the live-mode folder, D-172; a folder of its own);
+  `scoring.live.idle_close_s` (30), `join_window_s` (10), `max_lateness_s` (10) (D-173, D-174).
 
 ## Tests
 
@@ -122,3 +124,5 @@ Phase 9 addition:
 - Phase 7: `paths.live` (`data/live.duckdb`, the `live_*` scratch tables, D-103); the
   distinct-files check covers `duckdb`, `truth`, `memory` and `live`.
 - Phase 9: `swarm.pace_range` (D-150).
+- Phase 11: `PathsConfig.live_mode`; `LiveConfig.idle_close_s`, `join_window_s`,
+  `max_lateness_s`.

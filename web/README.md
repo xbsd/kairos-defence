@@ -21,6 +21,9 @@ curves), Director's ninth beat (the swarm encore) and the optional chat slide-ov
   the 3D labels need (troika does not read woff2 and would otherwise fetch a CDN font).
 - Keep high-frequency data out of React re-renders (§17.11): stores are written outside React,
   the theater reads them in `useFrame`, DOM panels redraw at most 10 times a second.
+- Phase 11, live mode (D-184): the Live page (`/live`), fed by `/ws/live/{installation}`: the
+  same theater and rails as Live watch, a scenario launcher, "Live incidents this session" with
+  Reveal who flew and Reset live data, and the command bar's live mode.
 
 ## Public API
 
@@ -113,6 +116,26 @@ curves), Director's ninth beat (the swarm encore) and the optional chat slide-ov
 - Phase 9, chat (`chat/ChatPanel.tsx`, `chat/chatStore.ts`): an Ask button and a slide-over,
   present only when `GET /api/chat/status` says enabled (`llm.provider: none` hides them);
   `POST /api/chat` returns the reply and the tool calls behind it, which the panel lists.
+- Phase 11, live mode (D-184):
+  - Route `/live` (`livemode`), first in the Pages menu; `pages/LiveMode.tsx` (lazy): the Live
+    watch grid with `live/Launcher.tsx` (watched installation, scenario, actor or team, base,
+    second base, speed 1 to 50, seed, Launch; the simulator line never names the actor),
+    `MatchList live` (no Explain link) or `live/SwarmMatchList.tsx`, `live/IncidentList.tsx`
+    (newest first; Reveal who flew on closed incidents only; Reset live data behind an inline
+    confirm), `live/RevealCard.tsx` (a native dialog: the words, who flew, scenario and seed, the
+    expectation and verdict, the first eight reruns), and "Nothing is flying at …" when idle.
+    `live/liveText.ts`: launcher choices and labels.
+  - `api/liveStream.ts` (`LiveStream`, `liveUrl`, `parseLiveMessage`: no client messages, a
+    reconnect gets a fresh catch-up), `api/messages.ts` (`LiveStreamMessage`, `LIVE_TYPES`, the
+    live REST types), `api.liveStatus`, `liveScenarios`, `simLaunch`, `liveReset`, `reveal`.
+  - `state/liveStore.ts` (installation, scenarios, status, incidents from the status and the
+    stream, the swarm result, reveals), `state/liveDispatch.ts` (the §16.3 types into the Live
+    watch stores, a new incident's hello resets them), `state/useLive.ts` (stream, scene, ledger
+    tail and verify, status every 2 s).
+  - `CommandBar mode="live"`: incident time, "Live feed, 20×" / "Feed idle" from the heartbeats'
+    rate, no speed, playback or Director controls. `app/status.liveStatus`.
+  - `three/TheaterFrame.tsx`: the theater with its own error and Suspense boundaries (D-185),
+    used by Live watch and the Live page.
 
 ## Data in and out
 
@@ -178,6 +201,13 @@ computed from the same stores. The lens shows the stream's `dtw` or a chosen mat
   Playwright starts its own API on :8765 with scratch ledger, live and export folders under
   `data/cache/e2e` (D-113, D-137).
   First time on a machine: `npx --prefix web playwright install chromium`.
+- Phase 11: Vitest `liveStore.test.ts` (status, incident list from the stream, reveals,
+  dispatch, parsing, launcher choices and labels), `LiveMode.test.tsx` (launcher options and the
+  launch request, the incident list and its Reveal buttons, the reset confirm, the reveal card,
+  the command bar's live mode), `router.test.ts` (`/live`); Playwright `e2e/livemode.spec.ts`
+  (launch `returning-prober` at 20× at Bravo, an incident opens, matches appear, it closes,
+  Reveal who flew names P1 and a verdict; axe; screenshots `phase11-live-*`; live data reset
+  before and after, the ledger reseeded after).
 
 ## Gotchas
 
@@ -192,6 +222,9 @@ web/openapi.json && npm --prefix web run gen:types`; `check:types` fails on stal
 - The React compiler lint rules: mutate three.js objects in module functions called from
   `useFrame`, never in the component body; component files export only components (D-147).
 - A clicked button keeps Space: e2e key presses blur first (`press` in `e2e/helpers.ts`).
+- A live hello has `duration_s` 0 (open-ended): `clockNow` treats 0 as unbounded.
+- The Live page reuses the replay stores; never mix a replay stream and the live stream on one
+  page.
 
 ## Demo video recorder (`demo/`, D-168)
 
@@ -222,3 +255,7 @@ time). It is not part of `make e2e`.
   ring, and the compact lens measures its header so the cost matrix and its caption fit the rail.
 - Demo video (D-168): `demo/` recorder; the command bar is `relative z-30` so the Pages menu opens
   above page panels (it opened behind the Swarm view's panels).
+- Phase 11: the Live page, launcher, incident list, reveal card and swarm matches; the live
+  stream client and store; the command bar's live mode; `TheaterFrame` (the theater's own Suspense
+  boundary, which fixed a page-wide "Loading" flash on slow machines, D-185); `playwright.config.ts`
+  passes `--live-mode-dir data/cache/e2e/live_mode` (D-184).

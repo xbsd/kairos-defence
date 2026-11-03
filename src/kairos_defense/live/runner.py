@@ -148,11 +148,13 @@ class LiveCompute:
 class LiveWorker:
     """The live work queue on one thread (``threaded=False``: run on submit, for tests).
 
-    Fresh first, then backfill (D-175): the next task is the newest rerun of the newest incident
-    when it is newer than anything computed for that incident (``fresh``: its result is
-    streamed and proposed); otherwise the oldest skipped rerun (backfill: recorded only), and a
-    close once no rerun is pending. So the screen always shows the latest second's result, every
-    rerun is still computed and recorded whatever the feed speed, and learning comes last."""
+    Closes first, then fresh, then backfill (D-175): a closing incident's remaining reruns and
+    then its learning run before anything else, so every incident that starts after it closed is
+    matched with it learned (as at speed 1). Otherwise the next task is the newest rerun of the
+    newest incident when it is newer than anything computed for that incident (``fresh``: its
+    result is streamed and proposed), else the oldest skipped rerun (backfill: recorded only). So
+    the screen shows the latest second's result and every rerun is still computed and recorded
+    whatever the feed speed."""
 
     def __init__(self, handle: Callable[[object, bool], None], *, threaded: bool = True) -> None:
         self.handle, self.threaded = handle, threaded
@@ -178,6 +180,14 @@ class LiveWorker:
 
     def _next(self):
         reruns = [t for t in self._pending if isinstance(t, RerunTask)]
+        closes = [t for t in self._pending if isinstance(t, CloseTask)]
+        if closes:  # a closing incident finishes (its reruns, then learning) before any other
+            iid = closes[0].meta["incident_id"]
+            own = [t for t in reruns if t.meta["incident_id"] == iid]
+            if not own:
+                self._pending.remove(closes[0])
+                return closes[0], False
+            reruns = own
         if reruns:
             newest = max(reruns, key=lambda t: (t.meta["start_ts"], t.t_s))
             iid = newest.meta["incident_id"]

@@ -99,6 +99,37 @@ swarm `DEMO-SWARM-ECHO-0614` (ECHO, 14 Jun 2026) with every earlier swarm; `S1-G
 - **Port 8000 busy:** stop the other server (`lsof -i :8000`), or run
   `uv run kairos-defense api --static web/dist --port 8001` after `make demo`'s build step.
 
+## Live mode (phase 11)
+
+The replay is the scripted demo. Live mode shows the same system on flights nobody has seen: a
+separate simulator process flies a scenario on a live calendar after the 18-month history and
+streams only sensor detections into the app, which forms the incident, matches it against every
+past flight (and every live flight it has learned since the last reset), forecasts and recalls,
+all on what it has received so far.
+
+1. `make live` (builds the web app and serves it on :8000), then open
+   `http://127.0.0.1:8000/live` (or **Pages → Live**).
+2. In **Launch a scenario** pick *Returning prober*, P1, Bravo and 20× (a 9-minute flight takes
+   about 30 s), then **Launch**. The command bar reads "Live feed, 20×"; an incident appears under
+   "Live incidents this session"; matches arrive from T+45 s and stay current (at high speed the
+   app computes the newest rerun first and fills in the skipped ones afterwards, D-175).
+3. When the incident shows **Closed**, press **Reveal who flew**: the card names the operator
+   ("P1, County Rd operator") and how the matcher did ("First recognized at T+45 s"). The app did
+   not know who flew while the drone was in the air; the answer comes from the evaluation's ground
+   truth, after the fact (D-170).
+4. Encore: *New operator, twice*. Flight 1 has nothing to find; flight 2, at the next base, is
+   matched to flight 1, which the app learned live minutes earlier.
+
+Say: "Nothing was precomputed and nothing was retrained: the same models, on detections arriving
+now." Reset live data (with its confirm) between audiences; it never touches the history or the
+ledger. **Before running the replay demo after live use, press R** (reseed): live proposals are
+stamped on the live calendar in September 2026, after the replay's clock (D-181).
+
+`uv run kairos-defense live check` flies all five scenarios headless at 50× and prints PASS or GAP
+for each (about six minutes). Run `uv run kairos-defense simulate --scenario returning-prober
+--speed 20` in a terminal of your own and it names the actor there too, for a presenter who wants
+to say it out loud; the app still receives only detections.
+
 ## Optional: the agent tools (MCP)
 
 Kairos Defense exposes read-only tools to any MCP client. In Claude Code:

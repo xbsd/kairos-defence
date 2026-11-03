@@ -86,7 +86,14 @@ export function IncidentList() {
       className="min-h-[9rem] flex-[1_1_0]"
       meta={pending ? `${pending} rerun${pending === 1 ? "" : "s"} queued` : undefined}
     >
-      <div className="absolute inset-0 flex flex-col overflow-y-auto">
+      {/* a scroll region keyboard users can reach even when its entries hold no enabled
+          control (axe scrollable-region-focusable) */}
+      <div
+        tabIndex={0}
+        role="region"
+        aria-label="Live incidents, scrollable"
+        className="absolute inset-0 flex flex-col overflow-y-auto"
+      >
         <div className="flex justify-end px-3 pb-1">
           <ResetLive />
         </div>

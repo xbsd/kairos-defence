@@ -2434,3 +2434,187 @@ Where this file and the SPEC ever disagree, this file wins.
   simulator is launched from the web page).
 - Consequences: a new API route and a reveal card on the Live page; the truth-isolation scan is
   extended to `live_truth`; `live check` and the reveal share one scoring function.
+
+## D-171 · How the cloud session runs phases 11 and 12 · 2026-11-02
+- Context: `docs/CLOUD_HANDOFF.md` step 2 says to try the real autopilot when `claude -p` works.
+  In this container it answered (`OK`), but the user's instruction for this session was to build
+  both phases in this session with `scripts/cloud_gate.py` as the only judge, and the nested
+  `claude -p` reported this session's own id.
+- Decision: step 3 of the handoff: plan, independent review by a subagent (saved as
+  `PLAN_REVIEW-k.json`), build, then `cloud_gate.py gate|accept|close`; push after each phase.
+- Why: the user's own words take precedence over the handoff's default; nested sessions sharing
+  this session's id could collide with it.
+
+## D-172 · Live-mode stores: one folder, separable by construction · 2026-11-02
+- Decision: one new path, `paths.live_mode` (`data/live_mode/`), holds everything live mode
+  writes: `feed.duckdb` (`live_points`, `live_rf`, `live_rid` with the columns of their history
+  sources, views `track_points`, `rf_detections`, `remote_id` over them and a copy of `sensors`, so
+  the existing `DuckTrackStore` SQL runs on live rows; `live_incidents`, `live_tracks`, learned
+  `track_features` and `track_signatures`, `live_results`), `vectors/` (LanceDB `flight_windows`
+  of learned tracks), `clock.json` and `sim/` (simulator logs). `store/live_feed.DuckFeedStore`
+  and `store/composite.CompositeTrackStore` / `CompositeVectorStore` put the history and the
+  learned live history behind the same ports (a track is live when its id starts with `LIVE-`);
+  `ports.LiveFeed` names the write side. The main database stays read-only.
+- Why: a separate folder makes `live reset` total and keeps the 18-month history, the evaluation
+  and the replay untouched (D-169). Rejected: a `source` column in the history tables (the API
+  holds the main file read-only, and every history query would need a filter).
+- Consequences: the live worker reads on its own DuckDB cursor of `feed.duckdb`; REST handlers
+  use the store's locked connection. `live reset` empties the tables and drops the vectors; the
+  clock is never rewound.
+
+## D-173 · The ingest contract v1 · 2026-11-02
+- Decision: `api/schemas_ingest.py`: `point`, `rf`, `rid` and `heartbeat` messages, each with
+  `v: 1`, an installation id and an aware `ts`; extra fields refused (no message can carry who
+  flew). `WS /ws/ingest` (one object or an array per frame, an `ack` per frame) and
+  `POST /api/ingest` (`{"messages": [...]}`). The hub also refuses unknown installations, a
+  sensor that is not that installation's radar (points) or RF sensor (rf), timestamps at or before
+  the end of the history (rule 3 guard) and messages more than `live.max_lateness_s` (10 s) behind
+  the installation's feed time. A heartbeat's `rate` is feed seconds per wall second.
+- Why: the seam a real radar, RF or Remote ID adapter would implement; the simulator is its first
+  client.
+
+## D-174 · Live incidents: formation and closing · 2026-11-02
+- Decision: per installation, feed time is the newest timestamp received. A point with an unseen
+  sensor track id opens a track; it joins an open incident when a track of that incident had a
+  point within `live.join_window_s` (10 s) and `swarm.max_spacing_m` (300 m), otherwise it opens
+  a new incident (T+0 = that point). Three or more tracks (`swarm.min_drones`) make a swarm
+  incident. An incident closes when feed time passes its last detection by `live.idle_close_s`
+  (30 s): its tracks' radar points, or RF and Remote ID heard at the installation. Ids
+  `LIVE-<BASE>-<YYMMDD>-<HHMMSS>` (local), tracks `<incident>-T<n>`.
+- Why: the first browser run split one P1 flight in two: a 34 s radar dropout while the RF sensor
+  heard the drone 16 times. The generator spans incidents over every sensor's detections
+  (D-028), so RF and Remote ID count as activity. RF is not tied to a track at ingest, so heard
+  RF keeps every open incident at that installation alive: an accepted approximation for one
+  watched installation (PHASE_11.md).
+
+## D-175 · Reruns: queued, fresh first, never lost · 2026-11-02
+- Decision: the hub queues a rerun for each `min_track_s + k × rerun_every_s` once feed time has
+  passed it, with the points received up to that second (rule 3), skipping a rerun whose point
+  count did not change. One worker thread runs them: a closing incident's remaining reruns and
+  then its learning come before anything else; otherwise the newest rerun of the newest incident
+  first when it is newer than anything computed for it (fresh: streamed and proposed), then the
+  skipped ones in order (backfill: recorded in `live_results` only).
+  `features` messages are computed in the ingest path for the newest whole second, at most five
+  per wall second. The replay's `LiveLoop.compute` became `loop.compute_result` (shared), and
+  the replay's results are unchanged.
+- Why: a rerun takes about 0.7 s in this container; at speed 20 the feed passes five seconds
+  every 0.25 s. A plain FIFO left 25 reruns queued and the Matches panel empty at T+02:28. Fresh
+  first keeps the screen current; backfill keeps every rerun's result recorded, identical at any
+  speed (the reveal and `live check` read them). Closes first: the first full `live check` with
+  fresh-first alone ran flight 2 of `new-operator-twice` before flight 1 was learned (a GAP); an
+  incident that starts after another closed must be matched with it learned, as at speed 1.
+
+## D-176 · Learning closed incidents · 2026-11-02
+- Decision: a close task runs the index build's own per-track code (`features.build.track_rows`,
+  extracted from `build_index`) on the incident's received points with the whole flight's sensor
+  context, writes `track_features` and `track_signatures` through `LiveFeed.learn` and the
+  windows through `VectorStore.upsert` (fixed-size vectors, like `make index`). Only closed
+  incidents are learned; the started-before filters still apply. Swarm drone tracks are learned
+  as tracks; swarm choreography (`swarm_features`, `swarm_windows`) is not learned in the MVP.
+- Consequences: `GET /api/history/{track}` serves learned live tracks from the live-mode store,
+  so their ghost trails work; open live tracks stay refused.
+
+## D-177 · The live clock and seeds · 2026-11-02
+- Decision: `sim/live_clock.LiveClock` persists the next free UTC instant and a launch counter in
+  `<live_mode>/clock.json`. Default start: the night after `calendar.end_local` (2026-09-01) at
+  21:00 local. A scenario launches at the earliest time at or after the clock inside its actor's
+  window (`time_local`; 19:00 to 23:00 for hobbyists and the invented operator; the swarm start
+  window) and reserves the clock to its last detection + `idle_close_s` + 60 s. The wind of a
+  live flight comes from the scenario seed and the night's position in the scenario, not the
+  date. A default seed is `rng_for(world_seed, "live", "seed", str(launches))` (rule 4); the API
+  derives it the same way and passes it explicitly.
+- Why: every history flight starts before every live flight (rule 3); the same seed and launch
+  time of night fly the same flight on any date; review 1 refused seeds from OS entropy.
+
+## D-178 · Scenarios and the invented operator · 2026-11-02
+- Decision: `sim/live_scenarios.py` builds the five recipes from the generator's functions
+  (`make_flight` with `prober_spec` or `copycat_spec`, the hobbyist plan, `swarm_plan`,
+  `drone_paths`, `kinematics.fly_plans`, `radar_track`, `rf_track`, `rid_track`); defaults P1, C1,
+  S1 and Bravo where allowed (the demo base), the actor's own bases only, `random` lets the seed
+  pick the prober. The invented operator N1 orbits `hq` clockwise at 260 m, two laps, 70 to 90 m,
+  12 m/s, RF `FAM-24` (no configured actor uses it; the plan said `FAM-40`, which the RF band
+  model does not know), Remote ID off, launch 1,400 m at bearing 45°; flight 2 flies at the second
+  base (default the next installation of the region) once flight 1 has closed. A returning drone
+  broadcasts its known Remote ID serial. Sensor track ids are `TRK-` plus a hash of seed, flight
+  key (scenario, actor, base, seed, flight) and launch instant: opaque, reproducible, unique per
+  launch.
+
+## D-179 · Ground truth of live flights · 2026-11-02
+- Decision: the simulator writes one row per sensor track it sends through
+  `sim/writers.record_live_flights` into the truth file's `live_truth` table (sensor track id,
+  actor or team, actor type, nickname, scenario, seed, base, flight, drone, launch time), keyed by
+  the sensor track id, before the first detection leaves; it retries while another process holds
+  the file. Only `eval` reads it (`eval/reveal.py`, `eval/live_check.py`); the truth-isolation
+  scan forbids the name everywhere else. `live reset` does not touch it: it is the simulator's
+  ground truth, not app data, the API may reach truth only through `eval`'s read-only reveal
+  (D-170), and rows of reset incidents are never joined again (their ids are unique per launch).
+  `make data` recreates the file.
+
+## D-180 · Scenario expectations and the reveal's verdict · 2026-11-02
+- Decision: times are seconds after the incident's first radar point. Returning prober: met when
+  some rerun at or before T+120 shows a same-actor flight in the top 3 (recognition is an event:
+  the first time counts; "top match from T+y" is the earliest rerun from which rank 1 stays
+  same-actor). Copycat: met when the latest rerun at or before T+120 shows a C1 flight in the top 5
+  above every flight of the actor it mimics (a ranking relation must hold at the decision time).
+  Hobbyist: no expectation, the top score is reported; a hobbyist incident that closes before any
+  rerun is a GAP (nothing to report). Swarm repeat: the final swarm rerun ranks a past event of the
+  same team first. New operator twice: flight 1 met when no same-actor history existed; flight 2
+  met when its final rerun ranks flight 1's learned track first. `live check` scores each
+  scenario's incident with the most reruns per flight; its seeds are fixed once (1101 to 1105).
+
+## D-181 · Live mode and the case memory · 2026-11-02
+- Decision: fresh single-track results go through the replay's own code (`session.propose`,
+  `result_messages`: record the incident, register the model, propose the top 3 to the case
+  holding the best-ranked top-3 incident, §15.6 dedup). Backfilled reruns and swarm results
+  propose nothing. Approve and Reject are the existing link route (rule 8). `live reset` never
+  touches the ledger (rule 7); the demo's R (reseed) still rebuilds it.
+- Consequences: live events are stamped on the live calendar (September 2026), after every seeded
+  row, so after live use a presenter presses R before the replay demo (`docs/DEMO.md`).
+
+## D-182 · Launching the simulator; who flew stays out of the app · 2026-11-02
+- Decision: `POST /api/sim/launch` validates against the catalog and starts
+  `python -m kairos_defense.cli simulate … --url ws://127.0.0.1:<port>/ws/ingest --live-mode-dir …
+  --config … --parent-pid …`, one at a time (409 while one runs). The actor is passed on the
+  child's command line and kept nowhere: the launcher stores scenario, bases, speed and seed, never
+  logs the command, and sends the child's output to `<live_mode>/sim/<n>.log`. The simulator names
+  the actor only when its stdout is a terminal or with `--show-actor`; off a terminal its refusals
+  are generic. A `random` prober is resolved in the child. When a child exits, the hub flushes
+  the bases it fed (open incidents close even if the feed died); a child whose parent died stops;
+  the feed client gives up after bounded reconnects. `websockets` comes with `uvicorn[standard]`.
+- Why: review 1 found that a launched child's log would otherwise hold the actor outside the
+  truth file (rule 2).
+
+## D-183 · `live check` · 2026-11-02
+- Decision: `eval/live_check.py`: scratch stores under `<paths.cache>/live_check/` (live-mode
+  folder, reseeded ledger, live tables, exports); the API in-process (uvicorn in a thread, free
+  loopback port); each scenario through `POST /api/sim/launch` with its fixed seed; waits for the
+  child to exit, every new incident to close and the worker to drain; scores with the reveal.
+  One `PASS` or `GAP` line per scenario and a summary; exit 0, 1 (gaps only, soft, D-063) or 2
+  (crash or timeout); resets the scratch live data; stops the server and every child.
+
+## D-184 · The live stream and the Live page · 2026-11-02
+- Decision: `WS /ws/live/{installation}` sends the §16.3 types (a `hello` per incident with
+  `duration_s` 0, open-ended; `clock` on feed time at up to 10 Hz with the feed rate as `speed`)
+  plus `incident_opened`, `incident_closed` and `swarm_match` (`LiveStreamMessage`, exported
+  through `GET /api/schema/live-stream`); the replay's `StreamMessage` is unchanged. The web Live
+  page (`/live`, first in the Pages menu) reuses the theater and every rail of Live watch; the
+  memory rail holds the launcher (watched installation, scenario, actor or team, base, second
+  base, speed, seed), the matches (or swarm matches) and "Live incidents this session" with
+  Reveal who flew (closed only) and Reset live data behind an inline confirm. The command bar's
+  live mode shows the incident's T+, the feed status and rate, and no replay controls or Director.
+  The Pages menu is the way in; a separate mode switch in the command bar was left out because
+  the bar is full at 1200 px in replay mode.
+
+## D-185 · The theater has its own Suspense boundary · 2026-11-02
+- Context: the baseline `make e2e` in this container failed "rails stack under the theater below
+  1280 px": the 3D theater's fonts suspend inside the canvas, react-three-fiber forwards that to
+  the nearest DOM Suspense boundary (the page's), and the whole page flashed "Loading" after it had
+  rendered.
+- Decision: `three/TheaterFrame.tsx` (error boundary plus its own Suspense, "Starting the 3D
+  theater") wraps the theater on Live watch and the Live page; the rails never blank.
+
+## D-186 · Live-mode tests stay fast · 2026-11-02
+- Decision: the hub, learning, reset and API tests run on the P1 nights with the hand-set
+  models, reruns every 20 s (`tests/unit/live_kit.fast_scoring`), the worker run on submit, and
+  detections fed in frames of feed time, so no test waits in real time. The real speed-50 run is
+  `live check` (and the slow `test_full_live_mode.py`).

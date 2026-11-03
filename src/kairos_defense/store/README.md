@@ -18,6 +18,9 @@ truth-isolation guard every app connection goes through.
   `data/live.duckdb`, D-103) and `ResultCache` over JSON files (`live_cache.py`, D-104).
 - Business logic imports the ports, never these modules directly (rule 6). Only index builds and
   composition roots such as `cli.py` construct the adapters (D-053).
+- Live mode (phase 11, D-172): the live-mode store over `<live_mode>/feed.duckdb`
+  (`live_feed.py`, the `LiveFeed` port plus `TrackStore` reads on live rows) and the history plus
+  learned live history behind the same ports (`composite.py`).
 
 ## Public API
 
@@ -96,6 +99,21 @@ truth-isolation guard every app connection goes through.
     phrase matches exactly; the tokenizer lowercases.
   - Empty results keep the columns.
 - `lance.REPORTS_TABLE`, `lance.REPORT_COLUMNS` (§7.5 without the vector), `lance.FTS_COLUMNS`.
+- Phase 11:
+  - `live_feed.DuckFeedStore(folder, app, sensors=None)` (a `DuckTrackStore` over
+    `feed.duckdb`, one connection behind an `RLock`): `append(table, rows) -> IngestStat`
+    (`live_points`, `live_rf`, `live_rid`), `put_incident(row)`, `put_track(row)`,
+    `learn(features, signatures)`, `add_result(row)`, `results(incident)`, `incidents()`,
+    `incident(id)`, `live_tracks(incident=None)`, `count(table)`, `counts()`, `reset()`,
+    `reader()` (a `DuckTrackStore` on its own cursor, for the live worker). Views
+    `track_points`, `rf_detections`, `remote_id` and `incidents` over the live tables, and a copy
+    of `sensors`. `RESET_TABLES`, `FEED_FILE`, `VECTORS_DIR`.
+  - `composite.CompositeTrackStore(main, live)` and `composite.CompositeVectorStore(main,
+    live)`: unions and merges (`tracks_before` by start time, `search` by `_distance`); `LIVE-`
+    ids belong to the live side; `upsert` writes the live side only. `composite.is_live_id`.
+  - `duck.DuckTrackStore.over(con, path)`; `live_duck.append_rows(con, table, cols, rows)`;
+    `lance.LanceVectorStore.upsert` stores a `vector` key as a fixed-size float32 list;
+    `LanceVectorStore.drop(table)`.
 
 ## Data in and out
 
@@ -116,6 +134,9 @@ truth-isolation guard every app connection goes through.
   `incident_id`; `reports` (§7.5, phase 5) with a full-text index on `text`; `swarm_windows`
   (§7.5, phase 9: one 96-d vector per history swarm incident, keyed by `incident_id`, with the
   §7.5 columns plus `region_id`, `duration_s`, `together_s` and `is_swarm`, D-149).
+- Phase 11: `<live_mode>/feed.duckdb` (`live_points`, `live_rf`, `live_rid`, `sensors`,
+  `live_incidents`, `live_tracks`, `track_features`, `track_signatures`, `live_results`) and
+  `<live_mode>/vectors` (`flight_windows` of learned live tracks).
 
 ## How it works
 
@@ -148,6 +169,8 @@ truth-isolation guard every app connection goes through.
   and truth refusal, schema refusal, `copy_from`; `test_memory_append_only.py` scans `src/` for
   ledger mutations.
 - Run: `uv run pytest tests/unit -q -k "truth or duck or index or lookahead or recall or memory"`.
+Phase 11: `tests/unit/test_live_stores.py` (views and the §11.2 SQL on live rows, state rows,
+reset, truth refused, composite unions and the vector merge).
 
 ## Gotchas
 
@@ -187,3 +210,5 @@ truth-isolation guard every app connection goes through.
   result fully (`fetchall`) before `register()`.
 - Phase 9: `swarm_features` DDL (the §7.2 columns); `swarm_windows` written through
   `LanceVectorStore.replace` (D-149).
+- Phase 11: `live_feed.py`, `composite.py`; `DuckTrackStore.over`, `live_duck.append_rows`,
+  `LanceVectorStore.upsert` (fixed-size vectors) and `drop` (D-172).

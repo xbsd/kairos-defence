@@ -14,7 +14,14 @@ export function SwarmMatchList() {
       className="min-h-[10rem] flex-[1.6_1_0]"
       meta={m ? `At ${tPlus(m.t_s)}, ${m.n_drones} drones` : undefined}
     >
-      <div className="absolute inset-0 flex flex-col overflow-y-auto">
+      {/* a scroll region keyboard users can reach even when its entries hold no enabled
+          control (axe scrollable-region-focusable) */}
+      <div
+        tabIndex={0}
+        role="region"
+        aria-label="Swarm matches, scrollable"
+        className="absolute inset-0 flex flex-col overflow-y-auto"
+      >
         {!m || m.matches.length === 0 ? (
           <p className="px-3 py-2 text-13 text-ink-mid">
             {m ? "No earlier swarm to match yet" : "Waiting for the swarm matcher"}
