@@ -32,7 +32,7 @@ Recorded in `docs/DECISIONS.md` during the build (numbers provisional).
    `MatchResult.trace` holds a JSON-ready record of that call, and nothing else changes (the same
    arrays, the same order, the same floating-point path). Contents, in computation order:
    - `query`: track, incident, `at_s`, `window_s`, `rows_used`, channel `dist_target_m` and the
-     query's curve on it (PAA to at most 64 points, raw meters).
+     query's curve on it (PAA to at most 48 points, raw meters).
    - `prefilter`: `ms`, `k_windows`, the number of windows returned, and every candidate track in
      prefilter order: rank, track and incident, installation, start, vector distance (squared L2)
      and the best window's size and offset.
@@ -126,8 +126,8 @@ Each step ends with `make check` and a checkpoint commit.
   - `test_trace_order_counts_and_fields`: the prefilter list is in prefilter order and as long as
     the candidates; `dtw.candidates` in the order computed, one per candidate, `d_norm =
     d / sqrt(n)`, `shape_sim = exp(-d_norm / tau)`, band = `band_window(n, m)`; paths only for the
-    first 50, each ≤ 64 points, monotone, from (0, ·) to (n−1, ·) after scaling; thumbnails
-    16 × 16; `fusion` scores equal the matches' scores; `ranking` equals the top 10.
+    first 50, each ≤ 48 points, monotone, from (0, ·) to (n−1, ·) after scaling; thumbnails
+    12 × 12; `fusion` scores equal the matches' scores; `ranking` equals the top 10.
   - `test_trace_overhead_is_measured`: `trace_ms` > 0 and `total_ms` is the untraced matcher's
     own stages; the overhead is printed into the test log and recorded in REPORT.md.
   - `test_the_path_cutoff_and_the_top10_paths`: with a recorder of `paths=3`, details exist for
@@ -204,3 +204,12 @@ the path labelled as the full-matrix alignment and no band drawn; `api/schemas_t
 contract tests' type sets; the cutoff test with `paths=3`; dialog and SVG accessible names and a
 text equivalent; the message size in REPORT.md; D-171 for the push. The uncommitted trace code
 written during the review matches the revised plan and is committed with this revision.
+
+Review 2 (`PLAN_REVIEW-2.json`) approved the plan with no blocking issues. Suggestions applied:
+the path and thumbnail sizes above now match the code (48 points, 12 × 12); the guide's
+`#live-mode` link moves to `#13-live-mode` with the rename; the live-mode guide images are
+written and committed before the exit-check chain; tests for `GET /api/live/trace` after a rerun
+and for backfilled reruns streaming no trace; the workbench's React reads stay at or under 10 per
+second (a Vitest checks it); the workbench screenshots at 1920 × 1080 and 1440 × 900; the cache
+size and the `make e2e` duration in REPORT.md; the renamed union test; links to section 13 from
+the guide's introduction, running-the-demo section and Live watch tour.

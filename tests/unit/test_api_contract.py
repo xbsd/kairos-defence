@@ -117,7 +117,7 @@ def test_every_message_type_has_a_valid_example() -> None:
         TA.validate_python({"type": "telemetry"})
 
 
-def test_union_covers_exactly_the_16_3_types() -> None:
+def test_union_covers_the_16_3_types_and_the_extension() -> None:
     members = typing.get_args(typing.get_args(StreamMessage)[0])
     kinds = {typing.get_args(m.model_fields["type"].annotation)[0] for m in members}
     assert kinds == TYPES and len(members) == len(MESSAGE_MODELS) == 14
