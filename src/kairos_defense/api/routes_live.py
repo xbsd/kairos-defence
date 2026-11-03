@@ -26,6 +26,7 @@ from pydantic import TypeAdapter, ValidationError
 from starlette.concurrency import run_in_threadpool
 
 from kairos_defense.api.deps import services
+from kairos_defense.api.schemas import MatcherTraceMsg
 from kairos_defense.api.schemas_ingest import IngestAck, IngestBatch, IngestMessage
 from kairos_defense.api.schemas_live import (
     LiveResetResponse,
@@ -237,6 +238,18 @@ def live_reveal(incident_id: str, svc: Services = Svc) -> dict:
         raise HTTPException(404, str(exc).strip("'\"")) from exc
     except NotClosed as exc:
         raise HTTPException(409, str(exc)) from exc
+
+
+@router.get("/api/live/trace", response_model=MatcherTraceMsg)
+def live_trace(installation: str = "BRAVO", svc: Services = Svc) -> dict:
+    """The latest live rerun's matcher trace at an installation (D-188); 404 before any."""
+    live = _live(svc)
+    if installation not in live.hub.sites:
+        raise HTTPException(404, f"no installation {installation}")
+    doc = live.hub.trace(installation)
+    if doc is None:
+        raise HTTPException(404, f"no live rerun at {installation} yet")
+    return doc
 
 
 @router.get("/api/schema/live-stream", response_model=LiveStreamSchema)

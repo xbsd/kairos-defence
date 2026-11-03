@@ -10,7 +10,7 @@ from pydantic import TypeAdapter
 
 from kairos_defense.api.schemas_ingest import IngestMessage
 from kairos_defense.api.schemas_live import LIVE_MESSAGE_MODELS, LiveStreamMessage
-from tests.unit.test_api_contract import EXAMPLES, TYPES_16_3
+from tests.unit.test_api_contract import EXAMPLES, TYPES
 
 LIVE = TypeAdapter(LiveStreamMessage)
 LIVE_TYPES = {"incident_opened", "incident_closed", "swarm_match"}
@@ -41,7 +41,7 @@ def test_the_live_union_is_16_3_plus_the_live_types() -> None:
     (union, _) = typing.get_args(LiveStreamMessage)
     kinds = {typing.get_args(m.model_fields["type"].annotation)[0]
              for m in typing.get_args(union)}  # fmt: skip
-    assert kinds == TYPES_16_3 | LIVE_TYPES and len(LIVE_MESSAGE_MODELS) == 16
+    assert kinds == TYPES | LIVE_TYPES and len(LIVE_MESSAGE_MODELS) == 17
 
 
 @pytest.mark.parametrize(

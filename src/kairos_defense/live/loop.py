@@ -35,7 +35,7 @@ from kairos_defense.match.query import Query, query_at
 from kairos_defense.memory.actions import json_safe
 from kairos_defense.ports import ResultCache, TrackStore
 
-CACHE_FORMAT = 1
+CACHE_FORMAT = 2  # 2: each result carries its matcher trace (D-188)
 TOP_N = 10
 RECALL_N = 3
 DEFAULT_CHANNEL = "dist_target_m"
@@ -199,7 +199,7 @@ class LiveLoop:
             return compute_result(r, lambda: self.query(r), store=self.store,
                                   matcher=self.matcher, recall=self.recall, scoring=self.scoring,
                                   offsets=self.offsets, incident_id=self.incident.incident_id,
-                                  clock=self._clock)  # fmt: skip
+                                  clock=self._clock, trace=True)  # fmt: skip
 
     def _lens(self, q: Query, match: dict, channel: str) -> dict:
         return lens_for(q, match, channel, self.matcher, self.scoring)
@@ -240,14 +240,16 @@ def lens_for(q: Query, match: dict, channel: str, matcher, scoring: ScoringConfi
 
 def compute_result(r: int, make_query: Callable[[], Query], *, store: TrackStore, matcher,
                    recall, scoring: ScoringConfig, offsets: dict, incident_id: str,
-                   clock: Callable[[], float] = time.perf_counter) -> dict:  # fmt: skip
+                   clock: Callable[[], float] = time.perf_counter,
+                   trace: bool = False) -> dict:  # fmt: skip
     """One rerun at second ``r``: build the query (``make_query``, points up to ``r`` only), run
     the matcher, the §13 forecast, §12 recall and the top match's lens, and return the JSON-ready
     result (see the module docstring). Shared by replays and live mode (D-175); the caller holds
-    the store lock."""
+    the store lock. ``trace``: also record the matcher's computation (``result["trace"]``, the DTW
+    workbench's data, D-187); the matches are the same either way."""
     t0 = clock()
     q = make_query()
-    res = matcher.match(q)
+    res = matcher.match(q, trace=trace)
     t1 = clock()
     fc = forecast(store, q, res, scoring)
     t2 = clock()
@@ -277,6 +279,7 @@ def compute_result(r: int, make_query: Callable[[], Query], *, store: TrackStore
         "rows_used": int(q.rows_used), "target_asset_id": q.target.asset_id,
         "matches": matches, "forecast": fc.to_dict() if fc else None, "recall": recall_doc,
         "dtw": lens, "elapsed_ms": (t4 - t0) * 1e3, "timings": timings, "cached": False,
+        "trace": {"t_s": int(r), **res.trace} if res.trace is not None else None,
     })  # fmt: skip
 
 

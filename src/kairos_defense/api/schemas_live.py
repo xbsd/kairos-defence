@@ -23,6 +23,7 @@ from kairos_defense.api.schemas import (
     HelloMsg,
     IngestMsg,
     LedgerMsg,
+    MatcherTraceMsg,
     MatchMsg,
     Num,
     PointMsg,
@@ -95,6 +96,7 @@ LiveStreamMessage = Annotated[
     | RecallMsg
     | LedgerMsg
     | ErrorMsg
+    | MatcherTraceMsg
     | IncidentOpenedMsg
     | IncidentClosedMsg
     | SwarmMatchMsg,

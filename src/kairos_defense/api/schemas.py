@@ -1,6 +1,7 @@
 """Pydantic models of the replay stream and the REST API (SPEC §16.3–§16.5, D-107, D-108).
 
-``StreamMessage`` is the discriminated union (on ``type``) of the thirteen §16.3 server messages;
+``StreamMessage`` is the discriminated union (on ``type``) of the thirteen §16.3 server messages
+plus ``matcher_trace`` (phase 12, D-188);
 ``ClientMessage`` the five client messages. Models forbid unknown fields, so the contract test
 catches any drift between what the server sends and what the web app's generated types say.
 ``kairos-defense api --dump-openapi web/openapi.json`` exports them; ``npm run gen:types`` turns
@@ -13,6 +14,8 @@ from __future__ import annotations
 from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from kairos_defense.api.schemas_trace import MatcherTraceMsg
 
 Num = float | None
 
@@ -248,7 +251,8 @@ class ErrorMsg(Strict):
 
 
 MESSAGE_MODELS = (HelloMsg, ClockMsg, PointMsg, RfMsg, RidMsg, FeaturesMsg, IngestMsg, MatchMsg,
-                  DtwMsg, ForecastMsg, RecallMsg, LedgerMsg, ErrorMsg)  # fmt: skip
+                  DtwMsg, ForecastMsg, RecallMsg, LedgerMsg, ErrorMsg,
+                  MatcherTraceMsg)  # fmt: skip
 StreamMessage = Annotated[
     HelloMsg
     | ClockMsg
@@ -262,7 +266,8 @@ StreamMessage = Annotated[
     | ForecastMsg
     | RecallMsg
     | LedgerMsg
-    | ErrorMsg,
+    | ErrorMsg
+    | MatcherTraceMsg,
     Field(discriminator="type"),
 ]
 

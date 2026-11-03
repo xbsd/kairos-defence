@@ -1,5 +1,6 @@
 """SPEC §16.5: the stream contract. One example of every message type validates; the union is
-exactly the §16.3 table; the committed OpenAPI file is current."""
+exactly the §16.3 table plus ``matcher_trace`` (phase 12, D-188); the committed OpenAPI file is
+current."""
 
 from __future__ import annotations
 
@@ -81,10 +82,32 @@ EXAMPLES = {
                "case_id": "CASE-P1-DELTA-260419", "subject_id": "P1-DELTA-260419"},
     "error": {"message": "speed must be 1, 2 or 5", "recoverable": True},
 }  # fmt: skip
+TRACE = {"t_s": 90, "version": 1, "trace_paths": 50, "channel": "dist_target_m",
+         "query": {"track_id": "DEMO-BRAVO-0828-T1", "incident_id": "DEMO-BRAVO-0828", "at_s": 90,
+                   "window_s": 60, "rows_used": 60, "n": 60, "curve": [180.0, 175.5, None]},
+         "prefilter": {"ms": 30.1, "k_windows": 10000, "candidates": 1,
+                       "track_id": ["P1-DELTA-260419-T1"], "incident_id": ["P1-DELTA-260419"],
+                       "start_ts_ms": [1776566100000], "distance": [0.12], "window_s": [60],
+                       "offset_s": [120]},
+         "dtw": {"ms": 56.0, "band_fraction": 0.25, "normalize": "fixed", "n": 60,
+                 "distance": [3.1], "d_norm": [0.4], "band": [30], "m": [120],
+                 "ms_each": [0.11], "shape_sim": [0.83],
+                 "detail": [{"order": 0, "track_id": "P1-DELTA-260419-T1",
+                             "path": [[0, 3], [59, 70]], "path_len": 75, "curve": [181.0, 170.2],
+                             "cost": [[0.5, None], [1.2, 2.0]]}]},
+         "fusion": {"ms": 1.2, "features": ["shape_sim", "rf_match"], "tau": 2.2,
+                    "coefficients": [9.1, 6.2], "intercept": -52.7, "values": [[0.83, 1.0]],
+                    "score": [0.97]},
+         "ranking": [{"rank": 1, "track_id": "P1-DELTA-260419-T1",
+                      "incident_id": "P1-DELTA-260419", "installation_id": "DELTA",
+                      "score": 0.97, "shape_sim": 0.83, "reasons": ["Same RF family"]}],
+         "explain_ms": 4.0, "total_ms": 92.0, "trace_ms": 60.0}  # fmt: skip
+EXAMPLES["matcher_trace"] = {"t_s": 90.0, "incident_id": "DEMO-BRAVO-0828", "trace": TRACE}
+TYPES = TYPES_16_3 | {"matcher_trace"}  # phase 12: the DTW workbench's trace (D-188)
 
 
 def test_every_message_type_has_a_valid_example() -> None:
-    assert set(EXAMPLES) == TYPES_16_3
+    assert set(EXAMPLES) == TYPES
     for kind, body in EXAMPLES.items():
         m = TA.validate_python({"type": kind, **body})
         assert m.type == kind
@@ -97,7 +120,7 @@ def test_every_message_type_has_a_valid_example() -> None:
 def test_union_covers_exactly_the_16_3_types() -> None:
     members = typing.get_args(typing.get_args(StreamMessage)[0])
     kinds = {typing.get_args(m.model_fields["type"].annotation)[0] for m in members}
-    assert kinds == TYPES_16_3 and len(members) == len(MESSAGE_MODELS) == 13
+    assert kinds == TYPES and len(members) == len(MESSAGE_MODELS) == 14
 
 
 def test_client_messages_validate() -> None:

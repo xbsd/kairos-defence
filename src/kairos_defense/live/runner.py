@@ -88,9 +88,16 @@ class LiveCompute:
         try:
             with self.lock:
                 res = compute_result(
-                    r, lambda: query_at(pts, site, r, self.scoring, ids), store=self.store,
-                    matcher=self.matcher, recall=self.recall, scoring=self.scoring,
-                    offsets=self.offsets, incident_id=meta["incident_id"])  # fmt: skip
+                    r,
+                    lambda: query_at(pts, site, r, self.scoring, ids),
+                    store=self.store,
+                    matcher=self.matcher,
+                    recall=self.recall,
+                    scoring=self.scoring,
+                    offsets=self.offsets,
+                    incident_id=meta["incident_id"],
+                    trace=fresh,
+                )  # fmt: skip  (the workbench replays what was shown, D-188)
         except ValueError as exc:  # too few seconds to describe yet
             log.info("rerun %s T+%s skipped: %s", meta["incident_id"], r, exc)
             return []

@@ -155,6 +155,19 @@ def warp_path(
     row). The segment's start and end may be skipped (``relaxation``). ``mode``/``scales`` as in
     ``prepare``: §9.3 ``series`` for the warp ratio; the forecast's j* uses the shape distance's
     configured mode (D-087)."""
+    return alignment(live, seg, weights, mode, scales)[0]
+
+
+def alignment(
+    live: np.ndarray,
+    seg: np.ndarray,
+    weights: np.ndarray | list[float],
+    mode: str = "series",
+    scales: np.ndarray | list[float] | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """``warp_path``'s alignment and the accumulated cost matrix it came from: ``(path (p, 2)
+    int, cost (n, m) float)``; cells the relaxed ends skip are ``inf``. The matcher trace's paths
+    and thumbnails (D-187)."""
     a, b = prepare(live, weights, mode, scales), prepare(seg, weights, mode, scales)
     n, m = len(a), len(b)
     psi = relaxation(n, m)
@@ -164,7 +177,10 @@ def warp_path(
         last = paths[n, 1:].copy()
         last[last < 0] = np.inf  # psi-skipped cells are -1
         col = int(np.argmin(last)) + 1
-    return np.asarray(dtw.best_path(paths, row=n, col=col), dtype=np.int64)
+    path = np.asarray(dtw.best_path(paths, row=n, col=col), dtype=np.int64)
+    cost = np.array(paths[1:, 1:], dtype=np.float64)
+    cost[cost < 0] = np.inf
+    return path, cost
 
 
 def warp_ratio(

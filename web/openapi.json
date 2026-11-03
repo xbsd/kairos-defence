@@ -261,6 +261,56 @@
     }
    }
   },
+  "/api/trace/{incident_id}": {
+   "get": {
+    "summary": "Trace",
+    "description": "The matcher trace of a replay incident's rerun at or before ``at`` (D-188): the DTW\nworkbench's data, the same shape as the stream's ``matcher_trace``. 404 for an unknown\nincident, 422 before the first rerun or for a swarm.",
+    "operationId": "trace_api_trace__incident_id__get",
+    "parameters": [
+     {
+      "name": "incident_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Incident Id"
+      }
+     },
+     {
+      "name": "at",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "number",
+       "minimum": 0,
+       "title": "At"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MatcherTraceMsg"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
   "/api/history/{track_id}": {
    "get": {
     "summary": "History",
@@ -1432,6 +1482,47 @@
        "application/json": {
         "schema": {
          "$ref": "#/components/schemas/RevealResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/live/trace": {
+   "get": {
+    "summary": "Live Trace",
+    "description": "The latest live rerun's matcher trace at an installation (D-188); 404 before any.",
+    "operationId": "live_trace_api_live_trace_get",
+    "parameters": [
+     {
+      "name": "installation",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "BRAVO",
+       "title": "Installation"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MatcherTraceMsg"
         }
        }
       }
@@ -4197,6 +4288,9 @@
         "$ref": "#/components/schemas/ErrorMsg"
        },
        {
+        "$ref": "#/components/schemas/MatcherTraceMsg"
+       },
+       {
         "$ref": "#/components/schemas/IncidentOpenedMsg"
        },
        {
@@ -4221,6 +4315,7 @@
         "ingest": "#/components/schemas/IngestMsg",
         "ledger": "#/components/schemas/LedgerMsg",
         "match": "#/components/schemas/MatchMsg",
+        "matcher_trace": "#/components/schemas/MatcherTraceMsg",
         "point": "#/components/schemas/PointMsg",
         "recall": "#/components/schemas/RecallMsg",
         "rf": "#/components/schemas/RfMsg",
@@ -4552,6 +4647,125 @@
      "matches"
     ],
     "title": "MatchResponse"
+   },
+   "MatcherTrace": {
+    "properties": {
+     "t_s": {
+      "type": "integer",
+      "title": "T S"
+     },
+     "version": {
+      "type": "integer",
+      "title": "Version"
+     },
+     "trace_paths": {
+      "type": "integer",
+      "title": "Trace Paths"
+     },
+     "channel": {
+      "type": "string",
+      "title": "Channel"
+     },
+     "query": {
+      "$ref": "#/components/schemas/TraceQuery"
+     },
+     "prefilter": {
+      "$ref": "#/components/schemas/TracePrefilter"
+     },
+     "dtw": {
+      "$ref": "#/components/schemas/TraceDtw"
+     },
+     "fusion": {
+      "$ref": "#/components/schemas/TraceFusion"
+     },
+     "ranking": {
+      "items": {
+       "$ref": "#/components/schemas/TraceRank"
+      },
+      "type": "array",
+      "title": "Ranking"
+     },
+     "explain_ms": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Explain Ms"
+     },
+     "total_ms": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Ms"
+     },
+     "trace_ms": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Trace Ms"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "t_s",
+     "version",
+     "trace_paths",
+     "channel",
+     "query",
+     "prefilter",
+     "dtw",
+     "fusion",
+     "ranking",
+     "explain_ms",
+     "total_ms",
+     "trace_ms"
+    ],
+    "title": "MatcherTrace",
+    "description": "The record of one matcher call (D-187): what the DTW workbench replays."
+   },
+   "MatcherTraceMsg": {
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "matcher_trace",
+      "title": "Type"
+     },
+     "t_s": {
+      "type": "number",
+      "title": "T S"
+     },
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "trace": {
+      "$ref": "#/components/schemas/MatcherTrace"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "type",
+     "t_s",
+     "incident_id",
+     "trace"
+    ],
+    "title": "MatcherTraceMsg"
    },
    "Park": {
     "properties": {
@@ -6020,6 +6234,9 @@
        },
        {
         "$ref": "#/components/schemas/ErrorMsg"
+       },
+       {
+        "$ref": "#/components/schemas/MatcherTraceMsg"
        }
       ],
       "title": "Message",
@@ -6035,6 +6252,7 @@
         "ingest": "#/components/schemas/IngestMsg",
         "ledger": "#/components/schemas/LedgerMsg",
         "match": "#/components/schemas/MatchMsg",
+        "matcher_trace": "#/components/schemas/MatcherTraceMsg",
         "point": "#/components/schemas/PointMsg",
         "recall": "#/components/schemas/RecallMsg",
         "rf": "#/components/schemas/RfMsg",
@@ -6674,6 +6892,505 @@
      "y_m"
     ],
     "title": "SwarmTarget"
+   },
+   "TraceDetail": {
+    "properties": {
+     "order": {
+      "type": "integer",
+      "title": "Order"
+     },
+     "track_id": {
+      "type": "string",
+      "title": "Track Id"
+     },
+     "path": {
+      "items": {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      "type": "array",
+      "title": "Path"
+     },
+     "path_len": {
+      "type": "integer",
+      "title": "Path Len"
+     },
+     "curve": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Curve"
+     },
+     "cost": {
+      "items": {
+       "items": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "type": "array"
+      },
+      "type": "array",
+      "title": "Cost"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "order",
+     "track_id",
+     "path",
+     "path_len",
+     "curve",
+     "cost"
+    ],
+    "title": "TraceDetail",
+    "description": "One of the first ``trace_paths`` candidates: its warping path (down-sampled, indices into\nthe full ``n`` \u00d7 ``m`` matrix), the candidate's curve and a cost-matrix thumbnail."
+   },
+   "TraceDtw": {
+    "properties": {
+     "ms": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Ms"
+     },
+     "band_fraction": {
+      "type": "number",
+      "title": "Band Fraction"
+     },
+     "normalize": {
+      "type": "string",
+      "title": "Normalize"
+     },
+     "n": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "N"
+     },
+     "distance": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Distance"
+     },
+     "d_norm": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "D Norm"
+     },
+     "band": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "Band"
+     },
+     "m": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "M"
+     },
+     "ms_each": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Ms Each"
+     },
+     "shape_sim": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Shape Sim",
+      "default": []
+     },
+     "detail": {
+      "items": {
+       "$ref": "#/components/schemas/TraceDetail"
+      },
+      "type": "array",
+      "title": "Detail"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "ms",
+     "band_fraction",
+     "normalize",
+     "n",
+     "distance",
+     "d_norm",
+     "band",
+     "m",
+     "ms_each",
+     "detail"
+    ],
+    "title": "TraceDtw"
+   },
+   "TraceFusion": {
+    "properties": {
+     "ms": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Ms"
+     },
+     "features": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Features"
+     },
+     "tau": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Tau"
+     },
+     "coefficients": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Coefficients"
+     },
+     "intercept": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Intercept"
+     },
+     "values": {
+      "items": {
+       "items": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "type": "array"
+      },
+      "type": "array",
+      "title": "Values"
+     },
+     "score": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Score"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "ms",
+     "features",
+     "tau",
+     "coefficients",
+     "intercept",
+     "values",
+     "score"
+    ],
+    "title": "TraceFusion"
+   },
+   "TracePrefilter": {
+    "properties": {
+     "ms": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Ms"
+     },
+     "k_windows": {
+      "type": "integer",
+      "title": "K Windows"
+     },
+     "candidates": {
+      "type": "integer",
+      "title": "Candidates"
+     },
+     "track_id": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Track Id"
+     },
+     "incident_id": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Incident Id"
+     },
+     "start_ts_ms": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "Start Ts Ms"
+     },
+     "distance": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Distance"
+     },
+     "window_s": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "Window S"
+     },
+     "offset_s": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "Offset S"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "ms",
+     "k_windows",
+     "candidates",
+     "track_id",
+     "incident_id",
+     "start_ts_ms",
+     "distance",
+     "window_s",
+     "offset_s"
+    ],
+    "title": "TracePrefilter",
+    "description": "Every candidate track in prefilter order (columns line up index by index)."
+   },
+   "TraceQuery": {
+    "properties": {
+     "track_id": {
+      "type": "string",
+      "title": "Track Id"
+     },
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "at_s": {
+      "type": "integer",
+      "title": "At S"
+     },
+     "window_s": {
+      "type": "integer",
+      "title": "Window S"
+     },
+     "rows_used": {
+      "type": "integer",
+      "title": "Rows Used"
+     },
+     "n": {
+      "type": "integer",
+      "title": "N"
+     },
+     "curve": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Curve"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "track_id",
+     "incident_id",
+     "at_s",
+     "window_s",
+     "rows_used",
+     "n",
+     "curve"
+    ],
+    "title": "TraceQuery"
+   },
+   "TraceRank": {
+    "properties": {
+     "rank": {
+      "type": "integer",
+      "title": "Rank"
+     },
+     "track_id": {
+      "type": "string",
+      "title": "Track Id"
+     },
+     "incident_id": {
+      "type": "string",
+      "title": "Incident Id"
+     },
+     "installation_id": {
+      "type": "string",
+      "title": "Installation Id"
+     },
+     "score": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Score"
+     },
+     "shape_sim": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Shape Sim"
+     },
+     "reasons": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Reasons"
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "rank",
+     "track_id",
+     "incident_id",
+     "installation_id",
+     "score",
+     "shape_sim",
+     "reasons"
+    ],
+    "title": "TraceRank"
    },
    "ValidationError": {
     "properties": {

@@ -66,6 +66,7 @@ class _Inst:
     wall: float = 0.0  # wall time of the last message
     recent: deque = field(default_factory=deque)  # (ms, message) of the current incident
     results: list[dict] = field(default_factory=list)  # latest result messages
+    trace: dict | None = None  # the latest matcher_trace message (the DTW workbench, D-188)
 
 
 def _ms_to_dt(ms: int) -> datetime:
@@ -298,7 +299,9 @@ class LiveHub:
                 return  # reset meanwhile
             inc.reruns += 1
             if msgs and self.tracker.current(inc.installation_id) is inc:
-                self._inst[inc.installation_id].results = list(msgs)
+                st = self._inst[inc.installation_id]
+                st.results = list(msgs)
+                st.trace = next((m for m in msgs if m["type"] == "matcher_trace"), st.trace)
                 for m in msgs:
                     self._emit(inc.installation_id, m, keep=False)
 
@@ -383,11 +386,17 @@ class LiveHub:
             for inst, st in list(self._inst.items()):
                 st.recent.clear()
                 st.results = []
+                st.trace = None
                 self._emit(inst, {"type": "clock", "t_s": 0.0,
                                   "ts": iso_z(_ms_to_dt(st.feed_ms or 0)), "speed": st.rate,
                                   "playing": False, "seeked": True}, keep=False)  # fmt: skip
                 st.feed_ms, st.heard_ms, st.wall = None, None, 0.0
                 self._emit(inst, self.hello(inst), keep=False)
+
+    def trace(self, inst: str) -> dict | None:
+        """The latest live ``matcher_trace`` message at an installation (None before any)."""
+        with self.lock:
+            return self._inst[inst].trace if inst in self._inst else None
 
     def feed_state(self) -> dict[str, dict]:
         with self.lock:

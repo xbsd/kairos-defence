@@ -15,6 +15,7 @@ from kairos_defense.api.schemas import (
     Health,
     IncidentSummary,
     Installation,
+    MatcherTraceMsg,
     MatchResponse,
     Scene,
     StreamSchema,
@@ -106,6 +107,23 @@ def dtw(incident_id: str, match_track_id: str, at: float = Query(..., ge=0),
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
     return {"type": "dtw", "t_s": float(loop.rerun_at(at)), **doc}
+
+
+@router.get("/trace/{incident_id}", response_model=MatcherTraceMsg)
+def trace(incident_id: str, at: float = Query(..., ge=0), svc: Services = Svc) -> dict:
+    """The matcher trace of a replay incident's rerun at or before ``at`` (D-188): the DTW
+    workbench's data, the same shape as the stream's ``matcher_trace``. 404 for an unknown
+    incident, 422 before the first rerun or for a swarm."""
+    loop = _loop(svc, incident_id)
+    res = loop.result_at(at)
+    if res is None:
+        raise HTTPException(422, f"no rerun at T+{at:g} s for {incident_id} (reruns start at "
+                                 f"T+{loop.min_track_s:g} s; swarms have none)")  # fmt: skip
+    if not res.get("trace"):
+        raise HTTPException(404, f"no trace for {incident_id} at T+{res['t_s']} s: "
+                                 "run `kairos-defense replay --precompute --force`")  # fmt: skip
+    return {"type": "matcher_trace", "t_s": float(res["t_s"]), "incident_id": incident_id,
+            "trace": res["trace"]}  # fmt: skip
 
 
 @router.get("/history/{track_id}")

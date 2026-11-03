@@ -67,6 +67,17 @@ def test_reruns_use_only_the_points_received_by_then(played) -> None:
     assert counts == sorted(counts) and len(set(counts)) == len(counts)  # no empty repeats
 
 
+def test_fresh_reruns_stream_a_matcher_trace(played, live_services) -> None:
+    traces = [m for m in played["msgs"] if m["type"] == "matcher_trace"]
+    matches = [m for m in played["msgs"] if m["type"] == "match"]
+    assert len(traces) == len(matches) > 0  # the worker on submit: every rerun is fresh
+    assert [t["t_s"] for t in traces] == [m["t_s"] for m in matches]
+    assert traces[-1]["incident_id"] == played["inc"]["incident_id"]
+    assert traces[-1]["trace"]["query"]["track_id"].endswith("-T1")
+    latest = live_services.live.hub.trace("BRAVO")
+    assert latest is not None and latest["t_s"] == traces[-1]["t_s"]
+
+
 def test_results_are_recorded_and_streamed(played, live_services) -> None:
     res = live_services.live.feed.results(played["inc"]["incident_id"])
     assert [r["t_s"] for r in res] == [round(t) for t, *_ in played["seen"]]

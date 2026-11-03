@@ -112,6 +112,28 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/trace/{incident_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Trace
+     * @description The matcher trace of a replay incident's rerun at or before ``at`` (D-188): the DTW
+     *     workbench's data, the same shape as the stream's ``matcher_trace``. 404 for an unknown
+     *     incident, 422 before the first rerun or for a swarm.
+     */
+    get: operations["trace_api_trace__incident_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/history/{track_id}": {
     parameters: {
       query?: never;
@@ -664,6 +686,26 @@ export interface paths {
      *     ``kairos_defense.eval`` on request, never stored. 404 unknown, 409 while open.
      */
     get: operations["live_reveal_api_live_incidents__incident_id__reveal_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/live/trace": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Live Trace
+     * @description The latest live rerun's matcher trace at an installation (D-188); 404 before any.
+     */
+    get: operations["live_trace_api_live_trace_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -1741,6 +1783,7 @@ export interface components {
         | components["schemas"]["RecallMsg"]
         | components["schemas"]["LedgerMsg"]
         | components["schemas"]["ErrorMsg"]
+        | components["schemas"]["MatcherTraceMsg"]
         | components["schemas"]["IncidentOpenedMsg"]
         | components["schemas"]["IncidentClosedMsg"]
         | components["schemas"]["SwarmMatchMsg"];
@@ -1837,6 +1880,45 @@ export interface components {
       case_id: string | null;
       /** Matches */
       matches: components["schemas"]["MatchItem"][];
+    };
+    /**
+     * MatcherTrace
+     * @description The record of one matcher call (D-187): what the DTW workbench replays.
+     */
+    MatcherTrace: {
+      /** T S */
+      t_s: number;
+      /** Version */
+      version: number;
+      /** Trace Paths */
+      trace_paths: number;
+      /** Channel */
+      channel: string;
+      query: components["schemas"]["TraceQuery"];
+      prefilter: components["schemas"]["TracePrefilter"];
+      dtw: components["schemas"]["TraceDtw"];
+      fusion: components["schemas"]["TraceFusion"];
+      /** Ranking */
+      ranking: components["schemas"]["TraceRank"][];
+      /** Explain Ms */
+      explain_ms: number | null;
+      /** Total Ms */
+      total_ms: number | null;
+      /** Trace Ms */
+      trace_ms: number | null;
+    };
+    /** MatcherTraceMsg */
+    MatcherTraceMsg: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "matcher_trace";
+      /** T S */
+      t_s: number;
+      /** Incident Id */
+      incident_id: string;
+      trace: components["schemas"]["MatcherTrace"];
     };
     /** Park */
     Park: {
@@ -2284,7 +2366,8 @@ export interface components {
         | components["schemas"]["ForecastMsg"]
         | components["schemas"]["RecallMsg"]
         | components["schemas"]["LedgerMsg"]
-        | components["schemas"]["ErrorMsg"];
+        | components["schemas"]["ErrorMsg"]
+        | components["schemas"]["MatcherTraceMsg"];
       /** Client */
       client?:
         | (
@@ -2470,6 +2553,128 @@ export interface components {
       /** Y M */
       y_m: number;
     };
+    /**
+     * TraceDetail
+     * @description One of the first ``trace_paths`` candidates: its warping path (down-sampled, indices into
+     *     the full ``n`` × ``m`` matrix), the candidate's curve and a cost-matrix thumbnail.
+     */
+    TraceDetail: {
+      /** Order */
+      order: number;
+      /** Track Id */
+      track_id: string;
+      /** Path */
+      path: number[][];
+      /** Path Len */
+      path_len: number;
+      /** Curve */
+      curve: (number | null)[];
+      /** Cost */
+      cost: (number | null)[][];
+    };
+    /** TraceDtw */
+    TraceDtw: {
+      /** Ms */
+      ms: number | null;
+      /** Band Fraction */
+      band_fraction: number;
+      /** Normalize */
+      normalize: string;
+      /** N */
+      n: number | null;
+      /** Distance */
+      distance: (number | null)[];
+      /** D Norm */
+      d_norm: (number | null)[];
+      /** Band */
+      band: number[];
+      /** M */
+      m: number[];
+      /** Ms Each */
+      ms_each: (number | null)[];
+      /**
+       * Shape Sim
+       * @default []
+       */
+      shape_sim: (number | null)[];
+      /** Detail */
+      detail: components["schemas"]["TraceDetail"][];
+    };
+    /** TraceFusion */
+    TraceFusion: {
+      /** Ms */
+      ms: number | null;
+      /** Features */
+      features: string[];
+      /** Tau */
+      tau: number | null;
+      /** Coefficients */
+      coefficients: (number | null)[];
+      /** Intercept */
+      intercept: number | null;
+      /** Values */
+      values: (number | null)[][];
+      /** Score */
+      score: (number | null)[];
+    };
+    /**
+     * TracePrefilter
+     * @description Every candidate track in prefilter order (columns line up index by index).
+     */
+    TracePrefilter: {
+      /** Ms */
+      ms: number | null;
+      /** K Windows */
+      k_windows: number;
+      /** Candidates */
+      candidates: number;
+      /** Track Id */
+      track_id: string[];
+      /** Incident Id */
+      incident_id: string[];
+      /** Start Ts Ms */
+      start_ts_ms: number[];
+      /** Distance */
+      distance: (number | null)[];
+      /** Window S */
+      window_s: number[];
+      /** Offset S */
+      offset_s: number[];
+    };
+    /** TraceQuery */
+    TraceQuery: {
+      /** Track Id */
+      track_id: string;
+      /** Incident Id */
+      incident_id: string;
+      /** At S */
+      at_s: number;
+      /** Window S */
+      window_s: number;
+      /** Rows Used */
+      rows_used: number;
+      /** N */
+      n: number;
+      /** Curve */
+      curve: (number | null)[];
+    };
+    /** TraceRank */
+    TraceRank: {
+      /** Rank */
+      rank: number;
+      /** Track Id */
+      track_id: string;
+      /** Incident Id */
+      incident_id: string;
+      /** Installation Id */
+      installation_id: string;
+      /** Score */
+      score: number | null;
+      /** Shape Sim */
+      shape_sim: number | null;
+      /** Reasons */
+      reasons: string[];
+    };
     /** ValidationError */
     ValidationError: {
       /** Location */
@@ -2650,6 +2855,39 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["DtwMsg"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  trace_api_trace__incident_id__get: {
+    parameters: {
+      query: {
+        at: number;
+      };
+      header?: never;
+      path: {
+        incident_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatcherTraceMsg"];
         };
       };
       /** @description Validation Error */
@@ -3492,6 +3730,37 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["RevealResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  live_trace_api_live_trace_get: {
+    parameters: {
+      query?: {
+        installation?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatcherTraceMsg"];
         };
       };
       /** @description Validation Error */

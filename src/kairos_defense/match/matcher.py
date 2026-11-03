@@ -32,6 +32,7 @@ from kairos_defense.match.fusion import (
     feature_matrix,
 )
 from kairos_defense.match.query import Query
+from kairos_defense.match.trace import TraceRecorder
 from kairos_defense.match.types import Match
 from kairos_defense.ports import TrackStore, VectorStore
 
@@ -49,6 +50,7 @@ class MatchResult:
     # Euclidean baseline, whose callers read them through the ports)
     signature: dict | None = None
     signatures: pd.DataFrame | None = None
+    trace: dict | None = None  # with match(q, trace=True): the record of this call (D-187)
 
 
 def load_models(models_dir: Path | str, scoring: ScoringConfig) -> tuple[FusionModel, float]:
@@ -88,14 +90,23 @@ class DtwMatcher:
     def model_version(self) -> str:
         return self.model.version
 
-    def match(self, q: Query) -> MatchResult:
+    def match(self, q: Query, trace: bool = False) -> MatchResult:
+        """Rank earlier tracks for ``q``. ``trace=True`` also records the computation
+        (``MatchResult.trace``, D-187) without changing the result; the recording's own time is
+        ``trace["trace_ms"]`` and stays out of ``timings``."""
+        rec = TraceRecorder(self.scoring) if trace else None
         t0 = time.perf_counter()
-        c = self.builder.build(q)
+        c = self.builder.build(q, rec)
         t1 = time.perf_counter()
         rows = c.rows.assign(shape_sim=dtw_rerank.shape_sim(c.rows["d_norm"].to_numpy(), self.tau))
-        scores = self.model.predict(feature_matrix(rows, self.model.features))
+        X = feature_matrix(rows, self.model.features)
+        scores = self.model.predict(X)
         order = sorted(range(len(rows)), key=lambda i: (-scores[i], i))  # ties: prefilter order
         t2 = time.perf_counter()
+        if rec is not None:
+            tr = time.perf_counter()
+            rec.fusion(rows, X, scores, self.model, self.tau, (t2 - t1) * 1e3)
+            rec.extra_s += time.perf_counter() - tr
         live = channel_matrix(q.features.iloc[-q.rows_used :], self.scoring)
         weights = self.scoring.features.channel_weights
         recs = rows.to_dict("records")
@@ -125,6 +136,16 @@ class DtwMatcher:
                 model_version=self.model.version,
             ))  # fmt: skip
         t3 = time.perf_counter()
+        traced = rec.extra_s if rec is not None else 0.0
         timings = {**c.timings, "fusion_ms": (t2 - t1) * 1e3, "explain_ms": explain_s * 1e3,
-                   "total_ms": (t3 - t0) * 1e3}  # fmt: skip
-        return MatchResult(out, rank_candidates(q, c.rows), timings, c.signature, c.signatures)
+                   "total_ms": (t3 - t0 - traced) * 1e3}  # fmt: skip
+        res = MatchResult(out, rank_candidates(q, c.rows), timings, c.signature, c.signatures)
+        if rec is not None:
+            for i in order[:10]:  # the final top 10 beyond the first paths get theirs too
+                r = recs[i]
+                seg = self.builder.segment(str(r["track_id"]), int(r["offset_s"]),
+                                           int(r["window_s"]))  # fmt: skip
+                rec.top_detail(i, str(r["track_id"]), live, seg)
+            rec.ranking(out, explain_s * 1e3)
+            res.trace = rec.finish(timings["total_ms"])
+        return res

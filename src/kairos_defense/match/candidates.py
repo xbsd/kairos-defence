@@ -75,7 +75,9 @@ class CandidateBuilder:
     def cached_ids(self) -> list[str]:
         return list(self._raw)
 
-    def build(self, q: Query) -> Candidates:
+    def build(self, q: Query, recorder=None) -> Candidates:
+        """``recorder``: a ``trace.TraceRecorder`` (D-187); it reads what is computed here and
+        times its own extra work, which the stage timings leave out. Results are identical."""
         sc = self.scoring
         t0 = time.perf_counter()
         cands = prefilter(q, self.vstore, sc)
@@ -89,6 +91,10 @@ class CandidateBuilder:
             raise LookAheadError(f"{len(absent)} candidate(s) for {q.track_id} have no earlier "
                                  f"signature: {absent[:3]}")  # fmt: skip
         live = channel_matrix(q.features.iloc[-q.rows_used :], sc)
+        extra0 = recorder.extra_s if recorder is not None else 0.0
+        if recorder is not None:
+            recorder.query(q, live)
+            recorder.prefilter(cands, (t1 - t0) * 1e3, sc.prefilter.k_windows)
         raw = self.raw_channels(ids)
         w, band = sc.features.channel_weights, sc.dtw.band_fraction
         mode, scales = sc.dtw.normalize, sc.features.channel_scales
@@ -99,14 +105,24 @@ class CandidateBuilder:
         ):
             series = raw[tid]
             lo, hi = dtw_rerank.anchor_bounds(int(off), int(size), len(series), before, after)
+            if recorder is None:
+                d_norm[i] = dtw_rerank.shape_distance(live, series[lo:hi], w, band, mode, scales)
+                continue
+            tc = time.perf_counter()
             d_norm[i] = dtw_rerank.shape_distance(live, series[lo:hi], w, band, mode, scales)
+            ms = (time.perf_counter() - tc) * 1e3
+            recorder.candidate(i, tid, float(d_norm[i]), len(live), hi - lo, ms, live,
+                               series[lo:hi])  # fmt: skip
         t3 = time.perf_counter()
+        traced = (recorder.extra_s - extra0) if recorder is not None else 0.0
+        if recorder is not None:
+            recorder.dtw((t3 - t2 - traced) * 1e3)
         csigs = sigs.loc[ids]
         ctx = context_frame(qsig, csigs).reset_index(drop=True)
         rows = pd.concat([cands.reset_index(drop=True), ctx], axis=1).assign(d_norm=d_norm)
         t4 = time.perf_counter()
         timings = {"prefilter_ms": (t1 - t0) * 1e3, "signature_ms": (t2 - t1) * 1e3,
-                   "dtw_ms": (t3 - t2) * 1e3, "features_ms": (t4 - t3) * 1e3}  # fmt: skip
+                   "dtw_ms": (t3 - t2 - traced) * 1e3, "features_ms": (t4 - t3) * 1e3}  # fmt: skip
         return Candidates(q, rows, qsig, csigs, timings)
 
     def segment(self, track_id: str, offset_s: int, window_s: int) -> np.ndarray:

@@ -281,6 +281,9 @@ def result_messages(res: Mapping, r: int, at: datetime, meta: Mapping, *, memory
                       "matches": matches})]  # fmt: skip
     if res.get("forecast"):
         out.append({"type": "forecast", "t_s": float(r), **res["forecast"]})
+    if res.get("trace"):  # the DTW workbench's record of this rerun (D-188)
+        out.append({"type": "matcher_trace", "t_s": float(r),
+                    "incident_id": meta["incident_id"], "trace": res["trace"]})  # fmt: skip
     for kind in ("dtw", "recall"):
         doc = res.get(kind)
         if doc is None:
