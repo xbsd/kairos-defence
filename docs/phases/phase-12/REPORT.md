@@ -2,7 +2,8 @@
 
 Status: done (the gate decides: `scripts/cloud_gate.py gate 12`) · Date: 2026-11-03 · Commits:
 `a2074d5` (plan), `07bba8d` (review 1, revision and the matcher trace), `b4104e8` (review 2,
-approved), `9b0578c` and `6514c88` (checkpoints), and `phase 12: DTW workbench …`
+approved), `9b0578c`, `6514c88`, `f579a08`, `bad8196` and `f39c2d5` (checkpoints and fixes),
+and `phase 12: DTW workbench …`
 
 ## Summary
 
@@ -52,6 +53,9 @@ Deviations from the block and the plan:
 - `TraceCurves` and `CostThumb` live in one file, `workbench/TraceViews.tsx`, not two.
 - Once fused, the alignment shown is the fused #1's (the last computed candidate was a poor match
   and said little), found while reviewing the screenshots.
+- Screenshot review fixes (EXIT_CHECK.md): connectors on the aligned samples, the fused #1 shown
+  at the end, reasons on two lines, the button no longer wrapping, the app's `T+mm:ss` in the
+  header, a swarm's drones told apart by track, and the Stream panel's blank rows at 20× (D-191).
 
 ## Tests
 
@@ -71,11 +75,21 @@ Deviations from the block and the plan:
   Pause and Step; axe on the open dialog; screenshots at 1440 × 900 and 1920 × 1080) and a
   `guide.spec.ts` test for the guide's four live-mode screenshots. No skip or xfail marker was
   added and no test was weakened.
-{{TEST_COUNTS}}
+- Fast Python tests: 929 pass (914 at the start of the phase); 19 slow. Vitest: 203 (184).
+  Playwright: 38 (35).
+- Two existing determinism tests (`test_live_loop.py`, `test_live_cache.py`) compare two
+  computed results after leaving out wall-clock timings; they now also leave out the trace's own
+  timing fields (`ms`, `ms_each`, `explain_ms`, `total_ms`, `trace_ms`), and every other trace field
+  (paths, distances, scores, ranking) is compared, so they check more than before.
 
 ## Exit check
 
-{{EXIT_TABLE}}
+| Criterion | Result | Evidence |
+|---|---|---|
+| `make check` | pass | ruff clean; 929 fast Python tests; web lint, typecheck, types current, Vitest 203 |
+| `npm --prefix web run build` | pass | built |
+| `make e2e` | pass | 38 passed in 19.0 min; the workbench during a live flight and from the Match explainer; axe clean on the open dialog |
+| `python3 scripts/check_docs.py` | pass | "Documentation complete."; guide 24 images, its four live-mode screenshots written by this run's `make e2e` |
 
 ## Metrics
 

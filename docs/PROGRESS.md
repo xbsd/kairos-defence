@@ -28,6 +28,33 @@ Status values: `not started` · `in progress` · `done` · `blocked (<reason>)`
 - Next: …
 -->
 
+### 2026-11-03 · Phase 12 (same cloud session)
+- Built (docs/phases/PHASE_12.md; decisions D-187 to D-191): the matcher trace
+  (`DtwMatcher.match(q, trace=True)`: the shortlist, every candidate's DTW distance, similarity,
+  band and time, paths and cost thumbnails for the first 50 plus the final top 10, the fusion
+  inputs and scores, the ranking; identical results, overhead measured at about 120 ms per rerun
+  here); `matcher_trace` after each `match` on the replay and live streams (live: fresh reruns
+  only), `GET /api/trace/{incident}?at=` and `GET /api/live/trace`; the DTW workbench (a
+  slow-motion replay of one run, pinned against newer ones, with Pause, Step, Replay and 3, 6 or
+  10 candidates a second; from "DTW workbench" under the matches on the Live page and Live watch
+  and from "Watch the matcher work" on the Match explainer); the user guide's section 13, Live
+  mode, with four screenshots from a real 20× flight; README, one-pager, DEMO and READMEs.
+- Exit check (`make check && npm --prefix web run build && make e2e && python3
+  scripts/check_docs.py`, 24 min, exit 0): 929 fast Python tests (914 at the start), Vitest 203 (184);
+  `make e2e` 38 passed in 19.0 min (`workbench.spec.ts` live and from the explainer, the guide's live-mode
+  test); "Documentation complete."
+- Found and fixed while building: two determinism tests compared the trace's own timings (they
+  now leave those out and compare the rest of the trace); the workbench header used "T+80" where
+  the app says "T+01:20"; a float rounding in the replay's step count; the Live page's Stream
+  panel showed blank rows at 20× in this container (fades that had not started at about 8 frames
+  a second; D-191, also visible in phase 11's screenshot); six workbench presentation fixes from
+  the screenshot review (EXIT_CHECK.md).
+- Reviews: plan review 1 found one blocking issue (nothing pinned the workbench to one trace, so
+  the e2e comparison raced the stream), fixed; review 2 approved with suggestions, applied.
+- Open issues: the workbench replays the first 50 of 500 candidates (plus the final top 10); the
+  trace adds about 120 ms to each traced rerun in this container.
+- Next: none in the handoff; phases 11 and 12 are the last blocks.
+
 ### 2026-11-02 · Phase 11 (single cloud session)
 - Built (docs/phases/PHASE_11.md, D-169, D-170; decisions D-171 to D-186): live mode. A separate
   simulator process (`kairos-defense simulate`) flies five scenarios with the generator's own

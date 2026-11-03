@@ -1,56 +1,56 @@
 # Phase 12: exit-check evidence
 
 Run in the Claude Code cloud container (4 vCPU, Ubuntu, no GPU: Chromium renders WebGL with
-SwiftShader), 2026-11-03 02:13 to 02:37 UTC, as one command chain, exactly the block's exit check:
+SwiftShader), 2026-11-03 02:39 to 03:03 UTC, as one command chain, exactly the block's exit check:
 
 ```bash
 make check && npm --prefix web run build && make e2e && python3 scripts/check_docs.py
 ```
 
-It took 24 min 13 s and exited 0. Playwright started and stopped its own server and, in
+It took 24 min 23 s and exited 0. Playwright started and stopped its own server and, in
 `livemode.spec.ts`, `workbench.spec.ts` and the guide's live-mode test, one simulator each. No
 server or child was left running.
 
 | Criterion (PHASE_12.md) | Command | Result |
 |---|---|---|
-| All checks pass | `make check` | pass: ruff clean, 273 files formatted; 929 fast Python tests (914 at the start of the phase), 19 slow deselected; web lint, typecheck, generated types current, Vitest 202 (184) |
-| The web app builds | `npm --prefix web run build` | pass: built in 1.65 s |
-| The end-to-end tests pass, including the workbench during a live scenario | `make e2e` | pass: 38 passed in 18.8 min (35 before this phase, plus `workbench.spec.ts` ×2 and the guide's live-mode test) |
-| The documentation is complete | `python3 scripts/check_docs.py` | pass: "Documentation complete." (guide 8,078 words, 24 images; one-pager 538 words) |
-| The guide's new screenshots were produced by this run's `make e2e` | file times below | pass: all four written between 02:28:12 and 02:29:35 UTC, inside the `make e2e` step (02:18:15 to 02:37:19) |
+| All checks pass | `make check` | pass: ruff clean, 273 files formatted; 929 fast Python tests (914 at the start of the phase), 19 slow deselected; web lint, typecheck, generated types current, Vitest 203 (184) |
+| The web app builds | `npm --prefix web run build` | pass: built in 1.71 s |
+| The end-to-end tests pass, including the workbench during a live scenario | `make e2e` | pass: 38 passed in 19.0 min (35 before this phase, plus `workbench.spec.ts` ×2 and the guide's live-mode test) |
+| The documentation is complete | `python3 scripts/check_docs.py` | pass: "Documentation complete." (guide 8,091 words, 24 images; one-pager 538 words) |
+| The guide's new screenshots were produced by this run's `make e2e` | file times below | pass: all four written between 02:53:57 and 02:55:40 UTC, inside the `make e2e` step (02:44:07 to 03:03:24) |
 
 ## `make check`
 
 ```text
 uv run ruff check .                 → All checks passed!
 uv run ruff format --check .        → 273 files already formatted
-uv run pytest -m "not slow" -q      → 929 passed, 19 deselected in 253.62s (0:04:13)
+uv run pytest -m "not slow" -q      → 929 passed, 19 deselected in 250.56s (0:04:10)
 npm --prefix web run check          → eslint and prettier clean; tsc clean; src/api/types.gen.ts is current;
-                                      Test Files 42 passed (42), Tests 202 passed (202)
-make check: 299 s, 02:13:06 → 02:18:05 UTC
+                                      Test Files 42 passed (42), Tests 203 passed (203)
+make check: 296 s, 02:39:01 → 02:43:57 UTC
 ```
 
 ## `make e2e`
 
 ```text
-npm --prefix web run build          → ✓ built in 1.59s
+npm --prefix web run build          → ✓ built
 uv run kairos-defense replay --precompute
   DEMO-BRAVO-0828: 95/95 fresh, 0 computed, 95 cached (cache format 2, with the matcher trace)
 npm --prefix web run e2e
 Running 38 tests using 1 worker
   ✓   1 e2e/director-1x.spec.ts › Director at 1x through every §1.2 row (2.2m)
   ✓   6 e2e/guide.spec.ts › guide: Live watch at T+90 (both sizes) and T+120 (2.1m)
-  ✓   9 e2e/guide.spec.ts › guide: live mode at 1920x1080 (launcher, incident, workbench, reveal) (1.4m)
-  ✓  10 e2e/lens.spec.ts › lens connectors follow the DTW path (36.5s)
+  ✓   9 e2e/guide.spec.ts › guide: live mode at 1920x1080 (launcher, incident, workbench, reveal) (1.8m)
+  ✓  10 e2e/lens.spec.ts › lens connectors follow the DTW path (36.0s)
   ✓  16 e2e/livemode.spec.ts › a returning prober flown live is recognized and revealed (1.2m)
-  ✓  17 e2e/pages.spec.ts › axe and the command bar on /live/DEMO-BRAVO-0828 (3.1s)
-  ✓  19 e2e/pages.spec.ts › axe and the command bar on /explainer?incident=DEMO-BRAVO-0828&at=90&track=P1-DELTA-260419-T1 (2.0s)
-  ✓  27 e2e/pages.spec.ts › layout holds at 1440 x 900 (1.6s)
-  ✓  37 e2e/workbench.spec.ts › the workbench replays a live rerun, pinned, and settles on the Matches panel's (1.5m)
-  ✓  38 e2e/workbench.spec.ts › the workbench from the Match explainer replays that replay second (9.9s)
+  ✓  17 e2e/pages.spec.ts › axe and the command bar on /live/DEMO-BRAVO-0828 (3.2s)
+  ✓  19 e2e/pages.spec.ts › axe and the command bar on /explainer?incident=DEMO-BRAVO-0828&at=90&track=P1-DELTA-260419-T1 (1.9s)
+  ✓  27 e2e/pages.spec.ts › layout holds at 1440 x 900 (1.5s)
+  ✓  37 e2e/workbench.spec.ts › the workbench replays a live rerun, pinned, and settles on the Matches panel's (1.4m)
+  ✓  38 e2e/workbench.spec.ts › the workbench from the Match explainer replays that replay second (9.6s)
   … (38 tests; every one passed)
-  38 passed (18.8m)
-make e2e: 1144 s, 02:18:15 → 02:37:19 UTC
+  38 passed (19.0m)
+make e2e: 1157 s, 02:44:07 → 03:03:24 UTC
 ```
 
 `workbench.spec.ts`, first test: launched `returning-prober` at 20× at Bravo from the Live page;
@@ -69,7 +69,7 @@ Pause then two Steps (one candidate each), axe, Play to the end, Close.
 ## `python3 scripts/check_docs.py`
 
 ```text
-user guide: 8078 words
+user guide: 8091 words
 user guide: 24 images
 one-pager: 538 words
 
@@ -82,10 +82,10 @@ Written by `web/e2e/guide.spec.ts` ("guide: live mode at 1920x1080 …") in this
 
 | Image | Written (UTC) | Bytes |
 |---|---|---|
-| `docs/guide/img/live-mode-launcher.png` | 2026-11-03 02:28:12 | 1,739,681 |
-| `docs/guide/img/live-mode-incident.png` | 2026-11-03 02:28:28 | 423,320 |
-| `docs/guide/img/live-mode-workbench.png` | 2026-11-03 02:28:50 | 319,851 |
-| `docs/guide/img/live-mode-reveal.png` | 2026-11-03 02:29:35 | 311,198 |
+| `docs/guide/img/live-mode-launcher.png` | 2026-11-03 02:53:57 | 1,739,675 |
+| `docs/guide/img/live-mode-incident.png` | 2026-11-03 02:54:14 | 400,972 |
+| `docs/guide/img/live-mode-workbench.png` | 2026-11-03 02:54:37 | 316,989 |
+| `docs/guide/img/live-mode-reveal.png` | 2026-11-03 02:55:40 | 306,957 |
 
 ## Screenshot review (§17.13)
 
