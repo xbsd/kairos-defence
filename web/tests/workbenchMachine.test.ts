@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   aligned,
+  candidateName,
   DEFAULT_RATE,
   endMs,
   finalState,
@@ -10,6 +11,7 @@ import {
   landingMs,
   nextStepMs,
   RATES,
+  repeatedIncidents,
   rescale,
   SHORTLIST_MS,
   stateAt,
@@ -113,6 +115,23 @@ describe("the workbench replay machine (D-189)", () => {
       "T2",
       "T0",
     ]);
+  });
+
+  it("tells a swarm's drones apart by their track", () => {
+    const t = makeTrace().trace;
+    expect(repeatedIncidents(t).size).toBe(0);
+    const swarm = {
+      ...t,
+      prefilter: {
+        ...t.prefilter,
+        incident_id: ["S-1", "S-1", "P-2"],
+        track_id: ["S-1-T1", "S-1-T3", "P-2-T1"],
+      },
+    };
+    const rep = repeatedIncidents(swarm);
+    expect([...rep]).toEqual(["S-1"]);
+    expect(candidateName("S-1-T3", "S-1", rep)).toBe("S-1 T3");
+    expect(candidateName("P-2-T1", "P-2", rep)).toBe("P-2");
   });
 
   it("reads a curve between its samples for the connectors", () => {

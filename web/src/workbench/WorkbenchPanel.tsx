@@ -1,7 +1,15 @@
 import type { MatcherTraceMsg } from "../api/messages";
 import { ms, num, tPlus } from "../lib/format";
 import { CostThumb, TraceCurves } from "./TraceViews";
-import { headline, RATES, stateAt, type Aligned, type WbState } from "./workbenchMachine";
+import {
+  candidateName,
+  headline,
+  RATES,
+  repeatedIncidents,
+  stateAt,
+  type Aligned,
+  type WbState,
+} from "./workbenchMachine";
 
 const SHORTLIST_ROWS = 12;
 const RANK_ROWS = 8;
@@ -14,6 +22,7 @@ function day(msUtc: number): string {
 function Shortlist({ msg, landed }: { msg: MatcherTraceMsg; landed: number }) {
   const p = msg.trace.prefilter;
   const rows = p.track_id.slice(0, SHORTLIST_ROWS);
+  const rep = repeatedIncidents(msg.trace);
   return (
     <section aria-labelledby="wb-shortlist" className="min-w-0">
       <h3 id="wb-shortlist" className="text-13 font-bold text-ink-mid">
@@ -28,7 +37,7 @@ function Shortlist({ msg, landed }: { msg: MatcherTraceMsg; landed: number }) {
             }`}
           >
             <span className="truncate">
-              {i + 1}. {p.incident_id[i]}
+              {i + 1}. {candidateName(t, p.incident_id[i] ?? "", rep)}
             </span>
             <span>{num(p.distance[i] ?? null, 3)}</span>
           </li>
@@ -136,6 +145,7 @@ function Ranking({ st }: { st: WbState }) {
 
 function Fusion({ msg }: { msg: MatcherTraceMsg }) {
   const f = msg.trace.fusion;
+  const rep = repeatedIncidents(msg.trace);
   return (
     <section aria-labelledby="wb-fusion" className="min-w-0" data-testid="workbench-fusion">
       <h3 id="wb-fusion" className="text-13 font-bold text-ink-mid">
@@ -151,7 +161,7 @@ function Fusion({ msg }: { msg: MatcherTraceMsg }) {
           >
             <span className="flex justify-between gap-2 font-mono text-12">
               <span className="truncate text-ink-hi">
-                {r.rank}. {r.incident_id}
+                {r.rank}. {candidateName(r.track_id, r.incident_id, rep)}
               </span>
               <span className="text-afterglow">{num(r.score, 3)}</span>
             </span>

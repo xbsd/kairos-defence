@@ -18,6 +18,7 @@ export interface Aligned {
   order: number;
   detail: TraceDetail;
   track: string;
+  /** The incident, with the track when the incident has several (`candidateName`). */
   incident: string;
   startMs: number;
   vectorDistance: number | null;
@@ -44,15 +45,32 @@ function at<T>(xs: T[] | undefined, i: number): T | null {
   return v === undefined ? null : v;
 }
 
+/** Incidents with more than one track in the shortlist (a swarm's drones). */
+export function repeatedIncidents(t: MatcherTrace): Set<string> {
+  const seen = new Set<string>();
+  const twice = new Set<string>();
+  for (const i of t.prefilter.incident_id) (seen.has(i) ? twice : seen).add(i);
+  return twice;
+}
+
+/** A candidate's name: its incident, plus the track ("T3") when the incident has several
+ * tracks in the shortlist, so a swarm's drones are told apart. */
+export function candidateName(track: string, incident: string, repeated: Set<string>): string {
+  if (!repeated.has(incident)) return incident;
+  const tail = track.startsWith(`${incident}-`) ? track.slice(incident.length + 1) : track;
+  return `${incident} ${tail}`;
+}
+
 /** The trace's replayed candidates in computed order, with their columns. */
 export function aligned(t: MatcherTrace): Aligned[] {
   const p = t.prefilter;
   const d = t.dtw;
+  const rep = repeatedIncidents(t);
   return d.detail.map((x) => ({
     order: x.order,
     detail: x,
     track: x.track_id,
-    incident: at(p.incident_id, x.order) ?? "",
+    incident: candidateName(x.track_id, at(p.incident_id, x.order) ?? "", rep),
     startMs: at(p.start_ts_ms, x.order) ?? 0,
     vectorDistance: at(p.distance, x.order),
     distance: at(d.distance, x.order),

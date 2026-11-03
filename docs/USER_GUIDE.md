@@ -923,7 +923,8 @@ replays and how long that run took, for example "Slow-motion replay of rerun T+0
 computed in 202 ms; the first 50 and 6 more of the final top 10 replayed at 6 per second" (the
 first 50 in the order computed, plus any final top-10 track computed later).
 
-1. **Shortlist**: the past tracks nearest to tonight's in the vector index, with their distances.
+1. **Shortlist**: the past tracks nearest to tonight's in the vector index, with their distances
+   (a swarm's drones are told apart by their track, for example `ECHO-260806-2049 T3`).
 2. **DTW alignment**: one candidate at a time, tonight's distance to the target (blue) above the
    candidate's (amber), joined along the warping path; the cost matrix with the path drawn on
    ("the full-matrix alignment with the segment's ends relaxed"; the distance itself is computed
