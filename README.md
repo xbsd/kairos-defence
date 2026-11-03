@@ -114,12 +114,12 @@ in which every plan was reviewed independently and every phase passed a scripted
 10 in a Claude Code on the web session with the same gate. Each phase is tagged `phase-NN-done`, and
 its plan, report and exit-check evidence are in `docs/phases/phase-NN/`.
 
-Phases 11 and 12 add live mode (a simulated sensor feed, live matching and learning, five
-scenarios scored by `kairos-defense live check`) and the DTW workbench; they are built in a Claude
-Code on the web session with the same gate.
+Phases 11 and 12 added live mode (a simulated sensor feed, live matching and learning, five
+scenarios scored by `kairos-defense live check`) and the DTW workbench; they were built in one
+Claude Code on the web session with the same gate.
 
 <details>
-<summary>Phases 0 to 11 are done; 12 is in progress</summary>
+<summary>Phases 0 to 12 are done</summary>
 
 | Phase | Title | Status |
 |---|---|---|
@@ -135,7 +135,7 @@ Code on the web session with the same gate.
 | 9 | Swarms, agent, MCP, hardening and runbook | [done](docs/phases/phase-09/REPORT.md) |
 | 10 | User guide, one-pager and rollback guide | [done](docs/phases/phase-10/REPORT.md) |
 | 11 | Live mode MVP: simulated sensor feed, live matching, scenarios | [done](docs/phases/phase-11/REPORT.md) |
-| 12 | DTW workbench and live-mode documentation | in progress |
+| 12 | DTW workbench and live-mode documentation | [done](docs/phases/phase-12/REPORT.md) |
 
 </details>
 
