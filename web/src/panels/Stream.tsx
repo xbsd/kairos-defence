@@ -78,7 +78,7 @@ function Row({ r, reduce }: { r: StreamRow; reduce: boolean }) {
 
 /** Above this many new rows per wall second (the panel's 10 Hz redraw) rows appear without
  * the fade: they would arrive faster than it plays, and on a slow machine a fade that has not
- * started yet leaves the newest rows blank (D-191). */
+ * started yet leaves the newest rows blank (D-191). A feed faster than 10× never fades. */
 const FADE_MAX_ROWS_PER_S = 10;
 
 /** Live detection rows, newest on top (SPEC §17.4). Hovering pauses the list. */
@@ -90,7 +90,8 @@ export function StreamPanel() {
     speed: st.clock?.speed ?? 1,
   }));
   const reduceAll = useThrottledStore(uiStore, reduceMotion);
-  const reduce = reduceAll || s.rate * s.speed > FADE_MAX_ROWS_PER_S;
+  // at least one row per feed second: a dropout must not bring the fade back mid-flight
+  const reduce = reduceAll || Math.max(1, s.rate) * s.speed > FADE_MAX_ROWS_PER_S;
   const [frozen, setFrozen] = useState<StreamRow[] | null>(null);
   const rows = frozen ?? s.rows;
   return (

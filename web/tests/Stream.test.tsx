@@ -91,6 +91,14 @@ describe("StreamPanel", () => {
       await flush();
       expect(screen.getAllByTestId("stream-row")).toHaveLength(31); // every row is there
       expect(anim).not.toHaveBeenCalled(); // and none waits on a fade to be seen
+      act(() => {
+        const s = replayStore.getState();
+        s.apply(clock(40, true, 20)); // a dropout at 20x: one RF row in 5 feed seconds
+        s.apply(rf(39, 335));
+      });
+      await flush();
+      expect(screen.getAllByTestId("stream-row")).toHaveLength(32);
+      expect(anim).not.toHaveBeenCalled(); // a feed faster than 10x never fades
     } finally {
       proto.animate = had;
     }

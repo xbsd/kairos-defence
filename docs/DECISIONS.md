@@ -2682,6 +2682,8 @@ Where this file and the SPEC ever disagree, this file wins.
   to start, so it sat at opacity 0 (measured with `getAnimations()`: running, start time null).
   Phase 11's Live page screenshot had the same blank panel.
 - Decision: a row fades in (and flashes its left edge) only while rows arrive at most 10 per wall
-  second (the detection rate over the last 5 s times the clock's speed), the panel's own redraw
-  rate (§17.11); faster than that, rows appear at once. Every row and number stays; the replay at
-  1×, 2× and 5× is unchanged.
+  second (the detection rate over the last 5 s, at least 1, times the clock's speed), the panel's
+  own redraw rate (§17.11); faster than that, rows appear at once, so a feed faster than 10× never
+  fades (the floor keeps a radar dropout from bringing the fade back mid-flight, which the
+  second guide run showed). Every row and number stays; the replay at 1×, 2× and 5× is
+  unchanged.
